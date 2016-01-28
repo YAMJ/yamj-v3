@@ -158,7 +158,7 @@ public class JsonApiStorageService {
             person.setBiography(update.getBiography(), API_SOURCE);
         }
         
-        person.setLastScanned(new Date(System.currentTimeMillis()));
+        person.setLastScanned(new Date());
         metadataDao.updateEntity(person);
         
         return ApiStatus.ok("Updated person with ID "+id);
@@ -677,7 +677,7 @@ public class JsonApiStorageService {
         // nothing to do
         if (videoDatas == null) return;
         
-        final Date watchedApiDate = new Date(System.currentTimeMillis());
+        final Date watchedApiDate = new Date();
         for (VideoData videoData : videoDatas) {
             // this will also set watched status to watched flag due the actual date
             videoData.setWatchedApi(watched, watchedApiDate);

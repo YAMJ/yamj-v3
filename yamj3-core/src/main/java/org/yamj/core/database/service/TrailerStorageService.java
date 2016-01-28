@@ -151,7 +151,7 @@ public class TrailerStorageService {
         }
         
         // set status of video data
-        videoData.setTrailerLastScanned(new Date(System.currentTimeMillis()));
+        videoData.setTrailerLastScanned(new Date());
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(videoData.getTrailers())) {
             videoData.setTrailerStatus(StatusType.NOTFOUND);
         } else {
@@ -192,7 +192,7 @@ public class TrailerStorageService {
         }
         
         // set status of series
-        series.setTrailerLastScanned(new Date(System.currentTimeMillis()));
+        series.setTrailerLastScanned(new Date());
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(series.getTrailers())) {
             series.setTrailerStatus(StatusType.NOTFOUND);
         } else {

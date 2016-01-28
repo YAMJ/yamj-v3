@@ -132,7 +132,7 @@ public class CommonStorageService {
                             mediaFile.setWatchedFile(true, maxWatchedFileDate);
                         } else if (mediaFile.isWatchedFile()) {
                             // set watched date to actual date if watch-change detected
-                            mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
+                            mediaFile.setWatchedFile(false, new Date());
                         }
                         
                         // media file needs an update
@@ -467,7 +467,7 @@ public class CommonStorageService {
         // update media file
         boolean marked;
         if (apiCall) {
-            mediaFile.setWatchedApi(watched, new Date(System.currentTimeMillis()));
+            mediaFile.setWatchedApi(watched, new Date());
             marked = mediaFile.isWatchedApi();
         } else {
             Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
@@ -476,7 +476,7 @@ public class CommonStorageService {
                 mediaFile.setWatchedFile(true, maxWatchedFileDate);
             } else if (mediaFile.isWatchedFile()) {
                 // set watched date to actual date if watch-change detected
-                mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
+                mediaFile.setWatchedFile(false, new Date());
             }
             marked = mediaFile.isWatchedFile();
         }

@@ -67,7 +67,7 @@ public class StagingService {
             library.setPlayerPath(libraryDTO.getPlayerPath());
         }
         library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-        library.setLastScanned(new Date(System.currentTimeMillis()));
+        library.setLastScanned(new Date());
         stagingDao.storeEntity(library);
         return library;
     }

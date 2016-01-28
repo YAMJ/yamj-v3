@@ -65,14 +65,14 @@
         </table>
         <br>
         <form:form  method="POST" commandName="skin-entity" action="skin-download.html">
-            <table id="headertable" class="hero-unit" style="width:60%; margin: auto;">
+            <table id="headertable" class="hero-unit" style="width:40%; margin: auto;">
                 <tbody>
                     <tr>
                         <td class="right"><label for="sourceUrl"><b>URL to download:</b></label></td>
                         <td class="center"><input class="span4" id="sourceUrl" name="sourceUrl" type="text" value="" size="90"></td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="center"><input type="submit" value="Add skin" class="btn"></td>
+                        <td colspan="2" class="center"><input type="submit" value="Add skin" class="btn info"></td>
                     </tr>
                 </tbody>
             </table>

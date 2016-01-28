@@ -26,7 +26,6 @@ import static org.yamj.core.tools.Constants.ALL;
 
 import java.util.*;
 import java.util.Map.Entry;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class NfoScannerService {
             videoData.setSkippendScansNfo(null);
             if (videoData.isWatchedNfo()) {
                 // the date where the NFO change for watch was detected
-                videoData.setWatchedNfo(false,  new Date(System.currentTimeMillis()));
+                videoData.setWatchedNfo(false,  new Date());
             }
             return;
         }
@@ -189,7 +188,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            final Date actualDate = new Date(System.currentTimeMillis());
+            final Date actualDate = new Date();
             series.setSkippendScansNfo(null);
             
             for (Season season : series.getSeasons()) {

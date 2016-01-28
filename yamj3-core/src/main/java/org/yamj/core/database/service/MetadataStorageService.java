@@ -312,7 +312,7 @@ public class MetadataStorageService {
     @Transactional(timeout=120)
     public void updateScannedPerson(Person person) {
         // update entity
-        person.setLastScanned(new Date(System.currentTimeMillis()));
+        person.setLastScanned(new Date());
         metadataDao.updateEntity(person);
 
         // update artwork
@@ -356,7 +356,7 @@ public class MetadataStorageService {
     @Transactional(timeout=120)
     public void updateScannedMetaData(VideoData videoData) {
         // update entity
-        videoData.setLastScanned(new Date(System.currentTimeMillis()));
+        videoData.setLastScanned(new Date());
         metadataDao.updateEntity(videoData);
 
         // update genres
@@ -387,7 +387,7 @@ public class MetadataStorageService {
     @Transactional(timeout=300)
     public void updateScannedMetaData(Series series) {
         // update entity
-        series.setLastScanned(new Date(System.currentTimeMillis()));
+        series.setLastScanned(new Date());
         metadataDao.updateEntity(series);
 
         // update genres

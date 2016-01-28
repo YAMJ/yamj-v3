@@ -33,7 +33,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.common.model.YamjInfo;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.CountGeneric;
@@ -46,26 +45,31 @@ import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
+import org.yamj.core.service.trakttv.TraktTvPin;
+import org.yamj.core.service.trakttv.TraktTvService;
 
 @Controller
 public class PagesController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PagesController.class);
+    
     @Autowired
-    private SystemInfoController sic;
+    private IndexController indexController;
+    @Autowired
+    private SystemInfoController systemInfoController;
     @Autowired
     private ConfigService configService;
     @Autowired
-    private FileStorageService fileStorageService;
-    @Autowired
-    private IndexController index;
-    @Autowired
     private JsonApiStorageService jsonApi;
-
+    @Autowired
+    private FileStorageService fileStorageService;
+    @Autowired 
+    private TraktTvService traktTvService;
+    
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
         ModelAndView view = new ModelAndView("index");
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
@@ -79,7 +83,7 @@ public class PagesController {
     @RequestMapping("/test/{name}")
     public ModelAndView displayTest(@PathVariable String name) {
         ModelAndView view = new ModelAndView("test-" + name);
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
@@ -88,7 +92,7 @@ public class PagesController {
     @RequestMapping("/system-info")
     public ModelAndView displaySystemInfo() {
         ModelAndView view = new ModelAndView("system-info");
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("countlist", yi.getCounts());
         return view;
@@ -98,10 +102,10 @@ public class PagesController {
     @RequestMapping("/count/job")
     public ModelAndView displayCountJob() {
         ModelAndView view = new ModelAndView("count-job");
-        YamjInfo yi = sic.getYamjInfo("false");
+        YamjInfo yi = systemInfoController.getYamjInfo("false");
         view.addObject("yi", yi);
 
-        List<CountGeneric> jobList = index.getJobs(ALL);
+        List<CountGeneric> jobList = indexController.getJobs(ALL);
         // Add some wording if there is an empty list
         if (jobList.isEmpty()) {
             CountGeneric noJobs = new CountGeneric();
@@ -118,7 +122,7 @@ public class PagesController {
     @RequestMapping("/config/add")
     public ModelAndView configAddPage() {
         ModelAndView view = new ModelAndView("config-add");
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("config", new Configuration());
         return view;
@@ -144,7 +148,7 @@ public class PagesController {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("configlist", configList);
 
@@ -160,7 +164,7 @@ public class PagesController {
                 view.addObject("config", config);
             }
         }
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
@@ -191,7 +195,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("player-list");
 
         List<PlayerInfo> playerList = jsonApi.getPlayerList();
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("playerlist", playerList);
 
@@ -201,7 +205,7 @@ public class PagesController {
     @RequestMapping("/player/add")
     public ModelAndView playerAddPage() {
         ModelAndView view = new ModelAndView("player-add");
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("player", new PlayerInfo());
 
@@ -224,7 +228,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("player-edit");
         PlayerInfo player = jsonApi.getPlayerInfo(id);
         view.addObject("player", player);
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
@@ -260,7 +264,7 @@ public class PagesController {
         view.addObject("player", player);
         view.addObject("pathlist", player.getPaths());
 
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
 
         return view;
@@ -281,7 +285,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("player-scan");
         List<PlayerInfo> playerList = jsonApi.getPlayerList();
 
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("playerlist", playerList);
 
@@ -292,7 +296,7 @@ public class PagesController {
     public ModelAndView playerAddPath(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("player-path-add");
 
-        YamjInfo yi = sic.getYamjInfo("false");
+        YamjInfo yi = systemInfoController.getYamjInfo("false");
         view.addObject("yi", yi);
         view.addObject("player", jsonApi.getPlayerInfo(id));
         view.addObject("playerPath", new PlayerPath());
@@ -334,7 +338,7 @@ public class PagesController {
             }
         }
 
-        YamjInfo yi = sic.getYamjInfo("true");
+        YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
@@ -370,14 +374,14 @@ public class PagesController {
         }
 
         view.addObject("skins", skins);
-        view.addObject("yi", sic.getYamjInfo("true"));
+        view.addObject("yi", systemInfoController.getYamjInfo("true"));
         return view;
     }
 
     @RequestMapping("/skin-download")
     public ModelAndView skinDownload(@ModelAttribute Skin skin) {
         ModelAndView view = new ModelAndView("skin-download");
-        view.addObject("yi", sic.getYamjInfo("true"));
+        view.addObject("yi", systemInfoController.getYamjInfo("true"));
         view.addObject("skin", skin);
         skin.setSkinDir(fileStorageService.getStoragePathSkin());
         String message = fileStorageService.storeSkin(skin);
@@ -387,11 +391,28 @@ public class PagesController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="TraktTV">
-    @RequestMapping("/trakttv/info")
+    @RequestMapping("/trakttv-info")
     public ModelAndView trakttvInfo() {
-        ModelAndView view = new ModelAndView("trakttv-info");
-        view.addObject("yi", sic.getYamjInfo("true"));
-        view.addObject("trakttv-scrobble", String.valueOf(PropertyTools.getBooleanProperty("trakttv.scrobble", Boolean.FALSE)));
+        ModelAndView view = new ModelAndView("trakttv-info", "pin-entity", new TraktTvPin());
+        view.addObject("yi", systemInfoController.getYamjInfo("true"));
+        view.addObject("trakttv", traktTvService.getTraktTvInfo());
+        return view;
+    }
+
+    @RequestMapping("/trakttv-pin")
+    public ModelAndView trakttvPin(@ModelAttribute TraktTvPin pin) {
+        ModelAndView view = new ModelAndView("trakttv-info", "pin-entity", new TraktTvPin());
+        
+        final String message;
+        final String givenPin = pin.getPin();
+        if (StringUtils.isBlank(givenPin) || givenPin.length() < 7) {
+            message = "No valid pin provided.";
+        } else {
+            message = this.traktTvService.authorizeWithPin(givenPin);
+        }
+                       
+        view.addObject("yi", systemInfoController.getYamjInfo("true"));
+        view.addObject("trakttv", traktTvService.getTraktTvInfo().setMessage(message));
         return view;
     }
     //</editor-fold>
