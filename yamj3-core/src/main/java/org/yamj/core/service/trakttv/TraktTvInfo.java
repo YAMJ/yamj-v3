@@ -26,22 +26,21 @@ import java.util.Date;
 
 public class TraktTvInfo {
 
-    private boolean scrobble;
+    private boolean synchronization;
     private boolean push;
     private boolean pull;
     private boolean authorized;
     private Date expirationDate;
     private String message;
     
-    public boolean isScrobble() {
-        return scrobble;
+    public boolean isSynchronization() {
+        return synchronization;
     }
 
-    public TraktTvInfo setScrobble(boolean scrobble) {
-        this.scrobble = scrobble;
-        return this;
+    public void setSynchronization(boolean synchronization) {
+        this.synchronization = synchronization;
     }
-    
+
     public boolean isPush() {
         return push;
     }

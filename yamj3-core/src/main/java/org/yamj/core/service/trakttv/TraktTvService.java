@@ -52,7 +52,7 @@ public class TraktTvService {
         // static values
         traktTvInfo.setPush(PropertyTools.getBooleanProperty("trakttv.scrobble.push", Boolean.FALSE));
         traktTvInfo.setPull(PropertyTools.getBooleanProperty("trakttv.scrobble.pull", Boolean.FALSE));
-        traktTvInfo.setScrobble(traktTvInfo.isPush()|| traktTvInfo.isPull());
+        traktTvInfo.setSynchronization(traktTvInfo.isPush()|| traktTvInfo.isPull());
         // dynamic values
         traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_AUTH_TOKEN)!=null);
         long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);
@@ -71,7 +71,7 @@ public class TraktTvService {
             // expiration date: creation date + expiration period * 1000 (cause given in seconds)
             long expireDate = (response.getCreatedAt() + response.getExpiresIn()) * 1000L;
             
-            // store values in config for later use
+            // store values in configuration settings
             configService.setProperty(TRAKTTV_EXPIRATION, expireDate);
             configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
             configService.setProperty(TRAKTTV_AUTH_TOKEN, response.getAccessToken());

@@ -20,25 +20,25 @@
             <h2>Trakt.TV Settings</h2>
         </div>
         
-        <c:if test="${!trakttv.scrobble}">
+        <c:if test="${!trakttv.synchronization}">
         <table id="tablelist" class="hero-unit" style="width: 50%; margin: auto;">
           	<tr>
-               	<th class="left">Trakt.TV scrobbling is not enabled.</th>
+               	<th class="left">Trakt.TV synchronization is not enabled.</th>
            	</tr>
         </table>
         </c:if>        
-        <c:if test="${trakttv.scrobble}">
+        <c:if test="${trakttv.synchronization}">
         <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
             <tr>
                 <th colspan="2">
                     <c:if test="${trakttv.push && trakttv.pull}">
-                    Trakt.TV scrobbling (Push and Pull) is enabled.
+                    Trakt.TV synchronization (Push &amp; Pull) is enabled.<br>
                    </c:if> 
                     <c:if test="${trakttv.push && !trakttv.pull}">
-                    Trakt.TV scrobbling (Push only) is enabled.
+                    Trakt.TV synchronization (Push only) is enabled.
                    </c:if> 
                     <c:if test="${!trakttv.push && trakttv.pull}">
-                    Trakt.TV scrobbling (Pull only) is enabled.
+                    Trakt.TV synchronization (Pull only) is enabled.
                    </c:if>
                 </th>
             </tr>
@@ -62,7 +62,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="right"><label for="pin"><b>TraktTV PIN:</b></label></td>
+                        <td class="right"><label for="pin"><b>Trakt.TV PIN:</b></label></td>
                         <td class="center"><input class="span4" id="pin" name="pin" type="text" value="" size="20"></td>
                     </tr>
                     <tr>
