@@ -31,12 +31,9 @@ import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class DateTimeTools {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DateTimeTools.class);
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":", "");
     private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");

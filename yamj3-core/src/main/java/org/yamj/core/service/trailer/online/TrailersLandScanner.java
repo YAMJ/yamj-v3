@@ -220,6 +220,7 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
                 continue;
             }
             
+            @SuppressWarnings("null")
             int nextIndex = xml.indexOf(TL_BASE_URL + TL_TRAILER_FILE_URL);
             while (nextIndex >= 0) {
                 int endIndex = xml.indexOf('"', nextIndex);

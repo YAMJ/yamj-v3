@@ -160,7 +160,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         // CAST & CREW
         Set<CreditDTO> actors;
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+        if (tvdbActors != null && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             actors = new LinkedHashSet<>(tvdbActors.size());
             for (Actor actor : tvdbActors) {
                 actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));

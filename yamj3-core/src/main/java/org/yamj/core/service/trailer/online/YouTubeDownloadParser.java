@@ -366,7 +366,7 @@ public class YouTubeDownloadParser  {
         }
     }
 
-    private static void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) throws Exception { //NOSONAR
+    private static void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) {
         String[] urlStrings = sline.split("url=");
         for (String urlString : urlStrings) {
             urlString = StringEscapeUtils.unescapeJava(urlString);

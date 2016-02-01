@@ -145,7 +145,7 @@ public class TrailerScannerService implements IQueueProcessService {
             }
         }
 
-        if (trailerDTOs.isEmpty()) {
+        if (trailerDTOs == null || trailerDTOs.isEmpty()) {
             LOG.info("No trailers found for movie {}-'{}'", videoData.getId(), videoData.getTitle());
             return;
         }

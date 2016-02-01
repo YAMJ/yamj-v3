@@ -321,6 +321,7 @@ public abstract class HibernateDao {
      * @param params the named parameters
      * @return list of entities
      */
+    @SuppressWarnings("unused")
     public <T> List<T> findByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
         Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);

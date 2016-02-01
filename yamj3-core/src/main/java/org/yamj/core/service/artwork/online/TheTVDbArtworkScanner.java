@@ -123,7 +123,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         } else if (!noLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with no language", id, season, language);
             returnDTOs = noLangDTOs;
-        } else if (CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
+        } else if (bannerList != null && CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
             LOG.info("Season {}-{}: No poster found by language, using first series poster found", id, season);
             returnDTOs = new ArrayList<>(1);
             Banner banner = bannerList.getPosterList().get(0);

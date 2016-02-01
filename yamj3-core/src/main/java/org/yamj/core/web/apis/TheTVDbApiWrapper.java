@@ -25,7 +25,6 @@ package org.yamj.core.web.apis;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.*;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -165,7 +164,7 @@ public class TheTVDbApiWrapper {
             LOG.trace(API_ERROR, ex);
         }
         
-        return (actorList == null ? new ArrayList<Actor>(0) : actorList);
+        return actorList;
     }
 
     public String getSeasonYear(String id, int season, String language) {

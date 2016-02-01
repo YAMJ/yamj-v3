@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
@@ -70,7 +69,7 @@ public class MovieMeterApiWrapper {
             LOG.trace(API_ERROR, ex);
         }
 
-        if (CollectionUtils.isEmpty(searchResults)) {
+        if (searchResults == null || searchResults.isEmpty()) {
             // failed retrieving any results
             return null;
         }
