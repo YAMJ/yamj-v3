@@ -65,7 +65,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
     @Override
     public boolean isEnabled() {
-        return configService.getBooleanProperty("trakttv.idscan.enabled", false);
+        return configService.getBooleanProperty("trakttv.enabled", false);
     }
 
     @Override
