@@ -95,13 +95,15 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
         
         // search by original title first
-        found = traktTvService.searchMovieByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear());
-        if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, String.valueOf(found.intValue()));
-            // nothing to do anymore cause Trakt.TV id found
-            return;
+        if (videoData.isTitleOriginalScannable()) {
+            found = traktTvService.searchMovieByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear());
+            if (found != null && found.intValue() > NO_ID) {
+                videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, String.valueOf(found.intValue()));
+                // nothing to do anymore cause Trakt.TV id found
+                return;
+            }
         }
-
+        
         // search by title if still not found
         found = traktTvService.searchMovieByTitleAndYear(videoData.getTitle(), videoData.getYear());
         if (found != null && found.intValue() > NO_ID) {
@@ -156,13 +158,15 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
         
         // search by original title first
-        found = traktTvService.searchShowByTitleAndYear(series.getTitleOriginal(), series.getStartYear());
-        if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, String.valueOf(found.intValue()));
-            // nothing to do anymore cause Trakt.TV id found
-            return;
+        if (series.isTitleOriginalScannable()) {
+            found = traktTvService.searchShowByTitleAndYear(series.getTitleOriginal(), series.getStartYear());
+            if (found != null && found.intValue() > NO_ID) {
+                series.setSourceDbId(TraktTvScanner.SCANNER_ID, String.valueOf(found.intValue()));
+                // nothing to do anymore cause Trakt.TV id found
+                return;
+            }
         }
-
+        
         // search by title if still not found
         found = traktTvService.searchMovieByTitleAndYear(series.getTitle(), series.getStartYear());
         if (found != null && found.intValue() > NO_ID) {
