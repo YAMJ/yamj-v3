@@ -20,12 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata;
+package org.yamj.core.service.metadata.extra;
 
+import com.omertron.rottentomatoesapi.RottenTomatoesApi;
+import com.omertron.rottentomatoesapi.RottenTomatoesException;
+import com.omertron.rottentomatoesapi.model.RTMovie;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.VideoData;
-
-import com.omertron.rottentomatoesapi.RottenTomatoesApi;
-import com.omertron.rottentomatoesapi.RottenTomatoesException;
-import com.omertron.rottentomatoesapi.model.RTMovie;
+import org.yamj.core.service.metadata.ExtraScannerService;
+import org.yamj.core.service.metadata.IExtraMovieScanner;
 
 @Service("rottenTomatoesRatingScanner")
 public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
@@ -53,7 +52,7 @@ public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize RottenTomatoes scanner");
+        LOG.info("Initialize RottenTomatoes rating scanner");
 
         // register this scanner
         extraScannerService.registerExtraScanner(this);

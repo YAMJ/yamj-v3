@@ -238,7 +238,7 @@ public class TheMovieDbApiWrapper {
                 tvEpisodeInfo = tmdbApi.getEpisodeInfo(Integer.parseInt(tmdbId), season, episode, locale.getLanguage(), MethodSub.CREDITS.getValue(), MethodSub.EXTERNAL_IDS.getValue());
             } catch (MovieDbException ex) {
                 LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
-                LOG.trace("TheMovieDb error", ex);
+                LOG.trace(API_ERROR, ex);
             }
         }
         return tvEpisodeInfo;
@@ -251,7 +251,7 @@ public class TheMovieDbApiWrapper {
         } catch (MovieDbException ex) {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get movie info using IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         return movieInfo;
     }
@@ -262,7 +262,7 @@ public class TheMovieDbApiWrapper {
         } catch (MovieDbException ex) {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get filmography for TMDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         return null;
     }

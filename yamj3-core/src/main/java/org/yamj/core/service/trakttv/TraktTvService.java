@@ -23,15 +23,25 @@
 package org.yamj.core.service.trakttv;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.api.trakttv.TraktTvApi;
 import org.yamj.api.trakttv.TraktTvException;
 import org.yamj.api.trakttv.auth.TokenResponse;
+import org.yamj.api.trakttv.model.*;
+import org.yamj.api.trakttv.model.enumeration.Extended;
+import org.yamj.api.trakttv.model.enumeration.IdType;
+import org.yamj.api.trakttv.model.enumeration.ReleaseType;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {
@@ -39,6 +49,7 @@ public class TraktTvService {
     private static final String TRAKTTV_AUTH_TOKEN = "trakttv.auth.access";
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
+    private static final String API_ERROR = "Trakt.TV error";
     
     private static final Logger LOG = LoggerFactory.getLogger(TraktTvService.class);
     
@@ -47,11 +58,13 @@ public class TraktTvService {
     @Autowired
     private TraktTvApi traktTvApi;
     
+    // AUTHORIZATION
+    
     public TraktTvInfo getTraktTvInfo() {
         TraktTvInfo traktTvInfo = new TraktTvInfo();
         // static values
-        traktTvInfo.setPush(PropertyTools.getBooleanProperty("trakttv.scrobble.push", Boolean.FALSE));
-        traktTvInfo.setPull(PropertyTools.getBooleanProperty("trakttv.scrobble.pull", Boolean.FALSE));
+        traktTvInfo.setPush(PropertyTools.getBooleanProperty("trakttv.push.enabled", Boolean.FALSE));
+        traktTvInfo.setPull(PropertyTools.getBooleanProperty("trakttv.pull.enabled", Boolean.FALSE));
         traktTvInfo.setSynchronization(traktTvInfo.isPush()|| traktTvInfo.isPull());
         // dynamic values
         traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_AUTH_TOKEN)!=null);
@@ -75,14 +88,195 @@ public class TraktTvService {
             configService.setProperty(TRAKTTV_EXPIRATION, expireDate);
             configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
             configService.setProperty(TRAKTTV_AUTH_TOKEN, response.getAccessToken());
+            
             // no authorization error
             return null;
         } catch (TraktTvException e) {
-            LOG.debug("TraktTv error", e);
+            LOG.debug(API_ERROR, e);
             return e.getResponse();
         } catch (Exception e) {
             LOG.debug("Unknown error", e);
             return "Unknow error occured";
         }
     }
+
+    // SEARCH BY ID
+    
+    public Integer searchMovieIdByIMDB(String imdbId) {
+        if (StringUtils.isBlank(imdbId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.IMDB, imdbId);
+            return getMovieId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get movie ID for IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    public Integer searchMovieIdByTMDB(String tmdbId) {
+        if (StringUtils.isBlank(tmdbId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.TMDB, tmdbId);
+            return getMovieId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get movie ID for TheMovieDb ID {}: {}", tmdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    private static Integer getMovieId(List<SearchResult> searchResults) {
+        if (CollectionUtils.isEmpty(searchResults)) {
+            return null;
+        }
+        for (SearchResult searchResult : searchResults) {
+            if (searchResult.getMovie() != null) {
+                return searchResult.getMovie().getIds().trakt();
+            }
+        }
+        return null;
+    }
+
+    public Integer searchShowIdByIMDB(String imdbId) {
+        if (StringUtils.isBlank(imdbId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.IMDB, imdbId);
+            return getShowId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get show ID for IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    public Integer searchShowIdByTMDB(String tmdbId) {
+        if (StringUtils.isBlank(tmdbId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.TMDB, tmdbId);
+            return getShowId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get show ID for TheMovieDb ID {}: {}", tmdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    public Integer searchShowIdByTVDB(String tvdbId) {
+        if (StringUtils.isBlank(tvdbId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.TVDB, tvdbId);
+            return getShowId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get show ID for TheTVDb ID {}: {}", tvdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    public Integer searchShowIdByTVRage(String tvRageId) {
+        if (StringUtils.isBlank(tvRageId)) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().idSearch(IdType.TVRAGE, tvRageId);
+            return getShowId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get show ID for TVRage ID {}: {}", tvRageId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    private static Integer getShowId(List<SearchResult> searchResults) {
+        if (CollectionUtils.isEmpty(searchResults)) {
+            return null;
+        }
+        for (SearchResult searchResult : searchResults) {
+            if (searchResult.getShow() != null) {
+                return searchResult.getShow().getIds().trakt();
+            }
+        }
+        return null;
+    }
+
+    // SCANNING
+
+    public TraktTvMovie getMovie(String traktTvId, Locale locale, boolean throwTempError) {
+        try {
+            Movie movie = traktTvApi.movieService().getMovie(traktTvId, Extended.FULL);
+            if (movie == null) {
+                // no movie found
+                return null;
+            }
+
+            TraktTvMovie traktTvMovie = new TraktTvMovie();
+            traktTvMovie.setIds(movie.getIds());
+            traktTvMovie.setTitle(movie.getTitle());
+            traktTvMovie.setOverview(movie.getOverview());
+            traktTvMovie.setTagline(movie.getTagline());
+            traktTvMovie.setYear(movie.getYear());
+            traktTvMovie.setRating(movie.getRating());
+            traktTvMovie.setCertification(movie.getCertification());
+            traktTvMovie.setReleaseDate(movie.getReleaseDate().toDate());
+            traktTvMovie.setGenres(movie.getGenres());
+
+            // get translation of movie
+            if (movie.getAvailableTranslations().contains(locale.getLanguage())) {
+                List<Translation> translations = traktTvApi.movieService().getTranslation(traktTvId, locale.getLanguage());
+                if (CollectionUtils.isNotEmpty(translations)) {
+                    final Translation translation = translations.get(0);
+                    traktTvMovie.setTitle(translation.getTitle());
+                    traktTvMovie.setOverview(translation.getOverview());
+                    traktTvMovie.setTagline(translation.getTagline());
+                }
+            }
+
+            // get releases
+            List<Release> releases = traktTvApi.movieService().getReleases(traktTvId, locale.getCountry());
+            for (Release release : releases) {
+                if (release.getReleaseType() == ReleaseType.THEATRALIC) {
+                    traktTvMovie.setReleaseCountry(StringUtils.upperCase(release.getCountry()));
+                    if (release.getReleaseDate() != null) {
+                        traktTvMovie.setReleaseDate(release.getReleaseDate().toDate());
+                    }
+                    traktTvMovie.setCertification(release.getCertification());
+                }
+            }
+            
+            // TODO get credits
+            
+            return traktTvMovie;
+            
+        } catch (TraktTvException ex) {
+            checkTempError(throwTempError, ex);
+            LOG.error("Failed to get movie for Trakt.TV ID {}: {}", traktTvId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    private static void checkTempError(boolean throwTempError, TraktTvException ex) {
+        if (throwTempError && ResponseTools.isTemporaryError(ex.getResponseCode())) {
+            throw new TemporaryUnavailableException("Trakt.TV service temporary not available: " + ex.getResponseCode(), ex);
+        }
+    }
+
+   // SYNCHRONIZATION
 }
