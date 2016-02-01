@@ -92,7 +92,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Library) {
-            final Library other = (Library) obj;
+            Library other = (Library) obj;
             return new EqualsBuilder()
                     .append(getClient(), other.getClient())
                     .append(getPlayerPath(), other.getPlayerPath())

@@ -102,7 +102,7 @@ public class CastCrewPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof CastCrewPK) {
-            final CastCrewPK other = (CastCrewPK) obj;
+            CastCrewPK other = (CastCrewPK) obj;
             return new EqualsBuilder()
                     .append(getJobType(), other.getJobType())
                     .append(getPerson().getId(), other.getPerson().getId())

@@ -78,7 +78,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Country)) {
             return false;
         }
-        final Country other = (Country) obj;
+        Country other = (Country) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

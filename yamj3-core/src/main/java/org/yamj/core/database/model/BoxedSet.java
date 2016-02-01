@@ -136,7 +136,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof BoxedSet)) {
             return false;
         }
-        final BoxedSet other = (BoxedSet) obj;
+        BoxedSet other = (BoxedSet) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

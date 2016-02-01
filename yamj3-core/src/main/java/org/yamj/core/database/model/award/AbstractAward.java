@@ -41,19 +41,19 @@ public abstract class AbstractAward implements Serializable {
         super();
     }
 
-    public final boolean isWon() {
+    public boolean isWon() {
         return won;
     }
 
-    public final void setWon(boolean won) {
+    public void setWon(boolean won) {
         this.won = won;
     }
 
-    public final boolean isNominated() {
+    public boolean isNominated() {
         return nominated;
     }
 
-    public final void setNominated(boolean nominated) {
+    public void setNominated(boolean nominated) {
         this.nominated = nominated;
     }
 }

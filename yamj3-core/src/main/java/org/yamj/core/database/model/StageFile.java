@@ -215,7 +215,7 @@ public class StageFile extends AbstractStateful {
         return getHashCode(0);
     }
 
-    public String getHashCode(final int increase) {
+    public String getHashCode(int increase) {
         return Integer.toString(Math.abs(this.getFullPath().hashCode()) + increase);
     }
 
@@ -240,7 +240,7 @@ public class StageFile extends AbstractStateful {
         if (!(obj instanceof StageFile)) {
             return false;
         }
-        final StageFile other = (StageFile) obj;
+        StageFile other = (StageFile) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

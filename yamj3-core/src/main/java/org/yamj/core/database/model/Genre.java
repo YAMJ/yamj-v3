@@ -100,7 +100,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Genre)) {
             return false;
         }
-        final Genre other = (Genre) obj;
+        Genre other = (Genre) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

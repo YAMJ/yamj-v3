@@ -105,7 +105,7 @@ public class Award extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Award)) {
             return false;
         }
-        final Award other = (Award) obj;
+        Award other = (Award) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

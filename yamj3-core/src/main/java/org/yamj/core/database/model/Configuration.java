@@ -74,7 +74,7 @@ public class Configuration implements Auditable, Serializable {
         return this.createTimestamp;
     }
 
-    public void setCreateTimestamp(final Date createTimestamp) {
+    public void setCreateTimestamp(Date createTimestamp) {
         this.createTimestamp = createTimestamp;
     }
 
@@ -83,7 +83,7 @@ public class Configuration implements Auditable, Serializable {
         return this.updateTimestamp;
     }
 
-    public void setUpdateTimestamp(final Date updateTimestamp) {
+    public void setUpdateTimestamp(Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
     }
 
@@ -99,9 +99,8 @@ public class Configuration implements Auditable, Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Configuration) {
-            final Configuration other = (Configuration) obj;
             return new EqualsBuilder()
-                    .append(getKey(), other.getKey())
+                    .append(getKey(), ((Configuration)obj).getKey())
                     .isEquals();
         }
         return false;

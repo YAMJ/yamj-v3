@@ -143,7 +143,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof AudioCodec)) {
             return false;
         }
-        final AudioCodec other = (AudioCodec) obj;
+        AudioCodec other = (AudioCodec) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

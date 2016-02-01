@@ -77,9 +77,8 @@ public class NfoRelation implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof NfoRelation) {
-            final NfoRelation other = (NfoRelation) obj;
             return new EqualsBuilder()
-                    .append(getNfoRelationPK(), other.getNfoRelationPK())
+                    .append(getNfoRelationPK(), ((NfoRelation)obj).getNfoRelationPK())
                     .isEquals();
         }
         return false;

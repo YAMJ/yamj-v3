@@ -242,7 +242,7 @@ public class ArtworkLocated extends AbstractStatefulPrev {
         if (!(obj instanceof ArtworkLocated)) {
             return false;
         }
-        final ArtworkLocated other = (ArtworkLocated) obj;
+        ArtworkLocated other = (ArtworkLocated) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

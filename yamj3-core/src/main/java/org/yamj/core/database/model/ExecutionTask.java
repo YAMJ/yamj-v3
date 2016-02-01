@@ -131,9 +131,8 @@ public class ExecutionTask implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ExecutionTask) {
-            final ExecutionTask other = (ExecutionTask) obj;
             return new EqualsBuilder()
-                    .append(getName(), other.getName())
+                    .append(getName(), ((ExecutionTask)obj).getName())
                     .isEquals();
         }
         return false;

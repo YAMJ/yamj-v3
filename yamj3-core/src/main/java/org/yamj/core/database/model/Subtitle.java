@@ -148,7 +148,7 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Subtitle)) {
             return false;
         }
-        final Subtitle other = (Subtitle) obj;
+        Subtitle other = (Subtitle) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

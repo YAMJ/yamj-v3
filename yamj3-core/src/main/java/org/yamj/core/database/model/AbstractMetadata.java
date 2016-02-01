@@ -68,15 +68,15 @@ public abstract class AbstractMetadata extends AbstractScannable
     // GETTER and SETTER
     
     @Override
-    public final String getTitle() {
+    public String getTitle() {
         return title;
     }
 
-    protected final void setTitle(String title) {
+    protected void setTitle(String title) {
         this.title = title;
     }
 
-    public final void setTitle(String title, String source) {
+    public void setTitle(String title, String source) {
         if (StringUtils.isNotBlank(title)) {
             this.title = title.trim();
             setOverrideFlag(OverrideFlag.TITLE, source);
@@ -92,15 +92,15 @@ public abstract class AbstractMetadata extends AbstractScannable
     }
 
     @Override
-    public final String getTitleOriginal() {
+    public String getTitleOriginal() {
         return titleOriginal;
     }
 
-    protected final void setTitleOriginal(String titleOriginal) {
+    protected void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
     }
 
-    public final void setTitleOriginal(String titleOriginal, String source) {
+    public void setTitleOriginal(String titleOriginal, String source) {
         if (StringUtils.isNotBlank(titleOriginal)) {
             this.titleOriginal = titleOriginal.trim();
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
@@ -115,7 +115,7 @@ public abstract class AbstractMetadata extends AbstractScannable
         }
     }
 
-    public final boolean isTitleOriginalScannable() {
+    public boolean isTitleOriginalScannable() {
         if (StringUtils.isBlank(this.titleOriginal)) {
             return false;
         }
@@ -123,52 +123,52 @@ public abstract class AbstractMetadata extends AbstractScannable
     }
     
     @Override
-    public final String getTitleSort() {
+    public String getTitleSort() {
         return titleSort;
     }
 
-    public final void setTitleSort(String titleSort) {
+    public void setTitleSort(String titleSort) {
         this.titleSort = titleSort;
     }
 
-    public final String getPlot() {
+    public String getPlot() {
         return plot;
     }
 
-    private final void setPlot(String plot) {
+    private void setPlot(String plot) {
         this.plot = plot;
     }
 
-    public final void setPlot(String plot, String source) {
+    public void setPlot(String plot, String source) {
         if (StringUtils.isNotBlank(plot)) {
             this.plot = plot.trim();
             setOverrideFlag(OverrideFlag.PLOT, source);
         }
     }
 
-    public final void removePlot(String source) {
+    public void removePlot(String source) {
         if (hasOverrideSource(OverrideFlag.PLOT, source)) {
             this.plot = null;
             removeOverrideFlag(OverrideFlag.PLOT);
         }
     }
 
-    public final String getOutline() {
+    public String getOutline() {
         return outline;
     }
 
-    private final void setOutline(String outline) {
+    private void setOutline(String outline) {
         this.outline = outline;
     }
 
-    public final void setOutline(String outline, String source) {
+    public void setOutline(String outline, String source) {
         if (StringUtils.isNotBlank(outline)) {
             this.outline = outline.trim();
             setOverrideFlag(OverrideFlag.OUTLINE, source);
         }
     }
 
-    public final void removeOutline(String source) {
+    public void removeOutline(String source) {
         if (hasOverrideSource(OverrideFlag.OUTLINE, source)) {
             this.outline = null;
             removeOverrideFlag(OverrideFlag.OUTLINE);
@@ -176,7 +176,7 @@ public abstract class AbstractMetadata extends AbstractScannable
     }
 
     @Override
-    public final int getYear() {
+    public int getYear() {
         if (this instanceof VideoData) {
             return ((VideoData) this).getPublicationYear();
         } else if (this instanceof Season) {

@@ -179,7 +179,7 @@ public class Artwork extends AbstractStateful {
         if (!(obj instanceof Artwork)) {
             return false;
         }
-        final Artwork other = (Artwork) obj;
+        Artwork other = (Artwork) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

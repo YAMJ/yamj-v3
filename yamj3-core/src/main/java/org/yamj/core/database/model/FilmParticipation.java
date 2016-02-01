@@ -241,7 +241,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FilmParticipation) {
-            final FilmParticipation other = (FilmParticipation) obj;
+            FilmParticipation other = (FilmParticipation) obj;
             return new EqualsBuilder()
                     .append(getSourceDb(), other.getSourceDb())
                     .append(getSourceDbId(), other.getSourceDbId())

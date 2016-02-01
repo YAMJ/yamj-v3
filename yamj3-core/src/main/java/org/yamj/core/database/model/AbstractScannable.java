@@ -70,36 +70,36 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     
     // GETTER and SETTER
     
-    public final String getIdentifier() {
+    public String getIdentifier() {
         return identifier;
     }
 
     @SuppressWarnings("unused")
-    private final void setIdentifier(String identifier) {
+    private void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
     @Override
-    public final Date getLastScanned() {
+    public Date getLastScanned() {
         return lastScanned;
     }
 
-    public final void setLastScanned(Date lastScanned) {
+    public void setLastScanned(Date lastScanned) {
         this.lastScanned = lastScanned;
     }
 
     @Override
-    public final int getRetries() {
+    public int getRetries() {
         return retries;
     }
 
-    public final void setRetries(int retries) {
+    public void setRetries(int retries) {
         this.retries = retries;
     }
 
     // TRANSIENT METHODS
     
-    public final void addModifiedSource(String source) {
+    public void addModifiedSource(String source) {
         if (!"all".equalsIgnoreCase(source)) {
             if (modifiedSources == null) {
                 modifiedSources = new HashSet<>(1);
@@ -108,7 +108,7 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
         }
     }
 
-    public final void addModifiedSources(Set<String> sources) {
+    public void addModifiedSources(Set<String> sources) {
         if (CollectionUtils.isNotEmpty(sources)) {
             if (modifiedSources == null) {
                 modifiedSources = new HashSet<>(sources.size());
@@ -117,11 +117,11 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
         }
     }
 
-    public final boolean hasModifiedSource() {
+    public boolean hasModifiedSource() {
         return CollectionUtils.isNotEmpty(modifiedSources);
     }
     
-    public final Set<String> getModifiedSources() {
+    public Set<String> getModifiedSources() {
         return modifiedSources;
     }
     
@@ -130,12 +130,12 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     abstract Map<String, String> getSourceDbIdMap();
         
     @Override
-    public final String getSourceDbId(String sourceDb) {
+    public String getSourceDbId(String sourceDb) {
         return getSourceDbIdMap().get(sourceDb);
     }
     
     @Override
-    public final boolean setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
             return false;
         }
@@ -150,7 +150,7 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     }
 
     @Override
-    public final boolean removeSourceDbId(String sourceDb) {
+    public boolean removeSourceDbId(String sourceDb) {
         if (getSourceDbIdMap().remove(sourceDb) != null) {
             addModifiedSource(sourceDb);
             return true;
@@ -162,7 +162,7 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
 
     abstract void setSkipScanApi(String skipScanApi);
     
-    public final boolean enableApiScan(String sourceDb) {
+    public boolean enableApiScan(String sourceDb) {
         // store the actual setting
         final String oldSkipScanApi = getSkipScanApi();
         
@@ -196,7 +196,7 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
         return !StringUtils.equalsIgnoreCase(oldSkipScanApi, newSkipScanApi);
     }
 
-    public final boolean disableApiScan(String sourceDb) {
+    public boolean disableApiScan(String sourceDb) {
         if (sourceDb == null) {
             return false;
         }
@@ -228,24 +228,24 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     abstract Map<OverrideFlag, String> getOverrideFlags();
     
     @Override
-    public final void setOverrideFlag(OverrideFlag overrideFlag, String source) {
+    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
         getOverrideFlags().put(overrideFlag, source.toLowerCase());
     }
 
-    protected final void removeOverrideFlag(OverrideFlag overrideFlag) {
+    protected void removeOverrideFlag(OverrideFlag overrideFlag) {
         getOverrideFlags().remove(overrideFlag);
     }
 
     @Override
-    public final String getOverrideSource(OverrideFlag overrideFlag) {
+    public String getOverrideSource(OverrideFlag overrideFlag) {
         return getOverrideFlags().get(overrideFlag);
     }
 
-    protected final boolean hasOverrideSource(OverrideFlag overrideFlag, String sourceDb) {
+    protected boolean hasOverrideSource(OverrideFlag overrideFlag, String sourceDb) {
         return StringUtils.equals(getOverrideSource(overrideFlag), sourceDb);
     }
     
-    public final boolean removeOverrideSource(final String sourceDb) {
+    public boolean removeOverrideSource(String sourceDb) {
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = getOverrideFlags().entrySet().iterator(); it.hasNext();) {
             Entry<OverrideFlag, String> e = it.next();

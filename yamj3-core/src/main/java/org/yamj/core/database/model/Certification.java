@@ -83,7 +83,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
         if (!(obj instanceof Certification)) {
             return false;
         }
-        final Certification other = (Certification) obj;
+        Certification other = (Certification) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

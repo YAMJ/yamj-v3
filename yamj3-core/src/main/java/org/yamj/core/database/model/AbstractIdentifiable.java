@@ -39,12 +39,12 @@ public abstract class AbstractIdentifiable implements Identifiable {
     private long id;
 
     @Override
-    public final long getId() {
+    public long getId() {
         return this.id;
     }
 
     @SuppressWarnings("unused")
-    private final void setId(long id) {
+    private void setId(long id) {
         this.id = id;
     }
 

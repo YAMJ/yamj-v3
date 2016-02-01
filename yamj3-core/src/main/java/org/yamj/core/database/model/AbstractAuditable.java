@@ -47,27 +47,27 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
 
     // GETTER AND SETTER
     
-    public final Date getCreateTimestamp() {
+    public Date getCreateTimestamp() {
         return this.createTimestamp;
     }
 
-    private final void setCreateTimestamp(final Date createTimestamp) {
+    private void setCreateTimestamp(Date createTimestamp) {
         this.createTimestamp = createTimestamp;
     }
 
-    public final Date getUpdateTimestamp() {
+    public Date getUpdateTimestamp() {
         return this.updateTimestamp;
     }
 
-    private final void setUpdateTimestamp(final Date updateTimestamp) {
+    private void setUpdateTimestamp(Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
     }
 
-    private final int getLockNo() {
+    private int getLockNo() {
         return lockNo;
     }
 
-    private final void setLockNo(int lockNo) {
+    private void setLockNo(int lockNo) {
         this.lockNo = lockNo;
     }
 }

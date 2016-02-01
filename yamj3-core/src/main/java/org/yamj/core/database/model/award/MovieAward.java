@@ -68,9 +68,8 @@ public class MovieAward extends AbstractAward {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MovieAward) {
-            final MovieAward other = (MovieAward) obj;
             return new EqualsBuilder()
-                    .append(getMovieAwardPK(), other.getMovieAwardPK())
+                    .append(getMovieAwardPK(), ((MovieAward)obj).getMovieAwardPK())
                     .isEquals();
         }
         return false;

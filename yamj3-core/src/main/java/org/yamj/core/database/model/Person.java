@@ -415,7 +415,7 @@ public class Person extends AbstractScannable {
         if (!(obj instanceof Person)) {
             return false;
         }
-        final Person other = (Person) obj;
+        Person other = (Person) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

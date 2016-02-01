@@ -194,7 +194,7 @@ public class Trailer extends AbstractStatefulPrev {
         if (!(obj instanceof Trailer)) {
             return false;
         }
-        final Trailer other = (Trailer) obj;
+        Trailer other = (Trailer) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

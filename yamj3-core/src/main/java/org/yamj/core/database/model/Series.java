@@ -160,13 +160,13 @@ public class Series extends AbstractMetadata {
     private Collection<String> countryCodes;
 
     @Transient
-    private final Map<String, String> certificationInfos = new HashMap<>(0);
+    private Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
+    private Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<AwardDTO> awardDTOS = new HashSet<>(0);
+    private Collection<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     
@@ -530,7 +530,7 @@ public class Series extends AbstractMetadata {
         if (!(obj instanceof Series)) {
             return false;
         }
-        final Series other = (Series) obj;
+        Series other = (Series) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

@@ -405,7 +405,7 @@ public class MediaFile extends AbstractStateful {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MediaFile) {
-            final MediaFile other = (MediaFile) obj;
+            MediaFile other = (MediaFile) obj;
             return new EqualsBuilder()
                     .append(getFileName(), other.getFileName())
                     .isEquals();

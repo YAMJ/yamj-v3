@@ -46,7 +46,7 @@ public abstract class AbstractStatefulPrev extends AbstractStateful {
     }
     
     @Override
-    public final void setStatus(StatusType status) {
+    public void setStatus(StatusType status) {
         if (StatusType.DELETED.equals(status)) {
            setPreviousStatus(getStatus());
         } else {
@@ -57,11 +57,11 @@ public abstract class AbstractStatefulPrev extends AbstractStateful {
 
     // GETTER and SETTER
     
-    public final StatusType getPreviousStatus() {
+    public StatusType getPreviousStatus() {
         return previousStatus;
     }
 
-    private final void setPreviousStatus(StatusType previousStatus) {
+    private void setPreviousStatus(StatusType previousStatus) {
         this.previousStatus = previousStatus;
     }
 }

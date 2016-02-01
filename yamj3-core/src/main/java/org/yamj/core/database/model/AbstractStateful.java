@@ -48,7 +48,7 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
     
     // GETTER and SETTER
     
-    public final StatusType getStatus() {
+    public StatusType getStatus() {
         return status;
     }
     
@@ -56,7 +56,7 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
         this.status = status;
     }
     
-    public final boolean isValidStatus() {
+    public boolean isValidStatus() {
         return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
     }
 }

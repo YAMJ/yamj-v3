@@ -209,22 +209,22 @@ public class VideoData extends AbstractMetadata {
     private Collection<String> countryCodes;
 
     @Transient
-    private final Map<String, String> certificationInfos = new HashMap<>(0);
+    private Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
+    private Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
+    private Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
-    private final Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
+    private Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
+    private Collection<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<AwardDTO> awardDTOS = new HashSet<>(0);
+    private Collection<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     
@@ -877,7 +877,7 @@ public class VideoData extends AbstractMetadata {
         if (!(obj instanceof VideoData)) {
             return false;
         }
-        final VideoData other = (VideoData) obj;
+        VideoData other = (VideoData) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

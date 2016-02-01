@@ -86,7 +86,7 @@ public class NfoRelationPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof NfoRelationPK) {
-            final NfoRelationPK other = (NfoRelationPK) obj;
+            NfoRelationPK other = (NfoRelationPK) obj;
             return new EqualsBuilder()
                     .append(getStageFile(), other.getStageFile())
                     .append(getVideoData(), other.getVideoData())

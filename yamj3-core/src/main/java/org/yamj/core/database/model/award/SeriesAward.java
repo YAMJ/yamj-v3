@@ -68,9 +68,8 @@ public class SeriesAward extends AbstractAward {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SeriesAward) {
-            final SeriesAward other = (SeriesAward) obj;
             return new EqualsBuilder()
-                    .append(getSeriesAwardPK(), other.getSeriesAwardPK())
+                    .append(getSeriesAwardPK(), ((SeriesAward)obj).getSeriesAwardPK())
                     .isEquals();
         }
         return false;

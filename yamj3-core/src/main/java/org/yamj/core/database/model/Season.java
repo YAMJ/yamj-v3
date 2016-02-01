@@ -126,7 +126,7 @@ public class Season extends AbstractMetadata {
         }
     }
 
-    public final void removePublicationYear(String source) {
+    public void removePublicationYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
             this.publicationYear = -1;
             removeOverrideFlag(OverrideFlag.YEAR);
@@ -254,7 +254,7 @@ public class Season extends AbstractMetadata {
         if (!(obj instanceof Season)) {
             return false;
         }
-        final Season other = (Season) obj;
+        Season other = (Season) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
