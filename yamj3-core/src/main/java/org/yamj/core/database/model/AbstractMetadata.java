@@ -32,7 +32,6 @@ import org.yamj.core.database.model.type.OverrideFlag;
  * Abstract implementation of an metadata object.
  */
 @MappedSuperclass
-@SuppressWarnings("unused")
 public abstract class AbstractMetadata extends AbstractScannable
         implements IMetadata {
 
@@ -78,15 +77,15 @@ public abstract class AbstractMetadata extends AbstractScannable
 
     public void setTitle(String title, String source) {
         if (StringUtils.isNotBlank(title)) {
-            this.title = title.trim();
+            setTitle(title.trim());
             setOverrideFlag(OverrideFlag.TITLE, source);
         }
     }
 
     public void removeTitle(String source) {
         if (hasOverrideSource(OverrideFlag.TITLE, source)) {
-            String[] splitted = this.getIdentifier().split("_");
-            this.title = splitted[0];
+            String[] splitted = getIdentifier().split("_");
+            setTitle(splitted[0]);
             removeOverrideFlag(OverrideFlag.TITLE);
         }
     }
@@ -102,24 +101,24 @@ public abstract class AbstractMetadata extends AbstractScannable
 
     public void setTitleOriginal(String titleOriginal, String source) {
         if (StringUtils.isNotBlank(titleOriginal)) {
-            this.titleOriginal = titleOriginal.trim();
+            setTitleOriginal(titleOriginal.trim());
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
         }
     }
 
     public void removeTitleOriginal(String source) {
         if (hasOverrideSource(OverrideFlag.ORIGINALTITLE, source)) {
-            String[] splitted = this.getIdentifier().split("_");
-            this.titleOriginal = splitted[0];
+            String[] splitted = getIdentifier().split("_");
+            setTitleOriginal(splitted[0]);
             removeOverrideFlag(OverrideFlag.ORIGINALTITLE);
         }
     }
 
-    public boolean isTitleOriginalScannable() {
-        if (StringUtils.isBlank(this.titleOriginal)) {
+    public final boolean isTitleOriginalScannable() {
+        if (StringUtils.isBlank(getTitleOriginal())) {
             return false;
         }
-        return !StringUtils.equalsIgnoreCase(this.title, this.titleOriginal);
+        return !StringUtils.equalsIgnoreCase(getTitle(), getTitleOriginal());
     }
     
     @Override
@@ -141,14 +140,14 @@ public abstract class AbstractMetadata extends AbstractScannable
 
     public void setPlot(String plot, String source) {
         if (StringUtils.isNotBlank(plot)) {
-            this.plot = plot.trim();
+            setPlot(plot.trim());
             setOverrideFlag(OverrideFlag.PLOT, source);
         }
     }
 
     public void removePlot(String source) {
         if (hasOverrideSource(OverrideFlag.PLOT, source)) {
-            this.plot = null;
+            setPlot(null);
             removeOverrideFlag(OverrideFlag.PLOT);
         }
     }
@@ -163,14 +162,14 @@ public abstract class AbstractMetadata extends AbstractScannable
 
     public void setOutline(String outline, String source) {
         if (StringUtils.isNotBlank(outline)) {
-            this.outline = outline.trim();
+            setOutline(outline.trim());
             setOverrideFlag(OverrideFlag.OUTLINE, source);
         }
     }
 
     public void removeOutline(String source) {
         if (hasOverrideSource(OverrideFlag.OUTLINE, source)) {
-            this.outline = null;
+            setOutline(null);
             removeOverrideFlag(OverrideFlag.OUTLINE);
         }
     }

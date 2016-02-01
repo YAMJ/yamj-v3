@@ -57,6 +57,6 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
     }
     
     public boolean isValidStatus() {
-        return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
+        return StatusType.DONE.equals(getStatus()) || StatusType.NEW.equals(getStatus()) || StatusType.UPDATED.equals(getStatus());
     }
 }

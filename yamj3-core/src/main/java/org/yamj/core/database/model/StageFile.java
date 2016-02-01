@@ -178,7 +178,7 @@ public class StageFile extends AbstractStateful {
     }
 
     public void addNfoRelation(NfoRelation nfoRelation) {
-        this.nfoRelations.add(nfoRelation);
+        getNfoRelations().add(nfoRelation);
     }
 
     private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
@@ -208,7 +208,7 @@ public class StageFile extends AbstractStateful {
     // TRANSIENT METHODS
     
     public String getFileName() {
-        return this.getBaseName().concat(".").concat(this.getExtension());
+        return getBaseName().concat(".").concat(getExtension());
     }
 
     public String getHashCode() {
@@ -216,7 +216,7 @@ public class StageFile extends AbstractStateful {
     }
 
     public String getHashCode(int increase) {
-        return Integer.toString(Math.abs(this.getFullPath().hashCode()) + increase);
+        return Integer.toString(Math.abs(getFullPath().hashCode()) + increase);
     }
 
     // EQUALITY CHECKS
@@ -266,7 +266,7 @@ public class StageFile extends AbstractStateful {
         sb.append(getFileDate());
         sb.append(", fileSize=");
         sb.append(getFileSize());
-        if (this.stageDirectory != null && Hibernate.isInitialized(this.stageDirectory)) {
+        if (getStageDirectory() != null && Hibernate.isInitialized(getStageDirectory())) {
             sb.append(", stageDirectory=");
             sb.append(getStageDirectory().getDirectoryPath());
         }

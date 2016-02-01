@@ -71,7 +71,7 @@ public class Configuration implements Auditable, Serializable {
 
     @JsonIgnore
     public Date getCreateTimestamp() {
-        return this.createTimestamp;
+        return createTimestamp;
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
@@ -80,7 +80,7 @@ public class Configuration implements Auditable, Serializable {
 
     @JsonIgnore
     public Date getUpdateTimestamp() {
-        return this.updateTimestamp;
+        return updateTimestamp;
     }
 
     public void setUpdateTimestamp(Date updateTimestamp) {

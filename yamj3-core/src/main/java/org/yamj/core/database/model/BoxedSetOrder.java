@@ -102,6 +102,6 @@ public class BoxedSetOrder extends AbstractIdentifiable implements Serializable 
     }
     
     public void update(BoxedSetDTO dto) {
-        this.ordering = (dto.getOrdering() == null) ? -1 : dto.getOrdering().intValue();
+        setOrdering(dto.getOrdering() == null ? -1 : dto.getOrdering().intValue());
     }
 }

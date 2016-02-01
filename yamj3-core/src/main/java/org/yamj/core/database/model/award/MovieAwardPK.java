@@ -100,7 +100,7 @@ public class MovieAwardPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MovieAwardPK) {
-            final MovieAwardPK other = (MovieAwardPK) obj;
+            MovieAwardPK other = (MovieAwardPK) obj;
             return new EqualsBuilder()
                     .append(getVideoData().getId(), other.getVideoData().getId())
                     .append(getAward().getId(), other.getAward().getId())

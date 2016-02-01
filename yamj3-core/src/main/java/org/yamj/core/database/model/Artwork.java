@@ -148,7 +148,7 @@ public class Artwork extends AbstractStateful {
     
     @Transient
     public StorageType getStorageType() {
-        if (this.artworkType == ArtworkType.PHOTO) {
+        if (getArtworkType() == ArtworkType.PHOTO) {
             return StorageType.PHOTO;
         }
         return StorageType.ARTWORK;

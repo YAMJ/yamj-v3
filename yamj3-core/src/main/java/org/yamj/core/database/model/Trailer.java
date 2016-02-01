@@ -168,7 +168,11 @@ public class Trailer extends AbstractStatefulPrev {
     // TRANSIENT METHODS
     
     public boolean isCached() {
-        return StringUtils.isNotBlank(getCacheFilename());
+        return !isNotCached();
+    }
+
+    public boolean isNotCached() {
+        return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
     }
     
     // EQUALITY CHECKS

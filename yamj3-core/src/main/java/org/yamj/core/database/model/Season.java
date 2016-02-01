@@ -121,14 +121,14 @@ public class Season extends AbstractMetadata {
 
     public void setPublicationYear(int publicationYear, String source) {
         if (publicationYear > 0) {
-            this.publicationYear = publicationYear;
+            setPublicationYear(publicationYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
 
     public void removePublicationYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
-            this.publicationYear = -1;
+            setPublicationYear(-1);
             removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
@@ -152,13 +152,13 @@ public class Season extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, rating);
+            getRatings().put(sourceDb, rating);
         }
     }
 
     public void removeRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            this.ratings.remove(sourceDb);
+            getRatings().remove(sourceDb);
         }
     }
 
@@ -213,24 +213,24 @@ public class Season extends AbstractMetadata {
     // TV CHECKS
 
     public boolean isTvSeasonDone(String sourceDb) {
-        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+        if (StringUtils.isBlank(getSourceDbId(sourceDb))) {
             // not done if episode ID not set
             return false;
         }
-        return StatusType.DONE.equals(this.getStatus());
+        return StatusType.DONE.equals(getStatus());
     }
     
     public void setTvSeasonDone() {
-        this.setStatus(StatusType.TEMP_DONE);
+        setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvSeasonNotFound() {
-        if (StatusType.DONE.equals(this.getStatus())) {
+        if (StatusType.DONE.equals(getStatus())) {
             // reset to temporary done state
-            this.setStatus(StatusType.TEMP_DONE);
-        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
+            setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(getStatus())) {
             // do not reset temporary done
-            this.setStatus(StatusType.NOTFOUND);
+            setStatus(StatusType.NOTFOUND);
         }
     }
 

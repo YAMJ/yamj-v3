@@ -112,8 +112,8 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
         this.stageFiles = stageFiles;
     }
 
-    
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

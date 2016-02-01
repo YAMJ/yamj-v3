@@ -48,7 +48,7 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
     // GETTER AND SETTER
     
     public Date getCreateTimestamp() {
-        return this.createTimestamp;
+        return createTimestamp;
     }
 
     private void setCreateTimestamp(Date createTimestamp) {
@@ -56,7 +56,7 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
     }
 
     public Date getUpdateTimestamp() {
-        return this.updateTimestamp;
+        return updateTimestamp;
     }
 
     private void setUpdateTimestamp(Date updateTimestamp) {

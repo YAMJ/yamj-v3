@@ -138,14 +138,14 @@ public class Person extends AbstractScannable {
 
     public void setName(String name, String source) {
         if (StringUtils.isNotBlank(name)) {
-            this.name = MetadataTools.fixScannedValue(name.trim());
+            setName(MetadataTools.fixScannedValue(name.trim()));
             setOverrideFlag(OverrideFlag.NAME, source);
         }
     }
 
     public void removeName(String source) {
         if (hasOverrideSource(OverrideFlag.NAME, source)) {
-            this.name = getIdentifier();
+            setName(getIdentifier());
             removeOverrideFlag(OverrideFlag.NAME);
         }
     }
@@ -160,7 +160,7 @@ public class Person extends AbstractScannable {
 
     public void setFirstName(String firstName, String source) {
         if (StringUtils.isNotBlank(firstName)) {
-            this.firstName =  MetadataTools.fixScannedValue(firstName.trim());
+            setFirstName(MetadataTools.fixScannedValue(firstName.trim()));
             setOverrideFlag(OverrideFlag.FIRSTNAME, source);
         }
     }
@@ -168,7 +168,7 @@ public class Person extends AbstractScannable {
     public void removeFirstName(String source) {
         if (hasOverrideSource(OverrideFlag.FIRSTNAME, source)) {
             PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
-            this.firstName = dto.getFirstName();
+            setFirstName(dto.getFirstName());
             removeOverrideFlag(OverrideFlag.FIRSTNAME);
         }
     }
@@ -183,7 +183,7 @@ public class Person extends AbstractScannable {
 
     public void setLastName(String lastName, String source) {
         if (StringUtils.isNotBlank(lastName)) {
-            this.lastName =  MetadataTools.fixScannedValue(lastName.trim());
+            setLastName(MetadataTools.fixScannedValue(lastName.trim()));
             setOverrideFlag(OverrideFlag.LASTNAME, source);
         }
     }
@@ -191,7 +191,7 @@ public class Person extends AbstractScannable {
     public void removeLastName(String source) {
         if (hasOverrideSource(OverrideFlag.LASTNAME, source)) {
             PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
-            this.lastName = dto.getLastName();
+            setLastName(dto.getLastName());
             removeOverrideFlag(OverrideFlag.LASTNAME);
         }
     }
@@ -206,14 +206,14 @@ public class Person extends AbstractScannable {
 
     public void setBirthDay(Date birthDay, String source) {
         if (birthDay != null) {
-            this.birthDay = birthDay;
+            setBirthDay(birthDay);
             setOverrideFlag(OverrideFlag.BIRTHDAY, source);
         }
     }
 
     public void removeBirthDay(String source) {
         if (hasOverrideSource(OverrideFlag.BIRTHDAY, source)) {
-            this.birthDay = null;
+            setBirthDay(null);
             removeOverrideFlag(OverrideFlag.BIRTHDAY);
         }
     }
@@ -228,14 +228,14 @@ public class Person extends AbstractScannable {
 
     public void setBirthPlace(String birthPlace, String source) {
         if (StringUtils.isNotBlank(birthPlace)) {
-            this.birthPlace =  MetadataTools.fixScannedValue(birthPlace.trim());
+            setBirthPlace(MetadataTools.fixScannedValue(birthPlace.trim()));
             setOverrideFlag(OverrideFlag.BIRTHPLACE, source);
         }
     }
 
     public void removeBirthPlace(String source) {
         if (hasOverrideSource(OverrideFlag.BIRTHPLACE, source)) {
-            this.birthPlace = null;
+            setBirthPlace(null);
             removeOverrideFlag(OverrideFlag.BIRTHPLACE);
         }
     }
@@ -250,14 +250,14 @@ public class Person extends AbstractScannable {
 
     public void setBirthName(String birthName, String source) {
         if (StringUtils.isNotBlank(birthName)) {
-            this.birthName =  MetadataTools.fixScannedValue(birthName.trim());
+            setBirthName(MetadataTools.fixScannedValue(birthName.trim()));
             setOverrideFlag(OverrideFlag.BIRTHNAME, source);
         }
     }
 
     public  void removeBirthName(String source) {
         if (hasOverrideSource(OverrideFlag.BIRTHNAME, source)) {
-            this.birthName = null;
+            setBirthName(null);
             removeOverrideFlag(OverrideFlag.BIRTHNAME);
         }
     }
@@ -272,14 +272,14 @@ public class Person extends AbstractScannable {
 
     public void setDeathDay(Date deathDay, String source) {
         if (deathDay != null) {
-            this.deathDay = deathDay;
+            setDeathDay(deathDay);
             setOverrideFlag(OverrideFlag.DEATHDAY, source);
         }
     }
 
     public void removeDeathDay(String source) {
         if (hasOverrideSource(OverrideFlag.DEATHDAY, source)) {
-            this.deathDay = null;
+            setDeathDay(null);
             removeOverrideFlag(OverrideFlag.DEATHDAY);
         }
     }
@@ -294,14 +294,14 @@ public class Person extends AbstractScannable {
 
     public void setDeathPlace(String deathPlace, String source) {
         if (StringUtils.isNotBlank(deathPlace)) {
-            this.deathPlace =  MetadataTools.fixScannedValue(deathPlace.trim());
+            setDeathPlace(MetadataTools.fixScannedValue(deathPlace.trim()));
             setOverrideFlag(OverrideFlag.DEATHPLACE, source);
         }
     }
 
     public void removeDeathPlace(String source) {
         if (hasOverrideSource(OverrideFlag.DEATHPLACE, source)) {
-            this.deathPlace = null;
+            setDeathPlace(null);
             removeOverrideFlag(OverrideFlag.DEATHPLACE);
         }
     }
@@ -316,14 +316,14 @@ public class Person extends AbstractScannable {
 
     public void setBiography(String biography, String source) {
         if (StringUtils.isNotBlank(biography)) {
-            this.biography = MetadataTools.fixScannedValue(biography.trim());
+            setBiography(MetadataTools.fixScannedValue(biography.trim()));
             setOverrideFlag(OverrideFlag.BIOGRAPHY, source);
         }
     }
 
     public void removeBiography(String source) {
         if (hasOverrideSource(OverrideFlag.BIOGRAPHY, source)) {
-            this.biography = null;
+            setBiography(null);
             removeOverrideFlag(OverrideFlag.BIOGRAPHY);
         }
     }

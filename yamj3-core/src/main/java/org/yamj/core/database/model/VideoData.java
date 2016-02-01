@@ -209,22 +209,22 @@ public class VideoData extends AbstractMetadata {
     private Collection<String> countryCodes;
 
     @Transient
-    private Map<String, String> certificationInfos = new HashMap<>(0);
+    private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
+    private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
+    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
-    private Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
+    private final Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
 
     @Transient
-    private Collection<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
+    private final Collection<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
 
     @Transient
-    private Collection<AwardDTO> awardDTOS = new HashSet<>(0);
+    private final Collection<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     
@@ -270,7 +270,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setPublicationYear(int publicationYear, String source) {
         if (publicationYear > 0) {
-            this.publicationYear = publicationYear;
+            setPublicationYear(publicationYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
@@ -278,9 +278,9 @@ public class VideoData extends AbstractMetadata {
     public void removePublicationYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
             if (isMovie()) { // just for movies
-                String[] splitted = this.getIdentifier().split("_");
+                String[] splitted = getIdentifier().split("_");
                 int splitYear = Integer.parseInt(splitted[1]);
-                this.publicationYear = (splitYear > 0) ? splitYear : -1; 
+                setPublicationYear(splitYear > 0 ? splitYear : -1); 
             }
             removeOverrideFlag(OverrideFlag.YEAR);
         }
@@ -316,16 +316,16 @@ public class VideoData extends AbstractMetadata {
 
     public void setRelease(String releaseCountryCode, Date releaseDate, String source) {
         if (releaseDate != null) {
-            this.releaseCountryCode = releaseCountryCode;
-            this.releaseDate = releaseDate;
+            setReleaseCountryCode(releaseCountryCode);
+            setReleaseDate(releaseDate);
             setOverrideFlag(OverrideFlag.RELEASEDATE, source);
         }
     }
 
     public void removeRelease(String source) {
         if (hasOverrideSource(OverrideFlag.RELEASEDATE, source)) {
-            this.releaseCountryCode = null;
-            this.releaseDate = null;
+            setReleaseCountryCode(null);
+            setReleaseDate(null);
             removeOverrideFlag(OverrideFlag.RELEASEDATE);
         }
     }
@@ -350,14 +350,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setTagline(String tagline, String source) {
         if (StringUtils.isNotBlank(tagline)) {
-            this.tagline = StringUtils.abbreviate(tagline.trim(), 2000);
+            setTagline(StringUtils.abbreviate(tagline.trim(), 2000));
             setOverrideFlag(OverrideFlag.TAGLINE, source);
         }
     }
 
     public void removeTagline(String source) {
         if (hasOverrideSource(OverrideFlag.TAGLINE, source)) {
-            this.tagline = null;
+            setTagline(null);
             removeOverrideFlag(OverrideFlag.TAGLINE);
         }
     }
@@ -372,14 +372,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setQuote(String quote, String source) {
         if (StringUtils.isNotBlank(quote)) {
-            this.quote = StringUtils.abbreviate(quote.trim(), 2000);
+            setQuote(StringUtils.abbreviate(quote.trim(), 2000));
             setOverrideFlag(OverrideFlag.QUOTE, source);
         }
     }
 
     public void removeQuote(String source) {
         if (hasOverrideSource(OverrideFlag.QUOTE, source)) {
-            this.quote = null;
+            setQuote(null);
             removeOverrideFlag(OverrideFlag.QUOTE);
         }
     }
@@ -500,19 +500,19 @@ public class VideoData extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating > 0)) {
-            this.ratings.put(sourceDb, rating);
+            getRatings().put(sourceDb, rating);
         }
     }
 
     public void removeRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            this.ratings.remove(sourceDb);
+            getRatings().remove(sourceDb);
         }
     }
 
     public int getRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            return this.ratings.get(sourceDb);
+            return getRatings().get(sourceDb);
         }
         return -1;
     }
@@ -620,7 +620,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addMediaFile(MediaFile mediaFile) {
-        this.mediaFiles.add(mediaFile);
+        getMediaFiles().add(mediaFile);
     }
 
     public List<CastCrew> getCredits() {
@@ -657,7 +657,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addBoxedSet(BoxedSetOrder boxedSet) {
-        this.boxedSets.add(boxedSet);
+        getBoxedSets().add(boxedSet);
     }
 
     public List<NfoRelation> getNfoRelations() {
@@ -669,7 +669,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addNfoRelation(NfoRelation nfoRelation) {
-        this.nfoRelations.add(nfoRelation);
+        getNfoRelations().add(nfoRelation);
     }
 
     public List<MovieAward> getMovieAwards() {
@@ -695,11 +695,11 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCreditDTO(CreditDTO creditDTO) {
-        this.creditDTOS.add(creditDTO);
+        getCreditDTOS().add(creditDTO);
     }
 
     public void addCreditDTOS(Collection<CreditDTO> creditDTOS) {
-        this.creditDTOS.addAll(creditDTOS);
+        getCreditDTOS().addAll(creditDTOS);
     }
 
     public Collection<String> getGenreNames() {
@@ -742,7 +742,7 @@ public class VideoData extends AbstractMetadata {
     public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
             for (Entry<String, String> entry : certificationInfos.entrySet()) {
-                this.addCertificationInfo(entry.getKey(), entry.getValue());
+                addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
     }
@@ -750,13 +750,13 @@ public class VideoData extends AbstractMetadata {
     public void addCertificationInfo(String countryCode, String certificate) {
         if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
             // check if country code already present
-            for (String storedCode : this.certificationInfos.keySet()) {
+            for (String storedCode : getCertificationInfos().keySet()) {
                 if (countryCode.equals(storedCode)) {
                     // certificate for country already present
                     return;
                 }
             }
-            this.certificationInfos.put(countryCode, certificate);
+            getCertificationInfos().put(countryCode, certificate);
         }
     }
 
@@ -770,7 +770,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
-            this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
+            getBoxedSetDTOS().add(new BoxedSetDTO(source, name, ordering, sourceId));
         }
     }
 
@@ -780,7 +780,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addPosterDTO(String source, String url) {
          if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.posterDTOS.add(new ArtworkDetailDTO(source, url));
+             getPosterDTOS().add(new ArtworkDetailDTO(source, url));
         }
     }
 
@@ -790,7 +790,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addFanartDTO(String source, String url) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.fanartDTOS.add(new ArtworkDetailDTO(source, url));
+            getFanartDTOS().add(new ArtworkDetailDTO(source, url));
         }
     }
 
@@ -807,54 +807,54 @@ public class VideoData extends AbstractMetadata {
             if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
                 continue;
             }
-            this.awardDTOS.add(awardDTO);
+            getAwardDTOS().add(awardDTO);
         }
     }
 
     public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            this.awardDTOS.add(new AwardDTO(event, category, source, year).setWon(true));
+            getAwardDTOS().add(new AwardDTO(event, category, source, year).setWon(true));
         }
     }
 
     // TV CHECKS
     
     public boolean isTvEpisodeDone(String sourceDb) {
-        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+        if (StringUtils.isBlank(getSourceDbId(sourceDb))) {
             // not done if episode ID not set
             return false;
         }
-        return StatusType.DONE.equals(this.getStatus());
+        return StatusType.DONE.equals(getStatus());
     }
 
     public void setTvEpisodeDone() {
-        this.setStatus(StatusType.TEMP_DONE);
+        setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvEpisodeNotFound() {
-        if (StatusType.DONE.equals(this.getStatus())) {
+        if (StatusType.DONE.equals(getStatus())) {
             // reset to temporary done state
-            this.setStatus(StatusType.TEMP_DONE);
-        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
+            setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(getStatus())) {
             // do not reset temporary done
-            this.setStatus(StatusType.NOTFOUND);
+            setStatus(StatusType.NOTFOUND);
         }
     }
     
     public void setTvEpisodeFinished() {
-        if (StatusType.TEMP_DONE.equals(this.getStatus())) {
-            this.setStatus(StatusType.DONE);
+        if (StatusType.TEMP_DONE.equals(getStatus())) {
+            setStatus(StatusType.DONE);
         }        
     }
 
     @Override
     public int getEpisodeNumber() {
-        return episode;
+        return getEpisode();
     }
 
     @Override
     public boolean isMovie() {
-        return episode < 0;
+        return getEpisode() < 0;
     }
 
     // EQUALITY CHECKS

@@ -334,7 +334,7 @@ public class MediaFile extends AbstractStateful {
     }
 
     public void addVideoData(VideoData videoData) {
-        this.videoDatas.add(videoData);
+        getVideoDatas().add(videoData);
     }
 
     public Set<StageFile> getStageFiles() {
@@ -346,7 +346,7 @@ public class MediaFile extends AbstractStateful {
     }
 
     public void addStageFile(StageFile stageFile) {
-        this.stageFiles.add(stageFile);
+        getStageFiles().add(stageFile);
     }
 
     public Set<AudioCodec> getAudioCodecs() {
@@ -377,7 +377,7 @@ public class MediaFile extends AbstractStateful {
     }
 
     public AudioCodec getAudioCodec(int counter) {
-        for (AudioCodec audioCodec : this.audioCodecs) {
+        for (AudioCodec audioCodec : getAudioCodecs()) {
             if (audioCodec.getCounter() == counter) {
                 return audioCodec;
             }
@@ -386,7 +386,7 @@ public class MediaFile extends AbstractStateful {
     }
 
     public Subtitle getSubtitle(int counter) {
-        for (Subtitle subtitle : this.subtitles) {
+        for (Subtitle subtitle : getSubtitles()) {
             if (subtitle.getStageFile() == null && subtitle.getCounter() == counter) {
                 return subtitle;
             }

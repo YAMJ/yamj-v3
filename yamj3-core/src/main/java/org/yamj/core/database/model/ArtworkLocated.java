@@ -213,11 +213,11 @@ public class ArtworkLocated extends AbstractStatefulPrev {
     // TRANSIENT METHODS
     
     public boolean isCached() {
-        return StringUtils.isNotBlank(cacheFilename) && StringUtils.isNotBlank(cacheDirectory);
+        return !isNotCached();
     }
 
     public boolean isNotCached() {
-        return StringUtils.isBlank(cacheFilename) || StringUtils.isBlank(cacheDirectory);
+        return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
     }
 
     // EQUALITY CHECKS

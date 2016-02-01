@@ -216,16 +216,16 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
 
     // TRANSIENT METHODS
     public void merge(FilmParticipation newFilmo) {
-        this.setRole(newFilmo.getRole());
-        this.setVoiceRole(newFilmo.isVoiceRole());
-        this.setParticipationType(newFilmo.getParticipationType());
-        this.setYear(newFilmo.getYear());
-        this.setYearEnd(newFilmo.getYearEnd());
-        this.setTitle(newFilmo.getTitle());
-        this.setTitleOriginal(newFilmo.getTitleOriginal());
-        this.setDescription(newFilmo.getDescription());
-        this.setReleaseDate(newFilmo.getReleaseDate());
-        this.setReleaseCountryCode(newFilmo.getReleaseCountryCode());
+        setRole(newFilmo.getRole());
+        setVoiceRole(newFilmo.isVoiceRole());
+        setParticipationType(newFilmo.getParticipationType());
+        setYear(newFilmo.getYear());
+        setYearEnd(newFilmo.getYearEnd());
+        setTitle(newFilmo.getTitle());
+        setTitleOriginal(newFilmo.getTitleOriginal());
+        setDescription(newFilmo.getDescription());
+        setReleaseDate(newFilmo.getReleaseDate());
+        setReleaseCountryCode(newFilmo.getReleaseCountryCode());
     }
 
     // EQUALITY CHECKS

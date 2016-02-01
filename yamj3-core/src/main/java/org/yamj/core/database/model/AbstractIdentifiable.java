@@ -40,7 +40,7 @@ public abstract class AbstractIdentifiable implements Identifiable {
 
     @Override
     public long getId() {
-        return this.id;
+        return id;
     }
 
     @SuppressWarnings("unused")
