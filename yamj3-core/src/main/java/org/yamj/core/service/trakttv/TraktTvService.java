@@ -36,9 +36,7 @@ import org.yamj.api.trakttv.TraktTvApi;
 import org.yamj.api.trakttv.TraktTvException;
 import org.yamj.api.trakttv.auth.TokenResponse;
 import org.yamj.api.trakttv.model.*;
-import org.yamj.api.trakttv.model.enumeration.Extended;
-import org.yamj.api.trakttv.model.enumeration.IdType;
-import org.yamj.api.trakttv.model.enumeration.ReleaseType;
+import org.yamj.api.trakttv.model.enumeration.*;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
@@ -102,7 +100,7 @@ public class TraktTvService {
 
     // SEARCH BY ID
     
-    public Integer searchMovieIdByIMDB(String imdbId) {
+    public Integer searchMovieIdByIMDB(final String imdbId) {
         if (StringUtils.isBlank(imdbId)) {
             return null;
         }
@@ -117,7 +115,7 @@ public class TraktTvService {
         return null;
     }
 
-    public Integer searchMovieIdByTMDB(String tmdbId) {
+    public Integer searchMovieIdByTMDB(final String tmdbId) {
         if (StringUtils.isBlank(tmdbId)) {
             return null;
         }
@@ -132,6 +130,21 @@ public class TraktTvService {
         return null;
     }
 
+    public Integer searchMovieByTitleAndYear(final String title, final int year) {
+        if (StringUtils.isBlank(title) || year <= 0) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().textSearch(title, SearchType.MOVIE, year, 1, 5);
+            return getMovieId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get movie ID for title '{}' and year '{}': {}", title, year, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+    
     private static Integer getMovieId(List<SearchResult> searchResults) {
         if (CollectionUtils.isEmpty(searchResults)) {
             return null;
@@ -199,6 +212,21 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get show ID for TVRage ID {}: {}", tvRageId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        return null;
+    }
+
+    public Integer searchShowByTitleAndYear(final String title, final int year) {
+        if (StringUtils.isBlank(title) || year <= 0) {
+            return null;
+        }
+        
+        try {
+            final List<SearchResult> searchResults = traktTvApi.searchService().textSearch(title, SearchType.SHOW, year, 1, 5);
+            return getShowId(searchResults);
+        } catch (TraktTvException ex) {
+            LOG.error("Failed to get movie ID for title '{}' and year '{}': {}", title, year, ex.getMessage());
             LOG.trace(API_ERROR, ex);
         }
         return null;

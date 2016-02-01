@@ -20,26 +20,33 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.extra;
+package org.yamj.core.service.metadata.online;
 
-import static org.junit.Assert.assertEquals;
-import javax.annotation.Resource;
-import org.junit.Test;
-import org.yamj.core.AbstractTest;
-import org.yamj.core.database.model.VideoData;
+import javax.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class RottenTomatoesRatingScannerTest extends AbstractTest {
+@Service("traktTvScanner")
+public class TraktTvScanner implements IMetadataScanner {
 
-    @Resource(name = "rottenTomatoesRatingScanner")
-    private TraktTvIdScanner rottenTomatoesRatingScanner;
+    public static final String SCANNER_ID = "trakttv";
+    private static final Logger LOG = LoggerFactory.getLogger(TraktTvScanner.class);
 
-    @Test
-    public void testScanMovie() {
-        VideoData videoData = new VideoData();
-        videoData.setTitle("Avatar", rottenTomatoesRatingScanner.getScannerName());
-        videoData.setPublicationYear(2009, rottenTomatoesRatingScanner.getScannerName());
-        rottenTomatoesRatingScanner.scanMovie(videoData);
+    @Autowired
+    private OnlineScannerService onlineScannerService;
+    
+    @Override
+    public String getScannerName() {
+        return SCANNER_ID;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOG.info("Initialize Trakt.TV scanner");
         
-        assertEquals(83, videoData.getRating(rottenTomatoesRatingScanner.getScannerName()));
+        // register this scanner
+        onlineScannerService.registerMetadataScanner(this);
     }
 }
