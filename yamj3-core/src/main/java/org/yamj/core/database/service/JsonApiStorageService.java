@@ -1092,14 +1092,4 @@ public class JsonApiStorageService {
         return ApiStatus.ok(sb.toString());
     }
     //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="List Methods">
-    public List<ApiListDTO> getMovieList(ApiWrapperList<ApiListDTO> wrapper) {
-        return apiDao.getMovieList(wrapper);
-    }
-
-    public List<ApiListDTO> getSeriesList(ApiWrapperList<ApiListDTO> wrapper) {
-        return apiDao.getSeriesList(wrapper);
-    }
-    //</editor-fold>
 }
