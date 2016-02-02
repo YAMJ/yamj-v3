@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
@@ -43,7 +44,7 @@ public class NfoScannerService {
 
     public static final String SCANNER_ID = "nfo";
     private static final Logger LOG = LoggerFactory.getLogger(NfoScannerService.class);
-
+    
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -157,7 +158,8 @@ public class NfoScannerService {
 
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                LOG.debug("Add movie nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
             }
 
             // add credit DTOs for update in database
@@ -280,7 +282,8 @@ public class NfoScannerService {
             
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                LOG.debug("Add series nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
             }
             
             for (Season season : series.getSeasons()) {

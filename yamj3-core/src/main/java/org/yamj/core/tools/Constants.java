@@ -33,6 +33,7 @@ public final class Constants {
 
     public static final String UNDEFINED = "Undefined";
     public static final String ALL = "all";
+    public static final String UNKNOWN = "unknown";
     
     public static final String LANGUAGE_EN = "en";
     public static final String LANGUAGE_UNTERTERMINED = "und";

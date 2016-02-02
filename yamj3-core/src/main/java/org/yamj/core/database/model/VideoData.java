@@ -780,10 +780,6 @@ public class VideoData extends AbstractMetadata {
         return boxedSetDTOS;
     }
 
-    public void addBoxedSetDTO(String source, String name, Integer ordering) {
-        this.addBoxedSetDTO(source, name, ordering, null);
-    }
-
     public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
             getBoxedSetDTOS().add(new BoxedSetDTO(source, name, ordering, sourceId));

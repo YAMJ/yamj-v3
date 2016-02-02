@@ -402,6 +402,9 @@ public class MetadataStorageService {
         // update certifications
         updateCertifications(series);
 
+        // update boxed sets
+        updateBoxedSets(series);
+
         // update awards
         updateAwards(series);
 
