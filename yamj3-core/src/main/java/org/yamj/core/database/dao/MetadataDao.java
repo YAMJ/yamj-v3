@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.CacheMode;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -93,17 +92,11 @@ public class MetadataDao extends HibernateDao {
     @CacheEvict(value=CachingNames.DB_PERSON, key="#doubletPerson.id")
     public void duplicate(Person person, Person doubletPerson) {
         // find movies which contains the doublet
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT distinct vd ");
-        sb.append("FROM VideoData vd ");
-        sb.append("JOIN vd.credits credit ");
-        sb.append("WHERE credit.castCrewPK.person.id=:id");
-        
-        Query query = currentSession().createQuery(sb.toString());
-        query.setParameter("id", doubletPerson.getId());
-        query.setCacheable(true);
-        query.setCacheMode(CacheMode.NORMAL);
-        List<VideoData> videoDatas = query.list();
+        List<VideoData> videoDatas = currentSession().getNamedQuery("videoData.findVideoDatas.byPerson")
+                .setLong("id", doubletPerson.getId())
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
         
         for (VideoData videoData : videoDatas) {
             // find doublet entries (for different jobs)
@@ -206,17 +199,11 @@ public class MetadataDao extends HibernateDao {
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("select a ");
-        sb.append("from Artwork a ");
-        sb.append("join a.person p ");
-        sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND lower(p.identifier)=:identifier ");
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("artworkType", ArtworkType.PHOTO);
-        params.put(IDENTIFIER, identifier.toLowerCase());
-
-        return this.findByNamedParameters(Artwork.class, sb, params);
+        return currentSession().getNamedQuery("artwork.findPersonArtworks")
+                .setParameter("artworkType", ArtworkType.PHOTO)
+                .setString(IDENTIFIER, identifier.toLowerCase())
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
     }
 }

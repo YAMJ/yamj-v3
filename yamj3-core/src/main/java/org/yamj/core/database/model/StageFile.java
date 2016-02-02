@@ -28,6 +28,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -35,6 +37,34 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.FileType;
 
+@NamedQueries({    
+    @NamedQuery(name = "stageFile.findNfoFile",
+        query = "SELECT distinct sf FROM StageFile sf "+
+                "WHERE sf.fileType=:fileType AND lower(sf.baseName)=:searchName AND sf.stageDirectory=:stageDirectory AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.getValidNFOFilesForVideo",
+        query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel JOIN nfrel.nfoRelationPK.videoData vd "+
+                "WHERE vd.id=:videoDataId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
+    ),
+    @NamedQuery(name = "stageFile.getValidNFOFilesForSeries",
+        query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel "+
+                "JOIN nfrel.nfoRelationPK.videoData vd JOIN vd.season sea JOIN sea.series ser "+
+                "WHERE ser.id=:seriesId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeries",
+        query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE ser.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeason",
+        query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE sea.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forVideoData",
+        query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE vd.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    )
+})
+    
 @Entity
 @Table(name = "stage_file",
        uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"}),
@@ -45,7 +75,7 @@ import org.yamj.core.database.model.type.FileType;
 public class StageFile extends AbstractStateful {
 
     private static final long serialVersionUID = -6247352843375054146L;
-
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "directory_id", nullable = false, foreignKey = @ForeignKey(name = "FK_STAGEFILE_DIRECTORY"))

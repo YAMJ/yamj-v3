@@ -28,6 +28,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedQueries({    
+    @NamedQuery(name = "certification.getCertification",
+        query = "from Certification where lower(country_code)=:countryCode and lower(certificate)=:certificate"
+    )
+})
+
 @Entity
 @Table(name = "certification",
         uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country_code", "certificate"})

@@ -31,6 +31,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -46,6 +48,20 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+
+@NamedQueries({    
+    @NamedQuery(name = "videoData.findVideoDatas.byLibrary",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf JOIN sf.stageDirectory sd "+
+                "WHERE sf.fileType=:fileType AND mf.extra=:extra AND lower(sf.baseName)=:baseName AND sd.library=:library AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "videoData.findVideoDatas.byStageDirectories",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE sf.fileType=:fileType AND mf.extra=:extra AND sf.stageDirectory in (:stageDirectories) AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "videoData.findVideoDatas.byPerson",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
+    )
+})
 
 @Entity
 @Table(name = "videodata",

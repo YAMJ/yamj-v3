@@ -165,21 +165,21 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
-        Criteria criteria = currentSession().createCriteria(ArtworkLocated.class);
-        criteria.add(Restrictions.isNotNull("cacheFilename"));
-        criteria.add(Restrictions.ne("status", StatusType.DELETED));
-        criteria.add(Restrictions.gt("id", lastId));
-        criteria.addOrder(Order.asc("id"));
-        criteria.setMaxResults(100);
-        return criteria.list();
+        return currentSession().createCriteria(ArtworkLocated.class)
+                .add(Restrictions.isNotNull("cacheFilename"))
+                .add(Restrictions.ne("status", StatusType.DELETED))
+                .add(Restrictions.gt("id", lastId))
+                .addOrder(Order.asc("id"))
+                .setMaxResults(100)
+                .list();
     }
     
     public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
         return currentSession().byNaturalId(ArtworkLocated.class)
-                        .using("artwork", artwork)
-                        .using("source", source)
-                        .using("hashCode", hashCode)
-                        .load();        
+                .using("artwork", artwork)
+                .using("source", source)
+                .using("hashCode", hashCode)
+                .load();        
         
     }
 }

@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -36,6 +38,12 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.StorageType;
+
+@NamedQueries({    
+    @NamedQuery(name = "artwork.findPersonArtworks",
+        query = "select a from Artwork a join a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+    )
+})
 
 @Entity
 @Table(name = "artwork",

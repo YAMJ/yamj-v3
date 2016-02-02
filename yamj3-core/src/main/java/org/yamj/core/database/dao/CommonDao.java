@@ -22,8 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.CacheMode;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
@@ -244,21 +246,17 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase() + '_' + #certificate.toLowerCase()", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_CERTIFICATION, key="{#countryCode.toLowerCase(), #certificate.toLowerCase()}", unless="#result==null")
     public Certification getCertification(String countryCode, String certificate) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("from Certification ");
-        sb.append("where lower(country_code) = :countryCode ");
-        sb.append("and lower(certificate) = :certificate ");
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("countryCode", countryCode.toLowerCase());
-        params.put("certificate", certificate.toLowerCase());
-
-        return this.findUniqueByNamedParameters(Certification.class, sb, params);
+        return (Certification) currentSession().getNamedQuery("certification.getCertification")
+                .setString("countryCode", countryCode.toLowerCase())
+                .setString("certificate", certificate.toLowerCase())
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .uniqueResult();
     }
 
-    @CachePut(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase() + '_' + #certificate.toLowerCase()")
+    @CachePut(value=CachingNames.DB_CERTIFICATION, key="{#countryCode.toLowerCase(), #certificate.toLowerCase()}")
     public Certification saveCertification(String countryCode, String certificate) {
         Certification certification = new Certification();
         certification.setCountryCode(countryCode);
@@ -464,7 +462,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=CachingNames.DB_AWARD, unless="#result==null")
+    @Cacheable(value=CachingNames.DB_AWARD, key="{#event, #category, #source}", unless="#result==null")
     public Award getAward(String event, String category, String source) {
         return currentSession()
                 .byNaturalId(Award.class)
@@ -474,7 +472,7 @@ public class CommonDao extends HibernateDao {
                 .load();
     }
 
-    @CachePut(value=CachingNames.DB_AWARD)
+    @CachePut(value=CachingNames.DB_AWARD, key="{#event, #category, #source}")
     public Award saveAward(String event, String category, String source) {
         Award award = new Award(event, category, source);
         this.saveEntity(award);
@@ -495,7 +493,6 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<Long> getSeriesVideoIds(Long id) {
-        // add scalars
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT DISTINCT vid.id ");
