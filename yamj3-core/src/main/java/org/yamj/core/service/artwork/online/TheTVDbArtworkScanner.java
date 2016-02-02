@@ -68,7 +68,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheTVDb artwork scanner");
+        LOG.trace("Initialize TheTVDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);

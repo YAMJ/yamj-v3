@@ -82,7 +82,7 @@ public class TheMovieDbArtworkScanner implements
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheMovieDb artwork scanner");
+        LOG.trace("Initialize TheMovieDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);

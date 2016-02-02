@@ -60,7 +60,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Allocine artwork scanner");
+        LOG.trace("Initialize Allocine artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);

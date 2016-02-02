@@ -57,7 +57,7 @@ public class ConfigService {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize config service");
+        LOG.trace("Initialize config service");
         
         // get stored properties
         Map<String, String> dbConfig = configDao.readConfig();

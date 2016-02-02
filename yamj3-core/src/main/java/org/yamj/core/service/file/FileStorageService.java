@@ -70,7 +70,7 @@ public class FileStorageService {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize file storage service");
+        LOG.trace("Initialize file storage service");
 
         String value = PropertyTools.getProperty("yamj3.file.storage.resources");
         if (StringUtils.isBlank(value)) {

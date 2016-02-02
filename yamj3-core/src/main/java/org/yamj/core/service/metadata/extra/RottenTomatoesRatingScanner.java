@@ -52,7 +52,7 @@ public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize RottenTomatoes rating scanner");
+        LOG.trace("Initialize RottenTomatoes rating scanner");
 
         // register this scanner
         extraScannerService.registerExtraScanner(this);

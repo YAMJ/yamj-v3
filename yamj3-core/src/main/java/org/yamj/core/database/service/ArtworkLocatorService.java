@@ -28,9 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.dao.StagingDao;
@@ -48,6 +48,11 @@ public class ArtworkLocatorService {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
 
+    @Value("${yamj3.folder.name.artwork:null}")
+    private String artworkFolderName;
+    @Value("${yamj3.folder.name.photo:null}")
+    private String photoFolderName;
+    
     private static Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories, List<String> tokens) {
         if (artworkType != ArtworkType.POSTER && artworkType != ArtworkType.FANART && artworkType != ArtworkType.BANNER) {
             // just poster, backdrop and banner will be searched
@@ -116,9 +121,7 @@ public class ArtworkLocatorService {
         Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
-        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            
             Library library = null;
             if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
                 library = videoFiles.get(0).getStageDirectory().getLibrary();
@@ -149,9 +152,7 @@ public class ArtworkLocatorService {
         Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
-        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            
             Library library = null;
             if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
                 library = videoFiles.get(0).getStageDirectory().getLibrary();
@@ -255,9 +256,6 @@ public class ArtworkLocatorService {
         artworkNames.add(person.getIdentifier().toLowerCase());
         artworkNames.add(person.getIdentifier().toLowerCase() + ".photo");
         artworkNames.add(person.getIdentifier().toLowerCase() + "-photo");
-
-        
-        String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
         
         List<StageFile> artworks;
         if (StringUtils.isNotBlank(photoFolderName)) {

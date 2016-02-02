@@ -125,15 +125,8 @@ public class CommonStorageService {
                         check.setStatus(StatusType.DONE);
                         this.stagingDao.updateEntity(check);
 
-                        // reset watched file date
-                        Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(check);
-                        if (maxWatchedFileDate != null) {
-                            // just update last date if max watched file date has been found
-                            mediaFile.setWatchedFile(true, maxWatchedFileDate);
-                        } else if (mediaFile.isWatchedFile()) {
-                            // set watched date to actual date if watch-change detected
-                            mediaFile.setWatchedFile(false, new Date());
-                        }
+                        // update watched file marker
+                        this.stagingService.updateWatchedFile(mediaFile, check);
                         
                         // media file needs an update
                         mediaFile.setStatus(StatusType.UPDATED);
@@ -470,14 +463,8 @@ public class CommonStorageService {
             mediaFile.setWatchedApi(watched, new Date());
             marked = mediaFile.isWatchedApi();
         } else {
-            Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
-            if (maxWatchedFileDate != null) {
-                // just update last date if max watched file date has been found
-                mediaFile.setWatchedFile(true, maxWatchedFileDate);
-            } else if (mediaFile.isWatchedFile()) {
-                // set watched date to actual date if watch-change detected
-                mediaFile.setWatchedFile(false, new Date());
-            }
+            // update watched file marker
+            this.stagingService.updateWatchedFile(mediaFile, videoFile);
             marked = mediaFile.isWatchedFile();
         }
         

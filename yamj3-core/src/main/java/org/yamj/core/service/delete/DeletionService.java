@@ -44,7 +44,6 @@ import org.yamj.core.service.file.FileStorageService;
 public class DeletionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeletionService.class);
-
     private static final ReentrantLock DELETION_LOCK = new ReentrantLock();
 
     @Autowired

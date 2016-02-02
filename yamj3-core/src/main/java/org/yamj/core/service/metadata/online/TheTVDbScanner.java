@@ -65,7 +65,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheTVDb scanner");
+        LOG.trace("Initialize TheTVDb scanner");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);

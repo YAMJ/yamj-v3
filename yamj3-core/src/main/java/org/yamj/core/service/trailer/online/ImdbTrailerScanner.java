@@ -60,7 +60,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb trailer scanner");
+        LOG.trace("Initialize IMDb trailer scanner");
         
         // register this scanner
         trailerScannerService.registerTrailerScanner(this);

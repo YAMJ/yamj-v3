@@ -44,7 +44,7 @@ public class TraktTvScanner implements IMetadataScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Trakt.TV scanner");
+        LOG.trace("Initialize Trakt.TV scanner");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);

@@ -73,7 +73,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize YouTube trailer scanner");
+        LOG.trace("Initialize YouTube trailer scanner");
         
         if (youtubeApiKey == null) {
             LOG.warn("No YouTube api key provided");

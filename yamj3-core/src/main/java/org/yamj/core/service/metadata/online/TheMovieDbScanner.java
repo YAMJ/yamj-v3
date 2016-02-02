@@ -73,7 +73,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheMovieDb scanner");
+        LOG.trace("Initialize TheMovieDb scanner");
 
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);

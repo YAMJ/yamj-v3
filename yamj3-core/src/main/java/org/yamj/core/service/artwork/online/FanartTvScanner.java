@@ -69,7 +69,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize FanartTV artwork scanner");
+        LOG.trace("Initialize FanartTV artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);

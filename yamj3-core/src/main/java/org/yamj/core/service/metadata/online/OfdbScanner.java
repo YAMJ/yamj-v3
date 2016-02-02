@@ -78,7 +78,7 @@ public class OfdbScanner implements IMovieScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize OFDb scanner");
+        LOG.trace("Initialize OFDb scanner");
 
         searchEngineTools = new SearchEngineTools(httpClient, Locale.GERMANY);
         searchEngineTools.setSearchSites("google");

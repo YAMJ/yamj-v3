@@ -60,7 +60,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb artwork scanner");
+        LOG.trace("Initialize IMDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);

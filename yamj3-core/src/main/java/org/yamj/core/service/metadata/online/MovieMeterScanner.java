@@ -22,12 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.moviemeter.model.Actor;
+import com.omertron.moviemeter.model.FilmInfo;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +41,6 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.MovieMeterApiWrapper;
-
-import com.omertron.moviemeter.model.Actor;
-import com.omertron.moviemeter.model.FilmInfo;
 
 @Service("movieMeterScanner")
 public class MovieMeterScanner implements IMovieScanner {
@@ -67,7 +64,7 @@ public class MovieMeterScanner implements IMovieScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize MovieMeter scanner");
+        LOG.trace("Initialize MovieMeter scanner");
 
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);

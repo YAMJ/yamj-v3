@@ -68,7 +68,7 @@ public class ImdbSearchEngine {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb search engine");
+        LOG.trace("Initialize IMDb search engine");
 
         Locale locale = localeService.getLocaleForConfig("imdb");
         searchEngineTools = new SearchEngineTools(httpClient, locale);

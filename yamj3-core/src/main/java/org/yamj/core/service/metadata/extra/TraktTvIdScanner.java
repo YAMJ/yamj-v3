@@ -52,7 +52,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Trakt.TV ID scanner");
+        LOG.trace("Initialize Trakt.TV ID scanner");
 
         // register this scanner
         extraScannerService.registerExtraScanner(this);

@@ -79,7 +79,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb scanner");
+        LOG.trace("Initialize IMDb scanner");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);

@@ -89,7 +89,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize ComingSoon scanner");
+        LOG.trace("Initialize ComingSoon scanner");
 
         searchEngineTools = new SearchEngineTools(httpClient, Locale.ITALY);
         

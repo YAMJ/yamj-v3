@@ -76,7 +76,7 @@ public class MediaInfoService implements IQueueProcessService {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize MediaInfo service");
+        LOG.debug("Initialize MediaInfo service");
 
         final String osName = System.getProperty("os.name");
         LOG.debug("Operating System Name   : {}", osName);

@@ -44,6 +44,7 @@ public class OnlineScannerService {
     public static final Set<String> SERIES_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.series", "tvdb,tmdb");
     public static final Set<String> PERSON_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.person", "tmdb,imdb");
     public static final Set<String> FILMOGRAPHY_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.filmography", "tmdb");
+    private static final String SCANNING_ERROR = "Scanning error";
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
@@ -107,7 +108,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
 
@@ -177,7 +178,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             
@@ -247,7 +248,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             
@@ -318,7 +319,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             

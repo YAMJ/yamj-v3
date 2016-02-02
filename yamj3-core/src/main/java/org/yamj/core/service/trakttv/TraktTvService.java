@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.api.trakttv.TraktTvApi;
@@ -37,33 +38,36 @@ import org.yamj.api.trakttv.TraktTvException;
 import org.yamj.api.trakttv.auth.TokenResponse;
 import org.yamj.api.trakttv.model.*;
 import org.yamj.api.trakttv.model.enumeration.*;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TraktTvService.class);
     private static final String TRAKTTV_AUTH_TOKEN = "trakttv.auth.access";
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
     private static final String API_ERROR = "Trakt.TV error";
     
-    private static final Logger LOG = LoggerFactory.getLogger(TraktTvService.class);
-    
     @Autowired
     private ConfigService configService;
     @Autowired
     private TraktTvApi traktTvApi;
+
+    @Value("${trakttv.push.enabled:false}")
+    private boolean pushEnabled;
+    @Value("${trakttv.pull.enabled:false}")
+    private boolean pullEnabled;
     
     // AUTHORIZATION
     
     public TraktTvInfo getTraktTvInfo() {
         TraktTvInfo traktTvInfo = new TraktTvInfo();
         // static values
-        traktTvInfo.setPush(PropertyTools.getBooleanProperty("trakttv.push.enabled", Boolean.FALSE));
-        traktTvInfo.setPull(PropertyTools.getBooleanProperty("trakttv.pull.enabled", Boolean.FALSE));
-        traktTvInfo.setSynchronization(traktTvInfo.isPush()|| traktTvInfo.isPull());
+        traktTvInfo.setPush(pushEnabled);
+        traktTvInfo.setPull(pullEnabled);
+        traktTvInfo.setSynchronization(pushEnabled || pullEnabled);
         // dynamic values
         traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_AUTH_TOKEN)!=null);
         long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);

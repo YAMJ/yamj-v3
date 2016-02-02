@@ -73,7 +73,7 @@ public class AttachmentScannerService {
    
     @PostConstruct
     public void init() {
-        LOG.info("Initialize attachment scanner service");
+        LOG.debug("Initialize attachment scanner service");
 
         boolean isWindows = System.getProperty("os.name").contains("Windows");
         LOG.debug("MKV Toolnix Path : {}", MT_PATH);

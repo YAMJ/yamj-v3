@@ -79,7 +79,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Allocine scanner");
+        LOG.trace("Initialize Allocine scanner");
         
         searchEngineTools = new SearchEngineTools(httpClient, Locale.FRANCE);
         searchEngineLock = new ReentrantLock(true);

@@ -69,7 +69,7 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TrailersLand trailer scanner");
+        LOG.trace("Initialize TrailersLand trailer scanner");
         
         // register this scanner
         trailerScannerService.registerTrailerScanner(this);

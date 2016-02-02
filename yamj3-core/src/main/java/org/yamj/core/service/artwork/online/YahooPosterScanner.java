@@ -54,7 +54,7 @@ public class YahooPosterScanner implements IMoviePosterScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Yahoo poster scanner");
+        LOG.trace("Initialize Yahoo poster scanner");
 
         artworkScannerService.registerArtworkScanner(this);
     }
