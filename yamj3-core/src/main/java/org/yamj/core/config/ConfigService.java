@@ -111,17 +111,19 @@ public class ConfigService {
         return NumberUtils.toLong(value, defaultValue);
     }
 
-    /**
-     * Return the key property as a float
-     *
-     * @param key
-     * @param defaultValue
-     * @return
-     */
     public float getFloatProperty(String key, float defaultValue) {
         String value = cachedProperties.get(key);
         return NumberUtils.toFloat(value, defaultValue);
     }
+
+    public Date getDateProperty(final String key) {
+        final long ms  = NumberUtils.toLong(cachedProperties.get(key), -1);
+        if (ms < 0) {
+            return null;
+        }
+        return new Date(ms);
+    }
+    
 
     public void setProperty(String key, String value) {
         // first store in database ...
@@ -146,6 +148,12 @@ public class ConfigService {
         setProperty(key, Float.toString(value));
     }
 
+    public void setProperty(String key, Date date) {
+        if (date != null) {
+            setProperty(key, Long.toString(date.getTime()));
+        }
+    }
+    
     @Transactional
     public void deleteProperty(String key) {
         // Delete the config from the database

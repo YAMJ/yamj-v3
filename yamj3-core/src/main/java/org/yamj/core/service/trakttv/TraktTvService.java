@@ -22,12 +22,11 @@
  */
 package org.yamj.core.service.trakttv;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ import org.yamj.api.trakttv.model.*;
 import org.yamj.api.trakttv.model.enumeration.*;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.service.TraktTvStorageService;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
+import org.yamj.core.service.metadata.online.*;
 
 @Service("traktTvService")
 public class TraktTvService {
@@ -50,6 +49,8 @@ public class TraktTvService {
     private static final String TRAKTTV_ACCESS_TOKEN = "trakttv.auth.access";
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
+    private static final String TRAKTTV_LAST_PULL_MOVIES = "trakttv.last.pull.movies";
+    private static final String TRAKTTV_LAST_PULL_SHOWS = "trakttv.last.pull.shows";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     
     @Autowired
@@ -81,8 +82,7 @@ public class TraktTvService {
     
     public boolean isExpired() {
         // check expiration date
-        final long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);
-        final Date expirationDate = (expiresAt > 0 ? new Date(expiresAt) : null);
+        final Date expirationDate = configService.getDateProperty(TRAKTTV_EXPIRATION);
         if (expirationDate == null || expirationDate.getTime() < System.currentTimeMillis()) {
             LOG.warn("Trakt.TV synchronization not possible cause expired");
             return true;
@@ -350,16 +350,54 @@ public class TraktTvService {
         }
         LOG.info("Found {} watched movies on Trakt.TV", trackedMovies.size());
         
+        // get the updated movie IDs for setting watched status
+        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PULL_MOVIES);
+        if (checkDate == null) {
+            // build a date long, long ago ...
+            checkDate = DateTime.now().minusYears(20).toDate();
+        }
+        Map<String,List<Long>> updated = this.traktTvStorageService.getUpdatedMovieIds(checkDate);
+
+        // store last pull date for later use
+        final Date lastPull = new Date();
+        
+        // nothing to do if no new or updated movies found
+        if (updated.isEmpty()) {
+            this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
+            return;
+        }
+        
+        boolean noError = true;
         for (TrackedMovie trackedMovie : trackedMovies) {
             try {
-                final List<Long> ids = traktTvStorageService.getIdsForMovies(trackedMovie.getMovie().getIds());
-                if (ids.size() > 0) {
-                    this.traktTvStorageService.updateWatched(trackedMovie, ids);
+                Set<Long> updateable = new HashSet<>();
+                Ids ids = trackedMovie.getMovie().getIds();
+                if (ids.trakt() != null) {
+                    List<Long> i = updated.get(TraktTvScanner.SCANNER_ID+"#"+ids.trakt());
+                    if (i != null) updateable.addAll(i);
+                }
+                if (ids.imdb() != null) {
+                    List<Long> i = updated.get(ImdbScanner.SCANNER_ID+"#"+ids.imdb());
+                    if (i != null) updateable.addAll(i);
+                }
+                if (ids.tmdb() != null) {
+                    List<Long> i = updated.get(TheMovieDbScanner.SCANNER_ID+"#"+ids.tmdb());
+                    if (i != null) updateable.addAll(i);
+                }
+                
+                if (updateable.size() > 0) {
+                    this.traktTvStorageService.updateWatched(trackedMovie, updateable);
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to updated watched movie: {}", trackedMovie);
                 LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
             }
+        }
+        
+        // just set last pull date if no error occurred
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
         }
     }
     

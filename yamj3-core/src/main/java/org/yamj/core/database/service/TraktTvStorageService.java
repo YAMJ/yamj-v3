@@ -23,15 +23,13 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.api.trakttv.model.Ids;
 import org.yamj.api.trakttv.model.TrackedMovie;
 import org.yamj.core.database.dao.TraktTvDao;
 import org.yamj.core.database.model.VideoData;
@@ -46,15 +44,14 @@ public class TraktTvStorageService {
     private TraktTvDao traktTvDao;
     @Autowired
     private MetadataStorageService metadataStorageService;
-    
+
     @Transactional(readOnly = true)
-    public List<Long> getIdsForMovies(Ids ids) {
-        return traktTvDao.findMovieByIDs(ids);
-        
+    public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
+        return this.traktTvDao.getUpdatedMovieIds(checkDate);
     }
     
     @Transactional
-    public void updateWatched(TrackedMovie trackedMovie, List<Long> ids) {
+    public void updateWatched(TrackedMovie trackedMovie, Collection<Long> ids) {
         final String traktTvId = trackedMovie.getMovie().getIds().trakt().toString();
         final Date lastWatched = trackedMovie.getLastWatchedAt().withMillisOfSecond(0).toDate();
         
@@ -76,6 +73,5 @@ public class TraktTvStorageService {
                 traktTvDao.updateEntity(videoData);
             }
         }
-    }
-    
+    }    
 }

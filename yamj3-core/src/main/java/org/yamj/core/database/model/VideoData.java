@@ -31,6 +31,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -60,6 +62,14 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     ),
     @NamedQuery(name = "videoData.findVideoDatas.byPerson",
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
+    )
+})
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = "videoData.movie.ids",
+        query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id, vd.create_timestamp, vd.update_timestamp, vd.episode "+
+                "FROM videodata_ids vid join videodata vd on vd.id=videodata_id and vd.episode<0 "+
+                "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
     )
 })
 

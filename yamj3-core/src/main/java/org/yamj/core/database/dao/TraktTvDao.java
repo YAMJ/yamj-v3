@@ -22,39 +22,39 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.LongType;
+import java.util.*;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.springframework.stereotype.Repository;
-import org.yamj.api.trakttv.model.Ids;
-import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TraktTvScanner;
 
 @Repository("traktTvDao")
 public class TraktTvDao extends HibernateDao {
     
-    public List<Long> findMovieByIDs(Ids ids) {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addParameter("trakTvScanner", TraktTvScanner.SCANNER_ID);
-        sqlScalars.addParameter("trakTvId", ids.trakt().toString());
-
-        sqlScalars.addToSql("SELECT distinct vid.videodata_id FROM videodata_ids vid");
-        sqlScalars.addToSql("WHERE (vid.sourcedb=:trakTvScanner AND vid.sourcedb_id=:trakTvId)");
-        if (StringUtils.isNotBlank(ids.imdb())) {
-            sqlScalars.addToSql("OR (vid.sourcedb=:imdbScanner AND vid.sourcedb_id=:imdbId)");
-            sqlScalars.addParameter("imdbScanner", ImdbScanner.SCANNER_ID);
-            sqlScalars.addParameter("imdbId", ids.imdb());
+    public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
+        final Map<String,List<Long>> result = new HashMap<>();
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.movie.ids")
+                .setDate("checkDate", checkDate)
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            String key;
+            Long id;
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                key = convertRowElementToString(row[0]);
+                id = convertRowElementToLong(row[1]);
+                
+                List<Long> ids = result.get(key);
+                if (ids==null) ids = new ArrayList<>();
+                ids.add(id);
+                result.put(key, ids);
+            }
         }
-        if (ids.tmdb() != null) {
-            sqlScalars.addToSql("OR (vid.sourcedb=:tmdbScanner AND vid.sourcedb_id=:tmdbId)");
-            sqlScalars.addParameter("tmdbScanner", TheMovieDbScanner.SCANNER_ID);
-            sqlScalars.addParameter("tmdbId", ids.tmdb().toString());
-        }
-
-        sqlScalars.addScalar("videodata_id", LongType.INSTANCE);
-        return executeQueryWithTransform(Long.class, sqlScalars, null);
+        
+        return result;
     }
 }

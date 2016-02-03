@@ -24,6 +24,7 @@ package org.yamj.core.hibernate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
@@ -200,6 +201,12 @@ public abstract class HibernateDao {
     protected static Integer convertRowElementToInteger(Object rowElement) {
         if (rowElement == null) {
             return 0;
+        } else if (rowElement instanceof Integer) {
+            return (Integer) rowElement;
+        } else if (rowElement instanceof BigInteger) {
+            return ((BigInteger) rowElement).intValue();
+        } else if (rowElement instanceof Long) {
+            return ((Long) rowElement).intValue();
         } else if (StringUtils.isNumeric(rowElement.toString())) {
             return Integer.valueOf(rowElement.toString());
         } else {
@@ -216,6 +223,12 @@ public abstract class HibernateDao {
     protected static Long convertRowElementToLong(Object rowElement) {
         if (rowElement == null) {
             return 0L;
+        } else if (rowElement instanceof BigInteger) {
+            return ((BigInteger) rowElement).longValue();
+        } else if (rowElement instanceof Long) {
+            return (Long) rowElement;
+        } else if (rowElement instanceof Integer) {
+            return ((Integer) rowElement).longValue();
         } else if (StringUtils.isNumeric(rowElement.toString())) {
             return Long.valueOf(rowElement.toString());
         } else {
