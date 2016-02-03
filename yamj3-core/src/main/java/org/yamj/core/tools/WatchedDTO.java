@@ -23,6 +23,7 @@
 package org.yamj.core.tools;
 
 import java.util.Date;
+import org.joda.time.DateTime;
 
 public final class WatchedDTO {
 
@@ -89,7 +90,10 @@ public final class WatchedDTO {
 
     public Date getWatchedDate() {
         this.evaluateWatched();
-        return this.watchedDate;
+        if (this.watchedDate == null) {
+            return null;
+        }
+        return new DateTime().withMillis(this.watchedDate.getTime()).withMillisOfSecond(0).toDate();
     }
 
     private void evaluateWatched() {

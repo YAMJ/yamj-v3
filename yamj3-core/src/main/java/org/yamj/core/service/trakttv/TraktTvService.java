@@ -25,6 +25,7 @@ package org.yamj.core.service.trakttv;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,22 +40,25 @@ import org.yamj.api.trakttv.auth.TokenResponse;
 import org.yamj.api.trakttv.model.*;
 import org.yamj.api.trakttv.model.enumeration.*;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.database.service.TraktTvStorageService;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TraktTvService.class);
-    private static final String TRAKTTV_AUTH_TOKEN = "trakttv.auth.access";
+    private static final String TRAKTTV_ACCESS_TOKEN = "trakttv.auth.access";
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
-    private static final String API_ERROR = "Trakt.TV error";
+    private static final String TRAKTTV_ERROR = "Trakt.TV error";
     
     @Autowired
     private ConfigService configService;
     @Autowired
     private TraktTvApi traktTvApi;
-
+    @Autowired
+    private TraktTvStorageService traktTvStorageService;
+    
     @Value("${trakttv.push.enabled:false}")
     private boolean pushEnabled;
     @Value("${trakttv.pull.enabled:false}")
@@ -62,14 +66,38 @@ public class TraktTvService {
     
     // AUTHORIZATION
     
+    @PostConstruct
+    public void init() {
+        if (isExpired()) {
+            // TODO request new access token by refresh token (if present)
+        } else {
+            traktTvApi.setAccessToken(configService.getProperty(TRAKTTV_ACCESS_TOKEN));
+        }
+    }
+
+    public boolean isSynchronizationEnabled() {
+        return (pushEnabled || pullEnabled);
+    }
+    
+    public boolean isExpired() {
+        // check expiration date
+        final long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);
+        final Date expirationDate = (expiresAt > 0 ? new Date(expiresAt) : null);
+        if (expirationDate == null || expirationDate.getTime() < System.currentTimeMillis()) {
+            LOG.warn("Trakt.TV synchronization not possible cause expired");
+            return true;
+        }
+        return false;
+    }
+
     public TraktTvInfo getTraktTvInfo() {
         TraktTvInfo traktTvInfo = new TraktTvInfo();
         // static values
         traktTvInfo.setPush(pushEnabled);
         traktTvInfo.setPull(pullEnabled);
-        traktTvInfo.setSynchronization(pushEnabled || pullEnabled);
+        traktTvInfo.setSynchronization(isSynchronizationEnabled());
         // dynamic values
-        traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_AUTH_TOKEN)!=null);
+        traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_ACCESS_TOKEN)!=null);
         long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);
         if (expiresAt > 0) {
             traktTvInfo.setExpirationDate(new Date(expiresAt));
@@ -89,12 +117,12 @@ public class TraktTvService {
             // store values in configuration settings
             configService.setProperty(TRAKTTV_EXPIRATION, expireDate);
             configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
-            configService.setProperty(TRAKTTV_AUTH_TOKEN, response.getAccessToken());
+            configService.setProperty(TRAKTTV_ACCESS_TOKEN, response.getAccessToken());
             
             // no authorization error
             return null;
         } catch (TraktTvException e) {
-            LOG.debug(API_ERROR, e);
+            LOG.debug(TRAKTTV_ERROR, e);
             return e.getResponse();
         } catch (Exception e) {
             LOG.debug("Unknown error", e);
@@ -114,7 +142,7 @@ public class TraktTvService {
             return getMovieId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get movie ID for IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -129,7 +157,7 @@ public class TraktTvService {
             return getMovieId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get movie ID for TheMovieDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -144,7 +172,7 @@ public class TraktTvService {
             return getMovieId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get movie ID for title '{}' and year '{}': {}", title, year, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -171,7 +199,7 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get show ID for IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -186,7 +214,7 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get show ID for TheMovieDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -201,7 +229,7 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get show ID for TheTVDb ID {}: {}", tvdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -216,7 +244,7 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get show ID for TVRage ID {}: {}", tvRageId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -231,7 +259,7 @@ public class TraktTvService {
             return getShowId(searchResults);
         } catch (TraktTvException ex) {
             LOG.error("Failed to get movie ID for title '{}' and year '{}': {}", title, year, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -299,7 +327,7 @@ public class TraktTvService {
         } catch (TraktTvException ex) {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get movie for Trakt.TV ID {}: {}", traktTvId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            LOG.trace(TRAKTTV_ERROR, ex);
         }
         return null;
     }
@@ -310,5 +338,33 @@ public class TraktTvService {
         }
     }
 
-   // SYNCHRONIZATION
+    // SYNCHRONIZATION
+
+    public void pullWatchedMovies() {
+        List<TrackedMovie> trackedMovies;
+        try {
+            trackedMovies = traktTvApi.syncService().getWatchedMovies(Extended.MINIMAL);
+        } catch (Exception e) {
+            LOG.error("Failed to get tracked movies", e);
+            return;
+        }
+        LOG.info("Found {} watched movies on Trakt.TV", trackedMovies.size());
+        
+        for (TrackedMovie trackedMovie : trackedMovies) {
+            try {
+                final List<Long> ids = traktTvStorageService.getIdsForMovies(trackedMovie.getMovie().getIds());
+                if (ids.size() > 0) {
+                    this.traktTvStorageService.updateWatched(trackedMovie, ids);
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to updated watched movie: {}", trackedMovie);
+                LOG.warn(TRAKTTV_ERROR, ex);
+            }
+        }
+    }
+    
+    public void pullWatchedShows() {
+        // TODO pull watched shows
+    }
+
 }

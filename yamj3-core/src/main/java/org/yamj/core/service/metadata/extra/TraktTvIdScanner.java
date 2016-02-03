@@ -27,8 +27,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.ExtraScannerService;
@@ -46,16 +46,19 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
     @Autowired
     private TraktTvService traktTvService;
     @Autowired
-    private ConfigService configService;
-    @Autowired
     private ExtraScannerService extraScannerService;
+    
+    @Value("${trakttv.collection.enabled:false}")
+    private boolean collectionEnabled;
     
     @PostConstruct
     public void init() {
         LOG.trace("Initialize Trakt.TV ID scanner");
 
-        // register this scanner
-        extraScannerService.registerExtraScanner(this);
+        // register this scanner if collection is enabled
+        if (collectionEnabled) {
+            extraScannerService.registerExtraScanner(this);
+        }
     }
     
     @Override
@@ -65,7 +68,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
     @Override
     public boolean isEnabled() {
-        return configService.getBooleanProperty("trakttv.enabled", false);
+        return collectionEnabled;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
             return;
         }
 
-        LOG.debug("Search for Trakt.TV movie ID: {}", videoData.getIdentifier());
+        LOG.trace("Search for Trakt.TV movie ID: {}", videoData.getIdentifier());
         
         // try IMDB id
         Integer found = traktTvService.searchMovieIdByIMDB(videoData.getSourceDbId(ImdbScanner.SCANNER_ID));

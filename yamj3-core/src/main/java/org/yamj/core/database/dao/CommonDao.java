@@ -481,7 +481,6 @@ public class CommonDao extends HibernateDao {
 
     public List<Long> getSeasonVideoIds(Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-
         sqlScalars.addToSql("SELECT DISTINCT vid.id ");
         sqlScalars.addToSql("FROM season sea, videodata vid ");
         sqlScalars.addToSql("WHERE vid.season_id=sea.id ");

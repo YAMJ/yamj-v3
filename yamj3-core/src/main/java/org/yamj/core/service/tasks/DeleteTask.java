@@ -23,7 +23,6 @@
 package org.yamj.core.service.tasks;
 
 import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +57,6 @@ public class DeleteTask implements ITask {
     public void execute(String options) throws Exception {
         LOG.debug("Execute delete task");
         this.deletionService.executeAllDeletions();
+        LOG.debug("Finished delete task");
     }
 }

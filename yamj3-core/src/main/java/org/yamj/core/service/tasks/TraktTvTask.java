@@ -26,47 +26,62 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.scheduling.ArtworkProcessScheduler;
+import org.yamj.core.service.trakttv.TraktTvService;
 
 /**
- * Task for checking artwork sanity.
+ * Task for periodical synchronization with Trakt.TV
  */
 @Component
-public class ArtworkSanityTask implements ITask {
+public class TraktTvTask implements ITask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkSanityTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
 
     @Autowired
     private ExecutionTaskService executionTaskService;
     @Autowired
-    private ArtworkStorageService artworkStorageService;
-    @Autowired
-    private ArtworkProcessScheduler artworkProcessScheduler;
+    private TraktTvService traktTvService;
+    
+    @Value("${trakttv.push.enabled:false}")
+    private boolean pushEnabled;
+    @Value("${trakttv.pull.enabled:false}")
+    private boolean pullEnabled;
     
     @Override
     public String getTaskName() {
-        return "artworksanity";
+        return "trakttv";
     }
 
     @PostConstruct
     public void init() {
-        executionTaskService.registerTask(this);
+        // just register task if push or pull is enabled
+        if (pushEnabled || pullEnabled) {
+            executionTaskService.registerTask(this);
+        }
     }
 
     @Override
     public void execute(String options) throws Exception {
-        LOG.debug("Execute artwork sanity task");
+        if (traktTvService.isExpired()) {
+            // nothing could be done if expired
+            return;
+        }
+        LOG.debug("Execute Trakt.TV task");
         
-        long lastId = -1;
-        do {
-            lastId = this.artworkStorageService.checkArtworkSanity(lastId);
-        } while (lastId > 0);
+        if (pullEnabled) {
+            traktTvService.pullWatchedMovies();
+            traktTvService.pullWatchedShows();
+        } else {
+            LOG.debug("Trakt.TV pulling is not enabled");
+        }
 
-        // trigger artwork processing in any case
-        this.artworkProcessScheduler.triggerProcess();
+        if (pushEnabled) {
+            // TODO pushing events to Trakt.TV
+        } else {
+            LOG.debug("Trakt.TV pushing is not enabled");
+        }
 
-        LOG.debug("Finished artwork sanity task");
+        LOG.debug("Finished Trakt.TV task");
     }
 }

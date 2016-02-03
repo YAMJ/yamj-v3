@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -460,7 +461,7 @@ public class CommonStorageService {
         // update media file
         boolean marked;
         if (apiCall) {
-            mediaFile.setWatchedApi(watched, new Date());
+            mediaFile.setWatchedApi(watched, DateTime.now().withMillisOfSecond(0).toDate());
             marked = mediaFile.isWatchedApi();
         } else {
             // update watched file marker

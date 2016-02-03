@@ -25,6 +25,7 @@ package org.yamj.core.database.service;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -675,9 +676,11 @@ public class JsonApiStorageService {
         }
 
         // nothing to do
-        if (videoDatas == null) return;
+        if (videoDatas == null) {
+            return;
+        }
         
-        final Date watchedApiDate = new Date();
+        final Date watchedApiDate = DateTime.now().withMillisOfSecond(0).toDate();
         for (VideoData videoData : videoDatas) {
             // this will also set watched status to watched flag due the actual date
             videoData.setWatchedApi(watched, watchedApiDate);

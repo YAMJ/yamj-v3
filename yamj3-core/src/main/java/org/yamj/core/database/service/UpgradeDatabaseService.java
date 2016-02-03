@@ -52,7 +52,7 @@ public class UpgradeDatabaseService {
         final String databaseType;
         if (StringUtils.containsIgnoreCase(dialect, "HSQLDialect")) {
             databaseType = DatabaseType.HSQL;
-        } else if (StringUtils.containsIgnoreCase(dialect, "dialect. MySQL")) {
+        } else if (StringUtils.containsIgnoreCase(dialect, "MySQL")) {
             databaseType = DatabaseType.MYSQL;
         } else if (StringUtils.containsIgnoreCase(dialect, "H2Dialect")) {
             databaseType = DatabaseType.H2;
@@ -71,6 +71,7 @@ public class UpgradeDatabaseService {
     }
     
     private void patchTraktTv(String databaseType) {
+        LOG.debug("Execute 'patchTraktTv': {}", databaseType);
         if (DatabaseType.MYSQL.equals(databaseType)) {
             // patch for MySQL
             upgradeDatabaseDao.mysqlPatchTraktTv();

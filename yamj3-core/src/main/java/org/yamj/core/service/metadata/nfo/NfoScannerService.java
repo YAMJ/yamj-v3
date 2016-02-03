@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class NfoScannerService {
             videoData.setSkippendScansNfo(null);
             if (videoData.isWatchedNfo()) {
                 // the date where the NFO change for watch was detected
-                videoData.setWatchedNfo(false,  new Date());
+                videoData.setWatchedNfo(false,  DateTime.now().withMillisOfSecond(0).toDate());
             }
             return;
         }
@@ -104,7 +105,8 @@ public class NfoScannerService {
             
             // set watched by NFO
             if (infoDTO.isWatched() != videoData.isWatchedNfo()) {
-                videoData.setWatchedNfo(infoDTO.isWatched(), infoDTO.getWatchedDate());
+                final Date watched = new DateTime().withMillis(infoDTO.getWatchedDate().getTime()).toDate();
+                videoData.setWatchedNfo(infoDTO.isWatched(), watched); 
             }
             
             // set sort title
@@ -190,7 +192,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            final Date actualDate = new Date();
+            final Date actualDate = DateTime.now().withMillisOfSecond(0).toDate();
             series.setSkippendScansNfo(null);
             
             for (Season season : series.getSeasons()) {
@@ -314,6 +316,13 @@ public class NfoScannerService {
                 season.setTvSeasonDone();
                 
                 for (VideoData videoData : season.getVideoDatas()) {
+                    // build watched date
+                    final Date watched;
+                    if (infoDTO.getWatchedDate() != null) {
+                        watched = null;
+                    } else {
+                        watched = new DateTime().withMillis(infoDTO.getWatchedDate().getTime()).withMillisOfSecond(0).toDate();
+                    }
                     
                     InfoEpisodeDTO episode = infoDTO.getEpisode(season.getSeason(), videoData.getEpisode());
                     if (episode == null) {
@@ -324,7 +333,7 @@ public class NfoScannerService {
                         
                         if (videoData.isWatchedNfo()) {
                             // the date where the NFO change for watch was detected
-                            videoData.setWatchedNfo(false, infoDTO.getWatchedDate());
+                            videoData.setWatchedNfo(false, watched);
                             videoData.setTvEpisodeNotFound();
                         }
                         
@@ -334,7 +343,7 @@ public class NfoScannerService {
                         
                         if (episode.isWatched() != videoData.isWatchedNfo()) {
                             // set NFO watched flag
-                            videoData.setWatchedNfo(episode.isWatched(), infoDTO.getWatchedDate());
+                            videoData.setWatchedNfo(episode.isWatched(), watched);
                         }
 
                         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {

@@ -473,7 +473,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
-    
     public boolean isWatchedTraktTv() {
         return watchedTraktTv;
     }
@@ -492,8 +491,8 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedTraktTv(boolean watchedTraktTv, Date watchedTraktTvLastDate) {
         if (watchedTraktTvLastDate != null) {
-            setWatchedApi(watchedTraktTv);
-            setWatchedApiLastDate(watchedTraktTvLastDate);
+            setWatchedTraktTv(watchedTraktTv);
+            setWatchedTraktTvLastDate(watchedTraktTvLastDate);
     
             if (getWatchedDate() == null || getWatchedDate().before(watchedTraktTvLastDate)) {
                 setWatched(watchedTraktTv);
