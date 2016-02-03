@@ -58,7 +58,7 @@
                     <tr>
                         <td colspan="2" class="center">
                             To request a Trakt.TV pin please follow this link:<br>
-                            <a href="http://trakt.tv/pin/0815" target="_blank">http://trakt.tv/pin/0815</a>
+                            <a href="http://trakt.tv/pin/8032" target="_blank">http://trakt.tv/pin/8032</a>
                         </td>
                     </tr>
                     <tr>
