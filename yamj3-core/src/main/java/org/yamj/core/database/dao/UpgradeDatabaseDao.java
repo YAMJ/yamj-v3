@@ -32,7 +32,9 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("upgradeDatabaseDao")
 public class UpgradeDatabaseDao extends HibernateDao {
 
-    protected boolean existsColumn(String table, String column) {
+    // MYSQL CHECKS
+    
+    protected boolean mysqlExistsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.COLUMNS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -42,7 +44,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return CollectionUtils.isNotEmpty(objects);
     }
 
-    protected boolean existsForeignKey(String table, String foreignKey) {
+    protected boolean mysqlExistsForeignKey(String table, String foreignKey) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -53,8 +55,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return CollectionUtils.isNotEmpty(objects);
     }
 
-    protected void dropForeignKey(String table, String foreignKey) {
-        if (existsForeignKey(table, foreignKey)) {
+    protected void mysqldropForeignKey(String table, String foreignKey) {
+        if (mysqlExistsForeignKey(table, foreignKey)) {
             StringBuilder sb = new StringBuilder();
             sb.append("ALTER TABLE ").append(table);
             sb.append(" DROP FOREIGN KEY ").append(foreignKey);
@@ -63,7 +65,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
     
     @SuppressWarnings("cast")
-    protected List<String> listForeignKeys(String table) {
+    protected List<String> mysqlListForeignKeys(String table) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -72,7 +74,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (List<String>) currentSession().createSQLQuery(sb.toString()).list();
     }
 
-    protected boolean existsIndex(String table, String indexName) {
+    protected boolean mysqlExistsIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.STATISTICS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -83,7 +85,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
 
     protected void dropIndex(String table, String indexName) {
-        if (existsIndex(table, indexName)) {
+        if (mysqlExistsIndex(table, indexName)) {
             StringBuilder sb = new StringBuilder();
             sb.append("ALTER TABLE ").append(table);
             sb.append(" DROP INDEX ").append(indexName);
@@ -91,7 +93,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
     }
 
-    protected boolean existsUniqueIndex(String table, String indexName) {
+    protected boolean mysqlExistsUniqueIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -102,12 +104,50 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return CollectionUtils.isNotEmpty(objects);
     }
 
-    protected void dropUniqueIndex(String table, String indexName) {
-        if (existsUniqueIndex(table, indexName)) {
+    protected void mysqlDropUniqueIndex(String table, String indexName) {
+        if (mysqlExistsUniqueIndex(table, indexName)) {
             StringBuilder sb = new StringBuilder();
             sb.append("ALTER TABLE ").append(table);
             sb.append(" DROP INDEX ").append(indexName);
             currentSession().createSQLQuery(sb.toString()).executeUpdate();
         }
-    }    
+    }  
+
+    // HSQL CHECKS
+    
+    protected boolean hsqlExistsColumn(String table, String column) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.COLUMNS ");
+        sb.append("WHERE UPPER(TABLE_NAME) = '").append(table.toUpperCase()).append("' ");
+        sb.append("AND UPPER(COLUMN_NAME) = '").append(column.toUpperCase()).append("'");
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
+    }
+
+    // PATCHES
+    
+    // Patch for Trakt.TV
+    
+    public void mysqlPatchTraktTv() {
+        if (!mysqlExistsColumn("videodata", "watched_trakttv")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BIT DEFAULT 0 NOT NULL")
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv_last_date DATETIME")
+            .executeUpdate();            
+        }
+    }
+    public void hsqlPatchTraktTv() {
+        if (!hsqlExistsColumn("videodata", "watched_trakttv")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BOOLEAN DEFAULT 0 NOT NULL")
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv_last_date TIMESTAMP")
+            .executeUpdate();
+        }
+    }
 }

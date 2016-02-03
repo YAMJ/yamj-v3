@@ -112,9 +112,17 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_api_last_date")
     private Date watchedApiLastDate;
 
+    @Column(name = "watched_trakttv", nullable = false)
+    private boolean watchedTraktTv = false;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "watched_trakttv_last_date")
+    private Date watchedTraktTvLastDate;
+    
     @Column(name = "watched", nullable = false)
     private boolean watched = false;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "watched_date")
     private Date watchedDate;
 
@@ -465,6 +473,35 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
+    
+    public boolean isWatchedTraktTv() {
+        return watchedTraktTv;
+    }
+
+    private void setWatchedTraktTv(boolean watchedTraktTv) {
+        this.watchedTraktTv = watchedTraktTv;
+    }
+
+    public Date getWatchedTraktTvLastDate() {
+        return watchedTraktTvLastDate;
+    }
+
+    private void setWatchedTraktTvLastDate(Date watchedTraktTvLastDate) {
+        this.watchedTraktTvLastDate = watchedTraktTvLastDate;
+    }
+
+    public void setWatchedTraktTv(boolean watchedTraktTv, Date watchedTraktTvLastDate) {
+        if (watchedTraktTvLastDate != null) {
+            setWatchedApi(watchedTraktTv);
+            setWatchedApiLastDate(watchedTraktTvLastDate);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(watchedTraktTvLastDate)) {
+                setWatched(watchedTraktTv);
+                setWatchedDate(watchedTraktTvLastDate);
+            }
+        }
+    }
+
     public boolean isWatched() {
         return watched;
     }

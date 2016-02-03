@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("h2")
+@Profile(DatabaseType.H2)
 public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(H2DatabaseConfiguration.class);
@@ -77,9 +77,7 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         dataSource.setUser(YAMJ3);
         dataSource.setPassword(YAMJ3);
-        
-        populateDatabase(dataSource, "update_h2.sql");
-        
+
         return dataSource;
     }
     

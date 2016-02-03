@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("mysql")
+@Profile(DatabaseType.MYSQL)
 public class MySQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(MySQLDatabaseConfiguration.class);
@@ -85,8 +85,6 @@ public class MySQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         basicDataSource.setTestOnReturn(testOnReturn);
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
-
-        populateDatabase(basicDataSource, "update_mysql.sql");
         
         return basicDataSource;
     }

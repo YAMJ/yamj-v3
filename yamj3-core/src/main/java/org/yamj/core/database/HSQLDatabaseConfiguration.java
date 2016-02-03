@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("hsql")
+@Profile(DatabaseType.HSQL)
 public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(HSQLDatabaseConfiguration.class);
@@ -100,8 +100,6 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         basicDataSource.setTestOnReturn(testOnReturn);
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
-
-        populateDatabase(basicDataSource, "update_hsql.sql");
 
         return basicDataSource;
     }
