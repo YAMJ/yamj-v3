@@ -50,7 +50,7 @@ public class TraktTvService {
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
     private static final String TRAKTTV_LAST_PULL_MOVIES = "trakttv.last.pull.movies";
-    private static final String TRAKTTV_LAST_PULL_SHOWS = "trakttv.last.pull.shows";
+    private static final String TRAKTTV_LAST_PULL_EPISODES = "trakttv.last.pull.episodes";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     
     @Autowired
@@ -350,48 +350,34 @@ public class TraktTvService {
         }
         LOG.info("Found {} watched movies on Trakt.TV", trackedMovies.size());
         
+        // store last pull date for later use
+        final Date lastPull = new Date();
+        
         // get the updated movie IDs for setting watched status
         Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PULL_MOVIES);
         if (checkDate == null) {
             // build a date long, long ago ...
             checkDate = DateTime.now().minusYears(20).toDate();
         }
-        Map<String,List<Long>> updated = this.traktTvStorageService.getUpdatedMovieIds(checkDate);
-
-        // store last pull date for later use
-        final Date lastPull = new Date();
+        Map<String,List<Long>> updatedMovies = this.traktTvStorageService.getUpdatedMovieIds(checkDate);
         
         // nothing to do if no new or updated movies found
-        if (updated.isEmpty()) {
+        if (updatedMovies.isEmpty()) {
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
             return;
         }
         
         boolean noError = true;
-        for (TrackedMovie trackedMovie : trackedMovies) {
-            try {
-                Set<Long> updateable = new HashSet<>();
-                Ids ids = trackedMovie.getMovie().getIds();
-                if (ids.trakt() != null) {
-                    List<Long> i = updated.get(TraktTvScanner.SCANNER_ID+"#"+ids.trakt());
-                    if (i != null) updateable.addAll(i);
+        for (TrackedMovie movie : trackedMovies) {
+            final Set<Long> updateable = getUpdateableMovies(movie.getMovie().getIds(), updatedMovies);
+            if (updateable.size() > 0) {
+                try {
+                    this.traktTvStorageService.updateWatched(movie, updateable);
+                } catch (Exception ex) {
+                    LOG.error("Failed to updated watched movie: {}", movie);
+                    LOG.warn(TRAKTTV_ERROR, ex);
+                    noError = false;
                 }
-                if (ids.imdb() != null) {
-                    List<Long> i = updated.get(ImdbScanner.SCANNER_ID+"#"+ids.imdb());
-                    if (i != null) updateable.addAll(i);
-                }
-                if (ids.tmdb() != null) {
-                    List<Long> i = updated.get(TheMovieDbScanner.SCANNER_ID+"#"+ids.tmdb());
-                    if (i != null) updateable.addAll(i);
-                }
-                
-                if (updateable.size() > 0) {
-                    this.traktTvStorageService.updateWatched(trackedMovie, updateable);
-                }
-            } catch (Exception ex) {
-                LOG.error("Failed to updated watched movie: {}", trackedMovie);
-                LOG.warn(TRAKTTV_ERROR, ex);
-                noError = false;
             }
         }
         
@@ -400,9 +386,94 @@ public class TraktTvService {
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
         }
     }
-    
-    public void pullWatchedShows() {
-        // TODO pull watched shows
+
+    private static Set<Long> getUpdateableMovies(Ids movieIds, Map<String,List<Long>> updatedMovies) {
+        Set<Long> updateable = new HashSet<>();
+        if (movieIds.trakt() != null) {
+            List<Long> i = updatedMovies.get(TraktTvScanner.SCANNER_ID+"#"+movieIds.trakt());
+            if (i != null) updateable.addAll(i);
+        }
+        if (movieIds.imdb() != null) {
+            List<Long> i = updatedMovies.get(ImdbScanner.SCANNER_ID+"#"+movieIds.imdb());
+            if (i != null) updateable.addAll(i);
+        }
+        if (movieIds.tmdb() != null) {
+            List<Long> i = updatedMovies.get(TheMovieDbScanner.SCANNER_ID+"#"+movieIds.tmdb());
+            if (i != null) updateable.addAll(i);
+        }
+        return updateable;
+    }
+
+    public void pullWatchedEpisodes() {
+        List<TrackedShow> trackedShows;
+        try {
+            trackedShows = traktTvApi.syncService().getWatchedShows(Extended.MINIMAL);
+        } catch (Exception e) {
+            LOG.error("Failed to get tracked shows", e);
+            return;
+        }
+        LOG.info("Found {} watched shows on Trakt.TV", trackedShows.size());
+
+        // store last pull date for later use
+        final Date lastPull = new Date();
+        
+        // get the updated movie IDs for setting watched status
+        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PULL_EPISODES);
+        if (checkDate == null) {
+            // build a date long, long ago ...
+            checkDate = DateTime.now().minusYears(20).toDate();
+        }
+        Map<String,List<Long>> updatedEpisodes = this.traktTvStorageService.getUpdatedEpisodeIds(checkDate);
+        
+        // nothing to do if no new or updated movies found
+        if (updatedEpisodes.isEmpty()) {
+            this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
+            return;
+        }
+        
+        boolean noError = true;
+        for (TrackedShow show : trackedShows) {
+            for (TrackedSeason season : show.getSeasons()) {
+                for (TrackedEpisode episode : season.getEpisodes()) {
+                    final Set<Long> updateable = getUpdateableEpisodes(show.getShow().getIds(), season.getNumber(), episode.getNumber(), updatedEpisodes);
+                    if (updateable.size() > 0) {
+                        try {
+                            this.traktTvStorageService.updateWatched(episode, updateable);
+                        } catch (Exception ex) {
+                            LOG.error("Failed to updated watched movie: {}", episode);
+                            LOG.warn(TRAKTTV_ERROR, ex);
+                            noError = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // just set last pull date if no error occurred
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
+        }
+    }
+
+    private static Set<Long> getUpdateableEpisodes(Ids showIds, int season, int episode, Map<String,List<Long>> updatedEpisodes) {
+        Set<Long> updateable = new HashSet<>();
+        if (showIds.trakt() != null) {
+            List<Long> i = updatedEpisodes.get(TraktTvScanner.SCANNER_ID+"#"+showIds.trakt()+"#"+season+"#"+episode);
+            if (i != null) updateable.addAll(i);
+        }
+        if (showIds.tvdb() != null) {
+            List<Long> i = updatedEpisodes.get(TheTVDbScanner.SCANNER_ID+"#"+showIds.tvdb()+"#"+season+"#"+episode);
+            if (i != null) updateable.addAll(i);
+        }
+        if (showIds.tvRage() != null) {
+            List<Long> i = updatedEpisodes.get(TVRageScanner.SCANNER_ID+"#"+showIds.tvRage()+"#"+season+"#"+episode);
+            if (i != null) updateable.addAll(i);
+        }
+        if (showIds.imdb() != null) {
+            List<Long> i = updatedEpisodes.get(ImdbScanner.SCANNER_ID+"#"+showIds.imdb()+"#"+season+"#"+episode);
+            if (i != null) updateable.addAll(i);
+        }
+        return updateable;
     }
 
 }

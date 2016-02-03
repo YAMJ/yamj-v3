@@ -55,23 +55,20 @@ public class TraktTvTask implements ITask {
 
     @PostConstruct
     public void init() {
-        // just register task if push or pull is enabled
-        if (pushEnabled || pullEnabled) {
-            executionTaskService.registerTask(this);
-        }
+        executionTaskService.registerTask(this);
     }
 
     @Override
     public void execute(String options) throws Exception {
+        LOG.debug("Execute Trakt.TV task");
+
         if (traktTvService.isExpired()) {
-            // nothing could be done if expired
             return;
         }
-        LOG.debug("Execute Trakt.TV task");
         
         if (pullEnabled) {
             traktTvService.pullWatchedMovies();
-            traktTvService.pullWatchedShows();
+            traktTvService.pullWatchedEpisodes();
         } else {
             LOG.debug("Trakt.TV pulling is not enabled");
         }

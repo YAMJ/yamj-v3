@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.api.trakttv.model.TrackedEpisode;
 import org.yamj.api.trakttv.model.TrackedMovie;
 import org.yamj.core.database.dao.TraktTvDao;
 import org.yamj.core.database.model.VideoData;
@@ -49,7 +50,12 @@ public class TraktTvStorageService {
     public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
         return this.traktTvDao.getUpdatedMovieIds(checkDate);
     }
-    
+
+    @Transactional(readOnly = true)
+    public Map<String,List<Long>> getUpdatedEpisodeIds(Date checkDate) {
+        return this.traktTvDao.getUpdatedEpisodeIds(checkDate);
+    }
+
     @Transactional
     public void updateWatched(TrackedMovie trackedMovie, Collection<Long> ids) {
         final String traktTvId = trackedMovie.getMovie().getIds().trakt().toString();
@@ -70,6 +76,20 @@ public class TraktTvStorageService {
             
             if (updated) {
                 LOG.debug("Trakt.TV watched movie: {}", videoData.getIdentifier());
+                traktTvDao.updateEntity(videoData);
+            }
+        }
+    }    
+
+    @Transactional
+    public void updateWatched(TrackedEpisode trackedEpisode, Collection<Long> ids) {
+        final Date lastWatched = trackedEpisode.getLastWatchedAt().withMillisOfSecond(0).toDate();
+        
+        for (Long id : ids) {
+            VideoData videoData = metadataStorageService.getRequiredVideoData(id);
+            if (videoData.getWatchedTraktTvLastDate() == null || videoData.getWatchedTraktTvLastDate().before(lastWatched)) {
+                videoData.setWatchedTraktTv(true, lastWatched);
+                LOG.debug("Trakt.TV watched episode: {}", videoData.getIdentifier());
                 traktTvDao.updateEntity(videoData);
             }
         }

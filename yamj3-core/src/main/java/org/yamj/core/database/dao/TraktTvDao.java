@@ -34,7 +34,34 @@ public class TraktTvDao extends HibernateDao {
     public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
         final Map<String,List<Long>> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.movie.ids")
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.movies")
+                .setDate("checkDate", checkDate)
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            String key;
+            Long id;
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                key = convertRowElementToString(row[0]);
+                id = convertRowElementToLong(row[1]);
+                
+                List<Long> ids = result.get(key);
+                if (ids==null) ids = new ArrayList<>();
+                ids.add(id);
+                result.put(key, ids);
+            }
+        }
+        
+        return result;
+    }
+
+    public Map<String,List<Long>> getUpdatedEpisodeIds(Date checkDate) {
+        final Map<String,List<Long>> result = new HashMap<>();
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.episodes")
                 .setDate("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
