@@ -131,23 +131,32 @@ public class UpgradeDatabaseDao extends HibernateDao {
     public void mysqlPatchTraktTv() {
         if (!mysqlExistsColumn("videodata", "watched_trakttv")) {
             currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BIT DEFAULT 0 NOT NULL")
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BIT, ADD COLUMN watched_trakttv_last_date DATETIME")
             .executeUpdate();
-            
-            currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv_last_date DATETIME")
-            .executeUpdate();            
         }
+        
+        currentSession()
+        .createSQLQuery("UPDATE videodata SET watched_trakttv=0 WHERE watched_trakttv is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE videodata MODIFY COLUMN watched_trakttv BIT NOT NULL")
+        .executeUpdate();            
     }
+    
     public void hsqlPatchTraktTv() {
         if (!hsqlExistsColumn("videodata", "watched_trakttv")) {
             currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BOOLEAN DEFAULT 0 NOT NULL")
-            .executeUpdate();
-            
-            currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv_last_date TIMESTAMP")
+            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BOOLEAN, ADD COLUMN watched_trakttv_last_date TIMESTAMP")
             .executeUpdate();
         }
+        
+        currentSession()
+        .createSQLQuery("UPDATE videodata SET watched_trakttv=0 WHERE watched_trakttv is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE videodata ALTER COLUMN watched_trakttv SET NOT NULL")
+        .executeUpdate();
     }
 }

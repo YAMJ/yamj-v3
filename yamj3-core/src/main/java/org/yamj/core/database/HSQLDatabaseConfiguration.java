@@ -101,6 +101,8 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
 
+        populateDatabase(basicDataSource, "update_hsql.sql");
+
         return basicDataSource;
     }
     

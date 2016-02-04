@@ -128,7 +128,7 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_api_last_date")
     private Date watchedApiLastDate;
 
-    @Column(name = "watched_trakttv", nullable = false)
+    @Column(name = "watched_trakttv", nullable = true) // TODO set nullable=false
     private boolean watchedTraktTv = false;
 
     @Temporal(TemporalType.TIMESTAMP)

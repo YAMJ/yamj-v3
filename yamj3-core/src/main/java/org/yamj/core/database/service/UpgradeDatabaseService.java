@@ -70,6 +70,9 @@ public class UpgradeDatabaseService {
 
     }
     
+    /**
+     * Date: 04.02.2016
+     */
     private void patchTraktTv(String databaseType) {
         LOG.debug("Execute 'patchTraktTv': {}", databaseType);
         if (DatabaseType.MYSQL.equals(databaseType)) {

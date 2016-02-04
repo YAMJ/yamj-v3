@@ -85,7 +85,9 @@ public class MySQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         basicDataSource.setTestOnReturn(testOnReturn);
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
-        
+
+        populateDatabase(basicDataSource, "update_mysql.sql");
+
         return basicDataSource;
     }
     
