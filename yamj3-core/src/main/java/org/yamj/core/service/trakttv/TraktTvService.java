@@ -39,6 +39,7 @@ import org.yamj.api.trakttv.auth.TokenResponse;
 import org.yamj.api.trakttv.model.*;
 import org.yamj.api.trakttv.model.enumeration.*;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
 import org.yamj.core.service.metadata.online.*;
@@ -509,7 +510,7 @@ public class TraktTvService {
             try {
                 this.traktTvApi.syncService().addItemsToWatchedHistory(items);
             } catch (Exception ex) {
-                LOG.error("Failed to add items to watched history");
+                LOG.error("Failed to add movie items to watched history");
                 LOG.warn(TRAKTTV_ERROR, ex);
                 noError = false;
             }
@@ -521,6 +522,94 @@ public class TraktTvService {
     }
 
     public void pushWatchedEpisodes() {
-        // TODO
+        // store last push date for later use
+        final Date lastPush = new Date();
+        
+        // get the updated movie IDs for setting watched status
+        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PUSH_EPISODES);
+        if (checkDate == null) {
+            // build a date long, long ago ...
+            checkDate = DateTime.now().minusYears(20).toDate();
+        }
+        Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
+        
+        List<SyncShow> syncList = new ArrayList<>();
+        for (TraktEpisodeDTO dto : watchedEpisodes) {
+            if (!dto.isValid()) {
+                continue;
+            }
+
+            // create synchronization show
+            SyncShow syncShow = getShow(dto, syncList);
+            if (syncShow == null) {
+                syncShow = new SyncShow();
+                syncShow.ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tvdb(dto.getTvdb()).tvRage(dto.getTvRage()));
+                syncList.add(syncShow);
+            }
+            
+            SyncSeason syncSeason = getSeason(dto, syncShow);
+            if (syncSeason == null) {
+                syncSeason = new SyncSeason().number(dto.getSeason());
+                syncShow.season(syncSeason);
+            }
+            
+            SyncEpisode syncEpisode = new SyncEpisode();
+            syncEpisode.number(dto.getEpisode());
+            syncEpisode.season(dto.getSeason());
+            syncEpisode.watchedAt(dto.getWatchedDate());
+            syncSeason.episode(syncEpisode);
+            LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
+        }
+        
+        boolean noError = true;
+        if (syncList.size() > 0) {
+            SyncItems items = new SyncItems();
+            items.shows(syncList);
+            try {
+                this.traktTvApi.syncService().addItemsToWatchedHistory(items);
+            } catch (Exception ex) {
+                LOG.error("Failed to add episode items to watched history");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+        }
+
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_PUSH_EPISODES, lastPush);
+        }
+    }
+    
+    private static SyncShow getShow(TraktEpisodeDTO dto, List<SyncShow> shows) {
+        for (SyncShow show : shows) {
+            if (matchId(show.ids().trakt(), dto.getTrakt())) {
+                return show;
+            }
+            if (matchId(show.ids().imdb(), dto.getImdb())) {
+                return show;
+            }
+            if (matchId(show.ids().tvdb(), dto.getTvdb())) {
+                return show;
+            }
+            if (matchId(show.ids().tvRage(), dto.getTvRage())) {
+                return show;
+            }
+        }
+        return null;
+    }
+
+    private static SyncSeason getSeason(TraktEpisodeDTO dto, SyncShow show) {
+        for (SyncSeason season : show.seasons()) {
+            if (season.number().intValue() == dto.getSeason()) {
+                return season;
+            }
+        }
+        return null;
+    }
+
+    private static boolean matchId(Object id1, Object id2) {
+        if (id1 == null || id2 == null) {
+            return false;
+        }
+        return id1.equals(id2);
     }
 }

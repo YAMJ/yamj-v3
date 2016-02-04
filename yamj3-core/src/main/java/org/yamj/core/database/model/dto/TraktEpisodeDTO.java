@@ -22,19 +22,46 @@
  */
 package org.yamj.core.database.model.dto;
 
-public final class TraktMovieDTO extends AbstractTraktDTO {
+public final class TraktEpisodeDTO extends AbstractTraktDTO {
 
-    private Integer tmdb;
+    private Integer tvdb;
+    private String tvRage;
+    private int season;
+    private int episode;
     
-    public Integer getTmdb() {
-        return tmdb;
+    public Integer getTvdb() {
+        return tvdb;
     }
 
-    public void setTmdb(Integer tmdb) {
-        this.tmdb = tmdb;
+    public void setTvdb(Integer tvdb) {
+        this.tvdb = tvdb;
+    }
+
+    public String getTvRage() {
+        return tvRage;
+    }
+
+    public void setTvRage(String tvRage) {
+        this.tvRage = tvRage;
+    }
+    
+    public int getSeason() {
+        return season;
+    }
+
+    public void setSeason(int season) {
+        this.season = season;
+    }
+
+    public int getEpisode() {
+        return episode;
+    }
+
+    public void setEpisode(int episode) {
+        this.episode = episode;
     }
 
     public boolean isValid() {
-        return (getTrakt() != null || getImdb() != null || getTmdb() != null);
+        return (getTrakt() != null || getImdb() != null || getTvdb() != null || getTvRage() != null);
     }
 }

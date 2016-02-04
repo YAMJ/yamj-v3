@@ -79,9 +79,14 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
                 "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
     ),
     @NamedNativeQuery(name = "videoData.trakttv.watched.movies",
-    query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, vd.watched, vd.watched_date, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
-            "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
-            "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
+        query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, vd.watched, vd.watched_date, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
+                "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
+                "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.watched.episodes",
+        query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, vd.watched, vd.watched_date, sea.season, vd.episode, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
+                "FROM series_ids sid JOIN series ser on ser.id=sid.series_id JOIN season sea on sea.series_id=ser.id JOIN videodata vd on vd.season_id=sea.id "+
+                "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
     )
 })
 
