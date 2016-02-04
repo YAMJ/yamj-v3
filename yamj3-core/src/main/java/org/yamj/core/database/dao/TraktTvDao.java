@@ -23,6 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.springframework.stereotype.Repository;
@@ -110,6 +111,58 @@ public class TraktTvDao extends HibernateDao {
                     dto.setId(id);
                     dto.setWatchedDate(convertRowElementToDate(row[4]));
                     dto.setIdentifier(convertRowElementToString(row[5]));
+                }
+                
+                source = convertRowElementToString(row[1]);
+                if (TraktTvScanner.SCANNER_ID.equals(source)) {
+                    dto.setTrakt(convertRowElementToInteger(row[2]));
+                } else if (ImdbScanner.SCANNER_ID.equals(source)) {
+                    dto.setImdb(convertRowElementToString(row[2]));
+                } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+                    dto.setTmdb(convertRowElementToInteger(row[2]));
+                }
+                
+                result.put(id, dto);
+            }
+        }
+        
+        return result.values();
+    }
+
+    public Collection<TraktMovieDTO> getCollectedMovies(Date checkDate) {
+        final Map<Long,TraktMovieDTO> result = new HashMap<>();
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.collected.movies")
+                .setDate("checkDate", checkDate)
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            Long id;
+            String source;
+            while (scroll.next()) {
+                row = scroll.get();
+                id = convertRowElementToLong(row[0]);
+                
+                TraktMovieDTO dto = result.get(id);
+                if (dto == null) {
+                    dto = new TraktMovieDTO();
+                    dto.setId(id);
+                    dto.setCollectDate(convertRowElementToDate(row[3]));
+                    dto.setIdentifier(convertRowElementToString(row[4]));
+                    
+                    String origTitle = convertRowElementToString(row[6]);
+                    if (StringUtils.isNotBlank(origTitle)) {
+                        dto.setTitle(origTitle);
+                    } else {
+                        dto.setTitle(convertRowElementToString(row[5]));
+                    }
+                    
+                    Integer year = convertRowElementToInteger(row[7]);
+                    if (year != null && year.intValue() > 0) {
+                        dto.setYear(year);
+                    }
                 }
                 
                 source = convertRowElementToString(row[1]);

@@ -51,6 +51,8 @@ public class TraktTvService {
     private static final String TRAKTTV_ACCESS_TOKEN = "trakttv.auth.access";
     private static final String TRAKTTV_REFRESH_TOKEN = "trakttv.auth.refresh";
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
+    private static final String TRAKTTV_LAST_COLLECT_MOVIES = "trakttv.last.collect.movies";
+    private static final String TRAKTTV_LAST_COLLECT_EPISODES = "trakttv.last.collect.episodes";
     private static final String TRAKTTV_LAST_PULL_MOVIES = "trakttv.last.pull.movies";
     private static final String TRAKTTV_LAST_PULL_EPISODES = "trakttv.last.pull.episodes";
     private static final String TRAKTTV_LAST_PUSH_MOVIES = "trakttv.last.push.movies";
@@ -339,6 +341,54 @@ public class TraktTvService {
         }
     }
 
+    // COLLECTION
+    
+    private Date getCheckDate(String property) {
+        Date checkDate = this.configService.getDateProperty(property);
+        if (checkDate == null) {
+            // build a date long, long ago ...
+            checkDate = DateTime.now().minusYears(20).toDate();
+        }
+        return checkDate;
+    }
+    
+    public void collectMovies() {
+        // store last collection date for later use
+        final Date lastCollection = new Date();
+
+        // get the collected movies
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_MOVIES);
+        Collection<TraktMovieDTO> collectedMovies = this.traktTvStorageService.getCollectedMovies(checkDate);
+        LOG.info("Found {} collected movies", collectedMovies.size());
+
+        // nothing to do if empty
+        if (collectedMovies.isEmpty()) {
+            //this.configService.setProperty(TRAKTTV_LAST_COLLECT_MOVIES, lastCollection);
+            return;
+        }
+
+        // find collected movies on Trakt.TV
+        List<TrackedMovie> trackedMovies;
+        try {
+            trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.MINIMAL);
+        } catch (Exception e) {
+            LOG.error("Failed to get tracked movies", e);
+            return;
+        }
+        LOG.info("Found {} collection movies on Trakt.TV", trackedMovies.size());
+        
+        // determine differences
+        for (TraktMovieDTO collected : collectedMovies) {
+            LOG.info("{}", collected);
+        }
+        
+        
+    }
+
+    public void collectEpisodes() {
+        // TODO
+    }
+
     // SYNCHRONIZATION
 
     public void pullWatchedMovies() {
@@ -355,14 +405,10 @@ public class TraktTvService {
         final Date lastPull = new Date();
         
         // get the updated movie IDs for setting watched status
-        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PULL_MOVIES);
-        if (checkDate == null) {
-            // build a date long, long ago ...
-            checkDate = DateTime.now().minusYears(20).toDate();
-        }
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PULL_MOVIES);
         Map<String,List<Long>> updatedMovies = this.traktTvStorageService.getUpdatedMovieIds(checkDate);
         
-        // nothing to do if no new or updated movies found
+        // nothing to do if empty
         if (updatedMovies.isEmpty()) {
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
             return;
@@ -418,15 +464,11 @@ public class TraktTvService {
         // store last pull date for later use
         final Date lastPull = new Date();
         
-        // get the updated movie IDs for setting watched status
-        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PULL_EPISODES);
-        if (checkDate == null) {
-            // build a date long, long ago ...
-            checkDate = DateTime.now().minusYears(20).toDate();
-        }
+        // get the updated episode IDs for setting watched status
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PULL_EPISODES);
         Map<String,List<Long>> updatedEpisodes = this.traktTvStorageService.getUpdatedEpisodeIds(checkDate);
         
-        // nothing to do if no new or updated movies found
+        // nothing to do if empty
         if (updatedEpisodes.isEmpty()) {
             this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
             return;
@@ -482,11 +524,7 @@ public class TraktTvService {
         final Date lastPush = new Date();
         
         // get the updated movie IDs for setting watched status
-        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PUSH_MOVIES);
-        if (checkDate == null) {
-            // build a date long, long ago ...
-            checkDate = DateTime.now().minusYears(20).toDate();
-        }
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES);
         Collection<TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
         
         List<SyncMovie> syncList = new ArrayList<>();
@@ -526,11 +564,7 @@ public class TraktTvService {
         final Date lastPush = new Date();
         
         // get the updated movie IDs for setting watched status
-        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PUSH_EPISODES);
-        if (checkDate == null) {
-            // build a date long, long ago ...
-            checkDate = DateTime.now().minusYears(20).toDate();
-        }
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_EPISODES);
         Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
         
         List<SyncShow> syncList = new ArrayList<>();

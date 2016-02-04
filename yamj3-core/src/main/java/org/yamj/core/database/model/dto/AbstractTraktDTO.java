@@ -31,10 +31,10 @@ public abstract class AbstractTraktDTO {
     private Long id;
     private Integer trakt;
     private String imdb;
+    private Date collectDate;
     private Date watchedDate;
     private String identifier;
     private String title;
-    private String originalTitle;
     private Integer year;
 
     public Long getId() {
@@ -61,6 +61,14 @@ public abstract class AbstractTraktDTO {
         this.imdb = imdb;
     }
 
+    public Date getCollectDate() {
+        return collectDate;
+    }
+
+    public void setCollectDate(Date collectDate) {
+        this.collectDate = collectDate;
+    }
+
     public Date getWatchedDate() {
         return watchedDate;
     }
@@ -83,14 +91,6 @@ public abstract class AbstractTraktDTO {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getOriginalTitle() {
-        return originalTitle;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
     }
 
     public Integer getYear() {

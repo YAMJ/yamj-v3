@@ -68,6 +68,11 @@ public class TraktTvStorageService {
         return this.traktTvDao.getWatchedEpisodes(checkDate);
     }
 
+    @Transactional(readOnly = true)
+    public Collection<TraktMovieDTO> getCollectedMovies(Date checkDate) {
+        return this.traktTvDao.getCollectedMovies(checkDate);
+    }
+
     @Transactional
     public void updateWatched(TrackedMovie trackedMovie, Collection<Long> ids) {
         final String traktTvId = trackedMovie.getMovie().getIds().trakt().toString();

@@ -43,6 +43,8 @@ public class TraktTvTask implements ITask {
     @Autowired
     private TraktTvService traktTvService;
     
+    @Value("${trakttv.collection.enabled:false}")
+    private boolean collectionEnabled;
     @Value("${trakttv.push.enabled:false}")
     private boolean pushEnabled;
     @Value("${trakttv.pull.enabled:false}")
@@ -67,7 +69,12 @@ public class TraktTvTask implements ITask {
         }
 
         // 1. collect
-        
+        if (collectionEnabled) {
+//            traktTvService.collectMovies();
+//            traktTvService.collectEpisodes();
+        } else {
+            LOG.debug("Trakt.TV collection is not enabled");
+        }
         
         // 2. pull
         if (pullEnabled) {
