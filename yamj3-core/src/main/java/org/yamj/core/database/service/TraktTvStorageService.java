@@ -34,6 +34,7 @@ import org.yamj.api.trakttv.model.TrackedEpisode;
 import org.yamj.api.trakttv.model.TrackedMovie;
 import org.yamj.core.database.dao.TraktTvDao;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.service.metadata.online.TraktTvScanner;
 
 @Service("traktTvStorageService")
@@ -54,6 +55,11 @@ public class TraktTvStorageService {
     @Transactional(readOnly = true)
     public Map<String,List<Long>> getUpdatedEpisodeIds(Date checkDate) {
         return this.traktTvDao.getUpdatedEpisodeIds(checkDate);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long,TraktMovieDTO> getWatchedMovies(Date checkDate) {
+        return this.traktTvDao.getWatchedMovies(checkDate);
     }
 
     @Transactional

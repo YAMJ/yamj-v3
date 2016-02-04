@@ -434,7 +434,7 @@ public final class MetadataTools {
 
         return year;
     }
-
+    
     /**
      * Parse a string value and convert it into an integer rating
      *
@@ -475,6 +475,7 @@ public final class MetadataTools {
         WatchedDTO watched = new WatchedDTO();
         watched.watchedVideo(videoData.isWatchedNfo(), videoData.getWatchedNfoLastDate());
         watched.watchedVideo(videoData.isWatchedApi(), videoData.getWatchedApiLastDate());
+        watched.watchedVideo(videoData.isWatchedTraktTv(), videoData.getWatchedTraktTvLastDate());
         
         for (MediaFile mediaFile : videoData.getMediaFiles()) {
             if (mediaFile.isExtra()) {

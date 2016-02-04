@@ -40,6 +40,9 @@
                     <c:if test="${!trakttv.push && trakttv.pull}">
                     Trakt.TV synchronization (Pull only) is enabled.
                    </c:if>
+                    <c:if test="${!trakttv.push && !trakttv.pull}">
+                    Trakt.TV synchronization is enabled.
+                   </c:if>
                 </th>
             </tr>
             <tr>
@@ -47,7 +50,7 @@
                 <td style="width:80%" class="left">${trakttv.authorized}</td>
             </tr>
             <tr>
-                <td style="width:20%" class="left">Expiration date:</td>
+                <td style="width:20%" class="left">Expiration Date:</td>
                 <td style="width:80%" class="left">${trakttv.expirationDate}</td>
             </tr>
         </table

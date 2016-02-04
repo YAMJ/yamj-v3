@@ -23,7 +23,7 @@
 package org.yamj.core.tools;
 
 import java.util.Date;
-import org.joda.time.DateTime;
+import org.apache.commons.lang.time.DateUtils;
 
 public final class WatchedDTO {
 
@@ -37,48 +37,51 @@ public final class WatchedDTO {
     private boolean watchedMediaApi = true;
     private Date watchedMediaApiDate;
   
-    public void watchedVideo(boolean watched, Date watchedDate) {
+    public void watchedVideo(final boolean watched, final Date watchedDate) {
         if (watchedDate == null) {
             return;
         }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedVideoDate == null) {
             this.watchedVideo = watched;
-            this.watchedVideoDate = watchedDate;
-        } else if (watchedDate.after(this.watchedVideoDate)) {
+            this.watchedVideoDate = watchedDateWithoutMS;
+        } else if (this.watchedVideoDate.before(watchedDateWithoutMS)) {
             this.watchedVideo = watched;
-            this.watchedVideoDate = watchedDate;
+            this.watchedVideoDate = watchedDateWithoutMS;
         }
     }
 
-    public void watchedMediaFile(boolean watched, Date watchedDate) {
+    public void watchedMediaFile(final boolean watched, final Date watchedDate) {
         if (watchedDate == null) {
             return;
         }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedMediaFileDate == null) {
             this.watchedMediaFile = watched;
-            this.watchedMediaFileDate = watchedDate;
+            this.watchedMediaFileDate = watchedDateWithoutMS;
         } else {
             this.watchedMediaFile = this.watchedMediaFile && watched;
-            if (watchedDate.after(this.watchedMediaFileDate)) {            
-                this.watchedMediaFileDate = watchedDate;
+            if (this.watchedMediaFileDate.before(watchedDateWithoutMS)) {
+                this.watchedMediaFileDate = watchedDateWithoutMS;
             }
         }
     }
 
-    public void watchedMediaApi(boolean watched, Date watchedDate) {
+    public void watchedMediaApi(final boolean watched, final Date watchedDate) {
         if (watchedDate == null) {
             return;
         }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedMediaApiDate == null) {
             this.watchedMediaApi = watched;
-            this.watchedMediaApiDate = watchedDate;
+            this.watchedMediaApiDate = watchedDateWithoutMS;
         } else {
             this.watchedMediaApi = this.watchedMediaApi && watched;
-            if (watchedDate.after(this.watchedMediaApiDate)) {            
-                this.watchedMediaApiDate = watchedDate;
+            if (this.watchedMediaApiDate.before(watchedDateWithoutMS)) {
+                this.watchedMediaApiDate = watchedDateWithoutMS;
             }
         }
     }
@@ -90,10 +93,7 @@ public final class WatchedDTO {
 
     public Date getWatchedDate() {
         this.evaluateWatched();
-        if (this.watchedDate == null) {
-            return null;
-        }
-        return new DateTime().withMillis(this.watchedDate.getTime()).withMillisOfSecond(0).toDate();
+        return this.watchedDate;
     }
 
     private void evaluateWatched() {

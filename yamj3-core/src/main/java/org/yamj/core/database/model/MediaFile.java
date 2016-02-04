@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -298,7 +299,7 @@ public class MediaFile extends AbstractStateful {
     public void setWatchedFile(boolean watchedFile, Date watchedFileLastDate) {
         if (watchedFileLastDate != null) {
             setWatchedFile(watchedFile);
-            setWatchedFileLastDate(watchedFileLastDate);
+            setWatchedFileLastDate(DateUtils.setMilliseconds(watchedFileLastDate, 0));
         }
     }
     
@@ -321,7 +322,7 @@ public class MediaFile extends AbstractStateful {
     public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
         if (watchedApiLastDate != null) {
             setWatchedApi(watchedApi);
-            setWatchedApiLastDate(watchedApiLastDate);
+            setWatchedApiLastDate(DateUtils.setMilliseconds(watchedApiLastDate, 0));
         }
     }
 

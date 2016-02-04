@@ -65,7 +65,11 @@ public class TraktTvTask implements ITask {
         if (traktTvService.isExpired()) {
             return;
         }
+
+        // 1. collect
         
+        
+        // 2. pull
         if (pullEnabled) {
             traktTvService.pullWatchedMovies();
             traktTvService.pullWatchedEpisodes();
@@ -73,8 +77,10 @@ public class TraktTvTask implements ITask {
             LOG.debug("Trakt.TV pulling is not enabled");
         }
 
+        // 2. push
         if (pushEnabled) {
-            // TODO pushing events to Trakt.TV
+            traktTvService.pushWatchedMovies();
+            traktTvService.pushWatchedEpisodes();
         } else {
             LOG.debug("Trakt.TV pushing is not enabled");
         }

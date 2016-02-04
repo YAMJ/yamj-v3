@@ -27,7 +27,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -48,17 +47,17 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
     @Autowired
     private ExtraScannerService extraScannerService;
     
-    @Value("${trakttv.collection.enabled:false}")
-    private boolean collectionEnabled;
+    private boolean enabled;
     
     @PostConstruct
     public void init() {
         LOG.trace("Initialize Trakt.TV ID scanner");
 
-        // register this scanner if collection is enabled
-        if (collectionEnabled) {
-            extraScannerService.registerExtraScanner(this);
-        }
+        // can be a global property cause set in static properties
+        enabled = traktTvService.isSynchronizationEnabled();
+
+        // register this scanner
+        extraScannerService.registerExtraScanner(this);
     }
     
     @Override
@@ -68,7 +67,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
     @Override
     public boolean isEnabled() {
-        return collectionEnabled;
+        return enabled;
     }
 
     @Override

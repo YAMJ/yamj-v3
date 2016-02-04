@@ -39,6 +39,7 @@ import org.yamj.api.trakttv.auth.TokenResponse;
 import org.yamj.api.trakttv.model.*;
 import org.yamj.api.trakttv.model.enumeration.*;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
 import org.yamj.core.service.metadata.online.*;
 
@@ -51,6 +52,8 @@ public class TraktTvService {
     private static final String TRAKTTV_EXPIRATION = "trakttv.auth.expiration";
     private static final String TRAKTTV_LAST_PULL_MOVIES = "trakttv.last.pull.movies";
     private static final String TRAKTTV_LAST_PULL_EPISODES = "trakttv.last.pull.episodes";
+    private static final String TRAKTTV_LAST_PUSH_MOVIES = "trakttv.last.push.movies";
+    private static final String TRAKTTV_LAST_PUSH_EPISODES = "trakttv.last.push.episodes";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     
     @Autowired
@@ -59,7 +62,9 @@ public class TraktTvService {
     private TraktTvApi traktTvApi;
     @Autowired
     private TraktTvStorageService traktTvStorageService;
-    
+
+    @Value("${trakttv.collection.enabled:false}")
+    private boolean collectionEnabled;
     @Value("${trakttv.push.enabled:false}")
     private boolean pushEnabled;
     @Value("${trakttv.pull.enabled:false}")
@@ -77,7 +82,7 @@ public class TraktTvService {
     }
 
     public boolean isSynchronizationEnabled() {
-        return (pushEnabled || pullEnabled);
+        return (collectionEnabled || pushEnabled || pullEnabled);
     }
     
     public boolean isExpired() {
@@ -92,16 +97,11 @@ public class TraktTvService {
 
     public TraktTvInfo getTraktTvInfo() {
         TraktTvInfo traktTvInfo = new TraktTvInfo();
-        // static values
+        traktTvInfo.setSynchronization(isSynchronizationEnabled());
         traktTvInfo.setPush(pushEnabled);
         traktTvInfo.setPull(pullEnabled);
-        traktTvInfo.setSynchronization(isSynchronizationEnabled());
-        // dynamic values
         traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_ACCESS_TOKEN)!=null);
-        long expiresAt = configService.getLongProperty(TRAKTTV_EXPIRATION, -1);
-        if (expiresAt > 0) {
-            traktTvInfo.setExpirationDate(new Date(expiresAt));
-        }
+        traktTvInfo.setExpirationDate(configService.getDateProperty(TRAKTTV_EXPIRATION));
         return traktTvInfo;
     }
     
@@ -476,4 +476,92 @@ public class TraktTvService {
         return updateable;
     }
 
+    public void pushWatchedMovies() {
+        List<TrackedMovie> trackedMovies;
+        try {
+            trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.MINIMAL);
+        } catch (Exception e) {
+            LOG.error("Failed to get collected movies", e);
+            return;
+        }
+        LOG.info("Found {} collected movies on Trakt.TV", trackedMovies.size());
+        
+        // store last push date for later use
+        final Date lastPush = new Date();
+        
+        // get the updated movie IDs for setting watched status
+        Date checkDate = this.configService.getDateProperty(TRAKTTV_LAST_PUSH_MOVIES);
+        if (checkDate == null) {
+            // build a date long, long ago ...
+            checkDate = DateTime.now().minusYears(20).toDate();
+        }
+        Map<Long, TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
+        
+        // nothing to do if no new watched movies found
+        if (watchedMovies.isEmpty()) {
+            this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
+            return;
+        }
+        
+        List<SyncMovie> syncList = new ArrayList<>();
+        for (TrackedMovie trackedMovie : trackedMovies) {
+            TraktMovieDTO dto = findWatchedMovie(trackedMovie, watchedMovies.values());
+            if (dto != null) {
+                // found a matching watched movie
+                SyncMovie syncMovie = new SyncMovie();
+                syncMovie.ids(trackedMovie.getMovie().getIds());
+                syncMovie.watchedAt(dto.getWatchedDate());
+                syncList.add(syncMovie);
+                LOG.debug("Trakt.TV watched movies sync: {}", dto.getIdentifier());
+            }
+        }
+        
+        boolean noError = true;
+        if (syncList.size() > 0) {
+            SyncItems items = new SyncItems();
+            items.movies(syncList);
+            try {
+                this.traktTvApi.syncService().addItemsToWatchedHistory(items);
+            } catch (Exception ex) {
+                LOG.error("Failed to add items to watched history");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+        }
+
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
+        }
+    }
+    
+    public static TraktMovieDTO findWatchedMovie(TrackedMovie trackedMovie, Collection<TraktMovieDTO> watchedMovies) {
+        final Ids ids = trackedMovie.getMovie().getIds();
+        for (TraktMovieDTO watched : watchedMovies) {
+            if (!watched.isValid()) {
+                continue;
+            }
+            
+            if (matchId(watched.getTrakt(), ids.trakt())) {
+                return watched;
+            }
+            if (matchId(watched.getImdb(), ids.imdb())) {
+                return watched;
+            }
+            if (matchId(watched.getTmdb(), ids.tmdb())) {
+                return watched;
+            }
+        }
+        return null;
+    }
+
+    private static boolean matchId(Object id1, Object id2) {
+        if (id1 == null || id2 == null) {
+            return false;
+        }
+        return id1.equals(id2);
+    }
+
+    public void pushWatchedEpisodes() {
+        // TODO
+    }
 }

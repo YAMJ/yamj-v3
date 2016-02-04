@@ -41,6 +41,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
@@ -66,16 +67,21 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = "videoData.trakttv.movies",
+    @NamedNativeQuery(name = "videoData.trakttv.updated.movies",
         query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id, vd.create_timestamp, vd.update_timestamp "+
                 "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
                 "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.episodes",
+    @NamedNativeQuery(name = "videoData.trakttv.updated.episodes",
         query = "SELECT concat(sid.sourcedb,'#',sid.sourcedb_id,'#',sea.season,'#',vd.episode), vd.id, vd.create_timestamp, vd.update_timestamp, vd.episode, sea.season "+
                 "FROM series_ids sid JOIN series ser on ser.id=sid.series_id "+
                 "JOIN season sea on ser.id=sea.series_id JOIN videodata vd on vd.season_id=sea.id "+
                 "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.watched.movies",
+    query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, vd.watched, vd.watched_date, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
+            "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
+            "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
     )
 })
 
@@ -449,14 +455,16 @@ public class VideoData extends AbstractMetadata {
         this.watchedNfoLastDate = watchedNfoLastDate;
     }
 
-    public void setWatchedNfo(boolean watchedNfo, Date watchedNfoLastDate) {
+    public void setWatchedNfo(final boolean watchedNfo, final Date watchedNfoLastDate) {
         if (watchedNfoLastDate != null) {
+            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedNfoLastDate,0);
+
             setWatchedNfo(watchedNfo);
-            setWatchedNfoLastDate(watchedNfoLastDate);
+            setWatchedNfoLastDate(dateWithoutMS);
     
-            if (getWatchedDate() == null || getWatchedDate().before(watchedNfoLastDate)) {
+            if (getWatchedDate() == null || getWatchedDate().before(dateWithoutMS)) {
                 setWatched(watchedNfo);
-                setWatchedDate(watchedNfoLastDate);
+                setWatchedDate(dateWithoutMS);
             }
         }
     }
@@ -477,14 +485,16 @@ public class VideoData extends AbstractMetadata {
         this.watchedApiLastDate = watchedApiLastDate;
     }
 
-    public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
+    public void setWatchedApi(final boolean watchedApi, final Date watchedApiLastDate) {
         if (watchedApiLastDate != null) {
+            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedApiLastDate,0);
+            
             setWatchedApi(watchedApi);
-            setWatchedApiLastDate(watchedApiLastDate);
+            setWatchedApiLastDate(dateWithoutMS);
     
-            if (getWatchedDate() == null || getWatchedDate().before(watchedApiLastDate)) {
+            if (getWatchedDate() == null || getWatchedDate().before(dateWithoutMS)) {
                 setWatched(watchedApi);
-                setWatchedDate(watchedApiLastDate);
+                setWatchedDate(dateWithoutMS);
             }
         }
     }
@@ -507,6 +517,8 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedTraktTv(boolean watchedTraktTv, Date watchedTraktTvLastDate) {
         if (watchedTraktTvLastDate != null) {
+            // NOTE: given watchedTraktTvLastDate is always without milliseconds
+            
             setWatchedTraktTv(watchedTraktTv);
             setWatchedTraktTvLastDate(watchedTraktTvLastDate);
     
@@ -533,10 +545,10 @@ public class VideoData extends AbstractMetadata {
         this.watchedDate = watchedDate;
     }
 
-    public void setWatched(boolean watched, Date watchedDate) {
+    public void setWatched(final boolean watched, final Date watchedDate) {
         if (watchedDate != null) {
             setWatched(watched);
-            setWatchedDate(watchedDate);
+            setWatchedDate(DateUtils.setMilliseconds(watchedDate,0));
         }
     }
     
