@@ -58,7 +58,7 @@ public class TraktTvStorageService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long,TraktMovieDTO> getWatchedMovies(Date checkDate) {
+    public Collection<TraktMovieDTO> getWatchedMovies(Date checkDate) {
         return this.traktTvDao.getWatchedMovies(checkDate);
     }
 

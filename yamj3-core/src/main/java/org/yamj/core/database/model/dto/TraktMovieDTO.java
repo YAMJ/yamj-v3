@@ -29,11 +29,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public final class TraktMovieDTO {
 
     private Long id;
-    private String identifier;
     private Integer trakt;
     private String imdb;
     private Integer tmdb;
     private Date watchedDate;
+    private String identifier;
+    private String title;
+    private String originalTitle;
+    private Integer year;
 
     public Long getId() {
         return id;
@@ -43,14 +46,6 @@ public final class TraktMovieDTO {
         this.id = id;
     }
     
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public Integer getTrakt() {
         return trakt;
     }
@@ -81,6 +76,38 @@ public final class TraktMovieDTO {
 
     public void setWatchedDate(Date watchedDate) {
         this.watchedDate = watchedDate;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+    
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
     public boolean isValid() {

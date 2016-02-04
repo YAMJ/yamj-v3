@@ -89,7 +89,7 @@ public class TraktTvDao extends HibernateDao {
         return result;
     }
 
-    public Map<Long,TraktMovieDTO> getWatchedMovies(Date checkDate) {
+    public Collection<TraktMovieDTO> getWatchedMovies(Date checkDate) {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.movies")
@@ -126,6 +126,6 @@ public class TraktTvDao extends HibernateDao {
             }
         }
         
-        return result;
+        return result.values();
     }
 }

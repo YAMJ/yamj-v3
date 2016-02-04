@@ -119,7 +119,7 @@ public class ExecutionTaskService {
             
             executionTask.setLastExecution(new Date());
             executionTask.setNextExecution(cal.getTime());
-            //this.executionTaskStorageService.updateEntity(executionTask);
+            this.executionTaskStorageService.updateEntity(executionTask);
         } catch (Exception ex) {
             LOG.error("Failed to update: {}", executionTask);
             LOG.warn("Storage error", ex);

@@ -477,15 +477,6 @@ public class TraktTvService {
     }
 
     public void pushWatchedMovies() {
-        List<TrackedMovie> trackedMovies;
-        try {
-            trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.MINIMAL);
-        } catch (Exception e) {
-            LOG.error("Failed to get collected movies", e);
-            return;
-        }
-        LOG.info("Found {} collected movies on Trakt.TV", trackedMovies.size());
-        
         // store last push date for later use
         final Date lastPush = new Date();
         
@@ -495,25 +486,20 @@ public class TraktTvService {
             // build a date long, long ago ...
             checkDate = DateTime.now().minusYears(20).toDate();
         }
-        Map<Long, TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
-        
-        // nothing to do if no new watched movies found
-        if (watchedMovies.isEmpty()) {
-            this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
-            return;
-        }
+        Collection<TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
         
         List<SyncMovie> syncList = new ArrayList<>();
-        for (TrackedMovie trackedMovie : trackedMovies) {
-            TraktMovieDTO dto = findWatchedMovie(trackedMovie, watchedMovies.values());
-            if (dto != null) {
-                // found a matching watched movie
-                SyncMovie syncMovie = new SyncMovie();
-                syncMovie.ids(trackedMovie.getMovie().getIds());
-                syncMovie.watchedAt(dto.getWatchedDate());
-                syncList.add(syncMovie);
-                LOG.debug("Trakt.TV watched movies sync: {}", dto.getIdentifier());
+        for (TraktMovieDTO dto : watchedMovies) {
+            if (!dto.isValid()) {
+                continue;
             }
+
+            // create synchronization movie
+            SyncMovie syncMovie = new SyncMovie();
+            syncMovie.ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()));
+            syncMovie.watchedAt(dto.getWatchedDate());
+            syncList.add(syncMovie);
+            LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
         }
         
         boolean noError = true;
@@ -532,33 +518,6 @@ public class TraktTvService {
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
         }
-    }
-    
-    public static TraktMovieDTO findWatchedMovie(TrackedMovie trackedMovie, Collection<TraktMovieDTO> watchedMovies) {
-        final Ids ids = trackedMovie.getMovie().getIds();
-        for (TraktMovieDTO watched : watchedMovies) {
-            if (!watched.isValid()) {
-                continue;
-            }
-            
-            if (matchId(watched.getTrakt(), ids.trakt())) {
-                return watched;
-            }
-            if (matchId(watched.getImdb(), ids.imdb())) {
-                return watched;
-            }
-            if (matchId(watched.getTmdb(), ids.tmdb())) {
-                return watched;
-            }
-        }
-        return null;
-    }
-
-    private static boolean matchId(Object id1, Object id2) {
-        if (id1 == null || id2 == null) {
-            return false;
-        }
-        return id1.equals(id2);
     }
 
     public void pushWatchedEpisodes() {
