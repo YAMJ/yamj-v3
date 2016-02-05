@@ -375,33 +375,28 @@ public class TraktTvService {
             LOG.error("Failed to get tracked movies", e);
             return;
         }
-        LOG.info("Found {} collection movies on Trakt.TV", trackedMovies.size());
+        LOG.debug("Found {} collection movies on Trakt.TV", trackedMovies.size());
         
         // determine movies to add to collection
-        List<SyncMovie> syncList = new ArrayList<>();
+        List<SyncMovie> syncMovies = new ArrayList<>();
         for (TraktMovieDTO dto : collectedMovies) {
-            TrackedMovie movie = findMovie(dto, trackedMovies);
+            final TrackedMovie movie = findMovie(dto, trackedMovies);
             if (movie != null) {
                 LOG.trace("Movie {} already collected", dto.getIdentifier());
                 if (dto.getTrakt() == null) {
                     // TODO store Trakt.TV id of movie
                 }
             } else {
-                // create synchronization movie
-                syncList.add(new SyncMovie()
-                    .ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()))
-                    .title(dto.getTitle()).year(dto.getYear())
-                    .collectedAt(dto.getCollectDate()));
+                // build movie and set collection date
+                addSyncMovie(dto, syncMovies).collectedAt(dto.getCollectDate());
                 LOG.debug("Trakt.TV collected movie: {}", dto.getIdentifier());
             }
         }
         
         boolean noError = true;
-        if (syncList.size() > 0) {
-            SyncItems items = new SyncItems();
-            items.movies(syncList);
+        if (syncMovies.size() > 0) {
             try {
-                this.traktTvApi.syncService().addItemsToCollection(items);
+                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
                 LOG.error("Failed to add movie items to collection");
                 LOG.warn(TRAKTTV_ERROR, ex);
@@ -416,23 +411,125 @@ public class TraktTvService {
 
     private static TrackedMovie findMovie(TraktMovieDTO dto, List<TrackedMovie> movies) {
         for (TrackedMovie movie : movies) {
-            if (matchId(movie.getMovie().getIds().trakt(), dto.getTrakt())) {
+            if (match(movie.getMovie().getIds().trakt(), dto.getTrakt())) {
                 return movie;
             }
-            if (matchId(movie.getMovie().getIds().imdb(), dto.getImdb())) {
+            if (match(movie.getMovie().getIds().imdb(), dto.getImdb())) {
                 return movie;
             }
-            if (matchId(movie.getMovie().getIds().tmdb(), dto.getTmdb())) {
+            if (match(movie.getMovie().getIds().tmdb(), dto.getTmdb())) {
                 return movie;
             }
-            if (matchId(movie.getMovie().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(movie.getMovie().getTitle(), dto.getTitle())) {
+            if (match(movie.getMovie().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(movie.getMovie().getTitle(), dto.getTitle())) {
                 return movie;
             }
         }
         return null;
     }
+    
     public void collectEpisodes() {
-        // TODO
+        // store last collection date for later use
+        final Date lastCollection = new Date();
+
+        // get the collected episodes
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_EPISODES);
+        Collection<TraktEpisodeDTO> collectedEpisodes = this.traktTvStorageService.getCollectedEpisodes(checkDate);
+        LOG.info("Found {} collected episodes", collectedEpisodes.size());
+
+        // nothing to do if empty
+        if (collectedEpisodes.isEmpty()) {
+            this.configService.setProperty(TRAKTTV_LAST_COLLECT_EPISODES, lastCollection);
+            return;
+        }
+
+        // find collected shows on Trakt.TV
+        List<TrackedShow> trackedShows;
+        try {
+            trackedShows = traktTvApi.syncService().getCollectionShows(Extended.MINIMAL);
+        } catch (Exception e) {
+            LOG.error("Failed to get tracked movies", e);
+            return;
+        }
+        LOG.debug("Found {} collection shows on Trakt.TV", trackedShows.size());
+
+        // determine movies to add to collection
+        List<SyncShow> syncShows = new ArrayList<>();
+        for (TraktEpisodeDTO dto : collectedEpisodes) {
+            final TrackedEpisode episode = findEpisode(dto, trackedShows);
+            if (episode != null) {
+                LOG.trace("Episode {} already collected", dto.getIdentifier());
+            } else {
+                // build episode and set collection date
+                addSyncEpisode(dto, syncShows).collectedAt(dto.getCollectDate());
+                LOG.debug("Trakt.TV collected episode: {}", dto.getIdentifier());
+            }
+        }
+        
+        boolean noError = true;
+        if (syncShows.size() > 0) {
+            try {
+                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().shows(syncShows));
+            } catch (Exception ex) {
+                LOG.error("Failed to add episode items to collection");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+        }
+
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_COLLECT_EPISODES, lastCollection);
+        }
+    }
+
+    private static TrackedEpisode findEpisode(TraktEpisodeDTO dto, List<TrackedShow> shows) {
+        List<TrackedSeason> seasons = null;
+        for (TrackedShow show : shows) {
+            if (match(show.getShow().getIds().trakt(), dto.getTrakt())) {
+                seasons = show.getSeasons();
+                break;
+            }
+            if (match(show.getShow().getIds().imdb(), dto.getImdb())) {
+                seasons = show.getSeasons();
+                break;
+            }
+            if (match(show.getShow().getIds().tmdb(), dto.getTmdb())) {
+                seasons = show.getSeasons();
+                break;
+            }
+            if (match(show.getShow().getIds().tvdb(), dto.getTvdb())) {
+                seasons = show.getSeasons();
+                break;
+            }
+            if (match(show.getShow().getIds().tvRage(), dto.getTvRage())) {
+                seasons = show.getSeasons();
+                break;
+            }
+            if (match(show.getShow().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(show.getShow().getTitle(), dto.getTitle())) {
+                seasons = show.getSeasons();
+                break;
+            }
+        }
+        if (CollectionUtils.isEmpty(seasons)) {
+            return null;
+        }
+        
+        TrackedSeason matchingSeason = null;
+        for (TrackedSeason season : seasons) {
+            if (match(season.getNumber(), dto.getSeason())) {
+                matchingSeason = season;
+                break;
+            }
+        }
+        if (matchingSeason == null) {
+            return null;
+        }
+        
+        for (TrackedEpisode episode : matchingSeason.getEpisodes()) {
+            if (match(episode.getNumber(), dto.getEpisode())) {
+                return episode;
+            }
+        }
+        return null;
     }
 
     // SYNCHRONIZATION
@@ -577,25 +674,21 @@ public class TraktTvService {
         final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES);
         Collection<TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
         
-        List<SyncMovie> syncList = new ArrayList<>();
+        List<SyncMovie> syncMovies = new ArrayList<>();
         for (TraktMovieDTO dto : watchedMovies) {
             if (!dto.isValid()) {
                 continue;
             }
 
-            // create synchronization movie
-            syncList.add(new SyncMovie()
-                .ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()))
-                .watchedAt(dto.getWatchedDate()));
+            // build episode and set watched date
+            addSyncMovie(dto, syncMovies).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
         }
         
         boolean noError = true;
-        if (syncList.size() > 0) {
-            SyncItems items = new SyncItems();
-            items.movies(syncList);
+        if (syncMovies.size() > 0) {
             try {
-                this.traktTvApi.syncService().addItemsToWatchedHistory(items);
+                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
                 LOG.error("Failed to add movie items to watched history");
                 LOG.warn(TRAKTTV_ERROR, ex);
@@ -616,35 +709,21 @@ public class TraktTvService {
         final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_EPISODES);
         Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
         
-        List<SyncShow> syncList = new ArrayList<>();
+        List<SyncShow> syncShows = new ArrayList<>();
         for (TraktEpisodeDTO dto : watchedEpisodes) {
             if (!dto.isValid()) {
                 continue;
             }
 
-            // create synchronization show
-            SyncShow syncShow = getShow(dto, syncList);
-            if (syncShow == null) {
-                syncShow = new SyncShow().ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()).tvdb(dto.getTvdb()).tvRage(dto.getTvRage()));
-                syncList.add(syncShow);
-            }
-            
-            SyncSeason syncSeason = getSeason(dto, syncShow);
-            if (syncSeason == null) {
-                syncSeason = new SyncSeason().number(dto.getSeason());
-                syncShow.season(syncSeason);
-            }
-            
-            syncSeason.episode(new SyncEpisode().number(dto.getEpisode()).season(dto.getSeason()).watchedAt(dto.getWatchedDate()));
+            // build episode and set watched date
+            addSyncEpisode(dto, syncShows).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
         }
         
         boolean noError = true;
-        if (syncList.size() > 0) {
-            SyncItems items = new SyncItems();
-            items.shows(syncList);
+        if (syncShows.size() > 0) {
             try {
-                this.traktTvApi.syncService().addItemsToWatchedHistory(items);
+                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
             } catch (Exception ex) {
                 LOG.error("Failed to add episode items to watched history");
                 LOG.warn(TRAKTTV_ERROR, ex);
@@ -656,38 +735,67 @@ public class TraktTvService {
             this.configService.setProperty(TRAKTTV_LAST_PUSH_EPISODES, lastPush);
         }
     }
+
+    private static SyncMovie addSyncMovie(final TraktMovieDTO dto, final List<SyncMovie> syncMovies) {
+        SyncMovie syncMovie = new SyncMovie().ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()));
+        syncMovies.add(syncMovie.title(dto.getTitle()).year(dto.getYear()));
+        return syncMovie;
+    }
     
-    private static SyncShow getShow(TraktEpisodeDTO dto, List<SyncShow> shows) {
-        for (SyncShow show : shows) {
-            if (matchId(show.ids().trakt(), dto.getTrakt())) {
-                return show;
+    private static SyncEpisode addSyncEpisode(final TraktEpisodeDTO dto, final List<SyncShow> syncShows) {
+        // find matching show in already processed shows
+        SyncShow syncShow = null;
+        for (SyncShow show : syncShows) {
+            if (match(show.ids().trakt(), dto.getTrakt())) {
+                syncShow = show;
+                break;
             }
-            if (matchId(show.ids().imdb(), dto.getImdb())) {
-                return show;
+            if (match(show.ids().imdb(), dto.getImdb())) {
+                syncShow = show;
+                break;
             }
-            if (matchId(show.ids().tmdb(), dto.getTmdb())) {
-                return show;
+            if (match(show.ids().tmdb(), dto.getTmdb())) {
+                syncShow = show;
+                break;
             }
-            if (matchId(show.ids().tvdb(), dto.getTvdb())) {
-                return show;
+            if (match(show.ids().tvdb(), dto.getTvdb())) {
+                syncShow = show;
+                break;
             }
-            if (matchId(show.ids().tvRage(), dto.getTvRage())) {
-                return show;
+            if (match(show.ids().tvRage(), dto.getTvRage())) {
+                syncShow = show;
+                break;
             }
         }
-        return null;
-    }
 
-    private static SyncSeason getSeason(TraktEpisodeDTO dto, SyncShow show) {
-        for (SyncSeason season : show.seasons()) {
+        // build a new show entry if not found
+        if (syncShow == null) {
+            syncShow = new SyncShow().ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()).tvdb(dto.getTvdb()).tvRage(dto.getTvRage()));
+            syncShows.add(syncShow.title(dto.getTitle()).year(dto.getYear()));
+        }
+
+        // find matching season in already processed seasons of teh same show
+        SyncSeason syncSeason = null;
+        for (SyncSeason season : syncShow.seasons()) {
             if (season.number().intValue() == dto.getSeason()) {
-                return season;
+                syncSeason = season;
+                break;
             }
         }
-        return null;
+
+        // build a new season entry if not found
+        if (syncSeason == null) {
+            syncSeason = new SyncSeason().number(dto.getSeason());
+            syncShow.season(syncSeason);
+        }
+        
+        // create a new episode, add it to season and return it
+        SyncEpisode episode = new SyncEpisode().number(dto.getEpisode()).season(dto.getSeason());
+        syncSeason.episode(episode);
+        return episode;
     }
 
-    private static boolean matchId(Object id1, Object id2) {
+    private static boolean match(Object id1, Object id2) {
         if (id1 == null || id2 == null) {
             return false;
         }

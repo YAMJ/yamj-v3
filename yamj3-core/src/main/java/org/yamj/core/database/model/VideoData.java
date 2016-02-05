@@ -85,7 +85,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     ),
     @NamedNativeQuery(name = "videoData.trakttv.watched.episodes",
         query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, vd.watched, vd.watched_date, sea.season, vd.episode, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
-                "FROM series_ids sid JOIN series ser on ser.id=sid.series_id JOIN season sea on sea.series_id=ser.id JOIN videodata vd on vd.season_id=sea.id "+
+                "FROM series_ids sid JOIN season sea on sea.series_id=sid.series_id JOIN videodata vd on vd.season_id=sea.id "+
                 "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
     ),
     @NamedNativeQuery(name = "videoData.trakttv.collected.movies",
@@ -94,9 +94,18 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
                 "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
                 "WHERE vd.episode<0 and vd.status='DONE' "+
                 "AND ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
-                "     not exists (select 1 from videodata_ids vid2 where vd.id=videodata_id and vid.sourcedb='trakttv')) "+
+                "     not exists (select 1 from videodata_ids vid2 where vd.id=vid2.videodata_id and vid2.sourcedb='trakttv')) "+
                 "GROUP BY vd.id, vid.sourcedb, vid.sourcedb_id, vd.identifier, vd.title, vd.title_original, vd.publication_year"
-    )
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.collected.episodes",
+    query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, sea.season, vd.episode, ser.title, ser.title_original, ser.start_year "+
+            "FROM series ser JOIN series_ids sid on ser.id=sid.series_id JOIN season sea on ser.id=sea.series_id "+
+            "JOIN videodata vd on sea.id=vd.season_id and vd.status='DONE' JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
+            "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
+            "WHERE ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
+            "       not exists (select 1 from series_ids sid2 where ser.id=sid2.series_id and sid2.sourcedb='trakttv')) "+
+            "GROUP BY vd.id, sid.sourcedb, sid.sourcedb_id, sea.season, vd.episode, vd.identifier, ser.title, ser.title_original, ser.start_year"
+    )    
 })
 
 @Entity

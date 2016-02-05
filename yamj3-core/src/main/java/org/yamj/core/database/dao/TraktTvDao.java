@@ -39,7 +39,7 @@ public class TraktTvDao extends HibernateDao {
         final Map<String,List<Long>> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.updated.movies")
-                .setDate("checkDate", checkDate)
+                .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
@@ -66,7 +66,7 @@ public class TraktTvDao extends HibernateDao {
         final Map<String,List<Long>> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.updated.episodes")
-                .setDate("checkDate", checkDate)
+                .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
@@ -89,58 +89,17 @@ public class TraktTvDao extends HibernateDao {
         return result;
     }
 
-    public Collection<TraktMovieDTO> getWatchedMovies(Date checkDate) {
-        final Map<Long,TraktMovieDTO> result = new HashMap<>();
-        
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.movies")
-                .setDate("checkDate", checkDate)
-                .setReadOnly(true)
-                .scroll(ScrollMode.FORWARD_ONLY)
-            )
-        {
-            Object[] row;
-            Long id;
-            String source;
-            while (scroll.next()) {
-                row = scroll.get();
-                id = convertRowElementToLong(row[0]);
-                
-                TraktMovieDTO dto = result.get(id);
-                if (dto == null) {
-                    dto = new TraktMovieDTO();
-                    dto.setId(id);
-                    dto.setWatchedDate(convertRowElementToDate(row[4]));
-                    dto.setIdentifier(convertRowElementToString(row[5]));
-                }
-                
-                source = convertRowElementToString(row[1]);
-                if (TraktTvScanner.SCANNER_ID.equals(source)) {
-                    dto.setTrakt(convertRowElementToInteger(row[2]));
-                } else if (ImdbScanner.SCANNER_ID.equals(source)) {
-                    dto.setImdb(convertRowElementToString(row[2]));
-                } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
-                    dto.setTmdb(convertRowElementToInteger(row[2]));
-                }
-                
-                result.put(id, dto);
-            }
-        }
-        
-        return result.values();
-    }
-
     public Collection<TraktMovieDTO> getCollectedMovies(Date checkDate) {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.collected.movies")
-                .setDate("checkDate", checkDate)
+                .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
         {
             Object[] row;
             Long id;
-            String source;
             while (scroll.next()) {
                 row = scroll.get();
                 id = convertRowElementToLong(row[0]);
@@ -165,15 +124,83 @@ public class TraktTvDao extends HibernateDao {
                     }
                 }
                 
-                source = convertRowElementToString(row[1]);
-                if (TraktTvScanner.SCANNER_ID.equals(source)) {
-                    dto.setTrakt(convertRowElementToInteger(row[2]));
-                } else if (ImdbScanner.SCANNER_ID.equals(source)) {
-                    dto.setImdb(convertRowElementToString(row[2]));
-                } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
-                    dto.setTmdb(convertRowElementToInteger(row[2]));
+                setMovieId(dto, row);
+                result.put(id, dto);
+            }
+        }
+        
+        return result.values();
+    }
+    
+    public Collection<TraktMovieDTO> getWatchedMovies(Date checkDate) {
+        final Map<Long,TraktMovieDTO> result = new HashMap<>();
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.movies")
+                .setTimestamp("checkDate", checkDate)
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            Long id;
+            while (scroll.next()) {
+                row = scroll.get();
+                id = convertRowElementToLong(row[0]);
+                
+                TraktMovieDTO dto = result.get(id);
+                if (dto == null) {
+                    dto = new TraktMovieDTO();
+                    dto.setId(id);
+                    dto.setWatchedDate(convertRowElementToDate(row[4]));
+                    dto.setIdentifier(convertRowElementToString(row[5]));
                 }
                 
+                setMovieId(dto, row);
+                result.put(id, dto);
+            }
+        }
+        
+        return result.values();
+    }
+
+    public Collection<TraktEpisodeDTO> getCollectedEpisodes(Date checkDate) {
+        final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.collected.episodes")
+                .setTimestamp("checkDate", checkDate)
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            Long id;
+            while (scroll.next()) {
+                row = scroll.get();
+                id = convertRowElementToLong(row[0]);
+                
+                TraktEpisodeDTO dto = result.get(id);
+                if (dto == null) {
+                    dto = new TraktEpisodeDTO();
+                    dto.setId(id);
+                    dto.setCollectDate(convertRowElementToDate(row[3]));
+                    dto.setIdentifier(convertRowElementToString(row[4]));
+                    dto.setSeason(convertRowElementToInteger(row[5]));
+                    dto.setEpisode(convertRowElementToInteger(row[6]));
+                    
+                    String origTitle = convertRowElementToString(row[8]);
+                    if (StringUtils.isNotBlank(origTitle)) {
+                        dto.setTitle(origTitle);
+                    } else {
+                        dto.setTitle(convertRowElementToString(row[7]));
+                    }
+                    
+                    Integer year = convertRowElementToInteger(row[9]);
+                    if (year != null && year.intValue() > 0) {
+                        dto.setYear(year);
+                    }
+                }
+                
+                setMovieId(dto, row);
                 result.put(id, dto);
             }
         }
@@ -185,14 +212,13 @@ public class TraktTvDao extends HibernateDao {
         final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.episodes")
-                .setDate("checkDate", checkDate)
+                .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
         {
             Object[] row;
             Long id;
-            String source;
             while (scroll.next()) {
                 row = scroll.get();
                 id = convertRowElementToLong(row[0]);
@@ -207,23 +233,37 @@ public class TraktTvDao extends HibernateDao {
                     dto.setIdentifier(convertRowElementToString(row[7]));
                 }
                 
-                source = convertRowElementToString(row[1]);
-                if (TraktTvScanner.SCANNER_ID.equals(source)) {
-                    dto.setTrakt(convertRowElementToInteger(row[2]));
-                } else if (ImdbScanner.SCANNER_ID.equals(source)) {
-                    dto.setImdb(convertRowElementToString(row[2]));
-                } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
-                    dto.setTmdb(convertRowElementToInteger(row[2]));
-                } else if (TheTVDbScanner.SCANNER_ID.equals(source)) {
-                    dto.setTvdb(convertRowElementToInteger(row[2]));
-                } else if (TVRageScanner.SCANNER_ID.equals(source)) {
-                    dto.setTvRage(convertRowElementToString(row[2]));
-                }
-                
+                setMovieId(dto, row);
                 result.put(id, dto);
             }
         }
         
         return result.values();
+    }
+
+    private static void setMovieId(TraktMovieDTO dto, Object[] row) {
+        final String source = convertRowElementToString(row[1]);
+        if (TraktTvScanner.SCANNER_ID.equals(source)) {
+            dto.setTrakt(convertRowElementToInteger(row[2]));
+        } else if (ImdbScanner.SCANNER_ID.equals(source)) {
+            dto.setImdb(convertRowElementToString(row[2]));
+        } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+            dto.setTmdb(convertRowElementToInteger(row[2]));
+        }
+    }
+
+    private static void setMovieId(TraktEpisodeDTO dto, Object[] row) {
+        final String source = convertRowElementToString(row[1]);
+        if (TraktTvScanner.SCANNER_ID.equals(source)) {
+            dto.setTrakt(convertRowElementToInteger(row[2]));
+        } else if (ImdbScanner.SCANNER_ID.equals(source)) {
+            dto.setImdb(convertRowElementToString(row[2]));
+        } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+            dto.setTmdb(convertRowElementToInteger(row[2]));
+        } else if (TheTVDbScanner.SCANNER_ID.equals(source)) {
+            dto.setTvdb(convertRowElementToInteger(row[2]));
+        } else if (TVRageScanner.SCANNER_ID.equals(source)) {
+            dto.setTvRage(convertRowElementToString(row[2]));
+        }
     }
 }
