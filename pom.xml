@@ -72,7 +72,7 @@
         <hibernate.version>5.0.7.Final</hibernate.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <org.slf4j.version>1.7.14</org.slf4j.version>
-        <jackson.version>2.6.5</jackson.version>
+        <jackson.version>2.7.1</jackson.version>
         <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
 
@@ -245,7 +245,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.9.1</version>
+                <version>2.9.2</version>
             </dependency>
             <dependency>
                 <groupId>org.joda</groupId>
@@ -255,6 +255,21 @@
             </dependency>
             <!--JACKSON JSON-->
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-hibernate5</artifactId>
                 <version>${jackson.version}</version>
@@ -262,11 +277,6 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <!--SERVLET-->
