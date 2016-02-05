@@ -212,6 +212,8 @@ public class TraktTvDao extends HibernateDao {
                     dto.setTrakt(convertRowElementToInteger(row[2]));
                 } else if (ImdbScanner.SCANNER_ID.equals(source)) {
                     dto.setImdb(convertRowElementToString(row[2]));
+                } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+                    dto.setTmdb(convertRowElementToInteger(row[2]));
                 } else if (TheTVDbScanner.SCANNER_ID.equals(source)) {
                     dto.setTvdb(convertRowElementToInteger(row[2]));
                 } else if (TVRageScanner.SCANNER_ID.equals(source)) {

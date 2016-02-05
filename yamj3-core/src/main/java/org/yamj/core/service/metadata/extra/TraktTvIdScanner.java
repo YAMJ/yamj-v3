@@ -115,6 +115,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // no Trakt.TV ID found at this point
+        LOG.info("No Trakt.TV ID found for movie '{}'-{}", videoData.getTitle(), videoData.getPublicationYear());
     }
 
     @Override
@@ -178,5 +179,6 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // no Trakt.TV ID found at this point
+        LOG.info("No Trakt.TV ID found for series '{}'-{}", series.getTitle(), series.getStartYear());
     }
 }

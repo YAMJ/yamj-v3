@@ -70,8 +70,8 @@ public class TraktTvTask implements ITask {
 
         // 1. collect
         if (collectionEnabled) {
-//            traktTvService.collectMovies();
-//            traktTvService.collectEpisodes();
+            traktTvService.collectMovies();
+            traktTvService.collectEpisodes();
         } else {
             LOG.debug("Trakt.TV collection is not enabled");
         }

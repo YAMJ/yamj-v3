@@ -363,7 +363,7 @@ public class TraktTvService {
 
         // nothing to do if empty
         if (collectedMovies.isEmpty()) {
-            //this.configService.setProperty(TRAKTTV_LAST_COLLECT_MOVIES, lastCollection);
+            this.configService.setProperty(TRAKTTV_LAST_COLLECT_MOVIES, lastCollection);
             return;
         }
 
@@ -377,14 +377,60 @@ public class TraktTvService {
         }
         LOG.info("Found {} collection movies on Trakt.TV", trackedMovies.size());
         
-        // determine differences
-        for (TraktMovieDTO collected : collectedMovies) {
-            LOG.info("{}", collected);
+        // determine movies to add to collection
+        List<SyncMovie> syncList = new ArrayList<>();
+        for (TraktMovieDTO dto : collectedMovies) {
+            TrackedMovie movie = findMovie(dto, trackedMovies);
+            if (movie != null) {
+                LOG.trace("Movie {} already collected", dto.getIdentifier());
+                if (dto.getTrakt() == null) {
+                    // TODO store Trakt.TV id of movie
+                }
+            } else {
+                // create synchronization movie
+                syncList.add(new SyncMovie()
+                    .ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()))
+                    .title(dto.getTitle()).year(dto.getYear())
+                    .collectedAt(dto.getCollectDate()));
+                LOG.debug("Trakt.TV collected movie: {}", dto.getIdentifier());
+            }
         }
         
-        
+        boolean noError = true;
+        if (syncList.size() > 0) {
+            SyncItems items = new SyncItems();
+            items.movies(syncList);
+            try {
+                this.traktTvApi.syncService().addItemsToCollection(items);
+            } catch (Exception ex) {
+                LOG.error("Failed to add movie items to collection");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+        }
+
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_COLLECT_MOVIES, lastCollection);
+        }
     }
 
+    private static TrackedMovie findMovie(TraktMovieDTO dto, List<TrackedMovie> movies) {
+        for (TrackedMovie movie : movies) {
+            if (matchId(movie.getMovie().getIds().trakt(), dto.getTrakt())) {
+                return movie;
+            }
+            if (matchId(movie.getMovie().getIds().imdb(), dto.getImdb())) {
+                return movie;
+            }
+            if (matchId(movie.getMovie().getIds().tmdb(), dto.getTmdb())) {
+                return movie;
+            }
+            if (matchId(movie.getMovie().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(movie.getMovie().getTitle(), dto.getTitle())) {
+                return movie;
+            }
+        }
+        return null;
+    }
     public void collectEpisodes() {
         // TODO
     }
@@ -516,6 +562,10 @@ public class TraktTvService {
             List<Long> i = updatedEpisodes.get(ImdbScanner.SCANNER_ID+"#"+showIds.imdb()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
+        if (showIds.tmdb() != null) {
+            List<Long> i = updatedEpisodes.get(TheMovieDbScanner.SCANNER_ID+"#"+showIds.tmdb()+"#"+season+"#"+episode);
+            if (i != null) updateable.addAll(i);
+        }
         return updateable;
     }
 
@@ -534,10 +584,9 @@ public class TraktTvService {
             }
 
             // create synchronization movie
-            SyncMovie syncMovie = new SyncMovie();
-            syncMovie.ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()));
-            syncMovie.watchedAt(dto.getWatchedDate());
-            syncList.add(syncMovie);
+            syncList.add(new SyncMovie()
+                .ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()))
+                .watchedAt(dto.getWatchedDate()));
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
         }
         
@@ -576,8 +625,7 @@ public class TraktTvService {
             // create synchronization show
             SyncShow syncShow = getShow(dto, syncList);
             if (syncShow == null) {
-                syncShow = new SyncShow();
-                syncShow.ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tvdb(dto.getTvdb()).tvRage(dto.getTvRage()));
+                syncShow = new SyncShow().ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()).tvdb(dto.getTvdb()).tvRage(dto.getTvRage()));
                 syncList.add(syncShow);
             }
             
@@ -587,11 +635,7 @@ public class TraktTvService {
                 syncShow.season(syncSeason);
             }
             
-            SyncEpisode syncEpisode = new SyncEpisode();
-            syncEpisode.number(dto.getEpisode());
-            syncEpisode.season(dto.getSeason());
-            syncEpisode.watchedAt(dto.getWatchedDate());
-            syncSeason.episode(syncEpisode);
+            syncSeason.episode(new SyncEpisode().number(dto.getEpisode()).season(dto.getSeason()).watchedAt(dto.getWatchedDate()));
             LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
         }
         
@@ -619,6 +663,9 @@ public class TraktTvService {
                 return show;
             }
             if (matchId(show.ids().imdb(), dto.getImdb())) {
+                return show;
+            }
+            if (matchId(show.ids().tmdb(), dto.getTmdb())) {
                 return show;
             }
             if (matchId(show.ids().tvdb(), dto.getTvdb())) {

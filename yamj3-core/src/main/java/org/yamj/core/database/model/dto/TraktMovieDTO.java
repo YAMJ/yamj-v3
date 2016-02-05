@@ -22,10 +22,46 @@
  */
 package org.yamj.core.database.model.dto;
 
-public final class TraktMovieDTO extends AbstractTraktDTO {
+import java.util.Date;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+public class TraktMovieDTO {
+
+    private Long id;
+    private Integer trakt;
+    private String imdb;
     private Integer tmdb;
+    private Date collectDate;
+    private Date watchedDate;
+    private String identifier;
+    private String title;
+    private Integer year;
     
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public Integer getTrakt() {
+        return trakt;
+    }
+
+    public void setTrakt(Integer trakt) {
+        this.trakt = trakt;
+    }
+
+    public String getImdb() {
+        return imdb;
+    }
+
+    public void setImdb(String imdb) {
+        this.imdb = imdb;
+    }
+
     public Integer getTmdb() {
         return tmdb;
     }
@@ -34,7 +70,52 @@ public final class TraktMovieDTO extends AbstractTraktDTO {
         this.tmdb = tmdb;
     }
 
+    public Date getCollectDate() {
+        return collectDate;
+    }
+
+    public void setCollectDate(Date collectDate) {
+        this.collectDate = collectDate;
+    }
+
+    public Date getWatchedDate() {
+        return watchedDate;
+    }
+
+    public void setWatchedDate(Date watchedDate) {
+        this.watchedDate = watchedDate;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+    
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
     public boolean isValid() {
         return (getTrakt() != null || getImdb() != null || getTmdb() != null);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

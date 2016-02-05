@@ -91,7 +91,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     @NamedNativeQuery(name = "videoData.trakttv.collected.movies",
         query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, vd.title, vd.title_original, vd.publication_year "+
                 "FROM videodata vd JOIN videodata_ids vid on vd.id=vid.videodata_id JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
-                "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
+                "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
                 "WHERE vd.episode<0 and vd.status='DONE' "+
                 "AND ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
                 "     not exists (select 1 from videodata_ids vid2 where vd.id=videodata_id and vid.sourcedb='trakttv')) "+

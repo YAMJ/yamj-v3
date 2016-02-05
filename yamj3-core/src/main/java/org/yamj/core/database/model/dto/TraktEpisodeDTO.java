@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.model.dto;
 
-public final class TraktEpisodeDTO extends AbstractTraktDTO {
+public class TraktEpisodeDTO extends TraktMovieDTO {
 
     private Integer tvdb;
     private String tvRage;
@@ -61,7 +61,8 @@ public final class TraktEpisodeDTO extends AbstractTraktDTO {
         this.episode = episode;
     }
 
+    @Override
     public boolean isValid() {
-        return (getTrakt() != null || getImdb() != null || getTvdb() != null || getTvRage() != null);
+        return (super.isValid() || getTvdb() != null || getTvRage() != null);
     }
 }
