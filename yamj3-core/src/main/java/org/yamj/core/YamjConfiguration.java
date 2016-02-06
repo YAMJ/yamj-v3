@@ -22,6 +22,8 @@
  */
 package org.yamj.core;
 
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import java.util.List;
 import java.util.Properties;
 import org.springframework.beans.factory.FactoryBean;
@@ -36,10 +38,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
 
@@ -70,7 +69,9 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new MappingJackson2HttpMessageConverter(new YamjObjectMapper()));
+        converters.add(new MappingJackson2HttpMessageConverter(
+           new JodaMapper().registerModule(
+               new Hibernate5Module().configure(Hibernate5Module.Feature.FORCE_LAZY_LOADING, true))));
     }
 
     @Bean
