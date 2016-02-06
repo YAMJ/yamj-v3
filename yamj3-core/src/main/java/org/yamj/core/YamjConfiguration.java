@@ -24,7 +24,6 @@ package org.yamj.core;
 
 import java.util.List;
 import java.util.Properties;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -43,7 +42,6 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.hibernate.HibernateAwareObjectMapper;
 
 @Configuration
 @EnableScheduling
@@ -72,7 +70,7 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new MappingJackson2HttpMessageConverter(new HibernateAwareObjectMapper()));
+        converters.add(new MappingJackson2HttpMessageConverter(new YamjObjectMapper()));
     }
 
     @Bean

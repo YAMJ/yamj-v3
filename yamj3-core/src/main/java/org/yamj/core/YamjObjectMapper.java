@@ -20,24 +20,26 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.hibernate;
+package org.yamj.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 /**
- * Taken from the Jackson Hibernate module<br>
- * This ensures that the Lazy Instantiated objects are fully instantiated before returning the JSON information to the API
- *
- * https://github.com/FasterXML/jackson-module-hibernate
+ * This ensures that the Lazy Instantiated objects are fully instantiated before returning the JSON information to the API.
+ * Also the JODA types will be registered.
  *
  * @author Stuart
  */
-public class HibernateAwareObjectMapper extends ObjectMapper {
+public class YamjObjectMapper extends ObjectMapper {
     private static final long serialVersionUID = 34607231867726798L;
 
-    public HibernateAwareObjectMapper() {
+    public YamjObjectMapper() {
+        super();
+        this.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
         // https://github.com/FasterXML/jackson-module-hibernate
         Hibernate5Module hm = new Hibernate5Module();
         registerModule(hm);
