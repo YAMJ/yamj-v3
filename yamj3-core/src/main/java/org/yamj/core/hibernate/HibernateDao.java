@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
+import org.hibernate.criterion.Order;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.builder.SqlScalars;
@@ -144,6 +145,17 @@ public abstract class HibernateDao {
      */
     public <T> T getById(Class<T> entityClass, Serializable id) {
         return currentSession().get(entityClass, id);
+    }
+
+    /**
+     * Get all objects for the entity class in a defined order.
+     *
+     * @param entityClass
+     * @param order
+     * @return
+     */
+    public <T> List<T> getAll(Class<T> entityClass, String order) {
+        return currentSession().createCriteria(entityClass).addOrder(Order.asc(order)).list();
     }
 
     /**

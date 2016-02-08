@@ -16,28 +16,31 @@
         </c:import>
 
         <div id="logo">
-            <h2>Configuration Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/config/add.html" class="btn info">Add new configuration &raquo;</a></p>
+            <h2>Execution Tasks</h2>
         </div>
 
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
-                <th>Key</th>
-                <th>Value</th>
-                <th>Create Timestamp</th>
-                <th>Update Timestamp</th>
+                <th>Name</th>
+                <th>Task Name</th>
+                <th>Interval</th>
+                <th>Delay</th>
+                <th>Last Execution</th>
+                <th>Next Execution</th>
                 <th class="center">Actions</th>
             </tr>
             <tbody>
-                <c:forEach items="${configlist}" var="entry" varStatus="row">
+                <c:forEach items="${tasklist}" var="task" varStatus="row">
                     <tr>
-                        <td>${entry.key}</td>
-                        <td>${entry.value}</td>
-                        <td>${entry.createTimestamp}</td>
-                        <td>${entry.updateTimestamp}</td>
+                        <td>${task.name}</td>
+                        <td>${task.taskName}</td>
+                        <td>${task.intervalType}</td>
+                        <td>${task.delay}</td>
+                        <td>${task.lastExecution}</td>
+                        <td>${task.nextExecution}</td>
                         <td class="center">
-                            <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info">Edit</a>
-                            <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info">Delete</a>
+                            <a href="${pageContext.request.contextPath}/task/edit/${task.name}.html" class="btn info">Edit</a>
+                            <a href="${pageContext.request.contextPath}/task/enqueue/${task.name}.html" class="btn info">Enqueue</a>
                         </td>
                     </tr>
                 </c:forEach>

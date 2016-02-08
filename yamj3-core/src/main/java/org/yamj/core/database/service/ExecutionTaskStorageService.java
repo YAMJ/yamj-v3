@@ -29,29 +29,37 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.ExecutionTask;
 
-@Transactional
 @Service("executionTaskStorageService")
 public class ExecutionTaskStorageService {
 
     @Autowired
     private CommonDao commonDao;
 
+    @Transactional
     public void saveEntity(ExecutionTask executionTask) {
         this.commonDao.saveEntity(executionTask);
     }
 
+    @Transactional
     public void updateEntity(ExecutionTask executionTask) {
         this.commonDao.updateEntity(executionTask);
     }
 
+    @Transactional
     public void deleteEntity(ExecutionTask executionTask) {
         this.commonDao.deleteEntity(executionTask);
     }
 
+    @Transactional(readOnly = true)
     public ExecutionTask getExecutionTask(String name) {
         return commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, "name", name);
     }
     
+    @Transactional(readOnly = true)
+    public List<ExecutionTask> getAllTasks() {
+        return this.commonDao.getAll(ExecutionTask.class, "name");
+    }
+
     @Transactional(readOnly = true)
     public List<ExecutionTask> getTasksForExecution() {
         String query = "from ExecutionTask et where et.nextExecution <= :actualDate";

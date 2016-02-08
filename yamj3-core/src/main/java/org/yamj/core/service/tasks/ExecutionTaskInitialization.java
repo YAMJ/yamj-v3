@@ -39,6 +39,7 @@ import org.yamj.core.database.service.ExecutionTaskStorageService;
 public class ExecutionTaskInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskInitialization.class);
+    
     @Autowired
     private ExecutionTaskStorageService executionTaskStorageService;
 

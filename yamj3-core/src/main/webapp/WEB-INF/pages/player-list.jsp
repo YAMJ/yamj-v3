@@ -27,7 +27,7 @@
                 <th>Device Type</th>
                 <th>IP Address</th>
                 <th># Paths</th>
-                <th>Actions</th>
+                <th class="center">Actions</th>
             </tr>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
