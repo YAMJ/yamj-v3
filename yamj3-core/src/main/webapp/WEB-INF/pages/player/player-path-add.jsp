@@ -6,18 +6,18 @@
     <head>
         <title>YAMJ v3</title>
         <!--Import the header details-->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="HEAD" />
         </c:import>
     </head>
     <body>
         <!--Import the navigation header-->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="NAV" />
         </c:import>
 
         <div id="logo">
-            <h2>Edit Player Path</h2>
+            <h2>Add Player Path</h2>
         </div>
 
         <table id="headertable" style="width:75%;">
@@ -35,35 +35,28 @@
             </tr>
         </table>
 
-        <p id="message">Edit the values required</p>
-        <form:form method="POST" commandName="path" action="${pageContext.request.contextPath}/player/edit-path/${player.id}/${path.id}.html">
-            <table id="headertable" style="width:75%;">
+        <p id="message" class="center">Enter the path information</p>
+        <form:form method="POST" commandName="playerPath" action="${pageContext.request.contextPath}/player/add-path/process/${player.id}.html">
+            <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
                 <tr>
-                    <td class="center">Path Data</td>
-                    <td class="center">Current</td>
-                    <td class="center">New</td>
-                </tr>
-                <tr>
-                    <td class="right">Source Path:</td>
-                    <td>${path.sourcePath}</td>
-                    <td><form:input path="sourcePath" size="100"></form:input></td>
+                    <td style="width:25%" class="right">Source Path:</td>
+                    <td style="width:75%"><form:input size="100" path="sourcePath"></form:input></td>
                     </tr>
                     <tr>
-                        <td class="right">Target Path:</td>
-                        <td>${path.targetPath}</td>
-                    <td><form:input path="targetPath" size="50"></form:input></td>
+                        <td style="width:25%" class="right">Target Path:</td>
+                        <td style="width:75%"><form:input size="50" path="targetPath"></form:input></td>
                     </tr>
                     <tr>
-                        <td colspan="3" class="center">
-                            <input type="submit" name="update" class="btn info" value="Update" > or
+                        <td colspan="2" class="center">
+                            <input value="Add Path" type="submit" class="btn info">
                             <a href="${pageContext.request.contextPath}/player/details/${player.id}.html" class="btn info">Cancel</a>
-                        </td>
-                    </tr>
-                </table>
+                    </td>
+                </tr>
+            </table>
         </form:form>
 
         <!-- Import the footer -->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="FOOTER" />
         </c:import>
     </body>

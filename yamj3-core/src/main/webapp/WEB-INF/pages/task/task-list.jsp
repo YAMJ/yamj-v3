@@ -5,13 +5,13 @@
     <head>
         <title>YAMJ v3</title>
         <!--Import the header details-->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="HEAD" />
         </c:import>
     </head>
     <body>
         <!--Import the navigation header-->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="NAV" />
         </c:import>
 
@@ -48,7 +48,7 @@
         </table>
 
         <!-- Import the footer -->
-        <c:import url="template.jsp">
+        <c:import url="../template.jsp">
             <c:param name="sectionName" value="FOOTER" />
         </c:import>
 

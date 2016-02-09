@@ -42,7 +42,7 @@ public class TaskPagesController extends AbstractPagesController {
 
     @RequestMapping("/list")
     public ModelAndView taskList() {
-        ModelAndView view = withInfo(new ModelAndView("task-list"));
+        ModelAndView view = withInfo(new ModelAndView("task/task-list"));
         view.addObject("tasklist", executionTaskStorageService.getAllTasks());
         return view;
     }

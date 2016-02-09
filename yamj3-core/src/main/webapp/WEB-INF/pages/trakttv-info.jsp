@@ -54,7 +54,7 @@
                 <td style="width:80%" class="left">${trakttv.expirationDate}</td>
             </tr>
         </table
-        <p>&nsbp;</p>
+        <p>&nbsp;</p>
         <form:form  method="POST" commandName="pin-entity" action="trakttv-pin.html">
             <table id="headertable" class="hero-unit" style="width:40%; margin: auto;">
                 <tbody>

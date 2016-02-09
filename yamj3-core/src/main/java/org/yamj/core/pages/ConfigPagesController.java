@@ -47,7 +47,7 @@ public class ConfigPagesController extends AbstractPagesController {
 
     @RequestMapping("/add")
     public ModelAndView configAddPage() {
-        ModelAndView view = withInfo(new ModelAndView("config-add"));
+        ModelAndView view = withInfo(new ModelAndView("config/config-add"));
         view.addObject("config", new Configuration());
         return view;
     }
@@ -63,7 +63,7 @@ public class ConfigPagesController extends AbstractPagesController {
 
     @RequestMapping("/list")
     public ModelAndView configList() {
-        ModelAndView view = withInfo(new ModelAndView("config-list"));
+        ModelAndView view = withInfo(new ModelAndView("config/config-list"));
 
         List<Configuration> configList = configService.getConfigurations(new OptionsConfig());
         Collections.sort(configList, new Comparator<Configuration>() {
@@ -79,7 +79,7 @@ public class ConfigPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/edit/{key}", method = RequestMethod.GET)
     public ModelAndView configEditPage(@PathVariable String key) {
-        ModelAndView view = withInfo(new ModelAndView("config-edit"));
+        ModelAndView view = withInfo(new ModelAndView("config/config-edit"));
         
         if (StringUtils.isNotBlank(key)) {
             Configuration config = configService.getConfiguration(key);

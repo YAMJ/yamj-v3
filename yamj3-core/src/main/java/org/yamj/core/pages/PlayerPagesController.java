@@ -43,14 +43,14 @@ public class PlayerPagesController extends AbstractPagesController {
     
     @RequestMapping("/list")
     public ModelAndView playerList() {
-        ModelAndView view = withInfo(new ModelAndView("player-list"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-list"));
         view.addObject("playerlist", jsonApi.getPlayerList());
         return view;
     }
 
     @RequestMapping("/add")
     public ModelAndView playerAddPage() {
-        ModelAndView view = withInfo(new ModelAndView("player-add"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-add"));
         view.addObject("player", new PlayerInfo());
         return view;
     }
@@ -68,7 +68,7 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
     public ModelAndView playerEditPage(@PathVariable Long id) {
-        ModelAndView view = withInfo(new ModelAndView("player-edit"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-edit"));
         view.addObject("player", jsonApi.getPlayerInfo(id));
         return view;
     }
@@ -98,7 +98,7 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/details/{id}", method = RequestMethod.GET)
     public ModelAndView playerDetails(@PathVariable Long id) {
-        ModelAndView view = withInfo(new ModelAndView("player-details"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-details"));
 
         PlayerInfo player = jsonApi.getPlayerInfo(id);
         view.addObject("player", player);
@@ -119,14 +119,14 @@ public class PlayerPagesController extends AbstractPagesController {
         LOG.info("Player Scanning...");
         //TODO: Add the scan
 
-        ModelAndView view = withInfo(new ModelAndView("player-scan"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-scan"));
         view.addObject("playerlist", jsonApi.getPlayerList());
         return view;
     }
 
     @RequestMapping(value = "/add-path/{id}", method = RequestMethod.GET)
     public ModelAndView playerAddPath(@PathVariable Long id) {
-        ModelAndView view = withInfo(new ModelAndView("player-path-add"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-path-add"));
         view.addObject("player", jsonApi.getPlayerInfo(id));
         view.addObject("playerPath", new PlayerPath());
         return view;
@@ -156,7 +156,7 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/edit-path/{playerId}/{pathId}", method = RequestMethod.GET)
     public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId) {
-        ModelAndView view = withInfo(new ModelAndView("player-path-edit"));
+        ModelAndView view = withInfo(new ModelAndView("player/player-path-edit"));
         
         PlayerInfo player = jsonApi.getPlayerInfo(playerId);
         view.addObject("player", player);
