@@ -44,7 +44,7 @@ public class ExecutionTaskInitialization {
     private ExecutionTaskStorageService executionTaskStorageService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.debug("Initialize execution tasks");
         storeExecutionTask("recheck", "recheck", IntervalType.DAILY, -1, new LocalDateTime(2016,1,1,3,0));
         storeExecutionTask("delete", "delete", IntervalType.HOURS, 2, new LocalDateTime(2016,1,1,0,0));
