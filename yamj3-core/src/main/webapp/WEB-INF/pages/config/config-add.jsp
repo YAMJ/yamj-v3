@@ -21,19 +21,25 @@
         </div>
         <p id="message">Enter the property configuration key and value</p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/add/process.html">
-            <table id="headertable">
+        	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>
                     <td class="right">Key:</td>
-                    <td><form:input path="key"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td class="right">Value:</td>
-                        <td><form:input path="value"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="center"><input value="Add Config" type="submit" class="btn default"></td>
-                    </tr>
-                </table>
+                    <td>&nbsp;</td>
+                    <td><form:input path="key"/></td>
+                </tr>
+                <tr>
+                    <td class="right">Value:</td>
+                	<td>&nbsp;</td>
+                    <td><form:input path="value"/></td>
+                </tr>
+                <tr>
+                 <td colspan="2">&nbsp;</td>
+                    <td class="left"">
+                 		<input type="submit" name="add" class="btn info" value="Add Config" >  
+	                    <a href="${pageContext.request.contextPath}/config/list.html" class="btn info">Cancel</a>
+                   	</td>
+                </tr>
+            </table>
         </form:form>
 
         <!-- Import the footer -->

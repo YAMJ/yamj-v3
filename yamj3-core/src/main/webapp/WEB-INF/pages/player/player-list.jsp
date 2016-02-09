@@ -21,13 +21,13 @@
             <p><a href="${pageContext.request.contextPath}/player/add.html" class="btn info">Add new player &raquo;</a></p>
         </div>
 
-        <table id="tablelist" style="width:95%; margin:auto;">
+        <table id="tablelist" style="width:90%; margin:auto;">
             <tr>
                 <th>Player Name</th>
                 <th>Device Type</th>
                 <th>IP Address</th>
                 <th># Paths</th>
-                <th class="center">Actions</th>
+                <th style="width:15%">&nbsp;</th>
             </tr>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
@@ -36,7 +36,7 @@
                         <td>${entry.deviceType}</td>
                         <td>${entry.ipAddress}</td>
                         <td>${fn:length(entry.paths)}</td>
-                        <td class="center">
+                        <td style="width:15%" class="center">
                             <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info">Edit</a>
                             <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info">Delete</a>
                             <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info">Add Path</a>

@@ -19,23 +19,30 @@
         <div id="logo">
             <h2>Edit Configuration</h2>
         </div>
-        <p id="message">Enter the new value required</p>
+        <p id="message">Enter the new values required</p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/edit/${config.key}.html">
-            <table id="headertable" style="width:30%;">
+        	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>
                     <td class="right">Key:</td>
+                    <td>&nbsp;</td>
                     <td>${config.key}</td>
                 </tr>
                 <tr>
                     <td class="right">Old Value:</td>
+                    <td>&nbsp;</td>
                     <td>${config.value}</td>
                 </tr>
                 <tr>
                     <td class="right">New Value:</td>
+                    <td>&nbsp;</td>
                     <td><form:input path="value"></form:input></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="center"><input value="Update" type="submit"></td>
+                    <td colspan="2">&nbsp;</td>
+                    <td class="left">
+                        <input type="submit" name="update" class="btn info" value="Update" >  
+                        <a href="${pageContext.request.contextPath}/config/list.html" class="btn info">Cancel</a>
+                    </td>
                 </tr>
             </table>
         </form:form>

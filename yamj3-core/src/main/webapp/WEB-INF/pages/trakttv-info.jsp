@@ -21,14 +21,14 @@
         </div>
         
         <c:if test="${!trakttv.synchronization}">
-        <table id="tablelist" class="hero-unit" style="width: 50%; margin: auto;">
+        <table id="tablelist" class="hero-unit" style="width: 40%; margin: auto;">
           	<tr>
                	<th class="left">Trakt.TV synchronization is not enabled.</th>
            	</tr>
         </table>
         </c:if>        
         <c:if test="${trakttv.synchronization}">
-        <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+        <table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
             <tr>
                 <th colspan="2">
                     <c:if test="${trakttv.push && trakttv.pull}">

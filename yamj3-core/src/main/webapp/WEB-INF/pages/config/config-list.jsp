@@ -26,7 +26,7 @@
                 <th>Value</th>
                 <th>Create Timestamp</th>
                 <th>Update Timestamp</th>
-                <th class="center">Actions</th>
+                <th style="width:10%">&nbsp;</th>
             </tr>
             <tbody>
                 <c:forEach items="${configlist}" var="entry" varStatus="row">
@@ -35,7 +35,7 @@
                         <td>${entry.value}</td>
                         <td>${entry.createTimestamp}</td>
                         <td>${entry.updateTimestamp}</td>
-                        <td class="center">
+                        <td  style="width:10%" class="center">
                             <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info">Edit</a>
                             <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info">Delete</a>
                         </td>

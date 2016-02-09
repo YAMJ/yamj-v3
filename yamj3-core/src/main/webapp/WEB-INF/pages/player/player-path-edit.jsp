@@ -20,46 +20,52 @@
             <h2>Edit Player Path</h2>
         </div>
 
-        <table id="headertable" style="width:75%;">
+        <table id="headertable" style="width:50%;" class="center">
             <tr>
                 <td class="right">Player Name:</td>
+				<td>&nbsp;</td>
                 <td>${player.name}</td>
             </tr>
             <tr>
                 <td class="right">Device Type:</td>
+				<td>&nbsp;</td>
                 <td>${player.deviceType}</td>
             </tr>
             <tr>
                 <td class="right">IP Address:</td>
+				<td>&nbsp;</td>
                 <td>${player.ipAddress}</td>
             </tr>
         </table>
 
         <p id="message">Edit the values required</p>
         <form:form method="POST" commandName="path" action="${pageContext.request.contextPath}/player/edit-path/${player.id}/${path.id}.html">
-            <table id="headertable" style="width:75%;">
+          	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>
-                    <td class="center">Path Data</td>
-                    <td class="center">Current</td>
-                    <td class="center">New</td>
+                    <td colspan="2">&nbsp;</td>
+                    <td>Current</td>
+                    <td>New</td>
                 </tr>
                 <tr>
                     <td class="right">Source Path:</td>
+					<td>&nbsp;</td>
                     <td>${path.sourcePath}</td>
-                    <td><form:input path="sourcePath" size="100"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td class="right">Target Path:</td>
-                        <td>${path.targetPath}</td>
-                    <td><form:input path="targetPath" size="50"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="center">
-                            <input type="submit" name="update" class="btn info" value="Update" > or
-                            <a href="${pageContext.request.contextPath}/player/details/${player.id}.html" class="btn info">Cancel</a>
-                        </td>
-                    </tr>
-                </table>
+                    <td><form:input path="sourcePath" size="100"/></td>
+                </tr>
+                <tr>
+                    <td class="right">Target Path:</td>
+					<td>&nbsp;</td>
+                    <td>${path.targetPath}</td>
+                    <td><form:input path="targetPath" size="50"/></td>
+                </tr>
+                <tr>
+					<td colspan="3">&nbsp;</td>
+                    <td class="left">
+                        <input type="submit" name="update" class="btn info" value="Update" >  
+                        <a href="${pageContext.request.contextPath}/player/details/${player.id}.html" class="btn info">Cancel</a>
+                    </td>
+                </tr>
+            </table>
         </form:form>
 
         <!-- Import the footer -->

@@ -21,25 +21,29 @@
         </div>
         <p id="message" class="center">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
-            <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
+        	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>
-                    <td style="width:25%" class="right">Player Name:</td>
-                    <td style="width:75%" class="left"><form:input size="200" path="name"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td style="width:25%" class="right">Device Type:</td>
-                        <td style="width:75%"><form:input size="200" path="deviceType"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td style="width:25%" class="right">IP Address:</td>
-                        <td style="width:75%"><form:input size="100" path="ipAddress"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="center">
-                            <input value="Add Player" type="submit" class="btn info">
-                            <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
-                    </td>
+	                <td class="right">Player Name:</td>
+                    <td>&nbsp;</td>
+                    <td><form:input size="200" path="name"></form:input></td>
                 </tr>
+                <tr>
+                    <td class="right">Device Type:</td>
+                    <td>&nbsp;</td>
+                    <td><form:input size="200" path="deviceType"></form:input></td>
+                </tr>
+                <tr>
+                    <td class="right">IP Address:</td>
+                    <td>&nbsp;</td>
+                    <td><form:input size="100" path="ipAddress"></form:input></td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                    <td class="left">
+                        <input type="submit" name="add" class="btn info" value="Add Player" >  
+                        <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
+                	</td>
+				</tr>
             </table>
         </form:form>
 

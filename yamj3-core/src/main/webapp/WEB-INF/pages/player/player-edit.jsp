@@ -21,33 +21,32 @@
         </div>
         <p id="message">Enter the new values required</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/edit/${player.id}.html">
-            <table id="headertable" style="width:75%;">
+        	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>
                     <td class="right">Player Name:</td>
+                    <td>&nbsp;</td>
                     <td colspan="2" class="left">${player.name}</td>
                 </tr>
                 <tr>
-                    <td class="center">Player Data</td>
-                    <td class="center">Current</td>
-                    <td class="center">New</td>
-                </tr>
-                <tr>
                     <td class="right">Device Type:</td>
+                    <td>&nbsp;</td>
                     <td>${player.deviceType}</td>
                     <td><form:input path="deviceType" size="100"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td class="right">IP Address:</td>
-                        <td>${player.ipAddress}</td>
-                    <td><form:input path="ipAddress" size="50"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="center">
-                            <input type="submit" name="update" class="btn info" value="Update" >  
-                            <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
-                        </td>
-                    </tr>
-                </table>
+                 </tr>
+                 <tr>
+                 	<td class="right">IP Address:</td>
+					<td>&nbsp;</td>
+                    <td>${player.ipAddress}</td>
+                 	<td><form:input path="ipAddress" size="50"></form:input></td>
+                 </tr>
+                 <tr>
+                    <td colspan="3">&nbsp;</td>
+                 	<td class="left">
+    	                <input type="submit" name="update" class="btn info" value="Update" >  
+                        <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
+                    </td>
+				</tr>
+			</table>
         </form:form>
 
         <!-- Import the footer -->

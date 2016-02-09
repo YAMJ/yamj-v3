@@ -27,7 +27,7 @@
                 <th>Delay</th>
                 <th>Last Execution</th>
                 <th>Next Execution</th>
-                <th class="center">Actions</th>
+                <th style="width:10%">&nbsp;</th>
             </tr>
             <tbody>
                 <c:forEach items="${tasklist}" var="task" varStatus="row">
@@ -38,7 +38,7 @@
                         <td>${task.delay}</td>
                         <td>${task.lastExecution}</td>
                         <td>${task.nextExecution}</td>
-                        <td class="center">
+                        <td style="width:10%" class="center">
                             <a href="${pageContext.request.contextPath}/task/edit/${task.name}.html" class="btn info">Edit</a>
                             <a href="${pageContext.request.contextPath}/task/enqueue/${task.name}.html" class="btn info">Enqueue</a>
                         </td>
