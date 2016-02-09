@@ -30,9 +30,10 @@ public class TaskForm {
     private String name;
     private String taskName;
     private String interval;
-    private int delay = -1;
-    private String nextDate;
-
+    private String delay;
+    private String nextExecDate;
+    private String errorMessage;
+    
     public String getName() {
         return name;
     }
@@ -57,20 +58,28 @@ public class TaskForm {
         this.interval = interval;
     }
 
-    public int getDelay() {
+    public String getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(String delay) {
         this.delay = delay;
     }
 
-    public String getNextDate() {
-        return nextDate;
+    public String getNextExecDate() {
+        return nextExecDate;
     }
 
-    public void setNextDate(String nextDate) {
-        this.nextDate = nextDate;
+    public void setNextExecDate(String nextExecDate) {
+        this.nextExecDate = nextExecDate;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     @Override

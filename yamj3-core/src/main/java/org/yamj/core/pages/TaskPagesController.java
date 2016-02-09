@@ -22,21 +22,29 @@
  */
 package org.yamj.core.pages;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.core.database.model.ExecutionTask;
+import org.yamj.core.database.model.type.IntervalType;
 import org.yamj.core.database.service.ExecutionTaskStorageService;
+import org.yamj.core.pages.form.TaskForm;
 
 @Controller
 @RequestMapping(value = "/task")
 public class TaskPagesController extends AbstractPagesController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TaskPagesController.class);
+    private static final SimpleDateFormat DATEPICKER_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    
     @Autowired
     private ExecutionTaskStorageService executionTaskStorageService;
 
@@ -58,6 +66,83 @@ public class TaskPagesController extends AbstractPagesController {
                 this.executionTaskStorageService.updateEntity(task);
             }
         }
+        return view;
+    }
+
+    @RequestMapping(value = "/edit/{name}", method = RequestMethod.GET)
+    public ModelAndView taskEditPage(@PathVariable String name) {
+        
+        if (StringUtils.isNotBlank(name)) {
+            ExecutionTask task = executionTaskStorageService.getExecutionTask(name);
+            if (task != null) {
+                TaskForm taskForm = new TaskForm();
+                taskForm.setName(task.getName());
+                taskForm.setTaskName(task.getTaskName());
+                taskForm.setInterval(task.getIntervalType().name());
+                if (task.getDelay() > 0) {
+                    taskForm.setDelay(Integer.toString(task.getDelay()));
+                }
+                taskForm.setNextExecDate(DATEPICKER_FORMAT.format(task.getNextExecution()));
+                
+                ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
+                view.addObject("task", taskForm);
+                return view;
+            }
+        }
+        
+        LOG.warn("No valid task name '{}' provided for editing", name);
+        return new ModelAndView("redirect:/task/list");
+    }
+
+    @RequestMapping(value = "/edit/{name}", method = RequestMethod.POST)
+    public ModelAndView configEditUpdate(@ModelAttribute("task") TaskForm taskForm) {
+        LOG.trace("Submitted form: {}", taskForm);
+        
+        // holds the error message
+        String errorMessage = null;
+
+        // get the execution task
+        ExecutionTask executionTask = executionTaskStorageService.getExecutionTask(taskForm.getName());
+
+        if (StringUtils.isBlank(taskForm.getTaskName())) {
+            errorMessage = "Task name must be given";
+            taskForm.setTaskName(executionTask.getTaskName());
+        } else {
+            executionTask.setTaskName(taskForm.getTaskName());
+        }
+        
+        // check the interval
+        final IntervalType intervalType = IntervalType.fromString(taskForm.getInterval());
+        final int delay = NumberUtils.toInt(taskForm.getDelay(), -1);
+        if (intervalType == IntervalType.UNKNOWN) {
+            errorMessage = "Interval is not valid";
+            taskForm.setInterval(executionTask.getIntervalType().name());
+        } else if (intervalType.needsDelay() && delay <1) {
+            errorMessage = "Delay must be a positive number";
+        } else {
+            executionTask.setIntervalType(intervalType);
+            executionTask.setDelay(intervalType.needsDelay() ? delay : -1);
+        }
+        
+        if (StringUtils.isNotBlank(taskForm.getNextExecDate())) {
+            try {
+                Date nextExecution = DATEPICKER_FORMAT.parse(taskForm.getNextExecDate());
+                executionTask.setNextExecution(nextExecution);
+            } catch (Exception e) {
+                errorMessage = "Invalid datetime provided";
+            }
+        }
+        
+        if (errorMessage == null) {
+            // no error so just update the task and return to list
+            executionTaskStorageService.updateEntity(executionTask);
+            return new ModelAndView("redirect:/task/list");
+        }
+        
+        ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
+        taskForm.setNextExecDate(DATEPICKER_FORMAT.format(executionTask.getNextExecution()));
+        taskForm.setErrorMessage(errorMessage);
+        view.addObject("task", taskForm);
         return view;
     }
 }

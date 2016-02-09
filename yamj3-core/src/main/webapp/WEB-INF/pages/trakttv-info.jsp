@@ -71,7 +71,7 @@
                     <tr>
                         <td colspan="2" class="center">
                             <input type="submit" value="Authorize with PIN" class="btn info"><br>
-                            <font color="red">${trakttv.message}</font>
+                            <font color="red">${trakttv.errorMessage}</font>
                         </td>
                     </tr>
                 </tbody>

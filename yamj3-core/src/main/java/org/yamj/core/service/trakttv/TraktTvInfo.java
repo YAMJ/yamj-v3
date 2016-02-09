@@ -31,7 +31,7 @@ public class TraktTvInfo {
     private boolean pull;
     private boolean authorized;
     private Date expirationDate;
-    private String message;
+    private String errorMessage;
     
     public boolean isSynchronization() {
         return synchronization;
@@ -77,12 +77,12 @@ public class TraktTvInfo {
         return this;
     }
 
-    public String getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public TraktTvInfo setMessage(String message) {
-        this.message = message;
+    public TraktTvInfo setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
         return this;
     }
 }

@@ -148,15 +148,15 @@ public class CommonPagesController extends AbstractPagesController {
     public ModelAndView trakttvPin(@ModelAttribute TraktTvPin pin) {
         ModelAndView view = withInfo(new ModelAndView("trakttv-info", "pin-entity", new TraktTvPin()));
         
-        final String message;
+        final String errorMessage;
         final String givenPin = pin.getPin();
         if (StringUtils.isBlank(givenPin) || givenPin.length() < 7) {
-            message = "No valid pin provided.";
+            errorMessage = "No valid pin provided.";
         } else {
-            message = this.traktTvService.authorizeWithPin(givenPin);
+            errorMessage = this.traktTvService.authorizeWithPin(givenPin);
         }
                        
-        view.addObject("trakttv", traktTvService.getTraktTvInfo().setMessage(message));
+        view.addObject("trakttv", traktTvService.getTraktTvInfo().setErrorMessage(errorMessage));
         return view;
     }
     //</editor-fold>
