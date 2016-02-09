@@ -49,12 +49,13 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**").addResourceLocations("WEB-INF/images/").setCachePeriod(60);
-        registry.addResourceHandler("/css/**").addResourceLocations("WEB-INF/css/").setCachePeriod(60);
         registry.addResourceHandler("/favicon.ico").addResourceLocations("WEB-INF/images/favicon.ico/").setCachePeriod(60);
+        registry.addResourceHandler("/css/**").addResourceLocations("WEB-INF/css/").setCachePeriod(60);
+        registry.addResourceHandler("/images/**").addResourceLocations("WEB-INF/images/").setCachePeriod(60);
         registry.addResourceHandler("/fonts/**").addResourceLocations("WEB-INF/fonts/").setCachePeriod(60);
         registry.addResourceHandler("/less/**").addResourceLocations("WEB-INF/less/").setCachePeriod(60);
         registry.addResourceHandler("/scss/**").addResourceLocations("WEB-INF/scss/").setCachePeriod(60);
+        registry.addResourceHandler("/scripts/**").addResourceLocations("WEB-INF/scripts/").setCachePeriod(60);
     }
 
     @Override
