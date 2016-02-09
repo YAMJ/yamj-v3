@@ -34,7 +34,7 @@
                 <tr>
                     <td class="right">Task Name:</td>
                     <td>&nbsp;</td>
-                    <td><form:input path="taskName"/></td>
+                    <td>${task.taskName}</td>
                 </tr>
                 <tr>
                     <td class="right">Interval:</td>

@@ -104,13 +104,6 @@ public class TaskPagesController extends AbstractPagesController {
         // get the execution task
         ExecutionTask executionTask = executionTaskStorageService.getExecutionTask(taskForm.getName());
 
-        if (StringUtils.isBlank(taskForm.getTaskName())) {
-            errorMessage = "Task name must be given";
-            taskForm.setTaskName(executionTask.getTaskName());
-        } else {
-            executionTask.setTaskName(taskForm.getTaskName());
-        }
-        
         // check the interval
         final IntervalType intervalType = IntervalType.fromString(taskForm.getInterval());
         final int delay = NumberUtils.toInt(taskForm.getDelay(), -1);
