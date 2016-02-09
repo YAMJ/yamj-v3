@@ -33,11 +33,11 @@
                 <tr>
                     <td class="right">New Value:</td>
                     <td><form:input path="value"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="center"><input value="Update" type="submit"></td>
-                    </tr>
-                </table>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center"><input value="Update" type="submit"></td>
+                </tr>
+            </table>
         </form:form>
 
         <!-- Import the footer -->

@@ -28,6 +28,7 @@ body {
     border-bottom: 1px solid                          #111111/*{table-border}*/;
     font-weight: bold;
     background-color: #222222;
+    vertical-align: middle;
 }
 
 #tablelist td, #headertable td
@@ -38,6 +39,7 @@ body {
     padding:4px;
     border-bottom: 1px solid                          #111111 /*{headertable-border}*/;
     color:#ffffff;
+    vertical-align: middle;
 }
 
 #tablelist tr:nth-child(odd)
@@ -47,6 +49,7 @@ body {
     text-align:left;
     color:#444444;
     background-color:#111111;
+    vertical-align: middle;
 }
 
 #tablelist th.title, #headertable th.title
