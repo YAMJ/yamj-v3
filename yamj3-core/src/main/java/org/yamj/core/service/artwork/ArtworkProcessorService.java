@@ -216,6 +216,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             ArtworkGenerated generated = new ArtworkGenerated();
             generated.setArtworkLocated(located);
             generated.setArtworkProfile(profile);
+            generated.setStatus(StatusType.DONE);
             generated.setCacheFilename(cacheFilename);
             String cacheDirectory = FileTools.createDirHash(cacheFilename);
             generated.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));

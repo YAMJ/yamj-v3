@@ -61,26 +61,25 @@ public class UpgradeDatabaseService {
             databaseType = null;
         }
         
-        // patch for Trakt.TV
+        // patch for ArtworkGenerated status
         try {
-            patchTraktTv(databaseType);
+            patchArtworkGeneratedStatus(databaseType);
         } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchTraktTv' for database type "+databaseType, ex);
+            LOG.warn("Failed upgrade 'patchArtworkGeneratedStatus' for database type "+databaseType, ex);
         }
-
     }
-    
+
     /**
-     * Date: 04.02.2016
+     * Date: 10.02.2016
      */
-    private void patchTraktTv(String databaseType) {
-        LOG.debug("Execute 'patchTraktTv': {}", databaseType);
+    private void patchArtworkGeneratedStatus(String databaseType) {
+        LOG.debug("Execute 'patchArtworkGeneratedStatus': {}", databaseType);
         if (DatabaseType.MYSQL.equals(databaseType)) {
             // patch for MySQL
-            upgradeDatabaseDao.mysqlPatchTraktTv();
+            upgradeDatabaseDao.mysqlPatchArtworkGeneratedStatus();
         } else if (DatabaseType.HSQL.equals(databaseType)) {
             // patch for HSQL
-            upgradeDatabaseDao.hsqlPatchTraktTv();
+            upgradeDatabaseDao.hsqlPatchArtworkGeneratedStatus();
         }
     }
 }

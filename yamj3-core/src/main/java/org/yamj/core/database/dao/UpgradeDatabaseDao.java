@@ -126,37 +126,37 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // PATCHES
     
-    // Patch for Trakt.TV
+    // Patch for artwork generated status
     
-    public void mysqlPatchTraktTv() {
-        if (!mysqlExistsColumn("videodata", "watched_trakttv")) {
+    public void mysqlPatchArtworkGeneratedStatus() {
+        if (!mysqlExistsColumn("artwork_generated", "status")) {
             currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BIT, ADD COLUMN watched_trakttv_last_date DATETIME")
+            .createSQLQuery("ALTER TABLE artwork_generated ADD COLUMN status VARCHAR(30)")
             .executeUpdate();
         }
         
         currentSession()
-        .createSQLQuery("UPDATE videodata SET watched_trakttv=0 WHERE watched_trakttv is null")
+        .createSQLQuery("UPDATE artwork_generated SET status='DONE' WHERE status is null")
         .executeUpdate();
 
         currentSession()
-        .createSQLQuery("ALTER TABLE videodata MODIFY COLUMN watched_trakttv BIT NOT NULL")
+        .createSQLQuery("ALTER TABLE artwork_generated MODIFY COLUMN status VARCHAR(30) NOT NULL")
         .executeUpdate();            
     }
     
-    public void hsqlPatchTraktTv() {
-        if (!hsqlExistsColumn("videodata", "watched_trakttv")) {
+    public void hsqlPatchArtworkGeneratedStatus() {
+        if (!hsqlExistsColumn("artwork_generated", "status")) {
             currentSession()
-            .createSQLQuery("ALTER TABLE videodata ADD COLUMN watched_trakttv BOOLEAN, ADD COLUMN watched_trakttv_last_date TIMESTAMP")
+            .createSQLQuery("ALTER TABLE artwork_generated ADD COLUMN status VARCHAR(30)")
             .executeUpdate();
         }
         
         currentSession()
-        .createSQLQuery("UPDATE videodata SET watched_trakttv=0 WHERE watched_trakttv is null")
+        .createSQLQuery("UPDATE artwork_generated SET status='DONE' WHERE status is null")
         .executeUpdate();
 
         currentSession()
-        .createSQLQuery("ALTER TABLE videodata ALTER COLUMN watched_trakttv SET NOT NULL")
+        .createSQLQuery("ALTER TABLE artwork_generated ALTER COLUMN status SET NOT NULL")
         .executeUpdate();
     }
 }

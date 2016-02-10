@@ -252,6 +252,7 @@ public class ArtworkStorageService {
         } else {
             stored.setCacheDirectory(generated.getCacheDirectory());
             stored.setCacheFilename(generated.getCacheFilename());
+            stored.setStatus(generated.getStatus());
             this.artworkDao.updateEntity(stored);
         }
     }

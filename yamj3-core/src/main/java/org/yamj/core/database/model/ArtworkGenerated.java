@@ -27,6 +27,8 @@ import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
+import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "artwork_generated",
@@ -52,6 +54,10 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     @Column(name = "cache_dir", nullable = false, length = 50)
     private String cacheDirectory;
 
+    @Type(type = "statusType")
+    @Column(name = "status", length = 30) // TODO implement AbstractStateful if done
+    private StatusType status;
+    
     // GETTER and SETTER
 
     public String getCacheDirectory() {
@@ -84,6 +90,14 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
 
     public void setArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkProfile = artworkProfile;
+    }
+
+    public StatusType getStatus() {
+        return status;
+    }
+    
+    public void setStatus(StatusType status) {
+        this.status = status;
     }
 
     // TRANSIENT METHODS
