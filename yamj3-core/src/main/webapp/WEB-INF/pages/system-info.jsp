@@ -71,7 +71,6 @@
 			    </td>
 			    <td class="left" style="width:50%">
 			        <table id="headertable" class="hero-unit" style="width:100%;margin:auto;align:left">
-			        <table id="headertable" class="hero-unit" style="width:100%; margin: auto; align:left">
 			            <c:forEach items="${joblist}" var="job">
 			                <tr>
 			                    <th class="right" style="width:60%">${job.item}</th>
