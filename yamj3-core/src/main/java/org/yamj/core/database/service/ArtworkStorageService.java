@@ -68,6 +68,12 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<ArtworkProfile> getAllArtworkProfiles() {
+        return artworkDao.getAll(ArtworkProfile.class, "profileName");
+
+    }
+
+    @Transactional(readOnly = true)
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkLocated located) {
         MetaDataType metaDataType = null;
 

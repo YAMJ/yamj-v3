@@ -26,12 +26,14 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.type.IntervalType;
 import org.yamj.core.database.service.ExecutionTaskStorageService;
 
 @Service("executionTaskService")
+@DependsOn("executionTaskInitialization")
 public class ExecutionTaskService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskService.class);

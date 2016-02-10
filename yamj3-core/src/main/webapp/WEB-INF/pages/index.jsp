@@ -48,7 +48,11 @@
             </tr>
             <tr>
                 <th style="width: 10%"><i class="fa fa-cogs fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/task/list.html">Tasks</a></th>
-                <td style="width: 30%">List of execution tasks.</td>
+                <td style="width: 30%">List of execution tasks and their configuration.</td>
+            </tr>
+            <tr>
+                <th style="width: 10%"><i class="fa fa-cogs fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/profile/list.html">Artwork Profiles</a></th>
+                <td style="width: 30%">List of artwork profiles and their configuration.</td>
             </tr>
             <tr>
                 <th style="width: 10%"><i class="fa fa-cogs fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/trakttv-info.html">Trakt.TV Settings</a></th>

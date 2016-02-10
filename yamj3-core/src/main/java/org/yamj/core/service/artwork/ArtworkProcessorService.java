@@ -35,6 +35,7 @@ import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.ArtworkGenerated;
@@ -49,6 +50,7 @@ import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkProcessorService")
+@DependsOn("artworkInitialization")
 public class ArtworkProcessorService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);

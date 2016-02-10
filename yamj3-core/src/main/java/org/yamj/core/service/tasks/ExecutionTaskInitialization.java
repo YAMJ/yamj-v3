@@ -35,7 +35,7 @@ import org.yamj.core.database.service.ExecutionTaskStorageService;
 /**
  * Just used for initialization of execution tasks on startup.
  */
-@Component
+@Component("executionTaskInitialization")
 public class ExecutionTaskInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskInitialization.class);

@@ -34,7 +34,7 @@ import org.yamj.core.database.service.ArtworkStorageService;
 /**
  * Just used for initialization of artwork profiles at startup.
  */
-@Component
+@Component("artworkInitialization")
 public class ArtworkInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
