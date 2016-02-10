@@ -81,26 +81,20 @@ public class CommonPagesController extends AbstractPagesController {
         YamjInfo yi = systemInfoController.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("countlist", yi.getCounts());
-        return view;
-    }
-    
-    @RequestMapping("/count/job")
-    public ModelAndView displayCountJob() {
-        ModelAndView view = withInfo(new ModelAndView("count-job"));
-
+        
         List<CountGeneric> jobList = indexController.getJobs(ALL);
         // Add some wording if there is an empty list
         if (jobList.isEmpty()) {
             CountGeneric noJobs = new CountGeneric();
-            noJobs.setItem("No jobs found!");
+            noJobs.setItem("No jobs found");
             noJobs.setCounter(0L);
             jobList.add(noJobs);
         }
+        view.addObject("joblist", jobList);
 
-        view.addObject("countlist", jobList);
         return view;
     }
-
+    
     //<editor-fold defaultstate="collapsed" desc="Skins Pages">
     @RequestMapping("/skin-info")
     public ModelAndView skinInfo() {

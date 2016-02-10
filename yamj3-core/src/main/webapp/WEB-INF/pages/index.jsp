@@ -47,10 +47,6 @@
                 <td style="width: 30%">Display information about the players and their paths.</td>
             </tr>
             <tr>
-                <th style="width: 10%"><i class="fa fa-list-ul fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/count/job.html">Job List</a></th>
-                <td style="width: 30%">List of jobs in the database.</td>
-            </tr>
-            <tr>
                 <th style="width: 10%"><i class="fa fa-cogs fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/task/list.html">Tasks</a></th>
                 <td style="width: 30%">List of execution tasks.</td>
             </tr>

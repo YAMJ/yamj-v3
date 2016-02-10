@@ -18,7 +18,7 @@
         <div id="logo">
             <h2>System Information</h2>
         </div>
-        <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+        <table id="headertable" class="hero-unit" style="width:50%; margin:auto;">
             <tr>
                 <th class="left" style="width: 20%">Core IP/Port</th>
                 <td class="left" style="width: 20%">${yi.coreIp}:${yi.corePort}</td>
@@ -55,16 +55,34 @@
         <br/>
         <div id="logo">
             <h2>Database Object Counts</h2>
-        </div>
-        <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
-            <c:forEach items="${countlist}" var="entry">
-                <tr>
-                    <th class="left" style="width: 20%">${entry.key}</th>
-                    <td class="center" style="width: 20%">${entry.value}</td>
-                </tr>
-            </c:forEach>
-        </table>
-
+		</div>
+        
+        <table style="width:50%; margin:auto; align:center">
+        	<tr>
+			    <td class="right" style="width:50%">
+			        <table id="headertable" class="hero-unit" style="width:100%;margin:auto;align:right">
+			            <c:forEach items="${countlist}" var="entry">
+			                <tr>
+			                    <th class="right" style="width:60%">${entry.key}</th>
+			                    <td class="center" style="width:40%">${entry.value}</td>
+			                </tr>
+			            </c:forEach>
+			        </table>
+			    </td>
+			    <td class="left" style="width:50%">
+			        <table id="headertable" class="hero-unit" style="width:100%;margin:auto;align:left">
+			        <table id="headertable" class="hero-unit" style="width:100%; margin: auto; align:left">
+			            <c:forEach items="${joblist}" var="job">
+			                <tr>
+			                    <th class="right" style="width:60%">${job.item}</th>
+			                    <td class="center" style="width:40%">${job.counter}</td>
+			                </tr>
+			            </c:forEach>
+			        </table>
+		        </td>
+		    </tr>
+	    </table>
+	    
         <!-- Import the footer -->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="FOOTER" />

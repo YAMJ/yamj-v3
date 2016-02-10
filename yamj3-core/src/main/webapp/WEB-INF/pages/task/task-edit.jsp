@@ -84,9 +84,10 @@
         dayOfWeekStart: 1,
         step: 5,
         startDate: new Date(givenDate),
-        inline:true,
-        theme:'dark',
+        inline :true,
+        theme: 'dark',
         yearStart: 2015,
+        yearEnd: 2050
     });
     </script>
 </html>
