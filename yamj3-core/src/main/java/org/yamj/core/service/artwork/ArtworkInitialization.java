@@ -23,12 +23,10 @@
 package org.yamj.core.service.artwork;
 
 import javax.annotation.PostConstruct;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkStorageService;
@@ -40,68 +38,58 @@ import org.yamj.core.database.service.ArtworkStorageService;
 public class ArtworkInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
+    
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork profiles");
-        
-        String[] defaultProfiles = PropertyTools.getProperty("artwork.profile.init.profiles", "").split(",");
-        if (defaultProfiles.length > 0) {
-            for (String defaultProfile : defaultProfiles) {
-                String name = defaultProfile;
-                boolean valid = true;
-
-                String type = PropertyTools.getProperty("artwork.profile." + name + ".type", ArtworkType.UNKNOWN.toString());
-                ArtworkType artworkType = ArtworkType.fromString(type);
-                if (ArtworkType.UNKNOWN == artworkType) {
-                    LOG.warn("Property 'artwork.profile.{}.type' denotes invalid artwork type: {}", name, type);
-                    valid = false;
-                }
-
-                String width = PropertyTools.getProperty("artwork.profile." + name + ".width");
-                if (!StringUtils.isNumeric(width)) {
-                    LOG.warn("Property 'artwork.profile.{}.width' is not numeric: {}", name, width);
-                    valid = false;
-                }
-
-                String height = PropertyTools.getProperty("artwork.profile." + name + ".height");
-                if (!StringUtils.isNumeric(width)) {
-                    LOG.warn("Property 'artwork.profile.{}.height' is not numeric: {}", name, height);
-                    valid = false;
-                }
-
-                if (!valid) {
-                    LOG.warn("Profile {} has no valid setup, so skipping", name);
-                    continue;
-                }
-
-                ArtworkProfile artworkProfile = new ArtworkProfile();
-                artworkProfile.setProfileName(name);
+        initArtworkProfile("default-fanart", ArtworkType.FANART, 1280, 720,
+                        true, true, true, false, false, true, // apply
+                        true, false, false, true, false); // processing 
+        initArtworkProfile("default-poster", ArtworkType.POSTER, 224, 332,
+                        true, true, true, false, false, true, // apply
+                        true, false, false, true, false); // processing 
+        initArtworkProfile("default-banner", ArtworkType.BANNER, 650, 120,
+                        false, true, true, false, false, true, // apply
+                        true, false, false, true, false); // processing 
+        initArtworkProfile("default-videoimage", ArtworkType.VIDEOIMAGE, 400, 225,
+                        false, false, false, true, false, false, // apply
+                        true, false, false, true, false); // processing 
+        initArtworkProfile("default-photo", ArtworkType.PHOTO, 200, 300,
+                        false, false, false, false, true, false, // apply
+                        true, false, false, true, false); // processing 
+    }
+    
+    private void initArtworkProfile(String profileName, ArtworkType artworkType, int width, int height,
+        boolean applyToMovie, boolean applyToSeries, boolean applyToSeason, boolean applyToEpisode, boolean applyToPerson, boolean applyToBoxedSet,
+        boolean preProcess, boolean roundedCorners, boolean reflection, boolean normalize, boolean stretch)
+    {
+        try {
+            ArtworkProfile artworkProfile = artworkStorageService.getArtworkProfile(profileName, artworkType);
+            if (artworkProfile == null) {
+                artworkProfile = new ArtworkProfile();
+                artworkProfile.setProfileName(profileName);
                 artworkProfile.setArtworkType(artworkType);
-                artworkProfile.setWidth(Integer.parseInt(width));
-                artworkProfile.setHeight(Integer.parseInt(height));
-                artworkProfile.setApplyToMovie(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToMovie", Boolean.FALSE));
-                artworkProfile.setApplyToSeries(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeries", Boolean.FALSE));
-                artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeason", Boolean.FALSE));
-                artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToEpisode", Boolean.FALSE));
-                artworkProfile.setApplyToPerson(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToPerson", Boolean.FALSE));
-                artworkProfile.setApplyToBoxedSet(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToBoxedSet", Boolean.FALSE));
-                artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile." + name + ".preProcess", Boolean.FALSE));
-                artworkProfile.setRoundedCorners(PropertyTools.getBooleanProperty("artwork.profile." + name + ".roundedCorners", Boolean.FALSE));
-                artworkProfile.setReflection(PropertyTools.getBooleanProperty("artwork.profile." + name + ".reflection", Boolean.FALSE));
-                artworkProfile.setNormalize(PropertyTools.getBooleanProperty("artwork.profile." + name + ".normalize", Boolean.FALSE));
-                artworkProfile.setStretch(PropertyTools.getBooleanProperty("artwork.profile." + name + ".stretch", Boolean.FALSE));
-
-                try {
-                    // call another service to handle transactions
-                    this.artworkStorageService.storeArtworkProfile(artworkProfile);
-                } catch (Exception error) {
-                    LOG.error("Failed to store {}", artworkProfile);
-                    LOG.warn("Storage error", error);
-                }
+                artworkProfile.setWidth(width);
+                artworkProfile.setHeight(height);
+                artworkProfile.setApplyToMovie(applyToMovie);
+                artworkProfile.setApplyToSeries(applyToSeries);
+                artworkProfile.setApplyToSeason(applyToSeason);
+                artworkProfile.setApplyToEpisode(applyToEpisode);
+                artworkProfile.setApplyToPerson(applyToPerson);
+                artworkProfile.setApplyToBoxedSet(applyToBoxedSet);
+                artworkProfile.setPreProcess(preProcess);
+                artworkProfile.setRoundedCorners(roundedCorners);
+                artworkProfile.setReflection(reflection);
+                artworkProfile.setNormalize(normalize);
+                artworkProfile.setStretch(stretch);
+                this.artworkStorageService.saveArtworkProfile(artworkProfile);
             }
+        } catch (Exception e) {
+            LOG.error("Failed to initialize artwork profile: "+profileName+" ("+artworkType.name()+")", e);
         }
     }
+
 }

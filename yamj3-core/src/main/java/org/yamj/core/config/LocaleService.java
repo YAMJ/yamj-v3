@@ -284,6 +284,10 @@ public class LocaleService  {
         return null;
     }
     
+    public Locale getLocale() {
+        return yamjLocale;
+    }
+    
     public Locale getLocaleForConfig(String config) {
         if (StringUtils.isBlank(config)) {
             return yamjLocale;

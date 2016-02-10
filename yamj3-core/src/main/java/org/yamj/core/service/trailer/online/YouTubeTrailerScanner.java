@@ -97,7 +97,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
 
     @Override
     public List<TrailerDTO> getTrailers(VideoData videoData) {
-        Locale yamjLocale = localeService.getLocaleForConfig(null);
+        final Locale yamjLocale = localeService.getLocale();
 
         try {
             StringBuilder query = new StringBuilder();

@@ -46,37 +46,25 @@ import org.yamj.core.service.file.StorageType;
 public class ArtworkStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkStorageService.class);
+    
     @Autowired
     private ArtworkDao artworkDao;
     @Autowired
     private FileStorageService fileStorageService;
-    
-    @Transactional
-    public void storeArtworkProfile(ArtworkProfile newProfile) {
-        ArtworkProfile profile = artworkDao.getArtworkProfile(newProfile.getProfileName(), newProfile.getArtworkType());
-        if (profile == null) {
-            this.artworkDao.saveEntity(newProfile);
-            LOG.info("Stored: {}", newProfile);
-        } else {
-            // TODO what to do if profile changed? set generated values to update?
 
-            profile.setHeight(newProfile.getHeight());
-            profile.setWidth(newProfile.getWidth());
-            profile.setApplyToMovie(newProfile.isApplyToMovie());
-            profile.setApplyToSeries(newProfile.isApplyToSeries());
-            profile.setApplyToSeason(newProfile.isApplyToSeason());
-            profile.setApplyToEpisode(newProfile.isApplyToEpisode());
-            profile.setApplyToPerson(newProfile.isApplyToPerson());
-            profile.setApplyToBoxedSet(newProfile.isApplyToBoxedSet());
-            profile.setPreProcess(newProfile.isPreProcess());
-            profile.setRoundedCorners(newProfile.isRoundedCorners());
-            profile.setReflection(newProfile.isReflection());
-            profile.setNormalize(newProfile.isNormalize());
-            profile.setStretch(newProfile.isStretch());
-            
-            this.artworkDao.updateEntity(profile);
-            LOG.info("Updated: {}", profile);
-        }
+    @Transactional
+    public void saveArtworkProfile(ArtworkProfile artworkProfile) {
+        this.artworkDao.saveEntity(artworkProfile);
+    }
+
+    @Transactional
+    public void updateArtworkProfile(ArtworkProfile artworkProfile) {
+        this.artworkDao.updateEntity(artworkProfile);
+    }
+
+    @Transactional(readOnly = true)
+    public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
+        return artworkDao.getArtworkProfile(profileName, artworkType);
     }
 
     @Transactional(readOnly = true)

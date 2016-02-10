@@ -818,7 +818,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updatePerson(Person person, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, imdbLocale);
         if (StringUtils.isBlank(imdbPerson.getActorId())) {
             return ScanResult.NO_RESULT;
