@@ -9,6 +9,7 @@
             <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta charset="utf-8">
         </c:when>
         <c:when test="${param.sectionName == 'NAV'}">
             <!-- START header fixed navigation-->
