@@ -25,7 +25,6 @@ package org.yamj.core.service.artwork;
 import static org.yamj.core.service.artwork.ArtworkTools.SOURCE_UPLOAD;
 
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
@@ -42,23 +40,15 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.scheduling.IQueueProcessService;
-import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkLocatedProcessorService")
 @DependsOn("artworkInitialization")
-public class ArtworkLocatedProcessorService implements IQueueProcessService {
+public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkLocatedProcessorService.class);
-    
-    @Autowired
-    private ArtworkStorageService artworkStorageService;
-    @Autowired
-    private FileStorageService fileStorageService;
     
     @Override
     public void processQueueElement(QueueDTO queueElement) {
@@ -194,24 +184,12 @@ public class ArtworkLocatedProcessorService implements IQueueProcessService {
     }
     
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
-        final StorageType storageType = located.getArtwork().getStorageType();
-
-        LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());
-        BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
-
-        // set dimension of original image if not done before
-        if (located.getWidth() <= 0 || located.getHeight() <= 0) {
-            located.setWidth(imageGraphic.getWidth());
-            located.setHeight(imageGraphic.getHeight());
-        }
-
-        // draw the image
-        BufferedImage image = drawImage(imageGraphic, profile);
-
-        // store image on stage system
-        String cacheFilename = ArtworkTools.buildCacheFilename(located, profile);
-        fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageType(), profile.getQuality());
-
+        // build cache filename
+        final String cacheFilename = ArtworkTools.buildCacheFilename(located, profile);
+        
+        // create and store image
+        createAndStoreImage(located, profile, cacheFilename);
+        
         try {
             ArtworkGenerated generated = new ArtworkGenerated();
             generated.setArtworkLocated(located);
@@ -224,41 +202,11 @@ public class ArtworkLocatedProcessorService implements IQueueProcessService {
         } catch (Exception ex) {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
+            final StorageType storageType = located.getArtwork().getStorageType();
             fileStorageService.deleteFile(storageType, cacheFilename);
             throw ex;
         }
     }
-
-    private static BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
-        BufferedImage bi = imageGraphic;
-
-        // TODO more graphic options
-        
-        int origWidth = imageGraphic.getWidth();
-        int origHeight = imageGraphic.getHeight();
-        float ratio = profile.getRatio();
-        float rcqFactor = profile.getRounderCornerQuality();
-
-        if (profile.isNormalize()) {
-            if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
-            	// normalize image if below profile settings
-                bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * rcqFactor * ratio), (int) (origHeight * rcqFactor), bi);
-            } else {
-            	// normalize image
-                bi = GraphicTools.scaleToSizeNormalized((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
-            }
-        } else if (profile.isStretch()) {
-        	// stretch image
-            bi = GraphicTools.scaleToSizeStretch((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
-        } else if ((origWidth != profile.getWidth()) || (origHeight != profile.getHeight())) {
-        	// scale image to given size
-            bi = GraphicTools.scaleToSize((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
-        }
-
-        // return image
-        return bi;
-    }
-
 
     private static boolean checkArtworkQuality(ArtworkLocated located) {
         if (StringUtils.isNotBlank(located.getUrl())) {

@@ -24,38 +24,43 @@ package org.yamj.core.service.artwork;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.scheduling.IQueueProcessService;
-import org.yamj.core.service.file.StorageType;
 
 @Service("artworkGeneratedProcessorService")
 @DependsOn("artworkInitialization")
-public class ArtworkGeneratedProcessorService implements IQueueProcessService {
+public class ArtworkGeneratedProcessorService extends AbstractArtworkProcessorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkGeneratedProcessorService.class);
     
-    @Autowired
-    private ArtworkStorageService artworkStorageService;
-
     @Override
     public void processQueueElement(QueueDTO queueElement) {
         // get required generated artwork
         ArtworkGenerated generated = artworkStorageService.getRequiredArtworkGenerated(queueElement.getId());
-        final StorageType storageType = generated.getArtworkLocated().getArtwork().getStorageType();
         LOG.info("Process generated artwork: {}", generated);
 
-        // TODO
+        try {
+            // generate image
+            createAndStoreImage(generated.getArtworkLocated(), generated.getArtworkProfile(), generated.getCacheFilename());
+
+            // mark generated image as done
+            generated.setStatus(StatusType.DONE);
+        } catch (Exception ex) {
+            LOG.error("Failed to generate image for {}", generated);
+            LOG.warn("Image generation error", ex);
+
+            // mark generated image as error
+            generated.setStatus(StatusType.ERROR);
+        }
+        
+        this.artworkStorageService.updateArtworkGenerated(generated);
     }
 
     @Override
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
-        LOG.error("Failed processing of generated artwork "+queueElement.getId(), error);
-        
-        // TODO
+        // nothing to to cause just the generated artwork may not exist
     }
 }

@@ -275,6 +275,11 @@ public class ArtworkStorageService {
         }
     }
 
+    @Transactional
+    public void updateArtworkGenerated(ArtworkGenerated generated) {
+        this.artworkDao.updateEntity(generated);
+    }
+
     @Transactional(readOnly=true)
     public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
         return this.artworkDao.getArtworkLocated(artwork, source, hashCode);
