@@ -207,6 +207,11 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<QueueDTO> getArtworGeneratedQueue(final int maxResults) {
+        return artworkDao.getArtworkGeneratedQueue(maxResults);
+    }
+
+    @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("FROM ArtworkLocated loc ");
@@ -220,6 +225,19 @@ public class ArtworkStorageService {
         sb.append("WHERE loc.id = :id");
 
         List<ArtworkLocated> objects = this.artworkDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
+    }
+
+    @Transactional(readOnly = true)
+    public ArtworkGenerated getRequiredArtworkGenerated(Long id) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("FROM ArtworkGenerated gen ");
+        sb.append("JOIN FETCH gen.artworkLocated loc ");
+        sb.append("JOIN FETCH gen.artworkProfile profile ");
+        sb.append("JOIN FETCH loc.artwork art ");
+        sb.append("WHERE gen.id = :id");
+
+        List<ArtworkGenerated> objects = this.artworkDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -311,17 +329,15 @@ public class ArtworkStorageService {
                 located.setStatus(StatusType.UPDATED);
                 located.setCacheDirectory(null);
                 located.setCacheFilename(null);
-                this.updateArtworkLocated(located);
+                this.artworkDao.updateEntity(located);
             } else {
                 // check if one of the generated images is missing
                 for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
                     if (!fileStorageService.existsFile(storageType, generated.getCacheDirectory(), generated.getCacheFilename())) {
-                        LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
-
-                        // just set status of located to UPDATED
-                        located.setStatus(StatusType.UPDATED);
-                        this.updateArtworkLocated(located);
-                        break;
+                        LOG.trace("Mark generated artwork {} for UPDATE due missing generated image", generated.getId());
+                        // set status of generated to UPDATED
+                        generated.setStatus(StatusType.UPDATED);
+                        this.artworkDao.updateEntity(generated);
                     }
                 }
             }

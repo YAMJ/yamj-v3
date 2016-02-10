@@ -49,11 +49,11 @@ import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
 
-@Service("artworkProcessorService")
+@Service("artworkLocatedProcessorService")
 @DependsOn("artworkInitialization")
-public class ArtworkProcessorService implements IQueueProcessService {
+public class ArtworkLocatedProcessorService implements IQueueProcessService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkLocatedProcessorService.class);
     
     @Autowired
     private ArtworkStorageService artworkStorageService;
@@ -138,7 +138,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                 LOG.warn("Original image is not found: {}/{}", located.getCacheDirectory(), located.getCacheFilename());
                 LOG.trace("Image generation error", ex);
                 
-                // reset cache values and mark located artwork and reset to updated
+                // reset cache values and mark located artwork for update
                 located.setCacheDirectory(null);
                 located.setCacheFilename(null);
                 located.setStatus(StatusType.UPDATED);

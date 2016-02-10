@@ -23,9 +23,9 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-
 import javax.persistence.*;
-
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -240,6 +240,37 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     // EQUALITY CHECKS
 
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(getProfileName())
+                .append(getArtworkType().name())
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ArtworkProfile)) {
+            return false;
+        }
+        ArtworkProfile other = (ArtworkProfile) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getProfileName(), other.getProfileName())
+                .append(getArtworkType().name(), other.getArtworkType().name())
+                .isEquals();
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

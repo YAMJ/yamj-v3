@@ -24,25 +24,33 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "artwork_generated",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_GENERATED", columnNames = {"located_id", "profile_id"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_GENERATED", columnNames = {"located_id", "profile_id"}),
+    indexes = @Index(name = "IX_ARTWORKGENERATED_STATUS", columnList = "status")
 )
 public class ArtworkGenerated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 2326614430648326340L;
 
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "located_id", foreignKey = @ForeignKey(name = "FK_ARTWORKGENERATED_LOCATED"))
     private ArtworkLocated artworkLocated;
 
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "profile_id", foreignKey = @ForeignKey(name = "FK_ARTWORKGENERATED_PROFILE"))
@@ -108,5 +116,57 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
 
     public boolean isNotCached() {
         return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
+    }
+
+    // EQUALITY CHECKS
+    
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(getArtworkLocated())
+                .append(getArtworkProfile())
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ArtworkGenerated)) {
+            return false;
+        }
+        ArtworkGenerated other = (ArtworkGenerated) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getArtworkLocated(), other.getArtworkLocated())
+                .append(getArtworkProfile(), other.getArtworkProfile())
+                .isEquals();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ArtworkGnerated [ID=");
+        sb.append(getId());
+        if (Hibernate.isInitialized(getArtworkLocated())) {
+            sb.append(", located=");
+            sb.append(getArtworkLocated().getId());
+        }
+        if (Hibernate.isInitialized(getArtworkProfile())) {
+            sb.append(", profile=");
+            sb.append(getArtworkProfile().getProfileName());
+            sb.append(", artworkType=");
+            sb.append(getArtworkProfile().getArtworkType());
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

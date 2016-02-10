@@ -140,6 +140,35 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
+    public List<QueueDTO> getArtworkGeneratedQueue(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT gen.id, gen.create_timestamp, gen.update_timestamp ");
+        sql.append("FROM artwork_generated gen ");
+        sql.append("JOIN artwork_located loc on loc.id=gen.located_id and loc.status='DONE'" );
+        sql.append("WHERE gen.status in ('NEW','UPDATED')");
+        
+        SQLQuery query = currentSession().createSQLQuery(sql.toString());
+        query.setReadOnly(true);
+        query.setCacheable(true);
+        if (maxResults > 0) {
+            query.setMaxResults(maxResults);
+        }
+        List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
+        for (Object[] object : objects) {
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
+            queueElement.setDate(convertRowElementToDate(object[2]));
+            if (queueElement.getDate() == null) {
+                queueElement.setDate(convertRowElementToDate(object[1]));
+            }
+            queueElements.add(queueElement);
+        }
+
+        Collections.sort(queueElements);
+        return queueElements;
+    }
+
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         Criteria criteria = currentSession().createCriteria(Artwork.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));

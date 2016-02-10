@@ -35,7 +35,8 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.ArtworkProcessorService;
+import org.yamj.core.service.artwork.ArtworkGeneratedProcessorService;
+import org.yamj.core.service.artwork.ArtworkLocatedProcessorService;
 
 @Component
 public class ArtworkProcessScheduler extends AbstractQueueScheduler {
@@ -48,7 +49,9 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
-    private ArtworkProcessorService artworkProcessorService;
+    private ArtworkLocatedProcessorService artworkLocatedProcessorService;
+    @Autowired
+    private ArtworkGeneratedProcessorService artworkGeneratedProcessorService;
 
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
@@ -88,15 +91,26 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
         }
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
-        List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
-        if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.trace("No artwork found to process");
-            watchProcess.set(false);
-            return;
-        }
 
-        LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), maxThreads);
-        threadedProcessing(queueElements, maxThreads, artworkProcessorService);
+        // process located artwork
+        List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
+        if (CollectionUtils.isNotEmpty(queueElements)) {
+            LOG.info("Found {} artwork located objects to process; process with {} threads", queueElements.size(), maxThreads);
+            threadedProcessing(queueElements, maxThreads, artworkLocatedProcessorService);
+        } else {
+            // process generated artwork if no located artwork found for processing anymore
+            queueElements = artworkStorageService.getArtworGeneratedQueue(maxResults);
+
+            if (CollectionUtils.isEmpty(queueElements)) {
+                LOG.trace("No artwork found to process");
+                watchProcess.set(false);
+                return;
+            }
+            
+            LOG.info("Found {} artwork generated objects to process; process with {} threads", queueElements.size(), maxThreads);
+            threadedProcessing(queueElements, maxThreads, artworkGeneratedProcessorService);
+            
+        }
 
         LOG.debug("Finished artwork processing");
     }
