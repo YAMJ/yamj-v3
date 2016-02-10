@@ -58,14 +58,14 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
 
         try {
             int count = this.artworkStorageService.generateImagesForProfile(id);
-            LOG.debug("Trigger rescan for {} generated images", count);
     
             if (count > 0) {
-                // trigger artwork processing when something was updated
+                LOG.debug("Trigger rescan for {} generated images", count);
                 artworkProcessScheduler.triggerProcess();
-            }
-            
-            view.addObject(SUCCESS_MESSAGE, "Triggered regeneration of "+count+" images");
+                view.addObject(SUCCESS_MESSAGE, "Triggered regeneration of "+count+" images");
+            } else {
+                view.addObject(SUCCESS_MESSAGE, "No image regeneration needed");
+            }            
         } catch (Exception ex) {
             LOG.error("Failed generation trigger for profile "+id, ex);
             view.addObject(ERROR_MESSAGE, "Failed regeneration trigger of images");
