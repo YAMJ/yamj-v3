@@ -25,12 +25,7 @@
                 <th style="vertical-align:top" class="center">Artwork<br>Type</th>
                 <th style="vertical-align:top" class="center">Width</th>
                 <th style="vertical-align:top" class="center">Height</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Movie</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Series</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Season</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Episode</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Person</th>
-                <th style="vertical-align:top" class="center">Apply to<br>Boxset</th>
+                <th style="vertical-align:top" class="center">Apply To</th>
                 <th style="vertical-align:top" class="center">PreProcess</th>
 				<th style="vertical-align:top" class="center">Normalize</th>
 				<th style="vertical-align:top" class="center">Stretch</th>
@@ -45,34 +40,29 @@
                         <td class="center">${profile.width}</td>
                         <td class="center">${profile.height}</td>
                         <td class="center">
-    						<c:if test="${profile.applyToMovie == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
-	                    </td>
-                        <td class="center">
-    						<c:if test="${profile.applyToSeries == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
-                        </td>
-                        <td class="center">
-    						<c:if test="${profile.applyToSeason == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
-                        </td>
-                        <td class="center">
-    						<c:if test="${profile.applyToEpisode == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
-                        </td>
-                        <td class="center">
-    						<c:if test="${profile.applyToPerson == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
-                        </td>
-                        <td class="center">
-    						<c:if test="${profile.applyToBoxedSet == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
-	                        </c:if>
+                        	<c:if test="${profile.artworkType == 'VIDEOIMAGE'}">
+                        	    &nbsp;Episode&nbsp;
+							</c:if>                        	 
+                        	<c:if test="${profile.artworkType == 'PHOTO'}">
+		                        &nbsp;Person&nbsp;
+							</c:if>
+                        	<c:if test="${profile.artworkType == 'FANART'}">
+		   						<c:if test="${profile.applyToMovie == true}">&nbsp;Movie&nbsp;</c:if>
+		   						<c:if test="${profile.applyToSeries == true}">&nbsp;Series&nbsp;</c:if>
+		   						<c:if test="${profile.applyToSeason == true}">&nbsp;Season&nbsp;</c:if>
+		   						<c:if test="${profile.applyToBoxedSet == true}">&nbsp;BoxSet&nbsp;</c:if>
+							</c:if>
+                        	<c:if test="${profile.artworkType == 'POSTER'}">
+		   						<c:if test="${profile.applyToMovie == true}">&nbsp;Movie&nbsp;</c:if>
+		   						<c:if test="${profile.applyToSeries == true}">&nbsp;Series&nbsp;</c:if>
+		   						<c:if test="${profile.applyToSeason == true}">&nbsp;Season&nbsp;</c:if>
+		   						<c:if test="${profile.applyToBoxedSet == true}">&nbsp;BoxSet&nbsp;</c:if>
+							</c:if>
+                        	<c:if test="${profile.artworkType == 'BANNER'}">
+		   						<c:if test="${profile.applyToSeries == true}">&nbsp;Series&nbsp;</c:if>
+		   						<c:if test="${profile.applyToSeason == true}">&nbsp;Season&nbsp;</c:if>
+		   						<c:if test="${profile.applyToBoxedSet == true}">&nbsp;BoxSet&nbsp;</c:if>
+							</c:if>
                         </td>
                         <td class="center">
     						<c:if test="${profile.preProcess == true}">
