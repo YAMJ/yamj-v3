@@ -57,15 +57,26 @@ public class TaskPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/enqueue/{name}", method = RequestMethod.GET)
     public ModelAndView taskExecute(@PathVariable String name) {
-        ModelAndView view = new ModelAndView("redirect:/task/list");
+        String errorMessage = null;
+        String successMessage = null;
         if (StringUtils.isNotBlank(name)) {
             ExecutionTask task = executionTaskStorageService.getExecutionTask(name);
             if (task != null) {
                 LocalDateTime nextExec = LocalDateTime.fromDateFields(task.getNextExecution());
                 task.setNextExecution(nextExec.minusYears(2).toDate());
                 this.executionTaskStorageService.updateEntity(task);
+                successMessage = "Enqueued task '"+name+"'";
+            } else {
+                errorMessage = "Task name '"+name+"' not found";
             }
+        } else {
+            errorMessage = "No valid task name provided";
         }
+        
+        ModelAndView view = withInfo(new ModelAndView("task/task-list"));
+        view.addObject("tasklist", executionTaskStorageService.getAllTasks());
+        view.addObject(ERROR_MESSAGE, errorMessage);
+        view.addObject(SUCCESS_MESSAGE, successMessage);
         return view;
     }
 
@@ -95,7 +106,7 @@ public class TaskPagesController extends AbstractPagesController {
     }
 
     @RequestMapping(value = "/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView configEditUpdate(@ModelAttribute("task") TaskForm taskForm) {
+    public ModelAndView taskEditUpdate(@ModelAttribute("task") TaskForm taskForm) {
         LOG.trace("Submitted form: {}", taskForm);
         
         // holds the error message
@@ -134,7 +145,7 @@ public class TaskPagesController extends AbstractPagesController {
         
         ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
         taskForm.setNextExecDate(DATEPICKER_FORMAT.format(executionTask.getNextExecution()));
-        taskForm.setErrorMessage(errorMessage);
+        view.addObject(ERROR_MESSAGE, errorMessage);
         view.addObject("task", taskForm);
         return view;
     }

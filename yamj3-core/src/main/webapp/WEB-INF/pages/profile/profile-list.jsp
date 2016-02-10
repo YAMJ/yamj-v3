@@ -22,7 +22,7 @@
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
                 <th style="vertical-align:top">Name</th>
-                <th style="vertical-align:top" class="center">Artwork<br>Type</th>
+                <th style="vertical-align:top" class="center">Artwork<br/>Type</th>
                 <th style="vertical-align:top" class="center">Width</th>
                 <th style="vertical-align:top" class="center">Height</th>
                 <th style="vertical-align:top" class="center">Apply To</th>
@@ -30,7 +30,8 @@
 				<th style="vertical-align:top" class="center">Normalize</th>
 				<th style="vertical-align:top" class="center">Stretch</th>
 				<th style="vertical-align:top" class="center">Reflection</th>
-				<th style="vertical-align:top" class="center">Rounded<br>Corners<th>
+				<th style="vertical-align:top" class="center">Rounded<br/>Corners</th>
+				<th/>
             </tr>
             <tbody>
                 <c:forEach items="${profilelist}" var="profile" varStatus="row">
@@ -66,34 +67,52 @@
                         </td>
                         <td class="center">
     						<c:if test="${profile.preProcess == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
+    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
 	                        </c:if>
                         </td>
                         <td class="center">
     						<c:if test="${profile.normalize == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
+    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
 	                        </c:if>
                         </td>
                         <td class="center">
     						<c:if test="${profile.stretch == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
+    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
 	                        </c:if>
                         </td>
                         <td class="center">
     						<c:if test="${profile.reflection == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
+    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
 	                        </c:if>
                         </td>
                         <td class="center">
     						<c:if test="${profile.roundedCorners == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px">
+    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
 	                        </c:if>
+                        <td class="center" style="width:1%">
+                           <span style="white-space:nowrap">
+                            <a href="${pageContext.request.contextPath}/profile/edit/${task.name}.html" class="btn info">Edit</a>
+                            <a href="${pageContext.request.contextPath}/profile/generate/${profile.id}.html" class="btn info">Regenerate</a>
+                           </span>
                         </td>
                     </tr>
                 </c:forEach>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="11" class="right">
+                        <c:if test="${errorMessage != null}">
+                        <span id="messageError" style="align:right">${errorMessage}</span>
+                        </c:if>
+                        <c:if test="${successMessage != null}">
+                        <span id="messageSuccess" style="align:right">${successMessage}</span>
+                        </c:if>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-
+        <p color="green">${successMessage}</p>
+        
         <!-- Import the footer -->
         <c:import url="../template.jsp">
             <c:param name="sectionName" value="FOOTER" />

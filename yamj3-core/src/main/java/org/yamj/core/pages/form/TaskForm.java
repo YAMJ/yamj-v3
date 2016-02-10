@@ -32,7 +32,6 @@ public class TaskForm {
     private String interval;
     private String delay;
     private String nextExecDate;
-    private String errorMessage;
     
     public String getName() {
         return name;
@@ -72,14 +71,6 @@ public class TaskForm {
 
     public void setNextExecDate(String nextExecDate) {
         this.nextExecDate = nextExecDate;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
     @Override

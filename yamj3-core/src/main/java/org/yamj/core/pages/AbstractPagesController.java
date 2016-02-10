@@ -29,6 +29,9 @@ import org.yamj.core.api.json.SystemInfoController;
 
 public abstract class AbstractPagesController {
 
+    protected static final String ERROR_MESSAGE = "errorMessage";
+    protected static final String SUCCESS_MESSAGE = "successMessage";
+    
     @Autowired
     protected SystemInfoController systemInfoController;
     

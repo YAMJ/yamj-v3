@@ -19,7 +19,7 @@
         <div id="logo">
             <h2>Edit Player</h2>
         </div>
-        <p id="message">Enter the new values required</p>
+        <p id="messageInfo">Enter the new values required</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/edit/${player.id}.html">
         	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>

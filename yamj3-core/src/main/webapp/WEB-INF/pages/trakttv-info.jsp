@@ -71,10 +71,21 @@
                     <tr>
                         <td colspan="2" class="center">
                             <input type="submit" value="Authorize with PIN" class="btn info"><br>
-                            <font color="red">${trakttv.errorMessage}</font>
                         </td>
                     </tr>
                 </tbody>
+	            <tfoot>
+	                <tr>
+	                    <td colspan="2" class="center">
+	                        <c:if test="${errorMessage != null}">
+	                        <span id="messageError" style="align:right">${errorMessage}</span>
+	                        </c:if>
+	                        <c:if test="${successMessage != null}">
+	                        <span id="messageSuccess" style="align:right">${successMessage}</span>
+	                        </c:if>
+	                    </td>
+	                </tr>
+	            </tfoot>
             </table>
         </form:form>        
         </c:if>

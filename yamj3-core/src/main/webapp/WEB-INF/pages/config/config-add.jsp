@@ -19,7 +19,7 @@
         <div id="logo">
             <h2>Add Configuration Entry</h2>
         </div>
-        <p id="message">Enter the property configuration key and value</p>
+        <p id="messageInfo">Enter the property configuration key and value</p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/add/process.html">
         	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>

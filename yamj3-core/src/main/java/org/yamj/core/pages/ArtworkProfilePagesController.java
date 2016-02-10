@@ -22,23 +22,55 @@
  */
 package org.yamj.core.pages;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.scheduling.ArtworkProcessScheduler;
 
 @Controller
 @RequestMapping(value = "/profile")
 public class ArtworkProfilePagesController extends AbstractPagesController {
  
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkProfilePagesController.class);
+
     @Autowired
     private ArtworkStorageService artworkStorageService;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler;
     
     @RequestMapping("/list")
     public ModelAndView profileList() {
         ModelAndView view = withInfo(new ModelAndView("profile/profile-list"));
         view.addObject("profilelist", artworkStorageService.getAllArtworkProfiles());
+        return view;
+    }
+
+    @RequestMapping(value = "/generate/{id}", method = RequestMethod.GET)
+    public ModelAndView generate(@PathVariable long id) {
+        ModelAndView view = withInfo(new ModelAndView("profile/profile-list"));
+        view.addObject("profilelist", artworkStorageService.getAllArtworkProfiles());
+
+        try {
+            int count = this.artworkStorageService.generateImagesForProfile(id);
+            LOG.debug("Trigger rescan for {} generated images", count);
+    
+            if (count > 0) {
+                // trigger artwork processing when something was updated
+                artworkProcessScheduler.triggerProcess();
+            }
+            
+            view.addObject(SUCCESS_MESSAGE, "Triggered regeneration of "+count+" images");
+        } catch (Exception ex) {
+            LOG.error("Failed generation trigger for profile "+id, ex);
+            view.addObject(ERROR_MESSAGE, "Failed regeneration trigger of images");
+        }
+
         return view;
     }
 }

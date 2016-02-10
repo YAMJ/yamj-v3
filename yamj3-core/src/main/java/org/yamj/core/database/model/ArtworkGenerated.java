@@ -154,7 +154,7 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("ArtworkGnerated [ID=");
+        sb.append("ArtworkGenerated [ID=");
         sb.append(getId());
         if (Hibernate.isInitialized(getArtworkLocated())) {
             sb.append(", located=");

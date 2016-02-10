@@ -23,7 +23,7 @@
         <div id="logo">
             <h2>Edit Execution Task</h2>
         </div>
-        <p id="message">Enter the new values required</p>
+        <p id="messageInfo">Enter the new values required</p>
         <form:form method="POST" commandName="task" action="${pageContext.request.contextPath}/task/edit/${task.name}.html">
         	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>
@@ -66,10 +66,21 @@
                     <td class="left">
                         <input type="submit" name="update" class="btn info" value="Update" >  
                         <a href="${pageContext.request.contextPath}/task/list.html" class="btn info">Cancel</a><br>
-                        <font color="red">${task.errorMessage}</font>
                     </td>
                 </tr>
             </table>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="right">
+                        <c:if test="${errorMessage != null}">
+                        <span id="messageError" style="align:right">${errorMessage}</span>
+                        </c:if>
+                        <c:if test="${successMessage != null}">
+                        <span id="messageSuccess" style="align:right">${successMessage}</span>
+                        </c:if>
+                    </td>
+                </tr>
+            </tfoot>
         </form:form>
 
         <!-- Import the footer -->

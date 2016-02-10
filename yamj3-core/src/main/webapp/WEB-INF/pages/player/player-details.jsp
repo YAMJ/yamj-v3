@@ -53,9 +53,11 @@
                 <tr>
                     <td>${entry.sourcePath}</td>
                     <td>${entry.targetPath}</td>
-                    <td class="center">
+                    <td class="center" style="width:1%">
+                        <span style="white-space:nowrap">
                         <a href="${pageContext.request.contextPath}/player/edit-path/${player.id}/${entry.id}.html" class="btn info">Edit</a>
                         <a href="${pageContext.request.contextPath}/player/delete-path/${player.id}/${entry.id}.html" class="btn info">Delete</a>
+                        </span>
                     </td>
                 </tr>
             </c:forEach>

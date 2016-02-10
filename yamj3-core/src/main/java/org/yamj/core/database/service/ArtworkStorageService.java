@@ -22,9 +22,7 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -349,5 +347,32 @@ public class ArtworkStorageService {
         }
         
         return newLastId;
+    }
+    
+    @Transactional
+    public int generateImagesForProfile(long id) {
+        ArtworkProfile profile = artworkDao.getById(ArtworkProfile.class, id);
+        if (profile == null) {
+            // nothing to do if no profile found
+            return 0;
+        }
+        
+        Date profileDate = profile.getCreateTimestamp();
+        if (profile.getUpdateTimestamp() != null) {
+            profileDate = profile.getUpdateTimestamp();
+        }
+       
+        final StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ArtworkGenerated gen ");
+        sb.append("SET status='UPDATED' ");
+        sb.append("WHERE gen.artworkProfile.id=:id ");
+        sb.append("AND gen.status != 'UPDATED' ");
+        sb.append("AND ((gen.updateTimestamp is null and gen.createTimestamp<=:profileDate) OR ");
+        sb.append("     (gen.updateTimestamp is not null and gen.updateTimestamp<=:profileDate)) ");
+
+        Map<String,Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("profileDate", profileDate);
+        return this.artworkDao.executeUpdate(sb, params);
     }
 }

@@ -36,10 +36,12 @@
                         <td>${entry.deviceType}</td>
                         <td>${entry.ipAddress}</td>
                         <td>${fn:length(entry.paths)}</td>
-                        <td style="width:15%" class="center">
+                        <td class="center" style="width:1%">
+                           <span style="white-space:nowrap">
                             <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info">Edit</a>
                             <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info">Delete</a>
                             <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info">Add Path</a>
+                            </span>
                         </td>
                     </tr>
                 </c:forEach>

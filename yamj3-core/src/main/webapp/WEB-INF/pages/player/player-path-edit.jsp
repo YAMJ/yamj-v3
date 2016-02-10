@@ -38,7 +38,7 @@
             </tr>
         </table>
 
-        <p id="message">Edit the values required</p>
+        <p id="messageInfo">Edit the values required</p>
         <form:form method="POST" commandName="path" action="${pageContext.request.contextPath}/player/edit-path/${player.id}/${path.id}.html">
           	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>

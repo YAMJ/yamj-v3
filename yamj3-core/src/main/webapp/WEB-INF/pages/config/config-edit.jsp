@@ -19,7 +19,7 @@
         <div id="logo">
             <h2>Edit Configuration</h2>
         </div>
-        <p id="message">Enter the new values required</p>
+        <p id="messageInfo">Enter the new values required</p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/edit/${config.key}.html">
         	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>

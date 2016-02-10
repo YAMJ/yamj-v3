@@ -81,13 +81,6 @@ body {
     border-bottom:1px solid #111111;
 }
 
-#message
-{
-    text-align:center;
-    font-weight: bold;
-    color: tomato;
-}
-
 #tablelist th.span, #tablelist td.span, #headertable th.span, #headertable td.span
 {
     column-span: all;
@@ -117,4 +110,21 @@ h1 {
     margin-bottom: 18px;
     font-size: 30px;
     line-height: 36px;
+}
+
+#messageInfo 
+{
+    text-align:center;
+    font-weight: bold;
+    color: tomato;
+}
+
+#messageError {
+    font-weight: bold;
+    color: #ff3030;
+}
+
+#messageSuccess {
+    font-weight: bold;
+    color: #66cd00;
 }

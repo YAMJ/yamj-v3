@@ -27,7 +27,7 @@
                 <th>Delay</th>
                 <th>Last Execution</th>
                 <th>Next Execution</th>
-                <th style="width:10%">&nbsp;</th>
+                <th/>
             </tr>
             <tbody>
                 <c:forEach items="${tasklist}" var="task" varStatus="row">
@@ -38,13 +38,27 @@
                         <td>${task.delay}</td>
                         <td>${task.lastExecution}</td>
                         <td>${task.nextExecution}</td>
-                        <td style="width:10%" class="center">
+                        <td class="center" style="width:1%">
+                           <span style="white-space:nowrap">
                             <a href="${pageContext.request.contextPath}/task/edit/${task.name}.html" class="btn info">Edit</a>
                             <a href="${pageContext.request.contextPath}/task/enqueue/${task.name}.html" class="btn info">Enqueue</a>
+                            </span>
                         </td>
                     </tr>
                 </c:forEach>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7" class="right">
+                        <c:if test="${errorMessage != null}">
+                        <span id="messageError" style="align:right">${errorMessage}</span>
+                        </c:if>
+                        <c:if test="${successMessage != null}">
+                        <span id="messageSuccess" style="align:right">${successMessage}</span>
+                        </c:if>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <!-- Import the footer -->

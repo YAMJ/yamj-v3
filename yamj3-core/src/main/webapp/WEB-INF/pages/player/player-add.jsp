@@ -19,7 +19,7 @@
         <div id="logo">
             <h2>Add Player Entry</h2>
         </div>
-        <p id="message" class="center">Enter the player information</p>
+        <p id="messageInfo" class="center">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
         	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
                 <tr>
