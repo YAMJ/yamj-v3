@@ -1,6 +1,7 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,16 +18,16 @@
         </c:import>
 
         <div id="logo">
-            <h2>Skin Listing</h2>
+            <h2><spring:message code="page.skin.title.info"/></h2>
         </div>
         <table id="tablelist" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
-                <th style="width:10%">Skin Name</th>
-                <th style="width:5%" >Version</th>
-                <th style="width:15%">Image</th>
-                <th style="width:30%">Skin Description</th>
-                <th style="width:20%">Location</th>
-                <th style="width:10%">Support</th>
+                <th style="width:10%"><spring:message code="page.skin.label.skin.name"/></th>
+                <th style="width:5%" ><spring:message code="page.skin.label.skin.version"/></th>
+                <th style="width:15%"><spring:message code="page.skin.label.skin.image"/></th>
+                <th style="width:30%"><spring:message code="page.skin.label.skin.description"/></th>
+                <th style="width:20%"><spring:message code="page.skin.label.skin.location"/></th>
+                <th style="width:10%"><spring:message code="page.skin.label.skin.support"/></th>
             </tr>
             <c:forEach items="${skins}" var="skin">
                 <tr>
@@ -35,7 +36,7 @@
                     <td class="center">
                         <c:choose>
                             <c:when test="${empty skin.image}">
-                                No Image
+                                <spring:message code="page.skin.no.image"/>
                             </c:when>
                             <c:otherwise>
                                 <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
@@ -53,10 +54,10 @@
                     <td class="center">
                         <c:choose>
                             <c:when test="${empty skin.supportUrl}">
-                                No URL
+                                <spring:message code="page.skin.no.url"/>
                             </c:when>
                             <c:otherwise>
-                                <a href="${skin.supportUrl}" target="_blank">Click here</a>
+                                <a href="${skin.supportUrl}" target="_blank"><spring:message code="page.skin.button.click.here"/></a>
                             </c:otherwise>
                         </c:choose>
                     </td>
@@ -68,11 +69,11 @@
             <table id="headertable" class="hero-unit" style="width:40%; margin: auto;">
                 <tbody>
                     <tr>
-                        <td class="right"><label for="sourceUrl"><b>URL to download:</b></label></td>
+                        <td class="right"><label for="sourceUrl"><b><spring:message code="page.skin.label.download.url"/>:</b></label></td>
                         <td class="center"><input class="span4" id="sourceUrl" name="sourceUrl" type="text" value="" size="90"></td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="center"><input type="submit" value="Add skin" class="btn info"></td>
+                        <td colspan="2" class="center"><input type="submit" value="<spring:message code="page.skin.button.add.skin"/>" class="btn info"></td>
                     </tr>
                 </tbody>
             </table>

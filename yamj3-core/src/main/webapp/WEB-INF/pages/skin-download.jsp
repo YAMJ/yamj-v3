@@ -1,5 +1,6 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,13 +17,13 @@
         </c:import>
 
         <div id="logo">
-            <h2>Skin Download Page</h2>
+            <h2><spring:message code="page.skin.title.download"/></h2>
         </div>
         <table class="headertable" style="width: 90%; margin:auto;">
             <tr>
-                <th style="width: 30%">Skin Name</th>
-                <th style="width: 10%">Skin Version</th>
-                <th style="width: 10%">Skin Date</th>
+                <th style="width: 30%"><spring:message code="page.skin.label.skin.name"/></th>
+                <th style="width: 10%"><spring:message code="page.skin.label.skin.version"/></th>
+                <th style="width: 10%"><spring:message code="page.skin.label.skin.date"/></th>
             </tr>
             <tr>
                 <td>${skin.name}</td>
@@ -33,7 +34,7 @@
                 <td colspan="3">
                     <c:choose>
                         <c:when test="${empty skin.image}">
-                            No Image
+                            <spring:message code="page.skin.no.image"/>
                         </c:when>
                         <c:otherwise>
                             <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
@@ -51,15 +52,15 @@
                 </td>
             </tr>
             <tr>
-                <th style="width: 10%">Path</th>
+                <th style="width: 10%"><spring:message code="page.skin.label.skin.location"/></th>
                 <td style="width: 40%" colspan="2">${skin.path}</td>
             </tr>
             <tr>
-                <th style="width: 10%">Source URL</th>
+                <th style="width: 10%"><spring:message code="page.skin.label.skin.source"/></th>
                 <td style="width: 40%" colspan="2">${skin.sourceUrl}</td>
             </tr>
             <tr>
-                <th style="width: 10%">Support URL</th>
+                <th style="width: 10%"><spring:message code="page.skin.label.skin.support"/></th>
                 <td style="width: 40%" colspan="2">${skin.supportUrl}</td>
             </tr>
         </table>

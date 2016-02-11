@@ -18,10 +18,10 @@
                 <div class="container-fluid">
                     <a href="${pageContext.request.contextPath}/" class="brand"><img alt="YAMJ Logo" src="${pageContext.request.contextPath}/images/YAMJ-logo-120-white-reflectv3.png"></a>
                     <ul class="nav">
-                        <li><a href="${pageContext.request.contextPath}/"><i class="fa fa-home fa-2x"></i><spring:message code="nav.home"/></a></li>
-                        <li><a href="${pageContext.request.contextPath}/skin-info.html"><i class="fa fa-ticket fa-2x"></i><spring:message code="nav.skins"/></a></li>
-                        <li><a href="${pageContext.request.contextPath}/config/list.html"><i class="fa fa-cogs fa-2x"></i><spring:message code="nav.config"/></a></li>
-                        <li><a href="http://www.networkedmediatank.com/forumdisplay.php?fid=139"><i class="fa fa-comments-o fa-2x"></i><spring:message code="nav.forum"/></a></li>
+                        <li><a href="${pageContext.request.contextPath}/"><i class="fa fa-home fa-2x"></i><spring:message code="title.home"/></a></li>
+                        <li><a href="${pageContext.request.contextPath}/skin-info.html"><i class="fa fa-ticket fa-2x"></i><spring:message code="title.skins"/></a></li>
+                        <li><a href="${pageContext.request.contextPath}/config/list.html"><i class="fa fa-cogs fa-2x"></i><spring:message code="title.config"/></a></li>
+                        <li><a href="http://www.networkedmediatank.com/forumdisplay.php?fid=139"><i class="fa fa-comments-o fa-2x"></i><spring:message code="title.forums"/></a></li>
                     </ul>
                 </div>
             </div>

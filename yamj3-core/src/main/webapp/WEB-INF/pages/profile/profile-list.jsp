@@ -27,8 +27,7 @@
                 <th style="vertical-align:top" class="center">Height</th>
                 <th style="vertical-align:top" class="center">Apply To</th>
                 <th style="vertical-align:top" class="center">PreProcess</th>
-				<th style="vertical-align:top" class="center">Normalize</th>
-				<th style="vertical-align:top" class="center">Stretch</th>
+				<th style="vertical-align:top" class="center">Scaling</th>
 				<th style="vertical-align:top" class="center">Reflection</th>
 				<th style="vertical-align:top" class="center">Rounded<br/>Corners</th>
 				<th/>
@@ -71,14 +70,11 @@
 	                        </c:if>
                         </td>
                         <td class="center">
-    						<c:if test="${profile.normalize == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
-	                        </c:if>
-                        </td>
-                        <td class="center">
-    						<c:if test="${profile.stretch == true}">
-    						   <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
-	                        </c:if>
+                        	<c:choose>
+                        		<c:when test="${profile.normalize == true}">Normalize</c:when>
+    							<c:when test="${profile.stretch == true}">Stretch</c:when>
+    						   	<c:otherwise>None</c:otherwise>
+	                        </c:choose>
                         </td>
                         <td class="center">
     						<c:if test="${profile.reflection == true}">
