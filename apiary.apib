@@ -1593,6 +1593,139 @@ GET /api/artwork/list
 }
 
 
+Get a list of artwork profiles
+***
+
+__Example__: `http://localhost:8888/yamj3/api/artwork/profiles`
+
+GET /api/artwork/profiles
+< 200
+< Content-Type: application/json
+{
+    "count": 5,
+    "totalCount": 5,
+    "queryDuration": "1ms",
+    "queryTime": "2016-02-11 14:51:45 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": null,
+    "baseArtworkUrl": "http://10.0.36.13:8888/artwork/",
+    "baseMediainfoUrl": "http://10.0.36.13:8888/mediainfo/",
+    "basePhotoUrl": "http://10.0.36.13:8888/photo/",
+    "baseTrailerUrl": "http://10.0.36.13:8888/trailer/",
+    "results": [
+        {
+            "id": 3,
+            "name": "default-banner",
+            "artworkType": "BANNER",
+            "width": 650,
+            "height": 120,
+            "applyTo": [
+                "SERIES",
+                "SEASON",
+                "BOXSET"
+            ],
+            "preProcess": true,
+            "normalize": true,
+            "stretch": false,
+            "reflection": false,
+            "roundedCorners": false
+        },
+        {
+            "id": 1,
+            "name": "default-fanart",
+            "artworkType": "FANART",
+            "width": 1280,
+            "height": 720,
+            "applyTo": [
+                "MOVIE",
+                "SERIES",
+                "SEASON",
+                "BOXSET"
+            ],
+            "preProcess": true,
+            "normalize": true,
+            "stretch": false,
+            "reflection": false,
+            "roundedCorners": false
+        },
+        {
+            "id": 5,
+            "name": "default-photo",
+            "artworkType": "PHOTO",
+            "width": 200,
+            "height": 300,
+            "applyTo": [
+                "PERSON"
+            ],
+            "preProcess": true,
+            "normalize": true,
+            "stretch": false,
+            "reflection": false,
+            "roundedCorners": false
+        },
+        {
+            "id": 2,
+            "name": "default-poster",
+            "artworkType": "POSTER",
+            "width": 224,
+            "height": 332,
+            "applyTo": [
+                "MOVIE",
+                "SERIES",
+                "SEASON",
+                "BOXSET"
+            ],
+            "preProcess": true,
+            "normalize": true,
+            "stretch": false,
+            "reflection": false,
+            "roundedCorners": false
+        },
+        {
+            "id": 4,
+            "name": "default-videoimage",
+            "artworkType": "VIDEOIMAGE",
+            "width": 400,
+            "height": 225,
+            "applyTo": [
+                "EPISODE"
+            ],
+            "preProcess": true,
+            "normalize": true,
+            "stretch": false,
+            "reflection": false,
+            "roundedCorners": false
+        }
+    ]
+}
+
+Regenerate images for an artwork profile.
+***
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of artwork profile.</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/artwork/regenerate/2`
+
+GET /api/artwork/regenerate/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Trigger regeneration of 32 images"
+}
+
+
 Ignore a located artwork.
 ***
 
