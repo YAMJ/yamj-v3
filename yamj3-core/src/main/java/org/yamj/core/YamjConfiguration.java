@@ -27,12 +27,11 @@ import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import java.util.List;
 import java.util.Properties;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -40,15 +39,22 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.config.LocaleService;
 
 @Configuration
 @EnableScheduling
 @ComponentScan("org.yamj.core")
 public class YamjConfiguration extends WebMvcConfigurationSupport {
 
+    @Autowired
+    private LocaleService localeService;
+    
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/favicon.ico").addResourceLocations("WEB-INF/images/favicon.ico/").setCachePeriod(60);
@@ -86,15 +92,6 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
     }
 
     @Bean
-    public MessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames("/WEB-INF/i18n/messages");
-        messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setFallbackToSystemLocale(false);
-        return messageSource;
-    }
-    
-    @Bean
     public static PropertyPlaceholderConfigurer propertyConfigurer() {
         final String yamjHome = System.getProperty("yamj3.home", ".");
         
@@ -120,5 +117,29 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         commonsMultipartResolver.setDefaultEncoding("UTF-8");
         commonsMultipartResolver.setMaxUploadSize(50000000);
         return commonsMultipartResolver;
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasenames("/WEB-INF/i18n/messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setFallbackToSystemLocale(false);
+        return messageSource;
+    }
+
+    @Bean
+    @DependsOn("localeService")
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+        localeResolver.setDefaultLocale(localeService.getLocale());
+        return localeResolver;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+        interceptor.setParamName("language");
+        registry.addInterceptor(interceptor);
     }
 }

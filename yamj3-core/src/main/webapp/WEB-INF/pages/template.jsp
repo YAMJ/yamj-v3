@@ -39,7 +39,7 @@
         <table class="footer" style="margin: auto;">
         <tbody>
             <tr>
-                <td style="width:20%">Yet Another Movie Jukebox</td>
+                <th style="width:20%">Yet Another Movie Jukebox</th>
                 <th style="width:10%">Revision</th>
                 <th style="width:10%">Java</th>
                 <th style="width:15%"><spring:message code="footer.builddate"/></th>
