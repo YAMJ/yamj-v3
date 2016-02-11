@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,17 +18,17 @@
         </c:import>
 
         <div id="logo">
-            <h2>Player Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/player/add.html" class="btn info">Add new player &raquo;</a></p>
+            <h2><spring:message code="page.player.title.list"/></h2>
+            <p><a href="${pageContext.request.contextPath}/player/add.html" class="btn info"><spring:message code="page.player.button.add.player"/> &raquo;</a></p>
         </div>
 
         <table id="tablelist" style="width:90%; margin:auto;">
             <tr>
-                <th>Player Name</th>
-                <th>Device Type</th>
-                <th>IP Address</th>
-                <th># Paths</th>
-                <th style="width:15%">&nbsp;</th>
+                <th><spring:message code="page.player.label.playername"/></th>
+                <th><spring:message code="page.player.label.devicetype"/></th>
+                <th><spring:message code="page.player.label.ipaddress"/></th>
+                <th><spring:message code="page.player.label.countpaths"/></th>
+                <th/>
             </tr>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
@@ -38,9 +39,9 @@
                         <td>${fn:length(entry.paths)}</td>
                         <td class="center" style="width:1%">
                            <span style="white-space:nowrap">
-                            <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info">Edit</a>
-                            <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info">Delete</a>
-                            <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info">Add Path</a>
+                            <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info"><spring:message code="button.edit"/></a>
+                            <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info"><spring:message code="button.delete"/></a>
+                            <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info"><spring:message code="page.player.button.add.path"/></a>
                             </span>
                         </td>
                     </tr>

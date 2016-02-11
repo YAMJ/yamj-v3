@@ -34,7 +34,7 @@
                 <th colspan="2">
                     <c:if test="${trakttv.push && trakttv.pull}">
                         <spring:message code="page.trakttv.sync.push.pull"/>
-                       </c:if> 
+                    </c:if> 
                     <c:if test="${trakttv.push && !trakttv.pull}">
                         <spring:message code="page.trakttv.sync.push"/>
                     </c:if> 

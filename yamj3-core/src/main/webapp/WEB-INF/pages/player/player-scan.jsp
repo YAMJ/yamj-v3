@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,20 +18,20 @@
         </c:import>
 
         <div id="logo">
-            <h2>Scan For Players</h2>
+            <h2><spring:message code="page.player.title.scan"/></h2>
         </div>
 
         <c:if test="${empty players}">
             <form action="PlayerServlet" method="get">
                 <input type="hidden" name="listallplayers" value="1"/><br/>
-                <input type="submit" value="Show all players"/>
+                <input type="submit" value="<spring:message code="page.player.show.all"/>"/>
             </form>
         </c:if>
         <c:if test="${!empty players}">
             <table id="tablelist">
                 <tr>
-                    <th>Player Name</th>
-                    <th>IP Address</th>
+                    <th><spring:message code="page.player.label.playername"/></th>
+                    <th><spring:message code="page.player.label.ipaddress"/></th>
                 </tr>
                 <tbody>
                     <c:forEach items="${playerlist}" var="entry" varStatus="row">

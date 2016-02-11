@@ -1,5 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,17 +18,17 @@
         </c:import>
 
         <div id="logo">
-            <h2>Execution Tasks</h2>
+            <h2><spring:message code="title.tasks"/></h2>
         </div>
 
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
-                <th>Name</th>
-                <th>Task Name</th>
-                <th>Interval</th>
-                <th>Delay</th>
-                <th>Last Execution</th>
-                <th>Next Execution</th>
+                <th><spring:message code="label.name"/></th>
+                <th><spring:message code="page.task.label.task.name"/></th>
+                <th><spring:message code="page.task.label.interval"/></th>
+                <th><spring:message code="page.task.label.delay"/></th>
+                <th><spring:message code="page.task.label.last.execution"/></th>
+                <th><spring:message code="page.task.label.next.execution"/></th>
                 <th/>
             </tr>
             <tbody>
@@ -39,9 +41,9 @@
                         <td>${task.lastExecution}</td>
                         <td>${task.nextExecution}</td>
                         <td class="center" style="width:1%">
-                           <span style="white-space:nowrap">
-                            <a href="${pageContext.request.contextPath}/task/edit/${task.name}.html" class="btn info">Edit</a>
-                            <a href="${pageContext.request.contextPath}/task/enqueue/${task.name}.html" class="btn info">Enqueue</a>
+                            <span style="white-space:nowrap">
+                            <a href="${pageContext.request.contextPath}/task/edit/${task.name}.html" class="btn info"><spring:message code="button.edit"/></a>
+                            <a href="${pageContext.request.contextPath}/task/enqueue/${task.name}.html" class="btn info"><spring:message code="page.task.button.enqueue"/></a>
                             </span>
                         </td>
                     </tr>

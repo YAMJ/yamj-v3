@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,27 +18,27 @@
         </c:import>
 
         <div id="logo">
-            <h2>Add Configuration Entry</h2>
+            <h2><spring:message code="page.config.title.add"/></h2>
         </div>
-        <p id="messageInfo">Enter the property configuration key and value</p>
+        <p id="messageInfo"><spring:message code="page.config.info.add"/></p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/add/process.html">
-        	<table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
+            <table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
                 <tr>
-                    <td class="right">Key:</td>
+                    <td class="right"><spring:message code="label.key"/>:</td>
                     <td>&nbsp;</td>
                     <td><form:input path="key"/></td>
                 </tr>
                 <tr>
-                    <td class="right">Value:</td>
-                	<td>&nbsp;</td>
+                    <td class="right"><spring:message code="label.value"/>:</td>
+                    <td>&nbsp;</td>
                     <td><form:input path="value"/></td>
                 </tr>
                 <tr>
                  <td colspan="2">&nbsp;</td>
                     <td class="left"">
-                 		<input type="submit" name="add" class="btn info" value="Add Config" >  
-	                    <a href="${pageContext.request.contextPath}/config/list.html" class="btn info">Cancel</a>
-                   	</td>
+                        <input type="submit" name="add" class="btn info" value="<spring:message code="button.add"/>">  
+                        <a href="${pageContext.request.contextPath}/config/list.html" class="btn info"><spring:message code="button.cancel"/></a>
+                    </td>
                 </tr>
             </table>
         </form:form>

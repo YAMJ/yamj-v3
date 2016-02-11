@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,16 +17,16 @@
         </c:import>
 
         <div id="logo">
-            <h2>Configuration Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/config/add.html" class="btn info">Add new configuration &raquo;</a></p>
+            <h2><spring:message code="page.config.title.list"/></h2>
+            <p><a href="${pageContext.request.contextPath}/config/add.html" class="btn info"><spring:message code="page.config.button.add"/> &raquo;</a></p>
         </div>
 
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
-                <th>Key</th>
-                <th>Value</th>
-                <th>Create Timestamp</th>
-                <th>Update Timestamp</th>
+                <th><spring:message code="label.key"/></th>
+                <th><spring:message code="label.value"/></th>
+                <th><spring:message code="label.create.timestamp"/></th>
+                <th><spring:message code="label.update.timestamp"/></th>
                 <th/>
             </tr>
             <tbody>
@@ -37,8 +38,8 @@
                         <td>${entry.updateTimestamp}</td>
                         <td class="center" style="width:1%">
                            <span style="white-space:nowrap">
-                            <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info">Edit</a>
-                            <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info">Delete</a>
+                            <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info"><spring:message code="button.edit"/></a>
+                            <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info"><spring:message code="button.delete"/></a>
                             </span>
                         </td>
                     </tr>
