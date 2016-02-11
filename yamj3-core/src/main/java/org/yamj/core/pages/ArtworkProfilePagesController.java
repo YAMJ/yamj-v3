@@ -60,7 +60,7 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
             int count = this.artworkStorageService.generateImagesForProfile(id);
     
             if (count > 0) {
-                LOG.debug("Trigger rescan for {} generated images", count);
+                LOG.debug("Trigger regeneration of {} images", count);
                 artworkProcessScheduler.triggerProcess();
                 view.addObject(SUCCESS_MESSAGE, "Triggered regeneration of "+count+" images");
             } else {

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiArtworkProfileDTO;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
@@ -56,6 +61,8 @@ public class ArtworkController {
     private ArtworkProcessScheduler artworkProcessScheduler; 
     @Autowired
     private ArtworkUploadService artworkUploadService;
+    @Autowired
+    private ArtworkStorageService artworkStorageService;
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {
@@ -74,6 +81,65 @@ public class ArtworkController {
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper));
         return wrapper;
+    }
+
+    @RequestMapping(value = "/profiles", method = RequestMethod.GET)
+    public ApiWrapperList<ApiArtworkProfileDTO> getArtworkProfiles() {
+        LOG.debug("Artwork profiles list");
+        
+        List<ApiArtworkProfileDTO> results = new ArrayList<>();
+        for (ArtworkProfile profile : artworkStorageService.getAllArtworkProfiles()) {
+            ApiArtworkProfileDTO dto = new ApiArtworkProfileDTO();
+            dto.setId(profile.getId());
+            dto.setName(profile.getProfileName());
+            dto.setArtworkType(profile.getArtworkType());
+            dto.setWidth(profile.getWidth());
+            dto.setHeight(profile.getHeight());
+            dto.setPreProcess(profile.isPreProcess());
+            dto.setNormalize(profile.isNormalize());
+            dto.setStretch(profile.isStretch());
+            dto.setReflection(profile.isReflection());
+            dto.setRoundedCorners(profile.isRoundedCorners());
+            
+            if (profile.isApplyToMovie()) {
+                dto.addMetaDataType(MetaDataType.MOVIE);
+            }
+            if (profile.isApplyToSeries()) {
+                dto.addMetaDataType(MetaDataType.SERIES);
+            }
+            if (profile.isApplyToSeason()) {
+                dto.addMetaDataType(MetaDataType.SEASON);
+            }
+            if (profile.isApplyToEpisode()) {
+                dto.addMetaDataType(MetaDataType.EPISODE);
+            }
+            if (profile.isApplyToPerson()) {
+                dto.addMetaDataType(MetaDataType.PERSON);
+            }
+            if (profile.isApplyToBoxedSet()) {
+                dto.addMetaDataType(MetaDataType.BOXSET);
+            }
+            
+            results.add(dto);
+        }
+        
+        ApiWrapperList<ApiArtworkProfileDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setResults(results);
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/regenerate/{id}", method = RequestMethod.GET)
+    public ApiStatus regenerateImagesByProfile(@PathVariable("id") Long id) {
+        LOG.debug("Attempting to regenerate images for profile ID {}", id);
+
+        int count = this.artworkStorageService.generateImagesForProfile(id);
+        if (count > 0) {
+            LOG.debug("Trigger regeneration of {} images", count);
+            artworkProcessScheduler.triggerProcess();
+            return ApiStatus.ok("Trigger regeneration of "+count+" images");
+        }
+        
+        return ApiStatus.ok("No image regeneration needed");
     }
 
     /**
