@@ -30,6 +30,7 @@ import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
+import org.yamj.core.database.model.type.ScalingType;
 
 @Entity
 @Table(name = "artwork_profile",
@@ -63,29 +64,21 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "apply_to_season", nullable = false)
     private boolean applyToSeason = false;
 
-    @Column(name = "apply_to_episode", nullable = false)
-    private boolean applyToEpisode = false;
-
-    @Column(name = "apply_to_person", nullable = false)
-    private boolean applyToPerson = false;
-
     @Column(name = "apply_to_boxexset", nullable = false)
     private boolean applyToBoxedSet = false;
 
-    @Column(name = "pre_process", nullable = false)
-    private boolean preProcess = false;
-
-    @Column(name = "rounded_corners", nullable = false)
-    private boolean roundedCorners = false;
+    @Type(type = "scalingType")
+    @Column(name = "scaling", length = 20, nullable=true) // TODO set nullable=true later on
+    private ScalingType scalingType;
 
     @Column(name = "reflection", nullable = false)
     private boolean reflection = false;
 
-    @Column(name = "normalize", nullable = false)
-    private boolean normalize = false;
+    @Column(name = "rounded_corners", nullable = false)
+    private boolean roundedCorners = false;
 
-    @Column(name = "stretch", nullable = false)
-    private boolean stretch = false;
+    @Column(name = "pre_process", nullable = false)
+    private boolean preProcess = false;
 
     // GETTER and SETTER
 
@@ -145,22 +138,6 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.applyToSeason = applyToSeason;
     }
 
-    public boolean isApplyToEpisode() {
-        return applyToEpisode;
-    }
-
-    public void setApplyToEpisode(boolean applyToEpisode) {
-        this.applyToEpisode = applyToEpisode;
-    }
-
-    public boolean isApplyToPerson() {
-        return applyToPerson;
-    }
-
-    public void setApplyToPerson(boolean applyToPerson) {
-        this.applyToPerson = applyToPerson;
-    }
-
     public boolean isApplyToBoxedSet() {
         return applyToBoxedSet;
     }
@@ -169,20 +146,12 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.applyToBoxedSet = applyToBoxedSet;
     }
 
-    public boolean isPreProcess() {
-        return preProcess;
+    public ScalingType getScalingType() {
+        return scalingType;
     }
 
-    public void setPreProcess(boolean preProcess) {
-        this.preProcess = preProcess;
-    }
-
-    public boolean isRoundedCorners() {
-        return roundedCorners;
-    }
-
-    public void setRoundedCorners(boolean roundedCorners) {
-        this.roundedCorners = roundedCorners;
+    public void setScalingType(ScalingType scalingType) {
+        this.scalingType = scalingType;
     }
 
     public boolean isReflection() {
@@ -193,20 +162,20 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.reflection = reflection;
     }
 
-    public boolean isNormalize() {
-        return normalize;
+    public boolean isRoundedCorners() {
+        return roundedCorners;
     }
 
-    public void setNormalize(boolean normalize) {
-        this.normalize = normalize;
+    public void setRoundedCorners(boolean roundedCorners) {
+        this.roundedCorners = roundedCorners;
     }
 
-    public boolean isStretch() {
-        return stretch;
+    public boolean isPreProcess() {
+        return preProcess;
     }
 
-    public void setStretch(boolean stretch) {
-        this.stretch = stretch;
+    public void setPreProcess(boolean preProcess) {
+        this.preProcess = preProcess;
     }
 
     // TODO
@@ -284,6 +253,8 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         sb.append(getWidth());
         sb.append(", height=");
         sb.append(getHeight());
+        sb.append(", scaling=");
+        sb.append(getScalingType());
         sb.append(", preProcess=");
         sb.append(isPreProcess());
         sb.append("]");

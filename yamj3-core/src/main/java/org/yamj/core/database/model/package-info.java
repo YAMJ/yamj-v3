@@ -38,7 +38,9 @@
     @TypeDef(name = "imageType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ImageType")}),
     @TypeDef(name = "containerType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ContainerType")})
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ContainerType")}),
+    @TypeDef(name = "scalingType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ScalingType")})
 })
 package org.yamj.core.database.model;
 

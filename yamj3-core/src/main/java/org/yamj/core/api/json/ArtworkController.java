@@ -95,29 +95,28 @@ public class ArtworkController {
             dto.setArtworkType(profile.getArtworkType());
             dto.setWidth(profile.getWidth());
             dto.setHeight(profile.getHeight());
+            dto.setScalingType(profile.getScalingType());
             dto.setPreProcess(profile.isPreProcess());
-            dto.setNormalize(profile.isNormalize());
-            dto.setStretch(profile.isStretch());
             dto.setReflection(profile.isReflection());
             dto.setRoundedCorners(profile.isRoundedCorners());
-            
-            if (profile.isApplyToMovie()) {
-                dto.addMetaDataType(MetaDataType.MOVIE);
-            }
-            if (profile.isApplyToSeries()) {
-                dto.addMetaDataType(MetaDataType.SERIES);
-            }
-            if (profile.isApplyToSeason()) {
-                dto.addMetaDataType(MetaDataType.SEASON);
-            }
-            if (profile.isApplyToEpisode()) {
-                dto.addMetaDataType(MetaDataType.EPISODE);
-            }
-            if (profile.isApplyToPerson()) {
+
+            if (ArtworkType.PHOTO == profile.getArtworkType()) {
                 dto.addMetaDataType(MetaDataType.PERSON);
-            }
-            if (profile.isApplyToBoxedSet()) {
-                dto.addMetaDataType(MetaDataType.BOXSET);
+            } else if (ArtworkType.VIDEOIMAGE == profile.getArtworkType()) {
+                dto.addMetaDataType(MetaDataType.EPISODE);
+            } else { 
+                if (profile.isApplyToMovie()) {
+                    dto.addMetaDataType(MetaDataType.MOVIE);
+                }
+                if (profile.isApplyToSeries()) {
+                    dto.addMetaDataType(MetaDataType.SERIES);
+                }
+                if (profile.isApplyToSeason()) {
+                    dto.addMetaDataType(MetaDataType.SEASON);
+                }
+                if (profile.isApplyToBoxedSet()) {
+                    dto.addMetaDataType(MetaDataType.BOXSET);
+                }
             }
             
             results.add(dto);

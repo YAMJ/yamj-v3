@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.type.ScalingType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
@@ -72,7 +73,7 @@ public abstract class AbstractArtworkProcessorService implements IQueueProcessSe
         float ratio = profile.getRatio();
         float rcqFactor = profile.getRounderCornerQuality();
 
-        if (profile.isNormalize()) {
+        if (ScalingType.NORMALIZE == profile.getScalingType()) {
             if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
             	// normalize image if below profile settings
                 bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * rcqFactor * ratio), (int) (origHeight * rcqFactor), bi);
@@ -80,7 +81,7 @@ public abstract class AbstractArtworkProcessorService implements IQueueProcessSe
             	// normalize image
                 bi = GraphicTools.scaleToSizeNormalized((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
             }
-        } else if (profile.isStretch()) {
+        } else if (ScalingType.STRETCH == profile.getScalingType()) {
         	// stretch image
             bi = GraphicTools.scaleToSizeStretch((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
         } else if ((origWidth != profile.getWidth()) || (origHeight != profile.getHeight())) {

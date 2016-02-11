@@ -21,6 +21,7 @@
             <h2><spring:message code="page.skin.title.info"/></h2>
         </div>
         <table id="tablelist" class="hero-unit" style="width: 90%; margin: auto;">
+        <tbody>
             <tr>
                 <th style="width:10%"><spring:message code="page.skin.label.skin.name"/></th>
                 <th style="width:5%" ><spring:message code="page.skin.label.skin.version"/></th>
@@ -63,6 +64,7 @@
                     </td>
                 </tr>
             </c:forEach>
+        </tbody>
         </table>
         <br>
         <form:form  method="POST" commandName="skin-entity" action="skin-download.html">

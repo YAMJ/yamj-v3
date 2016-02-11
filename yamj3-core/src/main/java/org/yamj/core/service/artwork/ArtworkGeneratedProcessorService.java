@@ -40,7 +40,7 @@ public class ArtworkGeneratedProcessorService extends AbstractArtworkProcessorSe
     public void processQueueElement(QueueDTO queueElement) {
         // get required generated artwork
         ArtworkGenerated generated = artworkStorageService.getRequiredArtworkGenerated(queueElement.getId());
-        LOG.info("Process generated artwork: {}", generated);
+        LOG.debug("Process generated artwork: {}", generated);
 
         try {
             // generate image

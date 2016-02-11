@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.database.DatabaseType;
 import org.yamj.core.database.dao.UpgradeDatabaseDao;
 
-@Component
+@Component("upgradeDatabaseService")
 public class UpgradeDatabaseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpgradeDatabaseService.class);
@@ -67,7 +67,14 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchArtworkGeneratedStatus' for database type "+databaseType, ex);
         }
-    }
+
+        // patch for ArtworkProfile
+        try {
+            patchArtworkProfile(databaseType);
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchArtworkProfileScaling' for database type "+databaseType, ex);
+        }
+}
 
     /**
      * Date: 10.02.2016
@@ -80,6 +87,20 @@ public class UpgradeDatabaseService {
         } else if (DatabaseType.HSQL.equals(databaseType)) {
             // patch for HSQL
             upgradeDatabaseDao.hsqlPatchArtworkGeneratedStatus();
+        }
+    }
+
+    /**
+     * Date: 11.02.2016
+     */
+    private void patchArtworkProfile(String databaseType) {
+        LOG.debug("Execute 'patchArtworkProfile': {}", databaseType);
+        if (DatabaseType.MYSQL.equals(databaseType)) {
+            // patch for MySQL
+            upgradeDatabaseDao.mysqlPatchArtworkProfile();
+        } else if (DatabaseType.HSQL.equals(databaseType)) {
+            // patch for HSQL
+            upgradeDatabaseDao.hsqlPatchArtworkProfile();
         }
     }
 }

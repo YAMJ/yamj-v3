@@ -61,6 +61,11 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
+    public ArtworkProfile getArtworkProfile(Long id) {
+        return artworkDao.getById(ArtworkProfile.class, id);
+    }
+
+    @Transactional(readOnly = true)
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
         return artworkDao.getArtworkProfile(profileName, artworkType);
     }

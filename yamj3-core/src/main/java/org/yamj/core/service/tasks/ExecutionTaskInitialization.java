@@ -27,6 +27,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.type.IntervalType;
@@ -36,6 +37,7 @@ import org.yamj.core.database.service.ExecutionTaskStorageService;
  * Just used for initialization of execution tasks on startup.
  */
 @Component("executionTaskInitialization")
+@DependsOn("upgradeDatabaseService")
 public class ExecutionTaskInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskInitialization.class);

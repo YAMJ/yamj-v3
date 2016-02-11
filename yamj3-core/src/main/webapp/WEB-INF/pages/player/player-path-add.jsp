@@ -22,6 +22,7 @@
         </div>
 
         <table id="headertable" style="width:50%;" class="center">
+        <tbody>
             <tr>
                 <td class="right"><spring:message code="page.player.label.playername"/>:</td>
                 <td>&nbsp;</td>
@@ -37,11 +38,13 @@
                 <td>&nbsp;</td>
                 <td>${player.ipAddress}</td>
             </tr>
+        </tbody>
         </table>
 
         <p id="messageInfo" class="center"><spring:message code="page.player.info.path.add"/></p>
         <form:form method="POST" commandName="playerPath" action="${pageContext.request.contextPath}/player/add-path/process/${player.id}.html">
-              <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+            <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+            <tbody>
                 <tr>
                     <td class="right"><spring:message code="page.player.label.path.source"/>:</td>
                     <td>&nbsp;</td>
@@ -59,6 +62,7 @@
                         <a href="${pageContext.request.contextPath}/player/details/${player.id}.html" class="btn info"><spring:message code="button.cancel"/></a>
                     </td>
                 </tr>
+            </tbody>
             </table>
         </form:form>
 

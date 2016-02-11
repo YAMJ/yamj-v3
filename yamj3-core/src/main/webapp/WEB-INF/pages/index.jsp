@@ -29,6 +29,7 @@
             <h2><spring:message code="page.index.title"/></h2>
         </div>
         <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+        <tbody>
             <tr>
                 <th style="width: 10%"><i class="fa fa-info-circle fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/system-info.html"><spring:message code="title.systeminfo"/></a></th>
                 <td style="width: 30%"><spring:message code="page.index.systeminfo.shortform"/></td>
@@ -57,6 +58,7 @@
                 <th style="width: 10%"><i class="fa fa-cogs fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/trakttv-info.html"><spring:message code="title.trakttv"/></a></th>
                 <td style="width: 30%"><spring:message code="page.index.trakttv.shortform"/></td>
             </tr>
+        </tbody>
         </table>
 
         <!-- Import the footer -->

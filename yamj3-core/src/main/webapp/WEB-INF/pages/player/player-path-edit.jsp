@@ -22,6 +22,7 @@
         </div>
 
         <table id="headertable" style="width:50%;" class="center">
+        <tbody>
             <tr>
                 <td class="right"><spring:message code="page.player.label.playername"/>:</td>
 				<td>&nbsp;</td>
@@ -37,11 +38,13 @@
 				<td>&nbsp;</td>
                 <td>${player.ipAddress}</td>
             </tr>
+        </tbody>
         </table>
 
         <p id="messageInfo"><spring:message code="page.player.info.path.edit"/></p>
         <form:form method="POST" commandName="path" action="${pageContext.request.contextPath}/player/edit-path/${player.id}/${path.id}.html">
           	<table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+          	<tbody>
                 <tr>
                     <td colspan="2">&nbsp;</td>
                     <td><spring:message code="label.value.old"/></td>
@@ -66,6 +69,7 @@
                         <a href="${pageContext.request.contextPath}/player/details/${player.id}.html" class="btn info"><spring:message code="button.cancel"/></a>
                     </td>
                 </tr>
+            </tbody>
             </table>
         </form:form>
 

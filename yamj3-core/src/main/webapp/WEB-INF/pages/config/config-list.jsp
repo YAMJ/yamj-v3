@@ -22,6 +22,7 @@
         </div>
 
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
+        <thead>
             <tr>
                 <th><spring:message code="label.key"/></th>
                 <th><spring:message code="label.value"/></th>
@@ -29,22 +30,23 @@
                 <th><spring:message code="label.update.timestamp"/></th>
                 <th/>
             </tr>
-            <tbody>
-                <c:forEach items="${configlist}" var="entry" varStatus="row">
-                    <tr>
-                        <td>${entry.key}</td>
-                        <td>${entry.value}</td>
-                        <td>${entry.createTimestamp}</td>
-                        <td>${entry.updateTimestamp}</td>
-                        <td class="center" style="width:1%">
-                           <span style="white-space:nowrap">
-                            <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info"><spring:message code="button.edit"/></a>
-                            <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info"><spring:message code="button.delete"/></a>
-                            </span>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </tbody>
+        </thead>
+        <tbody>
+            <c:forEach items="${configlist}" var="entry" varStatus="row">
+                <tr>
+                    <td>${entry.key}</td>
+                    <td>${entry.value}</td>
+                    <td>${entry.createTimestamp}</td>
+                    <td>${entry.updateTimestamp}</td>
+                    <td class="center" style="width:1%">
+                        <span class="nobr">
+                        <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html" class="btn info"><spring:message code="button.edit"/></a>
+                        <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html" class="btn info"><spring:message code="button.delete"/></a>
+                        </span>
+                    </td>
+                </tr>
+            </c:forEach>
+        </tbody>
         </table>
 
         <!-- Import the footer -->

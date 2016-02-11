@@ -20,6 +20,7 @@
             <h2><spring:message code="page.skin.title.download"/></h2>
         </div>
         <table class="headertable" style="width: 90%; margin:auto;">
+        <tbody>
             <tr>
                 <th style="width: 30%"><spring:message code="page.skin.label.skin.name"/></th>
                 <th style="width: 10%"><spring:message code="page.skin.label.skin.version"/></th>
@@ -63,6 +64,7 @@
                 <th style="width: 10%"><spring:message code="page.skin.label.skin.support"/></th>
                 <td style="width: 40%" colspan="2">${skin.supportUrl}</td>
             </tr>
+        </tbody>
         </table>
 
         <!-- Import the footer -->

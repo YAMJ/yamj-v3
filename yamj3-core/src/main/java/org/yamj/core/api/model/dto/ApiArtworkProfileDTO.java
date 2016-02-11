@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.ScalingType;
 
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
@@ -37,11 +38,10 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
     private int width = -1;
     private int height = -1;
     private List<MetaDataType> applyTo = new ArrayList<>();
-    private Boolean preProcess;
-    private Boolean normalize;
-    private Boolean stretch;
+    private ScalingType scalingType;
     private Boolean reflection;
     private Boolean roundedCorners;
+    private Boolean preProcess;
 
     public String getName() {
         return name;
@@ -82,29 +82,13 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
     public void setApplyTo(List<MetaDataType> applyTo) {
         this.applyTo = applyTo;
     }
-
-    public Boolean isPreProcess() {
-        return preProcess;
+    
+    public ScalingType getScalingType() {
+        return scalingType;
     }
 
-    public void setPreProcess(Boolean preProcess) {
-        this.preProcess = preProcess;
-    }
-
-    public Boolean isNormalize() {
-        return normalize;
-    }
-
-    public void setNormalize(Boolean normalize) {
-        this.normalize = normalize;
-    }
-
-    public Boolean isStretch() {
-        return stretch;
-    }
-
-    public void setStretch(Boolean stretch) {
-        this.stretch = stretch;
+    public void setScalingType(ScalingType scalingType) {
+        this.scalingType = scalingType;
     }
 
     public Boolean isReflection() {
@@ -122,7 +106,15 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
     public void setRoundedCorners(Boolean roundedCorners) {
         this.roundedCorners = roundedCorners;
     }
-    
+
+    public Boolean isPreProcess() {
+        return preProcess;
+    }
+
+    public void setPreProcess(Boolean preProcess) {
+        this.preProcess = preProcess;
+    }
+
     public void addMetaDataType(MetaDataType metaDataType) {
         this.applyTo.add(metaDataType);
     }

@@ -23,6 +23,7 @@
         <p id="messageInfo"><spring:message code="page.config.info.add"/></p>
         <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/add/process.html">
             <table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
+            <tbody>
                 <tr>
                     <td class="right"><spring:message code="label.key"/>:</td>
                     <td>&nbsp;</td>
@@ -40,6 +41,7 @@
                         <a href="${pageContext.request.contextPath}/config/list.html" class="btn info"><spring:message code="button.cancel"/></a>
                     </td>
                 </tr>
+            </tbody>
             </table>
         </form:form>
 

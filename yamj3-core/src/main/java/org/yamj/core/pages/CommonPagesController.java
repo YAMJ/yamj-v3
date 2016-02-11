@@ -98,7 +98,6 @@ public class CommonPagesController extends AbstractPagesController {
     //<editor-fold defaultstate="collapsed" desc="Skins Pages">
     @RequestMapping("/skin-info")
     public ModelAndView skinInfo() {
-        ModelAndView view = withInfo(new ModelAndView("skin-info", "skin-entity", new Skin()));
         List<String> dirNames = fileStorageService.getDirectoryList(StorageType.SKIN, ".");
         List<Skin> skins = new ArrayList<>(dirNames.size());
         for (String dir : dirNames) {
@@ -114,6 +113,7 @@ public class CommonPagesController extends AbstractPagesController {
             skins.add(skin);
         }
 
+        ModelAndView view = withInfo(new ModelAndView("skin-info", "skin-entity", new Skin()));
         view.addObject("skins", skins);
         return view;
     }

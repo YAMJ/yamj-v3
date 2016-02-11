@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
@@ -58,6 +59,7 @@ import org.yamj.core.tools.WatchedDTO;
  *
  */
 @Service("mediaImportService")
+@DependsOn("upgradeDatabaseService")
 public class MediaImportService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);

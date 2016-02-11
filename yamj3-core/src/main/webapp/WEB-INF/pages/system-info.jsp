@@ -59,6 +59,7 @@
         </div>
         
         <table style="width:50%; margin:auto; align:center">
+        <tbody>
             <tr>
                 <td class="right" style="width:50%">
                     <table id="headertable" class="hero-unit" style="width:100%;margin:auto;align:right">
@@ -81,6 +82,7 @@
                     </table>
                 </td>
             </tr>
+        </tbody>
         </table>
 
         <!-- Import the footer -->

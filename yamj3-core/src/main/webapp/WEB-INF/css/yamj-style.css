@@ -106,10 +106,16 @@ a:-webkit-any-link
     text-align:center;
 }
 
-h1 {
+h1 
+{
     margin-bottom: 18px;
     font-size: 30px;
     line-height: 36px;
+}
+
+.nobr
+{
+    white-space:nowrap;
 }
 
 #messageInfo 

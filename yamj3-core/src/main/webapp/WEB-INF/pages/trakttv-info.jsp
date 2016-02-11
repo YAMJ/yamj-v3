@@ -58,35 +58,35 @@
         <p>&nbsp;</p>
         <form:form  method="POST" commandName="pin-entity" action="trakttv-pin.html">
             <table id="headertable" class="hero-unit" style="width:40%; margin: auto;">
-                <tbody>
-                    <tr>
-                        <td colspan="2" class="center">
-                            <spring:message code="page.trakttv.text.request.pin"/>:<br>
-                            <a href="http://trakt.tv/pin/8032" target="_blank">http://trakt.tv/pin/8032</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="right"><label for="pin"><b><spring:message code="page.trakttv.label.pin"/></b></label></td>
-                        <td class="center"><input class="span4" id="pin" name="pin" type="text" value="" size="20"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="center">
-                            <input type="submit" value="<spring:message code="page.trakttv.button.authorize.pin"/>" class="btn info"><br>
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="2" class="center">
-                            <c:if test="${errorMessage != null}">
-                            <span id="messageError" style="align:right">${errorMessage}</span>
-                            </c:if>
-                            <c:if test="${successMessage != null}">
-                            <span id="messageSuccess" style="align:right">${successMessage}</span>
-                            </c:if>
-                        </td>
-                    </tr>
-                </tfoot>
+            <tbody>
+                <tr>
+                    <td colspan="2" class="center">
+                        <spring:message code="page.trakttv.text.request.pin"/>:<br>
+                        <a href="http://trakt.tv/pin/8032" target="_blank">http://trakt.tv/pin/8032</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="right"><label for="pin"><b><spring:message code="page.trakttv.label.pin"/></b></label></td>
+                    <td class="center"><input class="span4" id="pin" name="pin" type="text" value="" size="20"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center">
+                        <input type="submit" value="<spring:message code="page.trakttv.button.authorize.pin"/>" class="btn info"><br>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="center">
+                        <c:if test="${errorMessage != null}">
+                        <span id="messageError" style="align:right">${errorMessage}</span>
+                        </c:if>
+                        <c:if test="${successMessage != null}">
+                        <span id="messageSuccess" style="align:right">${successMessage}</span>
+                        </c:if>
+                    </td>
+                </tr>
+            </tfoot>
             </table>
         </form:form>        
         </c:if>

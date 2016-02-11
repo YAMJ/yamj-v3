@@ -64,14 +64,14 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
             // validate artwork
             boolean valid = checkArtworkQuality(located);
             if (!valid) {
-                LOG.debug("Located artwork {} is not valid", located);
+                LOG.warn("Located artwork {} is not valid", located);
                 located.setStatus(StatusType.INVALID);
                 artworkStorageService.updateArtworkLocated(located);
                 return;
             }
     
             if (SOURCE_UPLOAD.equals(located.getSource())) {
-                LOG.debug("Located artwork {} needs an upload", located);
+                LOG.info("Located artwork {} needs an upload", located);
                 located.setStatus(StatusType.INVALID);
                 artworkStorageService.updateArtworkLocated(located);
                 return;
@@ -95,7 +95,7 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
                     stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
                 }
             } catch (IOException ex) {
-                LOG.warn("Storage error: {}", ex.getMessage());
+                LOG.error("Storage error: {}", ex.getMessage());
                 LOG.trace("Storage error", ex);
                 
                 return;

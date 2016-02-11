@@ -23,13 +23,15 @@
         </div>
 
         <table id="tablelist" style="width:90%; margin:auto;">
-            <tr>
-                <th><spring:message code="page.player.label.playername"/></th>
-                <th><spring:message code="page.player.label.devicetype"/></th>
-                <th><spring:message code="page.player.label.ipaddress"/></th>
-                <th><spring:message code="page.player.label.countpaths"/></th>
-                <th/>
-            </tr>
+            <thead>
+                <tr>
+	                <th><spring:message code="page.player.label.playername"/></th>
+	                <th><spring:message code="page.player.label.devicetype"/></th>
+	                <th><spring:message code="page.player.label.ipaddress"/></th>
+	                <th><spring:message code="page.player.label.countpaths"/></th>
+	                <th/>
+                </tr>
+            <thead>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
                     <tr>
@@ -38,7 +40,7 @@
                         <td>${entry.ipAddress}</td>
                         <td>${fn:length(entry.paths)}</td>
                         <td class="center" style="width:1%">
-                           <span style="white-space:nowrap">
+                           <span class="nobr">
                             <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info"><spring:message code="button.edit"/></a>
                             <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info"><spring:message code="button.delete"/></a>
                             <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info"><spring:message code="page.player.button.add.path"/></a>

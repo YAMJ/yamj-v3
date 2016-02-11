@@ -24,12 +24,13 @@ package org.yamj.core.pages.form;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.core.database.model.type.IntervalType;
 
 public class TaskForm {
 
     private String name;
     private String taskName;
-    private String interval;
+    private IntervalType interval;
     private String delay;
     private String nextExecDate;
     
@@ -49,11 +50,11 @@ public class TaskForm {
         this.taskName = taskName;
     }
 
-    public String getInterval() {
+    public IntervalType getInterval() {
         return interval;
     }
 
-    public void setInterval(String interval) {
+    public void setInterval(IntervalType interval) {
         this.interval = interval;
     }
 

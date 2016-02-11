@@ -84,7 +84,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return CollectionUtils.isNotEmpty(objects);
     }
 
-    protected void dropIndex(String table, String indexName) {
+    protected void mysqlDropIndex(String table, String indexName) {
         if (mysqlExistsIndex(table, indexName)) {
             StringBuilder sb = new StringBuilder();
             sb.append("ALTER TABLE ").append(table);
@@ -157,6 +157,80 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
         currentSession()
         .createSQLQuery("ALTER TABLE artwork_generated ALTER COLUMN status SET NOT NULL")
+        .executeUpdate();
+    }
+
+    // Patch for artwork profile
+    
+    public void mysqlPatchArtworkProfile() {
+        if (!mysqlExistsColumn("artwork_profile", "scaling")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile ADD COLUMN scaling VARCHAR(20)")
+            .executeUpdate();
+        }
+        if (mysqlExistsColumn("artwork_profile", "normalize")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN normalize")
+            .executeUpdate();
+        }
+        if (mysqlExistsColumn("artwork_profile", "stretch")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN stretch")
+            .executeUpdate();
+        }
+        if (mysqlExistsColumn("artwork_profile", "apply_to_episode")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_episode")
+            .executeUpdate();
+        }
+        if (mysqlExistsColumn("artwork_profile", "apply_to_person")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_person")
+            .executeUpdate();
+        }
+
+        currentSession()
+        .createSQLQuery("UPDATE artwork_profile SET scaling='NORMALIZE' WHERE scaling is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile MODIFY COLUMN scaling VARCHAR(20) NOT NULL")
+        .executeUpdate();            
+    }
+    
+    public void hsqlPatchArtworkProfile() {
+        if (!hsqlExistsColumn("artwork_profile", "scaling")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile ADD COLUMN scaling VARCHAR(20)")
+            .executeUpdate();
+        }
+        if (hsqlExistsColumn("artwork_profile", "normalize")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN normalize")
+            .executeUpdate();
+        }
+        if (hsqlExistsColumn("artwork_profile", "stretch")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN stretch")
+            .executeUpdate();
+        }
+        if (hsqlExistsColumn("artwork_profile", "apply_to_episode")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_episode")
+            .executeUpdate();
+        }
+        if (hsqlExistsColumn("artwork_profile", "apply_to_person")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_person")
+            .executeUpdate();
+        }
+        
+        currentSession()
+        .createSQLQuery("UPDATE artwork_profile SET scaling='NORMALIZE' WHERE scaling is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile ALTER COLUMN scaling SET NOT NULL")
         .executeUpdate();
     }
 }

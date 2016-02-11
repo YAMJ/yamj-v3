@@ -57,53 +57,59 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping("/add/process")
     public ModelAndView playerAdd(@ModelAttribute PlayerInfo player) {
-        ModelAndView view = new ModelAndView("redirect:/player/list");
-
         LOG.info("Adding player: {}", player.toString());
         jsonApi.storePlayer(player);
         LOG.info("Player was successfully added.");
 
-        return view;
+        return new ModelAndView("redirect:/player/list");
     }
 
     @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
     public ModelAndView playerEditPage(@PathVariable Long id) {
+        PlayerInfo player = jsonApi.getPlayerInfo(id);
+        if (player == null) {
+            return new ModelAndView("redirect:/player/list");
+        }
+        
         ModelAndView view = withInfo(new ModelAndView("player/player-edit"));
-        view.addObject("player", jsonApi.getPlayerInfo(id));
+        view.addObject("player", player);
         return view;
     }
 
     @RequestMapping(value = "/edit/{id}", method = RequestMethod.POST)
     public ModelAndView playerEditUpdate(@PathVariable Long id, @ModelAttribute("player") PlayerInfo player) {
-        ModelAndView view = new ModelAndView("redirect:/player/list");
-
-        PlayerInfo exisiting = jsonApi.getPlayerInfo(id);
-        LOG.info("Updating player: {}-{}", exisiting.getId(), exisiting.getName());
-        exisiting.setDeviceType(player.getDeviceType());
-        exisiting.setIpAddress(player.getIpAddress());
-        jsonApi.storePlayer(exisiting);
-        LOG.info("Player was successfully edited.");
-        return view;
+        PlayerInfo existing = jsonApi.getPlayerInfo(id);
+        
+        if (existing != null) {
+            LOG.info("Updating player: {}-{}", existing.getId(), existing.getName());
+            existing.setDeviceType(player.getDeviceType());
+            existing.setIpAddress(player.getIpAddress());
+            jsonApi.storePlayer(existing);
+            LOG.info("Player was successfully edited.");
+        }
+        
+        return new ModelAndView("redirect:/player/list");
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
     public ModelAndView playerDelete(@PathVariable Long id) {
-        ModelAndView view = new ModelAndView("redirect:/player/list");
-
         LOG.info("Deleting player '{}'", id);
         jsonApi.deletePlayer(id);
         LOG.info("Player was successfully deleted.");
-        return view;
+
+        return new ModelAndView("redirect:/player/list");
     }
 
     @RequestMapping(value = "/details/{id}", method = RequestMethod.GET)
     public ModelAndView playerDetails(@PathVariable Long id) {
-        ModelAndView view = withInfo(new ModelAndView("player/player-details"));
-
         PlayerInfo player = jsonApi.getPlayerInfo(id);
+        if (player == null) {
+            return new ModelAndView("redirect:/player/list");
+        }
+        
+        ModelAndView view = withInfo(new ModelAndView("player/player-details"));
         view.addObject("player", player);
         view.addObject("pathlist", player.getPaths());
-
         return view;
     }
 
@@ -126,39 +132,43 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/add-path/{id}", method = RequestMethod.GET)
     public ModelAndView playerAddPath(@PathVariable Long id) {
+        PlayerInfo player = jsonApi.getPlayerInfo(id);
+        if (player == null) {
+            return new ModelAndView("redirect:/player/list");
+        }
+
         ModelAndView view = withInfo(new ModelAndView("player/player-path-add"));
-        view.addObject("player", jsonApi.getPlayerInfo(id));
+        view.addObject("player", player);
         view.addObject("playerPath", new PlayerPath());
         return view;
     }
 
     @RequestMapping(value = "/add-path/process/{id}", method = RequestMethod.POST)
     public ModelAndView playerAddPath(@PathVariable Long id, @ModelAttribute PlayerPath playerPath) {
-        ModelAndView view = new ModelAndView("redirect:/player/details/" + id);
-        
         LOG.info("Updating player '{}' with new path: {}", id, playerPath.toString());
         jsonApi.storePlayerPath(id, playerPath);
         LOG.info("Player was successfully updated");
         
-        return view;
+        return new ModelAndView("redirect:/player/details/" + id);
     }
 
     @RequestMapping(value = "/delete-path/{playerId}/{pathId}", method = RequestMethod.GET)
     public ModelAndView playerDeletePath(@PathVariable Long playerId, @PathVariable Long pathId) {
-        ModelAndView view = new ModelAndView("redirect:/player/details/" + playerId);
-
         LOG.info("Deleting path '{}' for player '{}'", pathId, playerId);
         jsonApi.deletePlayerPath(playerId, pathId);
         LOG.info("Path was successfully deleted");
         
-        return view;
+        return new ModelAndView("redirect:/player/details/" + playerId);
     }
 
     @RequestMapping(value = "/edit-path/{playerId}/{pathId}", method = RequestMethod.GET)
     public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId) {
-        ModelAndView view = withInfo(new ModelAndView("player/player-path-edit"));
-        
         PlayerInfo player = jsonApi.getPlayerInfo(playerId);
+        if (player == null) {
+            return new ModelAndView("redirect:/player/list");
+        }
+
+        ModelAndView view = withInfo(new ModelAndView("player/player-path-edit"));
         view.addObject("player", player);
 
         for (PlayerPath path : player.getPaths()) {
@@ -173,12 +183,10 @@ public class PlayerPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/edit-path/{playerId}/{pathId}", method = RequestMethod.POST)
     public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId, @ModelAttribute("path") PlayerPath playerPath) {
-        ModelAndView view = new ModelAndView("redirect:/player/details/" + playerId);
-
         LOG.info("Updating player path: {}-{}", playerId, pathId);
         this.jsonApi.storePlayerPath(playerId, pathId, playerPath);
         LOG.info("Path was successfully updated");
         
-        return view;
+        return new ModelAndView("redirect:/player/details/" + playerId);
     }
 }

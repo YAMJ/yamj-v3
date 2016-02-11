@@ -25,8 +25,12 @@
             <h2><spring:message code="page.task.title.edit"/></h2>
         </div>
         <p id="messageInfo"><spring:message code="page.task.info.edit"/></p>
-        <form:form method="POST" commandName="task" action="${pageContext.request.contextPath}/task/edit/${task.name}.html">
+        <form:form method="POST" commandName="task" action="${pageContext.request.contextPath}/task/edit.html">
+            <form:hidden path="name"/>
+            <form:hidden path="taskName"/>
+            
             <table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
+            <tbody>
                 <tr>
                     <td class="right"><spring:message code="label.name"/>:</td>
                     <td>&nbsp;</td>
@@ -58,9 +62,7 @@
                 <tr>
                     <td class="right"><spring:message code="page.task.label.next.execution"/>:</td>
                     <td>&nbsp;</td>
-                    <td>
-                      <input name="nextExecDate" style="display: none;" id="nextExecDate" type="text"/>
-                    </td>
+                    <td><input name="nextExecDate" style="display: none;" id="nextExecDate" type="text"/></td>
                 </tr>
                 <tr>
                     <td colspan="2">&nbsp;</td>
@@ -69,10 +71,11 @@
                         <a href="${pageContext.request.contextPath}/task/list.html" class="btn info"><spring:message code="button.cancel"/></a><br>
                     </td>
                 </tr>
-            </table>
+            </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3" class="right">
+                    <td colspan="2">&nbsp;</td>
+                    <td class="left">
                         <c:if test="${errorMessage != null}">
                         <span id="messageError" style="align:right">${errorMessage}</span>
                         </c:if>
@@ -82,6 +85,7 @@
                     </td>
                 </tr>
             </tfoot>
+            </table>
         </form:form>
 
         <!-- Import the footer -->

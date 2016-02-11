@@ -54,17 +54,15 @@ public class ConfigPagesController extends AbstractPagesController {
 
     @RequestMapping("/add/process")
     public ModelAndView configAdd(@ModelAttribute Configuration config) {
-        ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Adding config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
-        LOG.info("Configuration was successfully added.");
-        return view;
+        LOG.trace("Configuration was successfully added.");
+
+        return new ModelAndView("redirect:/config/list");
     }
 
     @RequestMapping("/list")
     public ModelAndView configList() {
-        ModelAndView view = withInfo(new ModelAndView("config/config-list"));
-
         List<Configuration> configList = configService.getConfigurations(new OptionsConfig());
         Collections.sort(configList, new Comparator<Configuration>() {
             @Override
@@ -72,41 +70,43 @@ public class ConfigPagesController extends AbstractPagesController {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
-        view.addObject("configlist", configList);
 
+        ModelAndView view = withInfo(new ModelAndView("config/config-list"));
+        view.addObject("configlist", configList);
         return view;
     }
 
     @RequestMapping(value = "/edit/{key}", method = RequestMethod.GET)
     public ModelAndView configEditPage(@PathVariable String key) {
-        ModelAndView view = withInfo(new ModelAndView("config/config-edit"));
-        
-        if (StringUtils.isNotBlank(key)) {
-            Configuration config = configService.getConfiguration(key);
-            if (config != null) {
-                view.addObject("config", config);
-            }
+        if (StringUtils.isBlank(key)) {
+            return new ModelAndView("redirect:/config/list");
+        }
+
+        Configuration config = configService.getConfiguration(key);
+        if (config == null) {
+            return new ModelAndView("redirect:/config/list");
         }
         
+        ModelAndView view = withInfo(new ModelAndView("config/config-edit"));
+        view.addObject("config", config);
         return view;
     }
 
     @RequestMapping(value = "/edit/{key}", method = RequestMethod.POST)
     public ModelAndView configEditUpdate(@ModelAttribute("config") Configuration config) {
-        ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Updating config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
-        LOG.info("Config was successfully edited.");
-        return view;
+        LOG.trace("Config was successfully edited.");
+        
+        return new ModelAndView("redirect:/config/list");
     }
 
     @RequestMapping(value = "/delete/{key}", method = RequestMethod.GET)
     public ModelAndView configDelete(@PathVariable String key) {
-        ModelAndView view = new ModelAndView("redirect:/config/list");
-
         LOG.info("Deleting config for '{}'", key);
         configService.deleteProperty(key);
-        LOG.info("Config was successfully deleted.");
-        return view;
+        LOG.trace("Config was successfully deleted.");
+        
+        return new ModelAndView("redirect:/config/list");
     }
 }

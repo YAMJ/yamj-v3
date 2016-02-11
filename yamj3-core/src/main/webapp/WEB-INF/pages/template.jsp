@@ -37,6 +37,7 @@
         <br/>
         <br/>
         <table class="footer" style="margin: auto;">
+        <tbody>
             <tr>
                 <td style="width:20%">Yet Another Movie Jukebox</td>
                 <th style="width:10%">Revision</th>
@@ -53,6 +54,7 @@
                 <td>${yi.startUpTime}</td>
                 <td>${yi.uptime}</td>
             </tr>
+        </tbody>
         </table>
         <!-- END Footer -->
     </c:when>

@@ -38,24 +38,26 @@
             </tr>
         </table>
 
-         <table id="headertable" class="hero-unit" style="width: 60%; margin: auto;">
-        <tr>
-               <th colspan="3" class="center">
-                   <a href="${pageContext.request.contextPath}/player/add-path/${player.id}.html" class="btn info"><spring:message code="page.player.button.add.path"/> &raquo;</a>
-            </th>
-        </tr>
-        <tr>
-            <th><spring:message code="page.player.label.path.source"/></th>
-            <th><spring:message code="page.player.label.path.target"/></th>
-            <th/>
-        </tr>
+        <table id="headertable" class="hero-unit" style="width: 60%; margin: auto;">
+        <thead>
+            <tr>
+                <th colspan="3" class="center">
+                    <a href="${pageContext.request.contextPath}/player/add-path/${player.id}.html" class="btn info"><spring:message code="page.player.button.add.path"/> &raquo;</a>
+                </th>
+            </tr>
+	        <tr>
+	            <th><spring:message code="page.player.label.path.source"/></th>
+	            <th><spring:message code="page.player.label.path.target"/></th>
+	            <th/>
+	        </tr>
+        </thead>
         <tbody>
             <c:forEach items="${pathlist}" var="entry" varStatus="row">
                 <tr>
                     <td>${entry.sourcePath}</td>
                     <td>${entry.targetPath}</td>
                     <td class="center" style="width:1%">
-                        <span style="white-space:nowrap">
+                        <span class="nobr">
                         <a href="${pageContext.request.contextPath}/player/edit-path/${player.id}/${entry.id}.html" class="btn info"><spring:message code="button.edit"/></a>
                         <a href="${pageContext.request.contextPath}/player/delete-path/${player.id}/${entry.id}.html" class="btn info"><spring:message code="button.delete"/></a>
                         </span>

@@ -82,71 +82,69 @@ public class TaskPagesController extends AbstractPagesController {
 
     @RequestMapping(value = "/edit/{name}", method = RequestMethod.GET)
     public ModelAndView taskEditPage(@PathVariable String name) {
-        
-        if (StringUtils.isNotBlank(name)) {
-            ExecutionTask task = executionTaskStorageService.getExecutionTask(name);
-            if (task != null) {
-                TaskForm taskForm = new TaskForm();
-                taskForm.setName(task.getName());
-                taskForm.setTaskName(task.getTaskName());
-                taskForm.setInterval(task.getIntervalType().name());
-                if (task.getDelay() > 0) {
-                    taskForm.setDelay(Integer.toString(task.getDelay()));
-                }
-                taskForm.setNextExecDate(DATEPICKER_FORMAT.format(task.getNextExecution()));
-                
-                ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
-                view.addObject("task", taskForm);
-                return view;
-            }
+        if (StringUtils.isBlank(name)) {
+            return new ModelAndView("redirect:/task/list");
         }
         
-        LOG.warn("No valid task name '{}' provided for editing", name);
-        return new ModelAndView("redirect:/task/list");
+        ExecutionTask task = executionTaskStorageService.getExecutionTask(name);
+        if (task == null) {
+            return new ModelAndView("redirect:/task/list");
+        }
+        
+        TaskForm form = new TaskForm();
+        form.setName(task.getName());
+        form.setTaskName(task.getTaskName());
+        form.setInterval(task.getIntervalType());
+        if (task.getDelay() > 0) {
+            form.setDelay(Integer.toString(task.getDelay()));
+        }
+        form.setNextExecDate(DATEPICKER_FORMAT.format(task.getNextExecution()));
+        
+        ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
+        view.addObject("task", form);
+        return view;
     }
 
-    @RequestMapping(value = "/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView taskEditUpdate(@ModelAttribute("task") TaskForm taskForm) {
-        LOG.trace("Submitted form: {}", taskForm);
+    @RequestMapping(value = "/edit", method = RequestMethod.POST)
+    public ModelAndView taskEditUpdate(@ModelAttribute("task") TaskForm form) {
+        LOG.info("Submitted form: {}", form);
         
         // holds the error message
         String errorMessage = null;
 
         // get the execution task
-        ExecutionTask executionTask = executionTaskStorageService.getExecutionTask(taskForm.getName());
+        ExecutionTask executionTask = executionTaskStorageService.getExecutionTask(form.getName());
 
         // check the interval
-        final IntervalType intervalType = IntervalType.fromString(taskForm.getInterval());
-        final int delay = NumberUtils.toInt(taskForm.getDelay(), -1);
+        final IntervalType intervalType = form.getInterval();
+        final int delay = NumberUtils.toInt(form.getDelay(), -1);
         if (intervalType == IntervalType.UNKNOWN) {
             errorMessage = "Interval is not valid";
-            taskForm.setInterval(executionTask.getIntervalType().name());
         } else if (intervalType.needsDelay() && delay <1) {
             errorMessage = "Delay must be a positive number";
-        } else {
-            executionTask.setIntervalType(intervalType);
-            executionTask.setDelay(intervalType.needsDelay() ? delay : -1);
         }
         
-        if (StringUtils.isNotBlank(taskForm.getNextExecDate())) {
+        if (StringUtils.isNotBlank(form.getNextExecDate())) {
             try {
-                Date nextExecution = DATEPICKER_FORMAT.parse(taskForm.getNextExecDate());
+                Date nextExecution = DATEPICKER_FORMAT.parse(form.getNextExecDate());
                 executionTask.setNextExecution(nextExecution);
             } catch (Exception e) {
                 errorMessage = "Invalid datetime provided";
             }
         }
-        
+
         if (errorMessage == null) {
             // no error so just update the task and return to list
+            executionTask.setIntervalType(form.getInterval());
+            executionTask.setDelay(form.getInterval().needsDelay()?delay:-1);
             executionTaskStorageService.updateEntity(executionTask);
             return new ModelAndView("redirect:/task/list");
         }
-        
+
         ModelAndView view = withInfo(new ModelAndView("task/task-edit"));
-        taskForm.setNextExecDate(DATEPICKER_FORMAT.format(executionTask.getNextExecution()));
+        form.setNextExecDate(DATEPICKER_FORMAT.format(executionTask.getNextExecution()));
         view.addObject(ERROR_MESSAGE, errorMessage);
-        view.addObject("task", taskForm);
+        view.addObject("task", form);
         return view;
     }
 }

@@ -23,6 +23,7 @@
         <p id="messageInfo" class="center"><spring:message code="page.player.info.add"/></p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
             <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
+            <tbody>
                 <tr>
                     <td class="right"><spring:message code="page.player.label.playername"/>:</td>
                     <td>&nbsp;</td>
@@ -45,6 +46,7 @@
                         <a href="${pageContext.request.contextPath}/player/list.html" class="btn info"><spring:message code="button.cancel"/></a>
                     </td>
                 </tr>
+            </tbody>
             </table>
         </form:form>
 

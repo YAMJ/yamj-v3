@@ -22,15 +22,16 @@
  */
 package org.yamj.core.pages;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.pages.form.ArtworkProfileForm;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
 
 @Controller
@@ -52,7 +53,7 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
     }
 
     @RequestMapping(value = "/generate/{id}", method = RequestMethod.GET)
-    public ModelAndView generate(@PathVariable long id) {
+    public ModelAndView generate(@PathVariable Long id) {
         ModelAndView view = withInfo(new ModelAndView("profile/profile-list"));
         view.addObject("profilelist", artworkStorageService.getAllArtworkProfiles());
 
@@ -71,6 +72,66 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
             view.addObject(ERROR_MESSAGE, "Failed regeneration trigger of images");
         }
 
+        return view;
+    }
+
+    @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+    public ModelAndView profileEditPage(@PathVariable Long id) {
+        ArtworkProfile profile = artworkStorageService.getArtworkProfile(id);
+        if (profile == null) {
+            return new ModelAndView("redirect:/profile/list");
+        }
+
+        ArtworkProfileForm form = new ArtworkProfileForm();
+        form.setId(profile.getId());
+        form.setProfileName(profile.getProfileName());
+        form.setArtworkType(profile.getArtworkType());
+        form.setWidth(Integer.toString(profile.getWidth()));
+        form.setHeight(Integer.toString(profile.getHeight()));
+        form.setApplyToMovie(profile.isApplyToMovie());
+        form.setApplyToSeries(profile.isApplyToSeries());
+        form.setApplyToSeason(profile.isApplyToSeason());
+        form.setApplyToBoxedSet(profile.isApplyToBoxedSet());
+        form.setScalingType(profile.getScalingType());
+        form.setReflection(profile.isReflection());
+        form.setRoundedCorners(profile.isRoundedCorners());
+        
+        ModelAndView view = withInfo(new ModelAndView("profile/profile-edit"));
+        view.addObject("profile", form);
+        return view;
+    }
+    
+    @RequestMapping(value = "/edit", method = RequestMethod.POST)
+    public ModelAndView profileEditUpdate(@ModelAttribute("profile") ArtworkProfileForm form) {
+        LOG.trace("Submitted form: {}", form);
+        
+        // holds the error message
+        String errorMessage = null;
+        
+        int width = NumberUtils.toInt(form.getWidth(), -1);
+        int height = NumberUtils.toInt(form.getHeight(), -1);
+        if (width <= 0 || height <= 0) {
+            errorMessage = "Invalid image size defined";
+        }
+        
+        if (errorMessage == null) {
+            ArtworkProfile profile = artworkStorageService.getArtworkProfile(form.getId());
+            profile.setWidth(width);
+            profile.setHeight(height);
+            profile.setApplyToMovie(form.isApplyToMovie());
+            profile.setApplyToSeries(form.isApplyToSeries());
+            profile.setApplyToSeason(form.isApplyToSeason());
+            profile.setApplyToBoxedSet(form.isApplyToBoxedSet());
+            profile.setScalingType(form.getScalingType());
+            profile.setReflection(form.isReflection());
+            profile.setRoundedCorners(form.isRoundedCorners());
+            artworkStorageService.updateArtworkProfile(profile);
+            return new ModelAndView("redirect:/profile/list");
+        }
+        
+        ModelAndView view = withInfo(new ModelAndView("profile/profile-edit"));
+        view.addObject("profile", form);
+        view.addObject(ERROR_MESSAGE, errorMessage);
         return view;
     }
 }
