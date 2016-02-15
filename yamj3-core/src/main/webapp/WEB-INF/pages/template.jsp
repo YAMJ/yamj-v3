@@ -8,6 +8,9 @@
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
         <meta charset="utf-8">
     </c:when>
@@ -39,7 +42,7 @@
         <table class="footer" style="margin: auto;">
         <tbody>
             <tr>
-                <td style="width:20%">Yet Another Movie Jukebox</td>
+                <th style="width:20%">Yet Another Movie Jukebox</th>
                 <th style="width:10%">Revision</th>
                 <th style="width:10%">Java</th>
                 <th style="width:15%"><spring:message code="footer.builddate"/></th>

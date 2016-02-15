@@ -102,7 +102,6 @@
             </tr>
         </tfoot>
         </table>
-        <p color="green">${successMessage}</p>
         
         <!-- Import the footer -->
         <c:import url="../template.jsp">

@@ -48,7 +48,14 @@
             </tr>
             <tr>
                 <td style="width:20%" class="left"><spring:message code="page.trakttv.label.authorized"/>:</td>
-                <td style="width:80%" class="left">${trakttv.authorized}</td>
+                <td style="width:80%" class="left">
+                    <c:if test="${trakttv.authorized}">
+                        <spring:message code="label.yes"/>
+                    </c:if>
+                    <c:if test="${!trakttv.authorized}">
+                        <spring:message code="label.no"/>
+                    </c:if>
+                </td>
             </tr>
             <tr>
                 <td style="width:20%" class="left"><spring:message code="page.trakttv.label.expiration.date"/>:</td>
