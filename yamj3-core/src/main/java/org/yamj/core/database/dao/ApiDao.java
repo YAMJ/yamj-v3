@@ -1950,6 +1950,15 @@ public class ApiDao extends HibernateDao {
             }
         }
 
+        if (params.hasDataItem(DataItem.VIDEOSOURCE)) {
+            List<String> videoSources = getVideoSources(type, options.getId());
+            if (videoSources.size() == 1) {
+                video.setVideoSource(videoSources.get(0));
+            } else if (videoSources.size() > 1) {
+                video.setVideoSource("MULTIPLE");
+            }
+        }
+        
         if (params.hasDataItem(DataItem.FILES)) {
             LOG.trace("Adding files for ID {}", options.getId());
             video.setFiles(getFilesForId(type, options.getId()));
@@ -1986,6 +1995,28 @@ public class ApiDao extends HibernateDao {
         return video;
     }
 
+    private List<String> getVideoSources(MetaDataType type, Long id) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT mf.video_source FROM mediafile_videodata mv ");
+        sbSQL.append("JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 and mf.video_source is not null ");
+
+        if (type == MetaDataType.SERIES) {
+            sbSQL.append("JOIN videodata vd on vd.id=mv.videodata_id ");
+            sbSQL.append("JOIN season sea on sea.id=vd.season_id" );
+            sbSQL.append("WHERE sea.series_id=:id");
+        } else if (type == MetaDataType.SEASON) {
+            sbSQL.append("JOIN videodata vd on vd.id=mv.videodata_id ");
+            sbSQL.append("WHERE vd.season_id=:id");
+        } else {
+            sbSQL.append("WHERE mv.videodata_id=:id");
+        }
+        
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addParameter(ID, id);
+        sqlScalars.addScalar("video_source", StringType.INSTANCE);
+        return executeQueryWithTransform(String.class, sqlScalars, null);
+    }
+        
     /**
      * Get a list of the files associated with a video ID.
      *

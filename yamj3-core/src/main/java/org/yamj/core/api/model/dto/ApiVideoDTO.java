@@ -49,6 +49,7 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     private Long episode = -1L;
     private Date newest;
     private String status;
+    private String videoSource;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
     private List<ApiCountryDTO> countries = Collections.emptyList();
@@ -170,6 +171,10 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
         return status;
     }
 
+    public String getVideoSource() {
+        return videoSource;
+    }
+
     public List<ApiFileDTO> getFiles() {
         return files;
     }
@@ -287,6 +292,10 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setVideoSource(String videoSource) {
+        this.videoSource = videoSource;
     }
 
     public void setFiles(List<ApiFileDTO> files) {
