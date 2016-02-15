@@ -58,7 +58,7 @@
                                 <spring:message code="page.skin.no.url"/>
                             </c:when>
                             <c:otherwise>
-                                <a href="${skin.supportUrl}" target="_blank"><spring:message code="page.skin.button.click.here"/></a>
+                                <a href="${skin.supportUrl}" target="_blank"><spring:message code="button.click.here"/></a>
                             </c:otherwise>
                         </c:choose>
                     </td>
