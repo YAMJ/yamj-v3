@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -109,41 +110,15 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public List<QueueDTO> getArtworkLocatedQueue(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
-        sql.append("FROM artwork_located loc ");
-        sql.append("WHERE loc.status in ('NEW','UPDATED')");
-        
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setDate(convertRowElementToDate(object[2]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[1]));
-            }
-            queueElements.add(queueElement);
-        }
-
-        Collections.sort(queueElements);
-        return queueElements;
+        return this.getQueue("artworkLocated.processQueue", maxResults);
     }
 
     public List<QueueDTO> getArtworkGeneratedQueue(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT gen.id, gen.create_timestamp, gen.update_timestamp ");
-        sql.append("FROM artwork_generated gen ");
-        sql.append("JOIN artwork_located loc on loc.id=gen.located_id and loc.status='DONE'" );
-        sql.append("WHERE gen.status in ('NEW','UPDATED')");
-        
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
+        return this.getQueue("artworkGenerated.processQueue", maxResults);
+    }
+
+    private List<QueueDTO> getQueue(final String queryName, final int maxResults) {
+        Query query = currentSession().getNamedQuery(queryName);
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {

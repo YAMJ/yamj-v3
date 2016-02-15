@@ -41,12 +41,12 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     private static final long serialVersionUID = -5178511945599751914L;
 
     @NaturalId
-    @Column(name = "profile_name")
+    @Column(name = "profile_name", length = 100)
     private String profileName;
 
     @NaturalId
     @Type(type = "artworkType")
-    @Column(name = "artwork_type")
+    @Column(name = "artwork_type", length = 20)
     private ArtworkType artworkType;
 
     @Column(name = "width", nullable = false)
@@ -68,7 +68,7 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     private boolean applyToBoxedSet = false;
 
     @Type(type = "scalingType")
-    @Column(name = "scaling", length = 20, nullable=true) // TODO set nullable=true later on
+    @Column(name = "scaling", length = 20, nullable=true) // TODO set nullable=false later on
     private ScalingType scalingType;
 
     @Column(name = "reflection", nullable = false)
@@ -79,6 +79,9 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
+
+    @Column(name = "quality", nullable = true) // TODO set nullable=false later on
+    private int quality = -1;
 
     // GETTER and SETTER
 
@@ -178,9 +181,12 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.preProcess = preProcess;
     }
 
-    // TODO
-    public ImageType getImageType() {
-        return ImageType.JPG;
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
     }
 
     // TODO
@@ -189,8 +195,8 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     }
 
     // TODO
-    public int getQuality() {
-        return 75;
+    public ImageType getImageType() {
+        return ImageType.JPG;
     }
 
     // COMMON METHODS

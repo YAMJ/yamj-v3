@@ -74,6 +74,7 @@ public class ArtworkInitialization {
                 artworkProfile.setReflection(false);
                 artworkProfile.setRoundedCorners(false);
                 artworkProfile.setPreProcess(true);
+                artworkProfile.setQuality(75);
                 this.artworkStorageService.saveArtworkProfile(artworkProfile);
             }
         } catch (Exception e) {

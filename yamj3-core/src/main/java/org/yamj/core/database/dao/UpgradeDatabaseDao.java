@@ -188,6 +188,19 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_person")
             .executeUpdate();
         }
+        if (!mysqlExistsColumn("artwork_profile", "quality")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile ADD COLUMN quality INTEGER")
+            .executeUpdate();
+        }
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile MODIFY COLUMN profile_name VARCHAR(100) NOT NULL")
+        .executeUpdate();            
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile MODIFY COLUMN artwork_type VARCHAR(20) NOT NULL")
+        .executeUpdate();            
 
         currentSession()
         .createSQLQuery("UPDATE artwork_profile SET scaling='NORMALIZE' WHERE scaling is null")
@@ -195,6 +208,14 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
         currentSession()
         .createSQLQuery("ALTER TABLE artwork_profile MODIFY COLUMN scaling VARCHAR(20) NOT NULL")
+        .executeUpdate();            
+
+        currentSession()
+        .createSQLQuery("UPDATE artwork_profile SET quality=75 WHERE quality is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile MODIFY COLUMN quality INTEGER NOT NULL")
         .executeUpdate();            
     }
     
@@ -224,7 +245,20 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("ALTER TABLE artwork_profile DROP COLUMN apply_to_person")
             .executeUpdate();
         }
+        if (!hsqlExistsColumn("artwork_profile", "quality")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_profile ADD COLUMN quality INTEGER")
+            .executeUpdate();
+        }
         
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile ALTER COLUMN profile_name set VARCHAR(100)")
+        .executeUpdate();            
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile ALTER COLUMN artwork_type set VARCHAR(20)")
+        .executeUpdate();            
+
         currentSession()
         .createSQLQuery("UPDATE artwork_profile SET scaling='NORMALIZE' WHERE scaling is null")
         .executeUpdate();
@@ -232,5 +266,13 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("ALTER TABLE artwork_profile ALTER COLUMN scaling SET NOT NULL")
         .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("UPDATE artwork_profile SET quality=75 WHERE quality is null")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_profile ALTER COLUMN quality SET NOT NULL")
+        .executeUpdate();            
     }
 }

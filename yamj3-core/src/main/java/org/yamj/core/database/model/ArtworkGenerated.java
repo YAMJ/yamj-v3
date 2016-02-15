@@ -27,6 +27,8 @@ import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -34,6 +36,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
+
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "artworkGenerated.processQueue",
+        query = "SELECT DISTINCT gen.id, gen.create_timestamp, gen.update_timestamp FROM artwork_generated gen "+
+                "JOIN artwork_located loc on loc.id=gen.located_id and loc.status='DONE' WHERE gen.status in ('NEW','UPDATED')"
+    )
+})
 
 @Entity
 @Table(name = "artwork_generated",
