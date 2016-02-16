@@ -79,6 +79,7 @@ public class ApiDao extends HibernateDao {
     private static final String LOCATED_ID = "locatedId";
     private static final String GENERATED_ID = "generatedId";
     private static final String COUNTRY_CODE = "countryCode";
+    private static final String MULTIPLE = "Multiple";
     
     // SQL
     private static final String SQL_UNION = " UNION ";
@@ -194,6 +195,13 @@ public class ApiDao extends HibernateDao {
             }
         }
         
+        if (params.hasDataItem(DataItem.VIDEOSOURCE)) {
+            LOG.trace("Adding video source to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setVideoSource(getVideoSource(video.getVideoType(), video.getId()));
+            }
+        }
+
         if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
             // Create and populate the ID list
             Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
@@ -1737,109 +1745,111 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
 
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
-        if (CollectionUtils.isNotEmpty(results)) {
-            
-            if (options.hasDataItem(DataItem.FILES)) {
-                for (ApiEpisodeDTO episode : results) {
-                    episode.setFiles(getFilesForId(MetaDataType.EPISODE, episode.getId()));
-                }
+        if (CollectionUtils.isEmpty(results)) {
+            // empty results; no need for evaluating options
+            return results;
+        }
+        
+        if (options.hasDataItem(DataItem.FILES)) {
+            for (ApiEpisodeDTO episode : results) {
+                episode.setFiles(getFilesForId(MetaDataType.EPISODE, episode.getId()));
             }
-            
-            if (options.hasDataItem(DataItem.GENRE)) {
-                // use series genres
-                Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
-                for (ApiEpisodeDTO episode : results) {
-                    List<ApiGenreDTO> genres = map.get(episode.getSeriesId());
-                    if (genres == null) {
-                        genres = getGenresForId(MetaDataType.SERIES, episode.getSeriesId());
-                        map.put(episode.getSeriesId(), genres);
-                    }
-                    episode.setGenres(genres);
+        }
+        
+        if (options.hasDataItem(DataItem.GENRE)) {
+            // use series genres
+            Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiGenreDTO> genres = map.get(episode.getSeriesId());
+                if (genres == null) {
+                    genres = getGenresForId(MetaDataType.SERIES, episode.getSeriesId());
+                    map.put(episode.getSeriesId(), genres);
                 }
+                episode.setGenres(genres);
             }
-            
-            if (options.hasDataItem(DataItem.COUNTRY)) {
-                // use series countries
-                Map<Long, List<ApiCountryDTO>> map = new HashMap<>();
-                for (ApiEpisodeDTO episode : results) {
-                    List<ApiCountryDTO> countries = map.get(episode.getSeriesId());
-                    if (countries == null) {
-                        countries = getCountriesForId(MetaDataType.SERIES, episode.getSeriesId());
-                        map.put(episode.getSeriesId(), countries);
-                    }
-                    episode.setCountries(countries);
+        }
+        
+        if (options.hasDataItem(DataItem.COUNTRY)) {
+            // use series countries
+            Map<Long, List<ApiCountryDTO>> map = new HashMap<>();
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiCountryDTO> countries = map.get(episode.getSeriesId());
+                if (countries == null) {
+                    countries = getCountriesForId(MetaDataType.SERIES, episode.getSeriesId());
+                    map.put(episode.getSeriesId(), countries);
                 }
+                episode.setCountries(countries);
             }
-            
-            if (options.hasDataItem(DataItem.STUDIO)) {
-                // use series studios
-                Map<Long, List<Studio>> map = new HashMap<>();
-                for (ApiEpisodeDTO episode : results) {
-                    List<Studio> studios = map.get(episode.getSeriesId());
-                    if (studios == null) {
-                        studios = getStudiosForId(MetaDataType.SERIES, episode.getSeriesId());
-                        map.put(episode.getSeriesId(), studios);
-                    }
-                    episode.setStudios(studios);
+        }
+        
+        if (options.hasDataItem(DataItem.STUDIO)) {
+            // use series studios
+            Map<Long, List<Studio>> map = new HashMap<>();
+            for (ApiEpisodeDTO episode : results) {
+                List<Studio> studios = map.get(episode.getSeriesId());
+                if (studios == null) {
+                    studios = getStudiosForId(MetaDataType.SERIES, episode.getSeriesId());
+                    map.put(episode.getSeriesId(), studios);
                 }
+                episode.setStudios(studios);
             }
-            
-            if (options.hasDataItem(DataItem.CERTIFICATION)) {
-                // use series certifications
-                Map<Long, List<ApiCertificationDTO>> map = new HashMap<>();
-                for (ApiEpisodeDTO episode : results) {
-                    List<ApiCertificationDTO> certifications = map.get(episode.getSeriesId());
-                    if (certifications == null) {
-                        certifications = getCertificationsForId(MetaDataType.SERIES, episode.getSeriesId());
-                        map.put(episode.getSeriesId(), certifications);
-                    }
-                    episode.setCertifications(certifications);
+        }
+        
+        if (options.hasDataItem(DataItem.CERTIFICATION)) {
+            // use series certifications
+            Map<Long, List<ApiCertificationDTO>> map = new HashMap<>();
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiCertificationDTO> certifications = map.get(episode.getSeriesId());
+                if (certifications == null) {
+                    certifications = getCertificationsForId(MetaDataType.SERIES, episode.getSeriesId());
+                    map.put(episode.getSeriesId(), certifications);
                 }
+                episode.setCertifications(certifications);
             }
-            
-            if (options.hasDataItem(DataItem.AWARD)) {
-                // use series awards
-                Map<Long, List<ApiAwardDTO>> map = new HashMap<>();
-                for (ApiEpisodeDTO episode : results) {
-                    List<ApiAwardDTO> awards = map.get(episode.getSeriesId());
-                    if (awards == null) {
-                        awards = getAwardsForId(MetaDataType.SERIES, episode.getSeriesId());
-                        map.put(episode.getSeriesId(), awards);
-                    }
-                    episode.setAwards(awards);
+        }
+        
+        if (options.hasDataItem(DataItem.AWARD)) {
+            // use series awards
+            Map<Long, List<ApiAwardDTO>> map = new HashMap<>();
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiAwardDTO> awards = map.get(episode.getSeriesId());
+                if (awards == null) {
+                    awards = getAwardsForId(MetaDataType.SERIES, episode.getSeriesId());
+                    map.put(episode.getSeriesId(), awards);
                 }
+                episode.setAwards(awards);
             }
-            
-            if (options.hasDataItem(DataItem.RATING)) {
-                // use episode certifications
-                for (ApiEpisodeDTO episode : results) {
-                    episode.setRatings(getRatingsForId(MetaDataType.EPISODE, episode.getId()));
-                }
+        }
+        
+        if (options.hasDataItem(DataItem.RATING)) {
+            // use episode certifications
+            for (ApiEpisodeDTO episode : results) {
+                episode.setRatings(getRatingsForId(MetaDataType.EPISODE, episode.getId()));
             }
+        }
 
-            if (MapUtils.isNotEmpty(options.splitJobs())) {
-                Set<String> jobs = options.getJobTypes();
+        if (MapUtils.isNotEmpty(options.splitJobs())) {
+            Set<String> jobs = options.getJobTypes();
 
-                for (ApiEpisodeDTO episode : results) {
-                    List<ApiPersonDTO> cast = getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), jobs);
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiPersonDTO> cast = getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), jobs);
 
-                    // just add given amount for jobs to cast
-                    Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
-                    for (ApiPersonDTO entry : cast) {
-                        Integer amount = jobMap.get(entry.getJob());
-                        if (amount == null) {
-                            episode.addCast(entry);
-                        } else if (amount > 0) {
-                            episode.addCast(entry);
-                            amount--;
-                            jobMap.put(entry.getJob(), amount);
-                        }
+                // just add given amount for jobs to cast
+                Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
+                for (ApiPersonDTO entry : cast) {
+                    Integer amount = jobMap.get(entry.getJob());
+                    if (amount == null) {
+                        episode.addCast(entry);
+                    } else if (amount > 0) {
+                        episode.addCast(entry);
+                        amount--;
+                        jobMap.put(entry.getJob(), amount);
                     }
                 }
-            } else if (options.isAllJobTypes()) {
-                for (ApiEpisodeDTO episode : results) {
-                    episode.setCast(getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), null));
-                }
+            }
+        } else if (options.isAllJobTypes()) {
+            for (ApiEpisodeDTO episode : results) {
+                episode.setCast(getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), null));
             }
         }
         
@@ -1936,6 +1946,21 @@ public class ApiDao extends HibernateDao {
             video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
         }
         
+        if (params.hasDataItem(DataItem.TRAILER)) {
+            LOG.trace("Adding trailers for ID {}", options.getId());
+            video.setTrailers(getTrailersForId(type, options.getId()));
+        }
+
+        if (params.hasDataItem(DataItem.VIDEOSOURCE)) {
+            LOG.trace("Adding video source for ID {}", options.getId());
+            video.setVideoSource(getVideoSource(type, options.getId()));
+        }
+
+        if (params.hasDataItem(DataItem.FILES)) {
+            LOG.trace("Adding files for ID {}", options.getId());
+            video.setFiles(getFilesForId(type, options.getId()));
+        }
+
         if (params.hasDataItem(DataItem.ARTWORK)) {
             LOG.trace("Adding artwork for ID {}", options.getId());
             Map<Long, List<ApiArtworkDTO>> artworkList;
@@ -1948,25 +1973,6 @@ public class ApiDao extends HibernateDao {
             if (artworkList.containsKey(options.getId())) {
                 video.setArtwork(artworkList.get(options.getId()));
             }
-        }
-
-        if (params.hasDataItem(DataItem.VIDEOSOURCE)) {
-            List<String> videoSources = getVideoSources(type, options.getId());
-            if (videoSources.size() == 1) {
-                video.setVideoSource(videoSources.get(0));
-            } else if (videoSources.size() > 1) {
-                video.setVideoSource("MULTIPLE");
-            }
-        }
-        
-        if (params.hasDataItem(DataItem.FILES)) {
-            LOG.trace("Adding files for ID {}", options.getId());
-            video.setFiles(getFilesForId(type, options.getId()));
-        }
-
-        if (params.hasDataItem(DataItem.TRAILER)) {
-            LOG.trace("Adding trailers for ID {}", options.getId());
-            video.setTrailers(getTrailersForId(type, options.getId()));
         }
 
         if (MapUtils.isNotEmpty(options.splitJobs())) {
@@ -1995,14 +2001,14 @@ public class ApiDao extends HibernateDao {
         return video;
     }
 
-    private List<String> getVideoSources(MetaDataType type, Long id) {
+    private String getVideoSource(MetaDataType type, Long id) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT mf.video_source FROM mediafile_videodata mv ");
         sbSQL.append("JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 and mf.video_source is not null ");
 
         if (type == MetaDataType.SERIES) {
             sbSQL.append("JOIN videodata vd on vd.id=mv.videodata_id ");
-            sbSQL.append("JOIN season sea on sea.id=vd.season_id" );
+            sbSQL.append("JOIN season sea on sea.id=vd.season_id ");
             sbSQL.append("WHERE sea.series_id=:id");
         } else if (type == MetaDataType.SEASON) {
             sbSQL.append("JOIN videodata vd on vd.id=mv.videodata_id ");
@@ -2014,7 +2020,14 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         sqlScalars.addParameter(ID, id);
         sqlScalars.addScalar("video_source", StringType.INSTANCE);
-        return executeQueryWithTransform(String.class, sqlScalars, null);
+        List<String> videoSources = executeQueryWithTransform(String.class, sqlScalars, null);
+        
+        if (videoSources.size() == 1) {
+            return videoSources.get(0);
+        } else if (videoSources.size() > 1) {
+            return MULTIPLE;
+        }
+        return null;
     }
         
     /**
