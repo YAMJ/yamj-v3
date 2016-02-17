@@ -24,6 +24,7 @@ package org.yamj.core;
 
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.springframework.beans.factory.FactoryBean;
@@ -35,6 +36,8 @@ import org.springframework.context.annotation.*;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -81,6 +84,10 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         converters.add(new MappingJackson2HttpMessageConverter(
            new JodaMapper().registerModule(
                new Hibernate5Module().configure(Hibernate5Module.Feature.FORCE_LAZY_LOADING, true))));
+        
+        ByteArrayHttpMessageConverter byteArrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
+        byteArrayHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(new MediaType[]{MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG}));
+        converters.add(byteArrayHttpMessageConverter);
     }
 
     @Bean

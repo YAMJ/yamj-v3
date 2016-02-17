@@ -353,7 +353,12 @@ public class ArtworkStorageService {
         
         return newLastId;
     }
-    
+
+    @Transactional(readOnly=true)
+    public ArtworkGenerated getArtworkGenerated(Long locatedId, ArtworkType artworkType, String profileName) {
+        return this.artworkDao.getArtworkGenerated(locatedId, artworkType, profileName);
+    }
+
     @Transactional
     public int generateImagesForProfile(long id) {
         ArtworkProfile profile = artworkDao.getById(ArtworkProfile.class, id);

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
@@ -238,5 +240,17 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         }
 
         return Boolean.TRUE;
-    }    
+    }
+    
+    public File getImageFile(Long id, ArtworkType artworkType, String profileName) {
+        ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, artworkType, profileName);
+        if (generated != null) {
+            final StorageType storageType = generated.getArtworkLocated().getArtwork().getStorageType();
+            final String fileName = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+            return this.fileStorageService.getFile(storageType, fileName);
+        }
+        
+        // TODO general image and return file for it
+        return null;
+    }
 }

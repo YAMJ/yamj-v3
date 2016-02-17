@@ -22,12 +22,16 @@
  */
 package org.yamj.core.api.json;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
@@ -43,6 +47,7 @@ import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
+import org.yamj.core.service.artwork.ArtworkLocatedProcessorService;
 import org.yamj.core.service.artwork.ArtworkUploadService;
 import org.yamj.core.service.file.FileStorageService;
 
@@ -51,6 +56,8 @@ import org.yamj.core.service.file.FileStorageService;
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
+    private static final byte[] EMPTY_IMAGE = {(byte)0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,0x00,0x0D,0x49,0x48,0x44,0x52,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x08,0x06,0x00,0x00,0x00,0x1F,0x15,(byte)0xC4,(byte)0x89,0x00,0x00,0x00,0x0B,0x49,0x44,0x41,0x54,0x78,(byte)0xDA,0x63,0x60,0x00,0x02,0x00,0x00,0x05,0x00,0x01,(byte)0xE9,(byte)0xFA,(byte)0xDC,(byte)0xD8,0x00,0x00,0x00,0x00,0x49,0x45,0x4E,0x44,(byte)0xAE,0x42,0x60,(byte)0x82};
+
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
     @Autowired
@@ -63,6 +70,8 @@ public class ArtworkController {
     private ArtworkUploadService artworkUploadService;
     @Autowired
     private ArtworkStorageService artworkStorageService;
+    @Autowired
+    private ArtworkLocatedProcessorService artworkLocatedProcessorService;
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {
@@ -187,5 +196,17 @@ public class ArtworkController {
             this.artworkProcessScheduler.triggerProcess();
         }
         return apiStatus;
+    }
+    
+    @RequestMapping(value = "/get/{type}/{profile}/{id}", method=RequestMethod.GET, produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public byte[] getImage(@PathVariable("type") String type, @PathVariable("profile") String profile, @PathVariable("id") Long id) {
+        try {
+            ArtworkType artworkType = ArtworkType.fromString(type);
+            File file = this.artworkLocatedProcessorService.getImageFile(id, artworkType, profile);
+            return IOUtils.toByteArray(new FileInputStream(file));
+        } catch (Exception ex) {
+            LOG.warn("Failed to get image", ex);
+            return EMPTY_IMAGE;
+        }
     }
 }
