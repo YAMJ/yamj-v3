@@ -29,6 +29,8 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -36,6 +38,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
+
+@NamedQueries({
+    @NamedQuery(name = "artworkGenerated.getArtworkGenerated",
+        query = "SELECT gen FROM ArtworkGenerated gen WHERE gen.artworkLocated.id=:locatedId "+
+                "AND gen.artworkProfile.artworkType=:artworkType AND gen.artworkProfile.profileName=:profileName"
+    )
+})
 
 @NamedNativeQueries({
     @NamedNativeQuery(name = "artworkGenerated.processQueue",

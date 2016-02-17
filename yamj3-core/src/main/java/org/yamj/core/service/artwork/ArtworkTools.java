@@ -26,8 +26,11 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 public final class ArtworkTools {
@@ -39,6 +42,22 @@ public final class ArtworkTools {
 
     private ArtworkTools() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
+    public static StorageType getStorageType(ArtworkLocated located) {
+        return getStorageType(located.getArtwork());
+    }
+
+    public static StorageType getStorageType(Artwork artwork) {
+        return getStorageType(artwork.getArtworkType());
+    }
+
+    public static StorageType getStorageType(ArtworkProfile profile) {
+        return getStorageType(profile.getArtworkType());
+    }
+
+    public static StorageType getStorageType(ArtworkType artworkType) {
+        return artworkType == ArtworkType.PHOTO ? StorageType.PHOTO : StorageType.ARTWORK;
     }
     
     public static String buildCacheFilename(ArtworkLocated located) {

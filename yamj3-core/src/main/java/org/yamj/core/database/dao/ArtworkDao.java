@@ -184,18 +184,10 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public ArtworkGenerated getArtworkGenerated(Long locatedId, ArtworkType artworkType, String profileName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT gen FROM ArtworkGenerated gen ");
-        sb.append("JOIN FETCH gen.artworkLocated loc ");
-        sb.append("JOIN FETCH loc.artwork art ");
-        sb.append("WHERE loc.id=:locatedId ");
-        sb.append("AND gen.artworkProfile.artworkType=:artworkType ");
-        sb.append("AND gen.artworkProfile.profileName=:profileName ");
-        
-        return (ArtworkGenerated)currentSession().createQuery(sb.toString())
-                    .setLong("locatedId", locatedId)
-                    .setParameter("artworkType", artworkType)
-                    .setString("profileName", profileName)
-                    .uniqueResult();
+        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
+                .setLong("locatedId", locatedId)
+                .setParameter("artworkType", artworkType)
+                .setString("profileName", profileName)
+                .uniqueResult();
     }
 }

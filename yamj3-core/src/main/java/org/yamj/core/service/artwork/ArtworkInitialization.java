@@ -48,14 +48,19 @@ public class ArtworkInitialization {
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork profiles");
-        initArtworkProfile("default-fanart", ArtworkType.FANART, 1280, 720, true, true, true, true); 
-        initArtworkProfile("default-poster", ArtworkType.POSTER, 224, 332, true, true, true, true); 
-        initArtworkProfile("default-banner", ArtworkType.BANNER, 650, 120, false, true, true, true);
-        initArtworkProfile("default-videoimage", ArtworkType.VIDEOIMAGE, 400, 225, false, false, false, false);
-        initArtworkProfile("default-photo", ArtworkType.PHOTO, 200, 300, false, false, false, false);
+        initArtworkProfile("default-fanart", ArtworkType.FANART, 1280, 720, true, true, true, true, true); 
+        initArtworkProfile("default-poster", ArtworkType.POSTER, 224, 332, true, true, true, true, true); 
+        initArtworkProfile("default-banner", ArtworkType.BANNER, 650, 120, true, false, true, true, true);
+        initArtworkProfile("default-videoimage", ArtworkType.VIDEOIMAGE, 400, 225, true, false, false, false, false);
+        initArtworkProfile("default-photo", ArtworkType.PHOTO, 200, 300, true, false, false, false, false);
+        initArtworkProfile("demand", ArtworkType.FANART, 1280, 720, false, true, true, true, true);
+        initArtworkProfile("demand", ArtworkType.POSTER, 224, 332, false, true, true, true, true); 
+        initArtworkProfile("demand", ArtworkType.BANNER, 650, 120, false, false, true, true, true);
+        initArtworkProfile("demand", ArtworkType.VIDEOIMAGE, 400, 225, false, false, false, false, false);
+        initArtworkProfile("demand", ArtworkType.PHOTO, 200, 300, false, false, false, false, false);
     }
     
-    private void initArtworkProfile(String profileName, ArtworkType artworkType, int width, int height,
+    private void initArtworkProfile(String profileName, ArtworkType artworkType, int width, int height, boolean preProcess,
         boolean applyToMovie, boolean applyToSeries, boolean applyToSeason, boolean applyToBoxedSet)
     {
         try {
@@ -73,7 +78,7 @@ public class ArtworkInitialization {
                 artworkProfile.setScalingType(ScalingType.NORMALIZE);
                 artworkProfile.setReflection(false);
                 artworkProfile.setRoundedCorners(false);
-                artworkProfile.setPreProcess(true);
+                artworkProfile.setPreProcess(preProcess);
                 artworkProfile.setQuality(75);
                 this.artworkStorageService.saveArtworkProfile(artworkProfile);
             }

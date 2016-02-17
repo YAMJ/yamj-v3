@@ -35,6 +35,9 @@ import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.ArtworkGenerated;
@@ -56,7 +59,7 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
     public void processQueueElement(QueueDTO queueElement) {
         // get required located artwork
         ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(queueElement.getId());
-        final StorageType storageType = located.getArtwork().getStorageType();
+        final StorageType storageType = ArtworkTools.getStorageType(located);
         LOG.debug("Process located artwork: {}", located);
 
         if (located.isNotCached()) {
@@ -185,7 +188,7 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         return fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
     }
     
-    private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
+    private ArtworkGenerated generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         // build cache filename
         final String cacheFilename = ArtworkTools.buildCacheFilename(located, profile);
         
@@ -201,10 +204,11 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
             String cacheDirectory = FileTools.createDirHash(cacheFilename);
             generated.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
             artworkStorageService.storeArtworkGenerated(generated);
+            return generated;
         } catch (Exception ex) {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
-            final StorageType storageType = located.getArtwork().getStorageType();
+            final StorageType storageType = ArtworkTools.getStorageType(profile);
             fileStorageService.deleteFile(storageType, cacheFilename);
             throw ex;
         }
@@ -242,15 +246,44 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         return Boolean.TRUE;
     }
     
-    public File getImageFile(Long id, ArtworkType artworkType, String profileName) {
+    public ImageDTO getImage(Long id, ArtworkType artworkType, String profileName) throws Exception {
+        ImageDTO result = new ImageDTO();
+
         ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, artworkType, profileName);
         if (generated != null) {
-            final StorageType storageType = generated.getArtworkLocated().getArtwork().getStorageType();
-            final String fileName = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-            return this.fileStorageService.getFile(storageType, fileName);
+            final StorageType storageType = ArtworkTools.getStorageType(artworkType);
+            final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+            result.setResource(this.fileStorageService.getStorageName(storageType, filename));
+            result.setHttpStatus(HttpStatus.OK);
+            result.setMediaType(MediaType.IMAGE_JPEG);
+            return result;
+        }
+
+        // if no generated image found then create one
+        ArtworkLocated located;
+        try {
+            located = this.artworkStorageService.getRequiredArtworkLocated(id);
+            if (located.isNotCached()) {
+                return null;
+            }
+        } catch (IncorrectResultSizeDataAccessException ex) {
+            return null;
         }
         
-        // TODO general image and return file for it
-        return null;
+        ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, artworkType);
+        if (profile == null) {
+            return null;
+        }
+        
+        // create the image and the database entry
+        generated = this.generateImage(located, profile);
+        
+        // return the image
+        final StorageType storageType = ArtworkTools.getStorageType(artworkType);
+        final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+        result.setResource(this.fileStorageService.getStorageName(storageType, filename));
+        result.setHttpStatus(HttpStatus.CREATED);
+        result.setMediaType(MediaType.IMAGE_JPEG);
+        return result;
     }
 }

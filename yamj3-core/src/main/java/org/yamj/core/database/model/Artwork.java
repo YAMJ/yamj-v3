@@ -37,7 +37,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.file.StorageType;
 
 @NamedQueries({    
     @NamedQuery(name = "artwork.findPersonArtworks",
@@ -152,16 +151,6 @@ public class Artwork extends AbstractStateful {
         return artworkLocated;
     }
 
-    // TRANSIENT METHODS
-    
-    @Transient
-    public StorageType getStorageType() {
-        if (getArtworkType() == ArtworkType.PHOTO) {
-            return StorageType.PHOTO;
-        }
-        return StorageType.ARTWORK;
-    }
-    
     // EQUALITY CHECKS
     
     @Override

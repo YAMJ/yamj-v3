@@ -37,6 +37,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 
@@ -328,7 +329,7 @@ public class ArtworkStorageService {
             newLastId = Math.max(newLastId, located.getId());
 
             // if original file does not exists, then also all generated artwork can be deleted
-            final StorageType storageType = located.getArtwork().getStorageType();
+            final StorageType storageType = ArtworkTools.getStorageType(located);
             
             if (!fileStorageService.existsFile(storageType, located.getCacheDirectory(), located.getCacheFilename())) {
                 LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());

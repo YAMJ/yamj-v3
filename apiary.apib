@@ -1775,13 +1775,38 @@ Add an image to a defined artwork for a choosen video type.
     </tr>
 </table>
 
-POST /add/{artwork}/{type}/{id}
+POST /api/artwork/add/{artwork}/{type}/{id}
 < 200
 < Content-Type: application/json
 {
     "status": 200,
     "message": "Cached image as '/a/av/Avatar.movie.13819.poster.jpg'"
 }
+
+Get image of a located artwork for a profile defined by artwork type and profile name. 
+***
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type/td>
+        <td>The artwork type: poster, banner, fanart, videoimage, photo</td>
+    </tr>
+    <tr>
+        <td>profile</td>
+        <td>Teh profile name which must exist.</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The ID of located artwork.</td>
+    </tr>
+</table>
+
+GET /api/artwork/get/{type}/{profile}/{id}
+< 200
+< Content-Type: image/jpg
 
 --
 Person

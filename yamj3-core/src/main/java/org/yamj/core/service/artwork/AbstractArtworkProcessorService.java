@@ -45,7 +45,7 @@ public abstract class AbstractArtworkProcessorService implements IQueueProcessSe
     protected FileStorageService fileStorageService;
 
     protected void createAndStoreImage(ArtworkLocated located, ArtworkProfile profile, String cacheFilename) throws Exception {
-        final StorageType storageType = located.getArtwork().getStorageType();
+        final StorageType storageType = ArtworkTools.getStorageType(profile);
         
         LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));

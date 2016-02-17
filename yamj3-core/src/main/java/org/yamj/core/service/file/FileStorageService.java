@@ -316,24 +316,24 @@ public class FileStorageService {
         return Arrays.asList(directories);
     }
 
-    public String getStorageName(StorageType type, String filename) {
-        return getStorageName(type, null, filename);
+    public String getStorageName(StorageType storageType, String filename) {
+        return getStorageName(storageType, null, filename);
     }
 
-    public String getStorageDir(StorageType type, final String path) {
+    public String getStorageDir(StorageType storageType, final String path) {
         String storageDir;
-        if (StorageType.ARTWORK == type) {
+        if (StorageType.ARTWORK == storageType) {
             storageDir = FilenameUtils.concat(this.storagePathArtwork, path);
-        } else if (StorageType.PHOTO == type) {
+        } else if (StorageType.PHOTO == storageType) {
             storageDir = FilenameUtils.concat(this.storagePathPhoto, path);
-        } else if (StorageType.MEDIAINFO == type) {
+        } else if (StorageType.MEDIAINFO == storageType) {
             storageDir = FilenameUtils.concat(this.storagePathMediaInfo, path);
-        } else if (StorageType.SKIN == type) {
+        } else if (StorageType.SKIN == storageType) {
             storageDir = FilenameUtils.concat(this.storagePathSkin, path);
-        } else if (StorageType.TRAILER == type) {
+        } else if (StorageType.TRAILER == storageType) {
             storageDir = FilenameUtils.concat(this.storagePathTrailer, path);
         } else {
-            throw new IllegalArgumentException("Unknown storage type " + type);
+            throw new IllegalArgumentException("Unknown storage type " + storageType);
         }
         return storageDir;
     }

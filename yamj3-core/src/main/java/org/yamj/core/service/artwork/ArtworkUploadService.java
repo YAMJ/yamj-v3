@@ -98,7 +98,7 @@ public class ArtworkUploadService {
 
         // save file to cache
         try {
-            fileStorageService.store(artwork.getStorageType(), cacheFilename, image.getBytes());
+            fileStorageService.store(ArtworkTools.getStorageType(artwork), cacheFilename, image.getBytes());
         } catch (Exception e) {
             LOG.warn("Failed to store uploaded file: " + cacheFilename, e);
             return ApiStatus.internalError("Failed to store uploaded file into cache");
