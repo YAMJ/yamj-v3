@@ -264,14 +264,17 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         try {
             located = this.artworkStorageService.getRequiredArtworkLocated(id);
             if (located.isNotCached()) {
+                // located image must be cached
                 return null;
             }
         } catch (IncorrectResultSizeDataAccessException ex) {
+            // no located image found
             return null;
         }
         
         ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, artworkType);
-        if (profile == null) {
+        if (profile == null || located.getArtwork().getArtworkType() != profile.getArtworkType()) {
+            // profile must be present and artwork types must match
             return null;
         }
         
