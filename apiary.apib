@@ -1783,7 +1783,7 @@ POST /api/artwork/add/{artwork}/{type}/{id}
     "message": "Cached image as '/a/av/Avatar.movie.13819.poster.jpg'"
 }
 
-Get image of a located artwork for a profile defined by artwork type and profile name. 
+Get image of a located artwork for a name profile. 
 ***
 
 **Required Parameters**
@@ -1791,12 +1791,8 @@ Get image of a located artwork for a profile defined by artwork type and profile
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>type/td>
-        <td>The artwork type: poster, banner, fanart, videoimage, photo</td>
-    </tr>
-    <tr>
         <td>profile</td>
-        <td>Teh profile name which must exist.</td>
+        <td>The profile name which must exist.</td>
     </tr>
     <tr>
         <td>id</td>
@@ -1804,7 +1800,7 @@ Get image of a located artwork for a profile defined by artwork type and profile
     </tr>
 </table>
 
-GET /api/artwork/get/{type}/{profile}/{id}
+GET /api/artwork/get/{profile}/{id}
 < 200
 < Content-Type: image/jpg
 

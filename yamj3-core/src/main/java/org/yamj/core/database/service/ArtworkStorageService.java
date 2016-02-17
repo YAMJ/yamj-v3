@@ -356,8 +356,8 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly=true)
-    public ArtworkGenerated getArtworkGenerated(Long locatedId, ArtworkType artworkType, String profileName) {
-        return this.artworkDao.getArtworkGenerated(locatedId, artworkType, profileName);
+    public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
+        return this.artworkDao.getArtworkGenerated(locatedId, profileName);
     }
 
     @Transactional

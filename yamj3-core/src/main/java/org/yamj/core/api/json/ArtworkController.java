@@ -197,10 +197,10 @@ public class ArtworkController {
         return apiStatus;
     }
     
-    @RequestMapping(value = "/get/{type}/{profile}/{id}", method=RequestMethod.GET, produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
-    public ResponseEntity<byte[]> getImage(@PathVariable("type") String type, @PathVariable("profile") String profile, @PathVariable("id") Long id) {
+    @RequestMapping(value = "/get/{profile}/{id}", method=RequestMethod.GET, produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    public ResponseEntity<byte[]> getImage(@PathVariable("profile") String profile, @PathVariable("id") Long id) {
         try {
-            ImageDTO image = this.artworkLocatedProcessorService.getImage(id, ArtworkType.fromString(type), profile);
+            ImageDTO image = this.artworkLocatedProcessorService.getImage(id, profile);
             if (image == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -211,7 +211,7 @@ public class ArtworkController {
                 return new ResponseEntity<>(IOUtils.toByteArray(fos), headers, HttpStatus.OK);
             }
         } catch (Exception ex) {
-            LOG.warn("Failed to get image for type={}, profile={}, id={}: {}", type, profile, id, ex.getMessage());
+            LOG.warn("Failed to get image for ID {} and profile '{}': {}", id, profile, ex.getMessage());
             LOG.trace("Image retrieval error", ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

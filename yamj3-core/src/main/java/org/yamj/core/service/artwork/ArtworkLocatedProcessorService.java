@@ -44,7 +44,6 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
@@ -246,12 +245,12 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         return Boolean.TRUE;
     }
     
-    public ImageDTO getImage(Long id, ArtworkType artworkType, String profileName) throws Exception {
+    public ImageDTO getImage(Long id, String profileName) throws Exception {
         ImageDTO result = new ImageDTO();
 
-        ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, artworkType, profileName);
+        ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, profileName);
         if (generated != null) {
-            final StorageType storageType = ArtworkTools.getStorageType(artworkType);
+            final StorageType storageType = ArtworkTools.getStorageType(generated.getArtworkProfile().getArtworkType());
             final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
             result.setResource(this.fileStorageService.getStorageName(storageType, filename));
             result.setHttpStatus(HttpStatus.OK);
@@ -272,9 +271,9 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
             return null;
         }
         
-        ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, artworkType);
-        if (profile == null || located.getArtwork().getArtworkType() != profile.getArtworkType()) {
-            // profile must be present and artwork types must match
+        ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, located.getArtwork().getArtworkType());
+        if (profile == null) {
+            // profile must be present
             return null;
         }
         
@@ -282,7 +281,7 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         generated = this.generateImage(located, profile);
         
         // return the image
-        final StorageType storageType = ArtworkTools.getStorageType(artworkType);
+        final StorageType storageType = ArtworkTools.getStorageType(located);
         final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
         result.setResource(this.fileStorageService.getStorageName(storageType, filename));
         result.setHttpStatus(HttpStatus.CREATED);
