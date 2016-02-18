@@ -95,6 +95,7 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
         form.setScalingType(profile.getScalingType());
         form.setReflection(profile.isReflection());
         form.setRoundedCorners(profile.isRoundedCorners());
+        form.setQuality(Integer.toString(profile.getQuality()));
         
         ModelAndView view = withInfo(new ModelAndView("profile/profile-edit"));
         view.addObject("profile", form);
@@ -108,10 +109,15 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
         // holds the error message
         String errorMessage = null;
         
-        int width = NumberUtils.toInt(form.getWidth(), -1);
-        int height = NumberUtils.toInt(form.getHeight(), -1);
-        if (width <= 0 || height <= 0) {
+        int width = NumberUtils.toInt(form.getWidth());
+        int height = NumberUtils.toInt(form.getHeight());
+        if (width == 0 || height == 0) {
             errorMessage = "Invalid image size defined";
+        }
+        
+        int quality = NumberUtils.toInt(form.getQuality());
+        if (quality == 0 || quality > 100) {
+            errorMessage = "Invalid image quality defined";
         }
         
         if (errorMessage == null) {
@@ -125,6 +131,7 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
             profile.setScalingType(form.getScalingType());
             profile.setReflection(form.isReflection());
             profile.setRoundedCorners(form.isRoundedCorners());
+            profile.setQuality(quality);
             artworkStorageService.updateArtworkProfile(profile);
             return new ModelAndView("redirect:/profile/list");
         }

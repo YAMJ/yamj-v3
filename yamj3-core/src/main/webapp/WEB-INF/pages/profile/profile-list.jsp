@@ -31,6 +31,7 @@
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.scaling"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.reflection"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.roundedcorners"/></th>
+                <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.quality"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.preprocess"/></th>
 	            <th/>
             </tr>
@@ -75,6 +76,7 @@
                            <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>
                         </c:if>
                     </td>
+                    <td class="center">${profile.quality}</td>
                     <td class="center">
                         <c:if test="${profile.preProcess == true}">
                            <img src="${pageContext.request.contextPath}/images/checked.png" alt="enabled" style="width:16px;height:16px"/>

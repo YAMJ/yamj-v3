@@ -102,6 +102,11 @@
                     <td><form:checkbox path="roundedCorners"/></td>
                 </tr>
                 <tr>
+                    <td class="right"><spring:message code="page.artwork.profiles.label.quality"/>:</td>
+                    <td>&nbsp;</td>
+                    <td><form:input path="quality"/>&nbsp;(1 - 100)</td>
+                </tr>
+                <tr>
                     <td colspan="2">&nbsp;</td>
                     <td class="left">
                         <input type="submit" name="update" class="btn info" value="<spring:message code="button.update"/>" >  

@@ -41,6 +41,7 @@ public class ArtworkProfileForm {
     private ScalingType scalingType;
     private boolean reflection = false;
     private boolean roundedCorners = false;
+    private String quality;
 
     public long getId() {
         return id;
@@ -136,6 +137,14 @@ public class ArtworkProfileForm {
 
     public void setRoundedCorners(boolean roundedCorners) {
         this.roundedCorners = roundedCorners;
+    }
+
+    public String getQuality() {
+        return quality;
+    }
+
+    public void setQuality(String quality) {
+        this.quality = quality;
     }
 
     @Override
