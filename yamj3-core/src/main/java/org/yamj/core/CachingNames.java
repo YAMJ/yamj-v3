@@ -37,6 +37,7 @@ public final class CachingNames {
     public static final String DB_BOXEDSET = "db_boxedSet";
     public static final String DB_AWARD = "db_award";
     public static final String DB_STAGEFILE = "db_stageFile";
+    public static final String DB_ARTWORK_IMAGE = "db_artwork_image";
 
     private CachingNames() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

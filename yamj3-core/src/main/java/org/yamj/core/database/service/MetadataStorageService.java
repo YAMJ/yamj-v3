@@ -121,21 +121,15 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from VideoData vd ");
-        sb.append("where vd.id = :id ");
-
-        List<VideoData> objects = this.commonDao.findById(sb, id);
+        List<VideoData> objects = this.commonDao.findById("from VideoData vd where vd.id = :id", id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("from Series ser ");
-        sb.append("join fetch ser.seasons sea ");
-        sb.append("join fetch sea.videoDatas vd ");
-        sb.append("where ser.id = :id ");
+        sb.append("from Series ser join fetch ser.seasons sea ");
+        sb.append("join fetch sea.videoDatas vd where ser.id = :id ");
 
         List<Series> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
@@ -144,11 +138,7 @@ public class MetadataStorageService {
     @Transactional(readOnly = true)
     @CachePut(value=CachingNames.DB_PERSON, key="#id")
     public Person getRequiredPerson(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from Person p ");
-        sb.append("where p.id = :id ");
-
-        List<Person> objects = this.commonDao.findById(sb, id);
+        List<Person> objects = this.commonDao.findById("from Person p where p.id = :id", id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 

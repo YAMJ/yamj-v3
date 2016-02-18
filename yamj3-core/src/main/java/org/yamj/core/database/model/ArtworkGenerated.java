@@ -41,8 +41,8 @@ import org.yamj.common.type.StatusType;
 
 @NamedQueries({
     @NamedQuery(name = "artworkGenerated.getArtworkGenerated",
-        query = "SELECT gen FROM ArtworkGenerated gen WHERE gen.artworkLocated.id=:locatedId "+
-                "AND gen.artworkProfile.artworkType=:artworkType AND gen.artworkProfile.profileName=:profileName"
+        query = "SELECT gen FROM ArtworkGenerated gen JOIN FETCH gen.artworkProfile prof WHERE gen.artworkLocated.id=:locatedId "+
+                "AND prof.profileName=:profileName AND prof.artworkType=gen.artworkLocated.artwork.artworkType"
     )
 })
 

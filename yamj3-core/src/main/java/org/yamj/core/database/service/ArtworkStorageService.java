@@ -28,11 +28,14 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -267,16 +270,19 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public void storeArtworkGenerated(ArtworkGenerated generated) {
-        ArtworkGenerated stored = this.artworkDao.getStoredArtworkGenerated(generated);
-        if (stored == null) {
-            this.artworkDao.saveEntity(generated);
-        } else {
-            stored.setCacheDirectory(generated.getCacheDirectory());
-            stored.setCacheFilename(generated.getCacheFilename());
-            stored.setStatus(generated.getStatus());
-            this.artworkDao.updateEntity(stored);
+    @CachePut(value=CachingNames.DB_ARTWORK_IMAGE, key="{#located.id, #profile.profileName}")
+    public ArtworkGenerated storeArtworkGenerated(ArtworkLocated located, ArtworkProfile profile, String cacheDir, String cacheFileName) {
+        ArtworkGenerated generated = this.artworkDao.getStoredArtworkGenerated(located, profile);
+        if (generated == null) {
+            generated = new ArtworkGenerated();
+            generated.setArtworkLocated(located);
+            generated.setArtworkProfile(profile);
         }
+        generated.setCacheDirectory(cacheDir);
+        generated.setCacheFilename(cacheFileName);
+        generated.setStatus(StatusType.DONE);
+        this.artworkDao.storeEntity(generated);
+        return generated;
     }
 
     @Transactional
@@ -356,6 +362,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly=true)
+    @Cacheable(value=CachingNames.DB_ARTWORK_IMAGE, key="{#locatedId, #profileName}", unless="#result==null")
     public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
         return this.artworkDao.getArtworkGenerated(locatedId, profileName);
     }

@@ -199,6 +199,7 @@ public class ArtworkController {
     
     @RequestMapping(value = "/get/{profile}/{id}", method=RequestMethod.GET, produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
     public ResponseEntity<byte[]> getImage(@PathVariable("profile") String profile, @PathVariable("id") Long id) {
+        final long start = System.currentTimeMillis();
         try {
             ImageDTO image = this.artworkLocatedProcessorService.getImage(id, profile);
             if (image == null) {
@@ -214,6 +215,8 @@ public class ArtworkController {
             LOG.warn("Failed to get image for ID {} and profile '{}': {}", id, profile, ex.getMessage());
             LOG.trace("Image retrieval error", ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } finally {
+            LOG.trace("Image generation took {} ms", System.currentTimeMillis()-start);
         }
     }
 }

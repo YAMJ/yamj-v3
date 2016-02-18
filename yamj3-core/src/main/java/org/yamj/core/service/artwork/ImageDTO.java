@@ -22,13 +22,11 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 public class ImageDTO {
 
     private String resource;
-    private HttpStatus httpStatus;
     private MediaType mediaType;
 
     public String getResource() {
@@ -37,14 +35,6 @@ public class ImageDTO {
 
     public void setResource(String resource) {
         this.resource = resource;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
     }
 
     public MediaType getMediaType() {

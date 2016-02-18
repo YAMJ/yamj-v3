@@ -101,10 +101,10 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkLocated) criteria.uniqueResult();
     }
 
-    public ArtworkGenerated getStoredArtworkGenerated(ArtworkGenerated generated) {
+    public ArtworkGenerated getStoredArtworkGenerated(ArtworkLocated located, ArtworkProfile profile) {
         Criteria criteria = currentSession().createCriteria(ArtworkGenerated.class);
-        criteria.add(Restrictions.eq("artworkLocated", generated.getArtworkLocated()));
-        criteria.add(Restrictions.eq("artworkProfile", generated.getArtworkProfile()));
+        criteria.add(Restrictions.eq("artworkLocated", located));
+        criteria.add(Restrictions.eq("artworkProfile", profile));
         criteria.setCacheable(true);
         return (ArtworkGenerated) criteria.uniqueResult();
     }
@@ -184,22 +184,9 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT gen FROM ArtworkGenerated gen ");
-        sb.append("JOIN FETCH gen.artworkProfile prof ");
-        sb.append("WHERE gen.artworkLocated.id=:locatedId ");
-        sb.append("AND prof.profileName=:profileName ");
-        sb.append("AND prof.artworkType=gen.artworkLocated.artwork.artworkType");
-        return (ArtworkGenerated)currentSession().createQuery(sb.toString())
-                        .setLong("locatedId", locatedId)
-                        .setString("profileName", profileName)
-                        .uniqueResult();
-        
-//        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
-//        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
-//                .setLong("locatedId", locatedId)
-//                .setParameter("artworkType", artworkType)
-//                .setString("profileName", profileName)
-//                .uniqueResult();
+        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
+                .setLong("locatedId", locatedId)
+                .setString("profileName", profileName)
+                .uniqueResult();
     }
 }

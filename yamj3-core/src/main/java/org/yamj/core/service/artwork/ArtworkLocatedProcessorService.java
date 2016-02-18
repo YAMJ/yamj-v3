@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
@@ -195,15 +194,8 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         createAndStoreImage(located, profile, cacheFilename);
         
         try {
-            ArtworkGenerated generated = new ArtworkGenerated();
-            generated.setArtworkLocated(located);
-            generated.setArtworkProfile(profile);
-            generated.setStatus(StatusType.DONE);
-            generated.setCacheFilename(cacheFilename);
-            String cacheDirectory = FileTools.createDirHash(cacheFilename);
-            generated.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
-            artworkStorageService.storeArtworkGenerated(generated);
-            return generated;
+            final String cacheDir = StringUtils.removeEnd(FileTools.createDirHash(cacheFilename), File.separator + cacheFilename);
+            return artworkStorageService.storeArtworkGenerated(located, profile, cacheDir, cacheFilename);
         } catch (Exception ex) {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
@@ -253,7 +245,6 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
             final StorageType storageType = ArtworkTools.getStorageType(generated.getArtworkProfile().getArtworkType());
             final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
             result.setResource(this.fileStorageService.getStorageName(storageType, filename));
-            result.setHttpStatus(HttpStatus.OK);
             result.setMediaType(MediaType.IMAGE_JPEG);
             return result;
         }
@@ -284,7 +275,6 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         final StorageType storageType = ArtworkTools.getStorageType(located);
         final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
         result.setResource(this.fileStorageService.getStorageName(storageType, filename));
-        result.setHttpStatus(HttpStatus.CREATED);
         result.setMediaType(MediaType.IMAGE_JPEG);
         return result;
     }
