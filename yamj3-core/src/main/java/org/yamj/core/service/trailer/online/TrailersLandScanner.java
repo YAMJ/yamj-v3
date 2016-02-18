@@ -208,19 +208,16 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
                     xml = response.getContent();
                 } else {
                     LOG.error("Failed retrieving trailer details for ID {}; status={}", trailersLandId);
-                    xml = null;
+                    continue;
                 }
             } catch (IOException ex) {
                 LOG.error("Failed retrieving trailer details for ID {}: {}", trailersLandId, ex.getMessage());
                 LOG.trace("TrailersLand error", ex);
-                xml = null;
-            }
-
-            if (StringUtils.isBlank(xml)) {
                 continue;
             }
             
             int nextIndex = xml.indexOf(TL_BASE_URL + TL_TRAILER_FILE_URL);
+            
             while (nextIndex >= 0) {
                 int endIndex = xml.indexOf('"', nextIndex);
                 String url = xml.substring(nextIndex, endIndex);

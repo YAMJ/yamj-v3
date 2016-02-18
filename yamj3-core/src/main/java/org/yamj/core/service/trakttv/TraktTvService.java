@@ -509,7 +509,8 @@ public class TraktTvService {
                 break;
             }
         }
-        if (CollectionUtils.isEmpty(seasons)) {
+        
+        if (seasons == null || seasons.isEmpty()) {
             return null;
         }
         
