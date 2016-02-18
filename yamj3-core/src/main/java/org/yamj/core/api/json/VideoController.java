@@ -96,17 +96,17 @@ public class VideoController {
         }
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
-        if (MetaDataType.SERIES == metaDataType) {
-            return jsonApiStorageService.updateSeries(id, update);
+        switch(metaDataType) {
+            case MOVIE:
+            case EPISODE:
+                return jsonApiStorageService.updateVideoData(id, update);
+            case SERIES:
+                return jsonApiStorageService.updateSeries(id, update);
+            case SEASON:
+                return jsonApiStorageService.updateSeason(id, update);
+            default:
+                return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
         }
-        if (MetaDataType.SEASON == metaDataType) {
-            return jsonApiStorageService.updateSeason(id, update);
-        }
-        if (MetaDataType.MOVIE == metaDataType || MetaDataType.EPISODE == metaDataType) {
-            return jsonApiStorageService.updateVideoData(id, update);
-        }
-
-        return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
     }
 
     /**
