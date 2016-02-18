@@ -188,7 +188,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_ids",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -196,7 +196,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_ratings",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -204,7 +204,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_override",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)

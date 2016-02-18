@@ -80,7 +80,7 @@ public class Series extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "series_ids",
             joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -88,7 +88,7 @@ public class Series extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "series_ratings",
             joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -97,7 +97,7 @@ public class Series extends AbstractMetadata {
     @CollectionTable(name = "series_override",
             joinColumns = @JoinColumn(name = "series_id"), 
             foreignKey = @ForeignKey(name = "FK_SERIES_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)

@@ -53,7 +53,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     @CollectionTable(name = "boxed_set_ids",
             joinColumns = @JoinColumn(name = "boxedset_id"), 
             foreignKey = @ForeignKey(name = "FK_BOXEDSET_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);

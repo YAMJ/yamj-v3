@@ -58,7 +58,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_ids",
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -66,7 +66,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_ratings", 
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -74,7 +74,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_override",
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)

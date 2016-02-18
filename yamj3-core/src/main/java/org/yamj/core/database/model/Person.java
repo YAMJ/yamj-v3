@@ -89,7 +89,7 @@ public class Person extends AbstractScannable {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "person_ids", 
             joinColumns = @JoinColumn(name = "person_id"), foreignKey = @ForeignKey(name = "FK_PERSON_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -97,7 +97,7 @@ public class Person extends AbstractScannable {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "person_override",
             joinColumns = @JoinColumn(name = "person_id"), foreignKey = @ForeignKey(name = "FK_PERSON_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
