@@ -55,13 +55,17 @@ public class ArtworkStorageService {
     private FileStorageService fileStorageService;
 
     @Transactional
-    public void saveArtworkProfile(ArtworkProfile artworkProfile) {
+    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    public ArtworkProfile saveArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkDao.saveEntity(artworkProfile);
+        return artworkProfile;
     }
 
     @Transactional
-    public void updateArtworkProfile(ArtworkProfile artworkProfile) {
+    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    public ArtworkProfile updateArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkDao.updateEntity(artworkProfile);
+        return artworkProfile;
     }
 
     @Transactional(readOnly = true)
@@ -70,54 +74,21 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
-    public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
-        return artworkDao.getArtworkProfile(profileName, artworkType);
+    @Cacheable(value=CachingNames.DB_ARTWORK_PROFILE, key="{#profileName, #metaDataType, #artworkType}", unless="#result==null")
+    public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
+        return artworkDao.getArtworkProfile(profileName, metaDataType, artworkType);
     }
 
     @Transactional(readOnly = true)
     public List<ArtworkProfile> getAllArtworkProfiles() {
-        return artworkDao.getAll(ArtworkProfile.class, "profileName");
-
+        return artworkDao.getAllArtworkProfiles();
     }
 
     @Transactional(readOnly = true)
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkLocated located) {
-        MetaDataType metaDataType = null;
-
-        final ArtworkType artworkType = located.getArtwork().getArtworkType(); 
-        switch(artworkType) {
-        case PHOTO:
-            metaDataType = MetaDataType.PERSON;
-            break;
-        case VIDEOIMAGE:
-            metaDataType = MetaDataType.EPISODE;
-            break;
-        case BANNER:
-            if (located.getArtwork().getBoxedSet() != null) {
-                metaDataType = MetaDataType.BOXSET;
-            } else if (located.getArtwork().getSeries() != null) {
-                metaDataType = MetaDataType.SERIES;
-            } else {
-                metaDataType = MetaDataType.SEASON;
-            }
-            break;
-        case POSTER:
-        case FANART:
-            if (located.getArtwork().getBoxedSet() != null) {
-                metaDataType = MetaDataType.BOXSET;
-            } else if (located.getArtwork().getSeries() != null) {
-                metaDataType = MetaDataType.SERIES;
-            } else if (located.getArtwork().getSeason() != null) {
-                metaDataType = MetaDataType.SEASON;
-            } else {
-                metaDataType = MetaDataType.MOVIE;
-            }
-            break;
-        default:
-            break;
-        }
-
-        return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
+        final MetaDataType metaDataType = ArtworkTools.getMetaDataType(located);
+        final ArtworkType artworkType = located.getArtwork().getArtworkType();
+        return this.artworkDao.getPreProcessArtworkProfiles(metaDataType, artworkType);
     }
 
     @Transactional

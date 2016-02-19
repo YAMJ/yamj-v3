@@ -41,26 +41,26 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
 
-    public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
+    public List<ArtworkProfile> getAllArtworkProfiles() {
+        return currentSession().getNamedQuery("artworkProfile.getAllArtworkProfiles")
+                .setReadOnly(true)
+                .setCacheable(true)
+                .list();
+    }
+    
+    public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
         return currentSession().byNaturalId(ArtworkProfile.class)
                 .using("profileName", profileName)
+                .using("metaDataType", metaDataType)
                 .using("artworkType", artworkType)
                 .load();
     }
 
-    public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
+    public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
         Criteria criteria = currentSession().createCriteria(ArtworkProfile.class);
+        criteria.add(Restrictions.eq("metaDataType", metaDataType));
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
-        if (MetaDataType.MOVIE == metaDataType) {
-            criteria.add(Restrictions.eq("applyToMovie", Boolean.TRUE));
-        } else if (MetaDataType.SERIES == metaDataType) {
-            criteria.add(Restrictions.eq("applyToSeries", Boolean.TRUE));
-        } else if (MetaDataType.SEASON == metaDataType) {
-            criteria.add(Restrictions.eq("applyToSeason", Boolean.TRUE));
-        } else if (MetaDataType.BOXSET == metaDataType) {
-            criteria.add(Restrictions.eq("applyToBoxedSet", Boolean.TRUE));
-        }
         return criteria.list();
     }
 

@@ -28,13 +28,20 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.model.type.ScalingType;
 
+@NamedQueries({
+    @NamedQuery(name = "artworkProfile.getAllArtworkProfiles",
+        query = "FROM ArtworkProfile ap ORDER BY ap.profileName, ap.metaDataType, ap.artworkType"
+    )
+})
+
 @Entity
 @Table(name = "artwork_profile",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "artwork_type"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "metadata_type", "artwork_type"})
 )
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
@@ -43,6 +50,11 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @NaturalId
     @Column(name = "profile_name", length = 100)
     private String profileName;
+
+    @NaturalId
+    @Type(type = "metaDataType")
+    @Column(name = "metadata_type", length = 20)
+    private MetaDataType metaDataType;
 
     @NaturalId
     @Type(type = "artworkType")
@@ -55,20 +67,8 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "height", nullable = false)
     private int height = -1;
 
-    @Column(name = "apply_to_movie", nullable = false)
-    private boolean applyToMovie = false;
-
-    @Column(name = "apply_to_series", nullable = false)
-    private boolean applyToSeries = false;
-
-    @Column(name = "apply_to_season", nullable = false)
-    private boolean applyToSeason = false;
-
-    @Column(name = "apply_to_boxexset", nullable = false)
-    private boolean applyToBoxedSet = false;
-
     @Type(type = "scalingType")
-    @Column(name = "scaling", length = 20, nullable=true) // TODO set nullable=false later on
+    @Column(name = "scaling", length = 20, nullable=false)
     private ScalingType scalingType;
 
     @Column(name = "reflection", nullable = false)
@@ -80,7 +80,7 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
 
-    @Column(name = "quality", nullable = true) // TODO set nullable=false later on
+    @Column(name = "quality", nullable = false)
     private int quality = -1;
 
     // GETTER and SETTER
@@ -91,6 +91,14 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     public void setProfileName(String profileName) {
         this.profileName = profileName;
+    }
+
+    public MetaDataType getMetaDataType() {
+        return metaDataType;
+    }
+
+    public void setMetaDataType(MetaDataType metaDataType) {
+        this.metaDataType = metaDataType;
     }
 
     public ArtworkType getArtworkType() {
@@ -115,38 +123,6 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     public void setHeight(int height) {
         this.height = height;
-    }
-
-    public boolean isApplyToMovie() {
-        return applyToMovie;
-    }
-
-    public void setApplyToMovie(boolean applyToMovie) {
-        this.applyToMovie = applyToMovie;
-    }
-
-    public boolean isApplyToSeries() {
-        return applyToSeries;
-    }
-
-    public void setApplyToSeries(boolean applyToSeries) {
-        this.applyToSeries = applyToSeries;
-    }
-
-    public boolean isApplyToSeason() {
-        return applyToSeason;
-    }
-
-    public void setApplyToSeason(boolean applyToSeason) {
-        this.applyToSeason = applyToSeason;
-    }
-
-    public boolean isApplyToBoxedSet() {
-        return applyToBoxedSet;
-    }
-
-    public void setApplyToBoxedSet(boolean applyToBoxedSet) {
-        this.applyToBoxedSet = applyToBoxedSet;
     }
 
     public ScalingType getScalingType() {
@@ -253,7 +229,9 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         sb.append(getId());
         sb.append(", name=");
         sb.append(getProfileName());
-        sb.append(", type=");
+        sb.append(", metaDataType=");
+        sb.append(getMetaDataType());
+        sb.append(", artworkType=");
         sb.append(getArtworkType());
         sb.append(", width=");
         sb.append(getWidth());

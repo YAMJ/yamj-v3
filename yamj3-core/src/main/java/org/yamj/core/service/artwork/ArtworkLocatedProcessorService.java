@@ -38,11 +38,13 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
@@ -262,7 +264,9 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
             return null;
         }
         
-        ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, located.getArtwork().getArtworkType());
+        final MetaDataType metaDataType = ArtworkTools.getMetaDataType(located);
+        final ArtworkType artworkType = located.getArtwork().getArtworkType();
+        ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, metaDataType, artworkType);
         if (profile == null) {
             // profile must be present
             return null;

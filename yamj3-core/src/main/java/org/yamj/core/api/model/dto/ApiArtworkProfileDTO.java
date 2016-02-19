@@ -24,8 +24,6 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.List;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
@@ -35,9 +33,9 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
 
     private String name;
     private ArtworkType artworkType;
+    private MetaDataType metaDataType;
     private int width = -1;
     private int height = -1;
-    private List<MetaDataType> applyTo = new ArrayList<>();
     private ScalingType scalingType;
     private Boolean reflection;
     private Boolean roundedCorners;
@@ -59,6 +57,14 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
         this.artworkType = artworkType;
     }
 
+    public MetaDataType getMetaDataType() {
+        return metaDataType;
+    }
+
+    public void setMetaDataType(MetaDataType metaDataType) {
+        this.metaDataType = metaDataType;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -73,14 +79,6 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
 
     public void setHeight(int height) {
         this.height = height;
-    }
-
-    public List<MetaDataType> getApplyTo() {
-        return applyTo;
-    }
-
-    public void setApplyTo(List<MetaDataType> applyTo) {
-        this.applyTo = applyTo;
     }
     
     public ScalingType getScalingType() {
@@ -113,9 +111,5 @@ public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {
 
     public void setPreProcess(Boolean preProcess) {
         this.preProcess = preProcess;
-    }
-
-    public void addMetaDataType(MetaDataType metaDataType) {
-        this.applyTo.add(metaDataType);
     }
 }

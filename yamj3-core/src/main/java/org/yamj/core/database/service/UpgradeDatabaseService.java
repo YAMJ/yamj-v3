@@ -60,47 +60,7 @@ public class UpgradeDatabaseService {
             // no valid database type for patching
             databaseType = null;
         }
-        
-        // patch for ArtworkGenerated status
-        try {
-            patchArtworkGeneratedStatus(databaseType);
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchArtworkGeneratedStatus' for database type "+databaseType, ex);
-        }
 
-        // patch for ArtworkProfile
-        try {
-            patchArtworkProfile(databaseType);
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchArtworkProfileScaling' for database type "+databaseType, ex);
-        }
-}
-
-    /**
-     * Date: 10.02.2016
-     */
-    private void patchArtworkGeneratedStatus(String databaseType) {
-        LOG.debug("Execute 'patchArtworkGeneratedStatus': {}", databaseType);
-        if (DatabaseType.MYSQL.equals(databaseType)) {
-            // patch for MySQL
-            upgradeDatabaseDao.mysqlPatchArtworkGeneratedStatus();
-        } else if (DatabaseType.HSQL.equals(databaseType)) {
-            // patch for HSQL
-            upgradeDatabaseDao.hsqlPatchArtworkGeneratedStatus();
-        }
-    }
-
-    /**
-     * Date: 11.02.2016
-     */
-    private void patchArtworkProfile(String databaseType) {
-        LOG.debug("Execute 'patchArtworkProfile': {}", databaseType);
-        if (DatabaseType.MYSQL.equals(databaseType)) {
-            // patch for MySQL
-            upgradeDatabaseDao.mysqlPatchArtworkProfile();
-        } else if (DatabaseType.HSQL.equals(databaseType)) {
-            // patch for HSQL
-            upgradeDatabaseDao.hsqlPatchArtworkProfile();
-        }
+        LOG.trace("Run patches for database type {}", databaseType);
     }
 }

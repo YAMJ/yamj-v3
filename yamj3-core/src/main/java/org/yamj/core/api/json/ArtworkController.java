@@ -101,32 +101,13 @@ public class ArtworkController {
             dto.setId(profile.getId());
             dto.setName(profile.getProfileName());
             dto.setArtworkType(profile.getArtworkType());
+            dto.setMetaDataType(profile.getMetaDataType());
             dto.setWidth(profile.getWidth());
             dto.setHeight(profile.getHeight());
             dto.setScalingType(profile.getScalingType());
             dto.setPreProcess(profile.isPreProcess());
             dto.setReflection(profile.isReflection());
             dto.setRoundedCorners(profile.isRoundedCorners());
-
-            if (ArtworkType.PHOTO == profile.getArtworkType()) {
-                dto.addMetaDataType(MetaDataType.PERSON);
-            } else if (ArtworkType.VIDEOIMAGE == profile.getArtworkType()) {
-                dto.addMetaDataType(MetaDataType.EPISODE);
-            } else { 
-                if (profile.isApplyToMovie()) {
-                    dto.addMetaDataType(MetaDataType.MOVIE);
-                }
-                if (profile.isApplyToSeries()) {
-                    dto.addMetaDataType(MetaDataType.SERIES);
-                }
-                if (profile.isApplyToSeason()) {
-                    dto.addMetaDataType(MetaDataType.SEASON);
-                }
-                if (profile.isApplyToBoxedSet()) {
-                    dto.addMetaDataType(MetaDataType.BOXSET);
-                }
-            }
-            
             results.add(dto);
         }
         

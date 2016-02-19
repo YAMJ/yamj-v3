@@ -73,6 +73,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfigDatabase(CachingNames.DB_BOXEDSET, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(CachingNames.DB_AWARD, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(CachingNames.DB_STAGEFILE, 100, 180))
+                .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_PROFILE, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_IMAGE, 2000, TTL_ONE_DAY))
             );
     }

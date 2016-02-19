@@ -24,10 +24,10 @@
         <thead>
             <tr>
 	            <th style="vertical-align:top"><spring:message code="label.name"/></th>
+                <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.applyto"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.artworktype"/></th>
-	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.width"/></th>
+                <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.width"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.height"/></th>
-	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.applyto"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.scaling"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.reflection"/></th>
 	            <th style="vertical-align:top" class="center"><spring:message code="page.artwork.profiles.label.roundedcorners"/></th>
@@ -40,25 +40,10 @@
             <c:forEach items="${profilelist}" var="profile" varStatus="row">
                 <tr>
                     <td>${profile.profileName}</td>
+                    <td class="center">${profile.metaDataType}</td>
                     <td class="center">${profile.artworkType}</td>
                     <td class="center">${profile.width}</td>
                     <td class="center">${profile.height}</td>
-                    <td class="center">
-                        <c:choose>
-                            <c:when test="${profile.artworkType == 'VIDEOIMAGE'}">
-                                &nbsp;<spring:message code="metadata.episode"/>&nbsp;
-                            </c:when>
-                            <c:when test="${profile.artworkType == 'PHOTO'}">
-                                &nbsp;<spring:message code="metadata.person"/>&nbsp;
-                            </c:when>
-                            <c:otherwise>
-                               <c:if test="${profile.applyToMovie == true}">&nbsp;<spring:message code="metadata.movie"/>&nbsp;</c:if>
-                               <c:if test="${profile.applyToSeries == true}">&nbsp;<spring:message code="metadata.series"/>&nbsp;</c:if>
-                               <c:if test="${profile.applyToSeason == true}">&nbsp;<spring:message code="metadata.season"/>&nbsp;</c:if>
-                               <c:if test="${profile.applyToBoxedSet == true}">&nbsp;<spring:message code="metadata.boxedset"/>&nbsp;</c:if>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
                     <td class="center">
                         <c:choose>
                             <c:when test="${profile.scalingType == 'NORMALIZE'}"><spring:message code="page.artwork.profiles.scale.normalize"/></c:when>

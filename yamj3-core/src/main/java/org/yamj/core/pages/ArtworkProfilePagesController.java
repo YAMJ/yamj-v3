@@ -86,12 +86,9 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
         form.setId(profile.getId());
         form.setProfileName(profile.getProfileName());
         form.setArtworkType(profile.getArtworkType());
+        form.setMetaDataType(profile.getMetaDataType());
         form.setWidth(Integer.toString(profile.getWidth()));
         form.setHeight(Integer.toString(profile.getHeight()));
-        form.setApplyToMovie(profile.isApplyToMovie());
-        form.setApplyToSeries(profile.isApplyToSeries());
-        form.setApplyToSeason(profile.isApplyToSeason());
-        form.setApplyToBoxedSet(profile.isApplyToBoxedSet());
         form.setScalingType(profile.getScalingType());
         form.setReflection(profile.isReflection());
         form.setRoundedCorners(profile.isRoundedCorners());
@@ -124,10 +121,6 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
             ArtworkProfile profile = artworkStorageService.getArtworkProfile(form.getId());
             profile.setWidth(width);
             profile.setHeight(height);
-            profile.setApplyToMovie(form.isApplyToMovie());
-            profile.setApplyToSeries(form.isApplyToSeries());
-            profile.setApplyToSeason(form.isApplyToSeason());
-            profile.setApplyToBoxedSet(form.isApplyToBoxedSet());
             profile.setScalingType(form.getScalingType());
             profile.setReflection(form.isReflection());
             profile.setRoundedCorners(form.isRoundedCorners());

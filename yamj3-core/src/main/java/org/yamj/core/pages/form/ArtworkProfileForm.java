@@ -24,6 +24,7 @@ package org.yamj.core.pages.form;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
 
@@ -32,12 +33,9 @@ public class ArtworkProfileForm {
     private long id;
     private String profileName;
     private ArtworkType artworkType;
+    private MetaDataType metaDataType;
     private String width;
     private String height;
-    private boolean applyToMovie = false;
-    private boolean applyToSeries = false;
-    private boolean applyToSeason = false;
-    private boolean applyToBoxedSet = false;
     private ScalingType scalingType;
     private boolean reflection = false;
     private boolean roundedCorners = false;
@@ -47,7 +45,7 @@ public class ArtworkProfileForm {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -67,6 +65,14 @@ public class ArtworkProfileForm {
         this.artworkType = artworkType;
     }
 
+    public MetaDataType getMetaDataType() {
+        return metaDataType;
+    }
+
+    public void setMetaDataType(MetaDataType metaDataType) {
+        this.metaDataType = metaDataType;
+    }
+
     public String getWidth() {
         return width;
     }
@@ -81,38 +87,6 @@ public class ArtworkProfileForm {
 
     public void setHeight(String height) {
         this.height = height;
-    }
-
-    public boolean isApplyToMovie() {
-        return applyToMovie;
-    }
-
-    public void setApplyToMovie(boolean applyToMovie) {
-        this.applyToMovie = applyToMovie;
-    }
-
-    public boolean isApplyToSeries() {
-        return applyToSeries;
-    }
-
-    public void setApplyToSeries(boolean applyToSeries) {
-        this.applyToSeries = applyToSeries;
-    }
-
-    public boolean isApplyToSeason() {
-        return applyToSeason;
-    }
-
-    public void setApplyToSeason(boolean applyToSeason) {
-        this.applyToSeason = applyToSeason;
-    }
-
-    public boolean isApplyToBoxedSet() {
-        return applyToBoxedSet;
-    }
-
-    public void setApplyToBoxedSet(boolean applyToBoxedSet) {
-        this.applyToBoxedSet = applyToBoxedSet;
     }
 
     public ScalingType getScalingType() {

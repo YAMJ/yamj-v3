@@ -21,6 +21,8 @@
  *
  */
 @TypeDefs({
+    @TypeDef(name = "metaDataType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.MetaDataType")}),
     @TypeDef(name = "statusType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")}),
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,

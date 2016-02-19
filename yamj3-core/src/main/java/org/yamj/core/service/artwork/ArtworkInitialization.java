@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
@@ -48,42 +49,41 @@ public class ArtworkInitialization {
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork profiles");
-        initArtworkProfile("default-fanart", ArtworkType.FANART, 1280, 720, true, true, true, true, true); 
-        initArtworkProfile("default-poster", ArtworkType.POSTER, 224, 332, true, true, true, true, true); 
-        initArtworkProfile("default-banner", ArtworkType.BANNER, 650, 120, true, false, true, true, true);
-        initArtworkProfile("default-videoimage", ArtworkType.VIDEOIMAGE, 400, 225, true, false, false, false, false);
-        initArtworkProfile("default-photo", ArtworkType.PHOTO, 200, 300, true, false, false, false, false);
-        initArtworkProfile("demand", ArtworkType.FANART, 1280, 720, false, true, true, true, true);
-        initArtworkProfile("demand", ArtworkType.POSTER, 224, 332, false, true, true, true, true); 
-        initArtworkProfile("demand", ArtworkType.BANNER, 650, 120, false, false, true, true, true);
-        initArtworkProfile("demand", ArtworkType.VIDEOIMAGE, 400, 225, false, false, false, false, false);
-        initArtworkProfile("demand", ArtworkType.PHOTO, 200, 300, false, false, false, false, false);
+        initArtworkProfile("default", MetaDataType.MOVIE, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.FANART, 1280, 720);
+        initArtworkProfile("default", MetaDataType.MOVIE, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.POSTER, 224, 332);
+        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile("default", MetaDataType.EPISODE, ArtworkType.VIDEOIMAGE, 400, 225);
+        initArtworkProfile("default", MetaDataType.PERSON, ArtworkType.PHOTO, 200, 300);
     }
     
-    private void initArtworkProfile(String profileName, ArtworkType artworkType, int width, int height, boolean preProcess,
-        boolean applyToMovie, boolean applyToSeries, boolean applyToSeason, boolean applyToBoxedSet)
+    private void initArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType, int width, int height)
     {
         try {
-            ArtworkProfile artworkProfile = artworkStorageService.getArtworkProfile(profileName, artworkType);
+            ArtworkProfile artworkProfile = artworkStorageService.getArtworkProfile(profileName, metaDataType, artworkType);
             if (artworkProfile == null) {
                 artworkProfile = new ArtworkProfile();
                 artworkProfile.setProfileName(profileName);
+                artworkProfile.setMetaDataType(metaDataType);
                 artworkProfile.setArtworkType(artworkType);
                 artworkProfile.setWidth(width);
                 artworkProfile.setHeight(height);
-                artworkProfile.setApplyToMovie(applyToMovie);
-                artworkProfile.setApplyToSeries(applyToSeries);
-                artworkProfile.setApplyToSeason(applyToSeason);
-                artworkProfile.setApplyToBoxedSet(applyToBoxedSet);
                 artworkProfile.setScalingType(ScalingType.NORMALIZE);
                 artworkProfile.setReflection(false);
                 artworkProfile.setRoundedCorners(false);
-                artworkProfile.setPreProcess(preProcess);
+                artworkProfile.setPreProcess(true);
                 artworkProfile.setQuality(75);
                 this.artworkStorageService.saveArtworkProfile(artworkProfile);
             }
         } catch (Exception e) {
-            LOG.error("Failed to initialize artwork profile: "+profileName+" ("+artworkType.name()+")", e);
+            LOG.error("Failed to initialize artwork profile: "+profileName+" ("+metaDataType.name()+","+artworkType.name()+")", e);
         }
     }
 }

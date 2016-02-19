@@ -25,6 +25,7 @@
             <form:hidden path="id"/>
             <form:hidden path="profileName"/>
             <form:hidden path="artworkType"/>
+            <form:hidden path="metaDataType"/>
             
             <table id="headertable" class="hero-unit" style="width: 40%; margin: auto;">
             <tbody>
@@ -32,6 +33,11 @@
                     <td class="right"><spring:message code="label.name"/>:</td>
                     <td>&nbsp;</td>
                     <td>${profile.profileName}</td>
+                </tr>
+                <tr>
+                    <td class="right"><spring:message code="page.artwork.profiles.label.applyto"/>:</td>
+                    <td>&nbsp;</td>
+                    <td>${profile.metaDataType}</td>
                 </tr>
                 <tr>
                     <td class="right"><spring:message code="page.artwork.profiles.label.artworktype"/>:</td>
@@ -48,38 +54,6 @@
                     <td>&nbsp;</td>
                     <td><form:input path="height"/></td>
                 </tr>
-                <c:if test="${profile.artworkType == 'POSTER' || profile.artworkType == 'FANART' || profile.artworkType == 'BANNER'}">
-                    <tr>
-                        <td class="right"><spring:message code="page.artwork.profiles.label.applyto"/>:</td>
-                        <td>&nbsp;</td>
-                        <td>
-                            <table id="tablelist" style="margin:0px;width:10%;background-color:#222222">
-                            <c:if test="${profile.artworkType != 'BANNER'}">
-                                <tr style="background-color:#222222">
-                                    <td style="border-bottom:0px"><spring:message code="metadata.movie"/>:</td>
-                                    <td style="border-bottom:0px">&nbsp;</td>
-                                    <td style="border-bottom:0px"><form:checkbox id="applyToMovie" path="applyToMovie"/></td>
-                                </tr>
-                            </c:if>
-                            <tr style="background-color:#222222">
-                                <td style="border-bottom:0px"><spring:message code="metadata.series"/>:</td>
-                                <td style="border-bottom:0px">&nbsp;</td>
-                                <td style="border-bottom:0px"><form:checkbox id="applyToSeries" path="applyToSeries"/></td>
-                            </tr>
-                            <tr style="background-color:#222222">
-                                <td style="border-bottom:0px"><spring:message code="metadata.season"/>:</td>
-                                <td style="border-bottom:0px">&nbsp;</td>
-                                <td style="border-bottom:0px"><form:checkbox id="applyToSeason" path="applyToSeason"/></td>
-                            </tr>
-                            <tr style="background-color:#222222">
-                                <td style="border-bottom:0px"><spring:message code="metadata.boxedset"/>:</td>
-                                <td style="border-bottom:0px">&nbsp;</td>
-                                <td style="border-bottom:0px"><form:checkbox id="applyToBoxedSet" path="applyToBoxedSet"/></td>
-                            </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </c:if>
                 <tr>
                     <td class="right"><spring:message code="page.artwork.profiles.label.scaling"/>:</td>
                     <td>&nbsp;</td>

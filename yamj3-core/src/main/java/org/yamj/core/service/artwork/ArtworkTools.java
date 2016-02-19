@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
@@ -95,7 +96,7 @@ public final class ArtworkTools {
         }
         
         // 2. artwork type
-        sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
+        sb.append(located.getArtwork().getArtworkType().name().toLowerCase());
         sb.append(".");
         
         // 3. hash code
@@ -119,6 +120,49 @@ public final class ArtworkTools {
         }
         
         return sb.toString();
+    }
+
+    public static MetaDataType getMetaDataType(ArtworkLocated located) {
+        return getMetaDataType(located.getArtwork());
+    }
+
+    public static MetaDataType getMetaDataType(Artwork artwork) {
+        MetaDataType metaDataType = MetaDataType.UNKNOWN;
+
+        final ArtworkType artworkType = artwork.getArtworkType(); 
+        switch(artworkType) {
+        case PHOTO:
+            metaDataType = MetaDataType.PERSON;
+            break;
+        case VIDEOIMAGE:
+            metaDataType = MetaDataType.EPISODE;
+            break;
+        case BANNER:
+            if (artwork.getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (artwork.getSeries() != null) {
+                metaDataType = MetaDataType.SERIES;
+            } else {
+                metaDataType = MetaDataType.SEASON;
+            }
+            break;
+        case POSTER:
+        case FANART:
+            if (artwork.getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (artwork.getSeries() != null) {
+                metaDataType = MetaDataType.SERIES;
+            } else if (artwork.getSeason() != null) {
+                metaDataType = MetaDataType.SEASON;
+            } else {
+                metaDataType = MetaDataType.MOVIE;
+            }
+            break;
+        default:
+            break;
+        }
+        
+        return metaDataType;
     }
 
     public static Set<String> determinePriorities(final String configValue, Set<String> allowedForScan) {
