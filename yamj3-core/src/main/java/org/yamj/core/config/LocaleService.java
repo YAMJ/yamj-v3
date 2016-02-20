@@ -23,6 +23,7 @@
 package org.yamj.core.config;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
@@ -49,7 +50,7 @@ public class LocaleService  {
     private ConfigService configService;
 
     @PostConstruct
-    public void init() {
+    public void init() { //NOSONAR
         String langCode;
         String countryCode;
         String langISO3;
@@ -64,12 +65,12 @@ public class LocaleService  {
             countryCode = StringUtils.trimToNull(locale.getCountry());
             try {
                 langISO3 = StringUtils.trimToNull(locale.getISO3Language());
-            } catch (Exception e) {
+            } catch (MissingResourceException mre) { //NOSONAR
                langISO3 = null; 
             }
             try {
                 countryISO3 = StringUtils.trimToNull(locale.getISO3Country());
-            } catch (Exception e) {
+            } catch (MissingResourceException mre) { //NOSONAR
                 countryISO3 = null; 
             }
             displayLanguage = StringUtils.trimToNull(locale.getDisplayLanguage());
@@ -125,26 +126,16 @@ public class LocaleService  {
         }
 
         // additional languages from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso639.xcode.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
-                languageLookupMap.put(key, prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load language code properties: {}", e.getMessage());
+        Properties props = this.loadProperties("/iso639.xcode.properties");
+        for (Entry<Object,Object> prop : props.entrySet()) {
+            String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
+            languageLookupMap.put(key, prop.getValue().toString());
         }
 
         // additional language display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso639.xdisplay.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load language display properties: {}", e.getMessage());
+        props = this.loadProperties("/iso639.xdisplay.properties");
+        for (Entry<Object,Object> prop : props.entrySet()) {
+            languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
         }
 
         // the ISO 639 catalogs
@@ -156,47 +147,31 @@ public class LocaleService  {
             }
             stream.append("properties");
             
-            try (InputStream inStream = getClass().getResourceAsStream(stream.toString())) {
-                Properties props = new Properties();
-                props.load(inStream);
-                for (Entry<Object,Object> prop : props.entrySet()) {
-                    // map from name to code
-                    languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                    if (StringUtils.isBlank(lang)) {
-                        // map from code to name
-                        languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
-                    } else {
-                        // map from language plus code to name
-                        languageDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
-                    }
+            props = this.loadProperties(stream.toString());
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                // map from name to code
+                languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                if (StringUtils.isBlank(lang)) {
+                    // map from code to name
+                    languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+                } else {
+                    // map from language plus code to name
+                    languageDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
                 }
-            } catch (Exception e) {
-                LOG.error("Failed to load {}: {}", stream, e.getMessage());
             }
         }
 
         // additional countries from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.xcode.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
-                countryLookupMap.put(key, prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load country code properties: {}", e.getMessage());
+        props = this.loadProperties("/iso3166.xcode.properties");
+        for (Entry<Object,Object> prop : props.entrySet()) {
+            String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
+            countryLookupMap.put(key, prop.getValue().toString());
         }
-
         
         // additional country display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.xdisplay.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load country display properties: {}", e.getMessage());
+        props = this.loadProperties("/iso3166.xdisplay.properties");
+        for (Entry<Object,Object> prop : props.entrySet()) {
+            countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
         }
 
         // the ISO 3166 catalogs
@@ -208,22 +183,17 @@ public class LocaleService  {
             }
             stream.append("properties");
             
-            try (InputStream inStream = getClass().getResourceAsStream(stream.toString())) {
-                Properties props = new Properties();
-                props.load(inStream);
-                for (Entry<Object,Object> prop : props.entrySet()) {
-                    // map from name to code
-                    countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                    if (StringUtils.isBlank(lang)) {
-                        // map from code to name
-                        countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
-                    } else {
-                        // map from language plus code to name
-                        countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
-                    }
+            props = this.loadProperties(stream.toString());
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                // map from name to code
+                countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                if (StringUtils.isBlank(lang)) {
+                    // map from code to name
+                    countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+                } else {
+                    // map from language plus code to name
+                    countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
                 }
-            } catch (Exception e) {
-                LOG.error("Failed to load {}: {}", stream, e.getMessage());
             }
         }
         
@@ -237,6 +207,7 @@ public class LocaleService  {
                 language = Locale.getDefault().getLanguage();
             }
         }
+        
         String country = PropertyTools.getProperty("yamj3.country");
         if (StringUtils.isEmpty(country)) {
             country = Locale.getDefault().getCountry();
@@ -257,13 +228,29 @@ public class LocaleService  {
         LOG.info("YAMY display countries: {}", countryDisplayMap.size());
     }
     
+    private Properties loadProperties(String resourceName) {
+        Properties props = new Properties();
+        try (InputStream inStream = getClass().getResourceAsStream(resourceName);
+             InputStreamReader reader = new InputStreamReader(inStream, "UTF-8"))
+        {
+            props.load(reader);
+        } catch (Exception ex) {
+            props.clear();
+            LOG.error("Failed to load '{}' properties: {}", resourceName, ex.getMessage());
+            LOG.trace("Property load error", ex);
+        }
+        return props;
+    }
+    
     public String findLanguageCode(String language) {
         if (StringUtils.isBlank(language)) {
             return null;
         }
         
         String languageCode = languageLookupMap.get(language);
-        if (languageCode != null) return languageCode;
+        if (languageCode != null) {
+            return languageCode;
+        }
         
         // check case insensitive
         for (Entry<String,String> entry : languageLookupMap.entrySet()) {
@@ -282,7 +269,9 @@ public class LocaleService  {
         }
         
         String countryCode = countryLookupMap.get(country);
-        if (countryCode != null) return countryCode;
+        if (countryCode != null) {
+            return countryCode;
+        }
         
         // check case insensitive
         for (Entry<String,String> entry : countryLookupMap.entrySet()) {
@@ -293,6 +282,10 @@ public class LocaleService  {
 
         LOG.warn("No country code found for country '{}'", country);
         return null;
+    }
+    
+    public Locale getLocale() {
+        return yamjLocale;
     }
     
     public Locale getLocaleForConfig(String config) {
@@ -309,6 +302,7 @@ public class LocaleService  {
                 language = yamjLocale.getLanguage();
             }
         }
+        
         String country = configService.getProperty(config+".country");
         if (StringUtils.isBlank(country)) {
             country = yamjLocale.getCountry();
@@ -318,51 +312,74 @@ public class LocaleService  {
                 country = yamjLocale.getCountry();
             }
         }
+        
         LOG.trace("Locale for {}: language={}, country={}", config, language, country);
         return new Locale(language, country);            
     }
 
-    public String getDisplayLanguage(final String inLanguage, final String languageCode) {
-        if (languageCode == null) return null;
+    public String getDisplayLanguage(final String inLanguage, final String languageCode) { //NOSONAR
+        if (languageCode == null) {
+            return null;
+        }
+        
         final String langCode = languageCode.toLowerCase();
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
+        String inLangCode = (inLanguage == null) ? yamjLocale.getLanguage() : inLanguage.toLowerCase();
         
         // fast way
         String display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
         
         // slower way
         inLangCode = findLanguageCode(inLanguage);
-        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        if (inLangCode == null) {
+            inLangCode = yamjLocale.getLanguage();
+        }
         display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // search for language code only
         display = this.languageDisplayMap.get(langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // just return language code
         return languageCode;
     }
 
-    public String getDisplayCountry(final String inLanguage, final String countryCode) {
-        if (countryCode == null) return null;
+    public String getDisplayCountry(final String inLanguage, final String countryCode) { //NOSONAR
+        if (countryCode == null) {
+            return null;
+        }
+        
         final String cCode = countryCode.toUpperCase();
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
+        String inLangCode = (inLanguage == null) ? yamjLocale.getLanguage() : inLanguage.toLowerCase();
         
         // fast way
         String display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
             
         // slower way
         inLangCode = findLanguageCode(inLanguage);
-        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        if (inLangCode == null) {
+            inLangCode = yamjLocale.getLanguage();
+        }
         display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // search for country code only
         display = this.countryDisplayMap.get(cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // just return country code
         return cCode;
@@ -377,21 +394,24 @@ public class LocaleService  {
         List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", locale.getCountry());
         for (String country : countries) {
             String countryCode = this.findCountryCode(country);
-            if (countryCode != null) result.add(countryCode);
+            if (countryCode != null) {
+                result.add(countryCode);
+            }
         }
         return result;
     }
     
     public Set<String> getCountryNames(String countryCode) {
+        if (StringUtils.isBlank(countryCode)) {
+            return Collections.emptySet();
+        }
+        
         Set<String> result = new HashSet<>();
-        if (StringUtils.isNotBlank(countryCode)) {
-            for (Entry<String,String> entry : countryLookupMap.entrySet()) {
-                if (entry.getValue().equals(countryCode)) {
-                    result.add(entry.getKey());
-                }
+        for (Entry<String,String> entry : countryLookupMap.entrySet()) {
+            if (entry.getValue().equals(countryCode)) {
+                result.add(entry.getKey());
             }
         }
         return result;
     }
 }
-

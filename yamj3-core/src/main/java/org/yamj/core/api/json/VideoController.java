@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.json;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +37,14 @@ import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ScanningScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
 
 @RestController
-@RequestMapping(value = "/api/video/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/video", produces = "application/json; charset=utf-8")
 public class VideoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
+    private static final String INVALID_META_DATA_TYPE = "Invalid meta data type '";
     
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
@@ -49,261 +52,174 @@ public class VideoController {
     private ScanningScheduler scanningScheduler;
 
     /**
-     * Get information on a movie
+     * Get information on a video.
      *
+     * @param type
      * @param options
      * @return
      */
-    @RequestMapping("/movie/{id}")
-    public ApiWrapperSingle<ApiVideoDTO> getVideoById(@ModelAttribute("options") OptionsIndexVideo options) {
+    @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
+    public ApiWrapperSingle<ApiVideoDTO> getVideo(@PathVariable("type") String type, @ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
-        // Set the type to movie
-        options.setType("MOVIE");
         wrapper.setOptions(options);
 
-        if (options.getId() > 0L) {
-            LOG.info("Getting video with ID '{}'", options.getId());
-            jsonApiStorageService.getSingleVideo(wrapper);
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (MetaDataType.MOVIE == metaDataType || MetaDataType.SEASON == metaDataType || MetaDataType.SERIES == metaDataType) {
+            // set the valid meta data type
+            options.setType(metaDataType.name());
+
+            if (options.getId() > 0L) {
+                LOG.debug("Getting {} with ID {}", options.getType(), options.getId());
+                wrapper.setResult(jsonApiStorageService.getSingleVideo(wrapper));
+            } else {
+                wrapper.setStatusInvalidId();
+            }
+        } else {
+            wrapper.setStatusCheck(ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for single video"));
         }
-        wrapper.setStatusCheck();
+        
         return wrapper;
     }
 
     /**
-     * Enable online scan for one movie.
-     */
-    @RequestMapping("/movie/enableonlinescan")
-    public ApiStatus enableMovieOnlineScan(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb) 
-    {
-        if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
-        }
-        
-        LOG.info("Enable {} online scan for movie with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Disable online scan for one movie.
-     */
-    @RequestMapping("/movie/disableonlinescan")
-    public ApiStatus disableMovieOnlineScan(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb) 
-    {
-        if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
-        }
-        
-        LOG.info("Disable {} online scan for movie with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Add or update an external id of a movie.
-     */
-    @RequestMapping("/movie/updateexternalid")
-    public ApiStatus updateMovieExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid
-    ) {
-        LOG.info("Set {} external ID '{}' for movie ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.MOVIE, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Add or update an external id of a movie.
-     */
-    @RequestMapping("/movie/removeexternalid")
-    public ApiStatus removeMovieExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb
-    ) {
-        LOG.info("Remove {} external ID from movie ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.MOVIE, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Get information on a series
+     * Update information on a video.
      *
-     * TODO: Get associate seasons for the series
-     *
-     * @param options
+     * @param type
+     * @param id
+     * @param update
      * @return
      */
-    @RequestMapping("/series/{id}")
-    public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
-        // Set the type to movie
-        options.setType("SERIES");
-        wrapper.setOptions(options);
-
-        if (options.getId() > 0L) {
-            LOG.info("Getting series with ID '{}'", options.getId());
-            jsonApiStorageService.getSingleVideo(wrapper);
+    @RequestMapping(value = "/{type}/{id}", method = RequestMethod.PUT)
+    public ApiStatus updateVideo(@PathVariable("type") String type, @PathVariable("id") Long id, @RequestBody UpdateVideo update) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
         }
-        wrapper.setStatusCheck();
-        return wrapper;
+
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        switch(metaDataType) {
+            case MOVIE:
+            case EPISODE:
+                return jsonApiStorageService.updateVideoData(id, update);
+            case SERIES:
+                return jsonApiStorageService.updateSeries(id, update);
+            case SEASON:
+                return jsonApiStorageService.updateSeason(id, update);
+            default:
+                return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
+        }
     }
 
     /**
-     * Enable online scan for one series.
+     * Enable online scan for one movie or series.
      */
-    @RequestMapping("/series/enableonlinescan")
-    public ApiStatus enableSeriesOnlineScan(
+    @RequestMapping(value = "/{type}/enableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus enableOnlineScan(
+            @PathVariable("type") String type,        
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
-        
-        LOG.info("Enable {} online scan for series with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
+
+        ApiStatus status;
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType) {
+            LOG.info("Enable {} online scan for {} with ID {}", sourcedb, metaDataType.name().toLowerCase(), id);
+
+            status = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, false);
+            if (status.isSuccessful()) {
+                scanningScheduler.triggerScanMetaData();
+            }
+        } else {
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for enabling online scan");
+        }
+        return status;
     }
 
     /**
-     * Disable online scan for one series.
+     * Disable online scan for one movie or series.
      */
-    @RequestMapping("/series/disableonlinescan")
-    public ApiStatus disableSeriesOnlineScan(
+    @RequestMapping(value = "/{type}/disableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus disableOnlineScan(
+            @PathVariable("type") String type,        
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
-        
-        LOG.info("Disable {} online scan for series with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    } 
-    
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/series/updateexternalid")
-    public ApiStatus updateSeriesExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid
-    ) {
-        LOG.info("Set {} external ID '{}' for series ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SERIES, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-        
-    }
 
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/series/removeexternalid")
-    public ApiStatus removeSeriesExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb
-    ) {
-        LOG.info("Remove {} external ID from series ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SERIES, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
+        ApiStatus status;
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType) {
+            LOG.info("Disable {} online scan for {} with ID {}", sourcedb, metaDataType.name().toLowerCase(), id);
 
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/season/updateexternalid")
-    public ApiStatus updateSeasonExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid
-    ) {
-        LOG.info("Set {} external ID '{}' for season ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SEASON, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-        
-    }
-
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/season/removeexternalid")
-    public ApiStatus removeSeasonExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb
-    ) {
-        LOG.info("Remove {} external ID from season ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SEASON, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/episode/updateexternalid")
-    public ApiStatus updateEpisodeExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid
-    ) {
-        LOG.info("Set {} external ID '{}' for episode ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.EPISODE, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-        
-    }
-
-    /**
-     * Add or update an external id of a series.
-     */
-    @RequestMapping("/episode/removeexternalid")
-    public ApiStatus removeEpisodeExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb
-    ) {
-        LOG.info("Remove {} external ID from episode ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.EPISODE, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    /**
-     * Get information on a season
-     *
-     * TODO: Add episodes to the season
-     *
-     * @param options
-     * @return
-     */
-    @RequestMapping("/season/{id}")
-    public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
-        // Set the type to movie
-        options.setType("SEASON");
-        wrapper.setOptions(options);
-
-        if (options.getId() > 0L) {
-            LOG.info("Getting season with ID '{}'", options.getId());
-            jsonApiStorageService.getSingleVideo(wrapper);
+            status = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, true);
+            if (status.isSuccessful()) {
+                scanningScheduler.triggerScanMetaData();
+            }
+        } else {
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for disabling online scan");
         }
-        wrapper.setStatusCheck();
-        return wrapper;
+        return status;
+    }
+
+    /**
+     * Add or update an external id for a meta data with videos.
+     */
+    @RequestMapping(value = "/{type}/updateexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus updateExternalId(
+            @PathVariable("type") String type,        
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        ApiStatus status;
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (metaDataType.isWithVideos()) {
+            LOG.info("Set {} external ID '{}' for {} ID {}", sourcedb, externalid, metaDataType.name().toLowerCase(), id);
+            
+            status = this.jsonApiStorageService.updateExternalId(metaDataType, id, sourcedb, externalid);
+            if (status.isSuccessful()) {
+                scanningScheduler.triggerScanMetaData();
+            }
+        } else {
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for updating external id");
+        }
+        return status;
+    }
+
+    /**
+     * Add or update an external id of a meta data with videos.
+     */
+    @RequestMapping(value = "/{type}/removeexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus removeExternalId(
+            @PathVariable("type") String type,        
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        ApiStatus status;
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (metaDataType.isWithVideos()) {
+            LOG.info("Remove {} external ID from {} ID {}", sourcedb,  metaDataType.name().toLowerCase(), id);
+            
+            status = this.jsonApiStorageService.updateExternalId(metaDataType, id, sourcedb, null);
+            if (status.isSuccessful()) {
+                scanningScheduler.triggerScanMetaData();
+            }
+        } else {
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for removing external id");
+        }
+        return status;
     }
 
     /**
@@ -312,18 +228,16 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping("/seriesinfo")
+    @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
     public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {
         ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-
         if (options.getId() > 0L) {
-            LOG.info("Getting series info for SeriesID '{}'", options.getId());
+            LOG.debug("Getting series info for ID {}", options.getId());
             if (options.hasDataItem(DataItem.ARTWORK) && StringUtils.isBlank(options.getArtwork())) {
-                options.setArtwork("all");
+                options.setArtwork(ALL);
             }
-            jsonApiStorageService.getSeriesInfo(wrapper);
-            wrapper.setStatusCheck();
+            wrapper.setResults(jsonApiStorageService.getSeriesInfo(wrapper));
         } else {
             wrapper.setStatusInvalidId();
         }
@@ -336,17 +250,16 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping("/episodes")
+    @RequestMapping(value = "/episodes", method = RequestMethod.GET)
     public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
         LOG.info("Getting episodes for seriesId '{}', seasonId '{}', season '{}'",
-                options.getSeriesid() < 0L ? "All" : options.getSeriesid(),
-                options.getSeasonid() < 0L ? "All" : options.getSeasonid(),
-                options.getSeason() < 0L ? "All" : options.getSeason());
+                options.getSeriesid() < 0L ? ALL : options.getSeriesid(),
+                options.getSeasonid() < 0L ? ALL : options.getSeasonid(),
+                options.getSeason() < 0L ? ALL : options.getSeason());
 
         ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        jsonApiStorageService.getEpisodeList(wrapper);
-        wrapper.setStatusCheck();
+        wrapper.setResults(jsonApiStorageService.getEpisodeList(wrapper));
         return wrapper;
     }
     
@@ -356,14 +269,13 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping("/years/list")
+    @RequestMapping(value = "/years/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiYearDecadeDTO> getYears(@ModelAttribute("options") OptionsMultiType options) {
-        LOG.info("Getting year list with {}", options.toString());
+        LOG.debug("Getting year list - Options: {}", options);
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getYears(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
         
     }
@@ -374,15 +286,13 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping("/decades/list")
+    @RequestMapping(value = "/decades/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiYearDecadeDTO> getDecades(@ModelAttribute("options") OptionsMultiType options) {
-        LOG.info("Getting decade list with {}", options.toString());
+        LOG.debug("Getting decade list - Options: {}", options);
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
-        
     }
 }

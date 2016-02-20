@@ -28,6 +28,7 @@ import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
@@ -95,6 +96,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     private Date releaseDate;
 
     // GETTER and SETTER
+    
     public String getSourceDb() {
         return sourceDb;
     }
@@ -132,8 +134,12 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     }
 
     public void setRole(String role) {
-        // Truncate the role to 255 characters
-        this.role = (role == null ? role : role.substring(0, Math.min(role.length(), 254)));
+        if (role != null) {
+            // Truncate the role to 255 characters
+            this.role = StringUtils.substring(role, 0, Math.min(role.length(), 254));
+        } else {
+            this.role = null;
+        }
     }
 
     public boolean isVoiceRole() {
@@ -210,16 +216,16 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
 
     // TRANSIENT METHODS
     public void merge(FilmParticipation newFilmo) {
-        this.setRole(newFilmo.getRole());
-        this.setVoiceRole(newFilmo.isVoiceRole());
-        this.setParticipationType(newFilmo.getParticipationType());
-        this.setYear(newFilmo.getYear());
-        this.setYearEnd(newFilmo.getYearEnd());
-        this.setTitle(newFilmo.getTitle());
-        this.setTitleOriginal(newFilmo.getTitleOriginal());
-        this.setDescription(newFilmo.getDescription());
-        this.setReleaseDate(newFilmo.getReleaseDate());
-        this.setReleaseCountryCode(newFilmo.getReleaseCountryCode());
+        setRole(newFilmo.getRole());
+        setVoiceRole(newFilmo.isVoiceRole());
+        setParticipationType(newFilmo.getParticipationType());
+        setYear(newFilmo.getYear());
+        setYearEnd(newFilmo.getYearEnd());
+        setTitle(newFilmo.getTitle());
+        setTitleOriginal(newFilmo.getTitleOriginal());
+        setDescription(newFilmo.getDescription());
+        setReleaseDate(newFilmo.getReleaseDate());
+        setReleaseCountryCode(newFilmo.getReleaseCountryCode());
     }
 
     // EQUALITY CHECKS
@@ -235,7 +241,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FilmParticipation) {
-            final FilmParticipation other = (FilmParticipation) obj;
+            FilmParticipation other = (FilmParticipation) obj;
             return new EqualsBuilder()
                     .append(getSourceDb(), other.getSourceDb())
                     .append(getSourceDbId(), other.getSourceDbId())

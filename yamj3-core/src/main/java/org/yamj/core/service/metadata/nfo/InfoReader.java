@@ -22,11 +22,14 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,6 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
@@ -77,7 +79,7 @@ public final class InfoReader {
         File nfoFile = new File(stageFile.getFullPath());
         String nfoContent = null;
         try {
-            nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
+            nfoContent = FileUtils.readFileToString(nfoFile, UTF8);
         } catch (Exception e) {
             LOG.error("Unable to read NFO file: " + stageFile.getFullPath(), e);
             
@@ -90,8 +92,8 @@ public final class InfoReader {
                 try {
                     stageFile.setStatus(StatusType.INVALID);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {
-                    // error can be ignored
+                } catch (Exception ignore) { //NOSONAR
+                    // any error can be ignored
                 }
                 
                 // nothing to do for this stage file
@@ -171,8 +173,8 @@ public final class InfoReader {
      * @return
      */
     private static int findPosition(final String nfoText, final String xmlType) {
-        int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
-        return (pos == -1 ? Integer.MAX_VALUE : pos);
+        final int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
+        return (pos == -1) ? Integer.MAX_VALUE : pos;
     }
 
     /**
@@ -224,7 +226,7 @@ public final class InfoReader {
         }
         
         // just one movie per file
-        if ((nlMovies == null) || (nlMovies.getLength() == 0)) {
+        if (nlMovies == null || nlMovies.getLength() == 0) {
             LOG.warn("NFO {} contains no infos", nfoFilename);
             return;
         }
@@ -303,22 +305,9 @@ public final class InfoReader {
         // premiered / release date
         movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
 
-
-        /* TODO
-        if (OverrideTools.checkOverwriteCountry(movie, NFO_PLUGIN_ID)) {
-            movie.setCountries(DOMHelper.getValueFromElement(eCommon, "country"), NFO_PLUGIN_ID);
-        }
-        */
-        
         // parse Top250
         value = DOMHelper.getValueFromElement(eCommon, "top250");
-        if (StringUtils.isNumeric(value)) {
-            try {
-                dto.setTop250(Integer.parseInt(value));
-            } catch (Exception e) {
-                // ignore this error
-            }
-        }
+        dto.setTop250(NumberUtils.toInt(value, -1));
         
         // director and writers
         if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.crew", false)) {
@@ -407,38 +396,40 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eId = (Element) nElements;
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            
+            Element eId = (Element) nElements;
 
-                String movieId = eId.getTextContent();
-                if (StringUtils.isNotBlank(movieId)) {
-                    String movieDb = eId.getAttribute("moviedb");
-                    if (StringUtils.isBlank(movieDb)) {
-                        if ("-1".equals(movieId)) {
-                            // skip all scans
-                            dto.setSkipAllScans();
-                        } else {
-                            // choose default scanner id
-                            if (isTV) {
-                                movieDb = TheTVDbScanner.SCANNER_ID;
-                            } else {
-                                movieDb = ImdbScanner.SCANNER_ID;
-                            }
-                            dto.addId(movieDb, movieId);
-                            LOG.debug("Found {} ID: {}", movieDb, movieId);
-                        }
+            String movieId = eId.getTextContent();
+            if (StringUtils.isNotBlank(movieId)) {
+                String movieDb = eId.getAttribute("moviedb");
+                if (StringUtils.isBlank(movieDb)) {
+                    if ("-1".equals(movieId)) {
+                        // skip all scans
+                        dto.setSkipAllScans();
                     } else {
+                        // choose default scanner id
+                        if (isTV) {
+                            movieDb = TheTVDbScanner.SCANNER_ID;
+                        } else {
+                            movieDb = ImdbScanner.SCANNER_ID;
+                        }
                         dto.addId(movieDb, movieId);
                         LOG.debug("Found {} ID: {}", movieDb, movieId);
                     }
+                } else {
+                    dto.addId(movieDb, movieId);
+                    LOG.debug("Found {} ID: {}", movieDb, movieId);
                 }
-                
-                // process the TMDB id
-                movieId = eId.getAttribute("TMDB");
-                if (StringUtils.isNotBlank(movieId)) {
-                    LOG.debug("Found TheMovieDb ID: {}", movieId);
-                    dto.addId(TheMovieDbScanner.SCANNER_ID, movieId);
-                }
+            }
+            
+            // process the TMDB id
+            movieId = eId.getAttribute("TMDB");
+            if (StringUtils.isNotBlank(movieId)) {
+                LOG.debug("Found TheMovieDb ID: {}", movieId);
+                dto.addId(TheMovieDbScanner.SCANNER_ID, movieId);
             }
         }
     }
@@ -462,34 +453,36 @@ public final class InfoReader {
         }
 
         tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
-        if (StringUtils.isNotBlank(tempCert)) {
-            // scan for given countries
-            for (String countryCode : this.localeService.getCertificationCountryCodes()) {
-                for (String countryName : this.localeService.getCountryNames(countryCode)) {
-                    int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, countryName);
-                    if (countryPos >= 0) {
-                        // We've found the country, so extract just that tag
-                        String certification = tempCert.substring(countryPos);
-                        int pos = certification.indexOf(':');
-                        if (pos > 0) {
-                            int endPos = certification.indexOf("/");
-                            if (endPos > 0) {
-                                // this is in the middle of the string
-                                certification = certification.substring(pos + 1, endPos);
-                            } else {
-                                // this is at the end of the string
-                                certification = certification.substring(pos + 1);
-                            }
+        if (StringUtils.isBlank(tempCert)) {
+            return;
+        }
+            
+        // scan for given countries
+        for (String countryCode : this.localeService.getCertificationCountryCodes()) {
+            for (String countryName : this.localeService.getCountryNames(countryCode)) {
+                int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, countryName);
+                if (countryPos >= 0) {
+                    // We've found the country, so extract just that tag
+                    String certification = tempCert.substring(countryPos);
+                    int pos = certification.indexOf(':');
+                    if (pos > 0) {
+                        int endPos = certification.indexOf("/");
+                        if (endPos > 0) {
+                            // this is in the middle of the string
+                            certification = certification.substring(pos + 1, endPos);
+                        } else {
+                            // this is at the end of the string
+                            certification = certification.substring(pos + 1);
                         }
-                        dto.addCertificatioInfo(countryCode, StringUtils.trimToNull(certification));
                     }
+                    dto.addCertificatioInfo(countryCode, StringUtils.trimToNull(certification));
                 }
-                
-                if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
-                    // extract the MPAA rating from the certification
-                    String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                    dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
-                }
+            }
+            
+            if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
+                // extract the MPAA rating from the certification
+                String mpaa = MetadataTools.processMpaaCertification(tempCert);
+                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
             }
         }
     }
@@ -505,15 +498,17 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eGenre = (Element) nElements;
-                NodeList nlNames = eGenre.getElementsByTagName("name");
-                if ((nlNames != null) && (nlNames.getLength() > 0)) {
-                    parseGenres(nlNames, dto);
-                } else if (eGenre.getTextContent() != null) {
-                    for (String genre : eGenre.getTextContent().split(SPLIT_GENRE)) {
-                        dto.adGenre(genre);
-                    }
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            
+            Element eGenre = (Element) nElements;
+            NodeList nlNames = eGenre.getElementsByTagName("name");
+            if ((nlNames != null) && (nlNames.getLength() > 0)) {
+                parseGenres(nlNames, dto);
+            } else if (eGenre.getTextContent() != null) {
+                for (String genre : eGenre.getTextContent().split(SPLIT_GENRE)) {
+                    dto.adGenre(genre);
                 }
             }
         }
@@ -543,15 +538,16 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eId = (Element) nElements;
-
-                String setOrder = eId.getAttribute("order");
-                if (StringUtils.isNumeric(setOrder)) {
-                    dto.addSetInfo(eId.getTextContent(), Integer.parseInt(setOrder));
-                } else {
-                    dto.addSetInfo(eId.getTextContent());
-                }
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            
+            Element eId = (Element) nElements;
+            String setOrder = eId.getAttribute("order");
+            if (StringUtils.isNumeric(setOrder)) {
+                dto.addSetInfo(eId.getTextContent(), Integer.parseInt(setOrder));
+            } else {
+                dto.addSetInfo(eId.getTextContent());
             }
         }
     }
@@ -571,10 +567,12 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eDirector = (Element) nElements;
-                dto.addDirector(eDirector.getTextContent());
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
             }
+            
+            Element eDirector = (Element) nElements;
+            dto.addDirector(eDirector.getTextContent());
         }
     }
 
@@ -628,25 +626,27 @@ public final class InfoReader {
             if (nlCast.getLength() > 1) {
                 for (int looper = 0; looper < nlCast.getLength(); looper++) {
                     nElement = nlCast.item(looper);
-                    if (nElement.getNodeType() == Node.ELEMENT_NODE) {
-                        Element eCast = (Element) nElement;
-                        if (eCast.getNodeName().equalsIgnoreCase("name")) {
-                            if (firstActor) {
-                                firstActor = Boolean.FALSE;
-                            } else {
-                                dto.addActor(aName, aRole, aThumb);
-                            }
-                            aName = eCast.getTextContent();
-                            aRole = null;
-                            aThumb = null;
-                        } else if (eCast.getNodeName().equalsIgnoreCase("role") && StringUtils.isNotBlank(eCast.getTextContent())) {
-                            aRole = eCast.getTextContent();
-                        } else if (eCast.getNodeName().equalsIgnoreCase("thumb") && StringUtils.isNotBlank(eCast.getTextContent())) {
-                            // thumb will be skipped if there's nothing in there
-                            aThumb = eCast.getTextContent();
-                        }
-                        // There's a case where there might be a different node here that isn't name, role or thumb, but that will be ignored
+                    if (nElement.getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
                     }
+
+                    Element eCast = (Element) nElement;
+                    if (eCast.getNodeName().equalsIgnoreCase("name")) {
+                        if (firstActor) {
+                            firstActor = Boolean.FALSE;
+                        } else {
+                            dto.addActor(aName, aRole, aThumb);
+                        }
+                        aName = eCast.getTextContent();
+                        aRole = null;
+                        aThumb = null;
+                    } else if (eCast.getNodeName().equalsIgnoreCase("role") && StringUtils.isNotBlank(eCast.getTextContent())) {
+                        aRole = eCast.getTextContent();
+                    } else if (eCast.getNodeName().equalsIgnoreCase("thumb") && StringUtils.isNotBlank(eCast.getTextContent())) {
+                        // thumb will be skipped if there's nothing in there
+                        aThumb = eCast.getTextContent();
+                    }
+                    // There's a case where there might be a different node here that isn't name, role or thumb, but that will be ignored
                 }
             } else {
                 // This looks like a Mede8er node in the "<actor>Actor Name</actor>" format, so just get the text element
@@ -668,10 +668,12 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eTrailer = (Element) nElements;
-                dto.addTrailerURL(eTrailer.getTextContent());
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
             }
+            
+            Element eTrailer = (Element) nElements;
+            dto.addTrailerURL(eTrailer.getTextContent());
         }
     }
 
@@ -685,12 +687,14 @@ public final class InfoReader {
         Node nEpisodeDetails;
         for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
             nEpisodeDetails = nlEpisodeDetails.item(looper);
-            if (nEpisodeDetails.getNodeType() == Node.ELEMENT_NODE) {
-                Element eEpisodeDetail = (Element) nEpisodeDetails;
-                InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
-                episodeDTO.setWatched(watched);
-                dto.addEpisode(episodeDTO);
+            if (nEpisodeDetails.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
             }
+            
+            Element eEpisodeDetail = (Element) nEpisodeDetails;
+            InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
+            episodeDTO.setWatched(watched);
+            dto.addEpisode(episodeDTO);
         }
     }
 
@@ -725,11 +729,7 @@ public final class InfoReader {
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
         if (StringUtils.isNotBlank(tempValue)) {
-            try {
-                episodeDTO.setFirstAired(MetadataTools.parseToDate(tempValue.trim()));
-            } catch (Exception ignore) {
-                // ignore error if date has invalid format
-            }
+            episodeDTO.setFirstAired(MetadataTools.parseToDate(tempValue.trim()));
         }
 
         episodeDTO.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));

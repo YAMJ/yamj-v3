@@ -30,21 +30,21 @@ package org.yamj.core.api.model;
 public class CountGeneric {
 
     private String item = "";
-    private Long count = 0L;
+    private Long counter = 0L;
 
     public void setItem(String item) {
         this.item = item;
     }
 
-    public void setCount(Long count) {
-        this.count = count;
+    public void setCounter(Long counter) {
+        this.counter = counter;
     }
 
     public String getItem() {
         return item;
     }
 
-    public Long getCount() {
-        return count;
+    public Long getCounter() {
+        return counter;
     }
 }

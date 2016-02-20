@@ -22,10 +22,11 @@
  */
 package org.yamj.core.web.apis;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
@@ -45,14 +48,11 @@ import org.yamj.core.service.metadata.online.OnlineScannerException;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
-import org.yamj.core.web.ResponseTools;
 
 @Service
 public class ImdbApiWrapper {
     
     private static final Logger LOG = LoggerFactory.getLogger(ImdbApiWrapper.class);
-    private static final Charset CHARSET = Charset.forName("UTF-8");
     private static final String HTML_SITE_FULL = "http://www.imdb.com/";
     private static final String HTML_TITLE = "title/";
     private static final String HTML_A_END = "</a>";
@@ -84,6 +84,10 @@ public class ImdbApiWrapper {
         return url;
     }
 
+    public ImdbMovieDetails getMovieDetails(String imdbId) {
+        return this.getMovieDetails(imdbId, Locale.US);
+    }
+    
     public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
         ImdbMovieDetails imdbMovieDetails;
         imdbApiLock.lock();
@@ -93,25 +97,21 @@ public class ImdbApiWrapper {
         } finally {
             imdbApiLock.unlock();
         }
-        return (imdbMovieDetails == null ? new ImdbMovieDetails() : imdbMovieDetails);
+        return imdbMovieDetails;
     }
         
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public String getMovieDetailsXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
-            response = httpClient.requestContent(getImdbUrl(imdbId), CHARSET);
+            response = httpClient.requestContent(getImdbUrl(imdbId), UTF8);
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new OnlineScannerException("IMDb request failed", ex);
         }
 
-        if (throwTempError && ResponseTools.isTemporaryError(response)) {
-            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
-        } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
-        }
+        checkTempError(throwTempError, response);
         return response.getContent();
     }
     
@@ -141,10 +141,23 @@ public class ImdbApiWrapper {
         return (imdbPerson == null ? new ImdbPerson() : imdbPerson);
     }
 
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName}")
+    public Map<String,Integer> getTop250() {
+        Map<String,Integer> result = new HashMap<>();
+        int rank = 0;
+        for (ImdbList imdbList : imdbApi.getTop250()) {
+            rank++;
+            if (StringUtils.isNotBlank(imdbList.getImdbId())) {
+                result.put(imdbList.getImdbId(), Integer.valueOf(rank));
+            }
+        }
+        return result;
+    }
+    
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public List<ImdbImage> getTitlePhotos(String imdbId) {
         List<ImdbImage> titlePhotos = imdbApi.getTitlePhotos(imdbId);
-        return (titlePhotos == null ? new ArrayList<ImdbImage>() : titlePhotos);
+        return (titlePhotos == null ? new ArrayList<ImdbImage>(0) : titlePhotos);
     }
 
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
@@ -180,11 +193,10 @@ public class ImdbApiWrapper {
         return result;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}", unless="#result==null")
     public String getReleasInfoXML(final String imdbId) {
         String webpage = null;
         try {
-            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), CHARSET);
+            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), UTF8);
             if (ResponseTools.isOK(response)) {
                 webpage = response.getContent();
             } else {
@@ -199,25 +211,21 @@ public class ImdbApiWrapper {
     public String getPersonBioXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
-            response = httpClient.requestContent(HTML_SITE_FULL + "name/" + imdbId + "/bio", CHARSET);
+            response = httpClient.requestContent(HTML_SITE_FULL + "name/" + imdbId + "/bio", UTF8);
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new OnlineScannerException("IMDb request failed", ex);
         }
 
-        if (throwTempError && ResponseTools.isTemporaryError(response)) {
-            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
-        } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
-        }
+        checkTempError(throwTempError, response);
         return response.getContent();
     }
 
     public Set<String> getProductionStudios(String imdbId) {
         Set<String> studios = new LinkedHashSet<>();
         try {
-            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "companycredits"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "companycredits"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting studios failed with status {}: {}", response.getStatusCode(), imdbId);
             } else {
@@ -232,11 +240,20 @@ public class ImdbApiWrapper {
         return studios;
     }
 
-    public Map<String, String> getCertifications(String imdbId, Locale imdbLocale) {
+    public Map<String, String> getCertifications(String imdbId, Locale imdbLocale, ImdbMovieDetails movieDetails) {
         Map<String, String> certifications = new HashMap<>();
         
+        // get certificate from IMDb API movie details
+        String certificate = movieDetails.getCertificate().get("certificate");
+        if (StringUtils.isNotBlank(certificate)) {
+            String country = movieDetails.getCertificate().get("country");
+            if (StringUtils.isBlank(country)) {
+                certifications.put(imdbLocale.getCountry(), certificate);
+            }
+        }
+        
         try {
-            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
             } else {
@@ -263,7 +280,7 @@ public class ImdbApiWrapper {
                 Collections.reverse(tags);
                 for (String countryCode : localeService.getCertificationCountryCodes(imdbLocale)) {
                     loop: for (String country : localeService.getCountryNames(countryCode)) {
-                        String certificate = getPreferredValue(tags, country);
+                        certificate = getPreferredValue(tags, country);
                         if (StringUtils.isNotBlank(certificate)) {
                             certifications.put(countryCode, certificate);
                             break loop;
@@ -311,7 +328,7 @@ public class ImdbApiWrapper {
         HashSet<AwardDTO> awards = new HashSet<>();
         
         try {
-            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "awards"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "awards"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
             } else if (response.getContent().contains("<h1 class=\"header\">Awards</h1>")) {
@@ -347,6 +364,14 @@ public class ImdbApiWrapper {
             LOG.error("Failed to retrieve awards: " + imdbId, ex);
         }
         return awards;
+    }
+
+    private static void checkTempError(boolean throwTempError, DigestedResponse response) throws OnlineScannerException {
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
+        }
     }
 
 }   

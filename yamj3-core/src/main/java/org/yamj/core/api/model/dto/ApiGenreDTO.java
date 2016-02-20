@@ -22,20 +22,21 @@
  */
 package org.yamj.core.api.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.yamj.core.database.model.Genre;
 
-/**
- * @author Stuart
- */
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiGenreDTO extends AbstractApiIdentifiableDTO {
 
     private String name;
     private String target;
 
-    public ApiGenreDTO() {}
+    public ApiGenreDTO() {
+        // empty constructor
+    }
 
     public ApiGenreDTO(Genre genre) {
         this.setId(genre.getId());

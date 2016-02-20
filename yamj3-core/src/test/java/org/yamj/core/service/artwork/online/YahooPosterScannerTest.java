@@ -25,14 +25,12 @@ package org.yamj.core.service.artwork.online;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.online.YahooPosterScanner;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
+public class YahooPosterScannerTest extends AbstractTest {
 
     @Resource(name = "yahooPosterScanner")
     private YahooPosterScanner yahooPosterScanner;
@@ -44,10 +42,6 @@ public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
         videoData.setPublicationYear(2009, yahooPosterScanner.getScannerName());
         
         List<ArtworkDetailDTO> dtos = yahooPosterScanner.getPosters(videoData);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 }

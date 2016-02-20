@@ -30,14 +30,14 @@ public class EnumValidator extends OptionValidator {
     /**
      * Array with allowed values
      */
-    private final String allowedValues[];
+    private final String[] allowedValues;
 
     /**
      * Creates a new enumeration validator.
      *
      * @param allowedValues array of allowed values
      */
-    public EnumValidator(final String allowedValues[]) {
+    public EnumValidator(final String[] allowedValues) {
         this.allowedValues = allowedValues.clone();
     }
 

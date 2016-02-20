@@ -26,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -35,7 +39,7 @@ import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/api/player/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/player", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class PlayerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerController.class);
@@ -59,8 +63,6 @@ public class PlayerController {
         }
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getPlayerList(options));
-        wrapper.setStatusCheck();
-
         return wrapper;
     }
 
@@ -78,7 +80,7 @@ public class PlayerController {
             @RequestParam(required = true, defaultValue = "") String deviceType,
             @RequestParam(required = true, defaultValue = "") String ipAddress) {
 
-        ApiStatus status = new ApiStatus();
+        ApiStatus status;
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipAddress) && StringUtils.isNotBlank(deviceType)) {
             LOG.info("Storing player '{}'", name);
             PlayerInfo player = new PlayerInfo();
@@ -86,11 +88,9 @@ public class PlayerController {
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
             jsonApiStorageService.storePlayer(player);
-            status.setStatus(200);
-            status.setMessage("Successfully stored '" + name + "'");
+            status = ApiStatus.ok("Successfully stored '" + name + "'");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid player information specified; player not stored");
+            status = ApiStatus.badRequest("Invalid player information specified; player not stored");
         }
         return status;
     }
@@ -102,19 +102,14 @@ public class PlayerController {
      * @return
      */
     @RequestMapping("/delete")
-    public ApiStatus playerDelete(
-            @RequestParam(required = true, defaultValue = "") Long playerId) {
-        ApiStatus status = new ApiStatus();
-        if (playerId != null && playerId > 0) {
-            LOG.info("Deleting player '{}'", playerId);
-            jsonApiStorageService.deletePlayer(playerId);
-            status.setStatus(200);
-            status.setMessage("Successfully deleted '" + playerId + "'");
-        } else {
-            status.setStatus(400);
-            status.setMessage("Invalid player ID specified; player not deleted");
+    public ApiStatus playerDelete(@RequestParam(required = true, defaultValue = "") Long playerId) {
+        if (playerId <= 0L) {
+            return ApiStatus.INVALID_ID;
         }
-        return status;
+
+        LOG.info("Deleting player {}", playerId);
+        jsonApiStorageService.deletePlayer(playerId);
+        return ApiStatus.ok("Successfully deleted player " + playerId);
     }
 
     /**
@@ -131,28 +126,25 @@ public class PlayerController {
         @RequestParam(required = true, defaultValue = "") String sourcePath,
         @RequestParam(required = true, defaultValue = "") String targetPath)
     {
-        ApiStatus status = new ApiStatus();
-        if (playerId == null || playerId <= 0) {
-            status.setStatus(400);
-            status.setMessage("Invalid player ID specified; player path not stored");
-        } else if (StringUtils.isBlank(sourcePath)) {
-            status.setStatus(400);
-            status.setMessage("Invalid source path; player path not stored");
-        } else if (StringUtils.isBlank(targetPath)) {
-            status.setStatus(400);
-            status.setMessage("Invalid target path; player path not stored");
+        if (playerId <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+        if (StringUtils.isBlank(sourcePath)) {
+            return ApiStatus.badRequest("Invalid source path; player path not stored");
+        }
+        if (StringUtils.isBlank(targetPath)) {
+            return ApiStatus.badRequest("Invalid target path; player path not stored");
+        }
+        
+        PlayerPath playerPath = new PlayerPath();
+        playerPath.setSourcePath(sourcePath);
+        playerPath.setTargetPath(targetPath);
+        
+        ApiStatus status;
+        if (jsonApiStorageService.storePlayerPath(playerId, playerPath)) {
+            status = ApiStatus.ok("Successfully stored player path for player " + playerId);
         } else {
-            PlayerPath playerPath = new PlayerPath();
-            playerPath.setSourcePath(sourcePath);
-            playerPath.setTargetPath(targetPath);
-            boolean stored = jsonApiStorageService.storePlayerPath(playerId, playerPath);
-            if (stored) {
-                status.setStatus(200);
-                status.setMessage("Successfully stored player path for player " + playerId);
-            } else {
-                status.setStatus(400);
-                status.setMessage("Player "+ playerId + " does not exist; player path not stored");
-            }
+            status = ApiStatus.badRequest("Player "+ playerId + " does not exist; player path not stored");
         }
         return status;
     }
@@ -168,22 +160,19 @@ public class PlayerController {
         @RequestParam(required = true, defaultValue = "") Long playerId,
         @RequestParam(required = true, defaultValue = "") Long pathId)
     {
-        ApiStatus status = new ApiStatus();
+        
         if (playerId == null || playerId <= 0) {
-            status.setStatus(400);
-            status.setMessage("Invalid player ID specified, player path not removed");
-        } else if (pathId == null || pathId <= 0) {
-            status.setStatus(400);
-            status.setMessage("Invalid path ID specified, player path not removed");
+            return ApiStatus.badRequest("Invalid player ID specified, player path not removed");
+        } 
+        if (pathId == null || pathId <= 0) {
+            return ApiStatus.badRequest("Invalid path ID specified, player path not removed");
+        }
+
+        ApiStatus status;
+        if (jsonApiStorageService.deletePlayerPath(playerId, pathId)) {
+            status = ApiStatus.ok("Successfully removed player path " + pathId + " from player " + playerId);
         } else {
-            boolean deleted = jsonApiStorageService.deletePlayerPath(playerId, pathId);
-            if (deleted) {
-                status.setStatus(200);
-                status.setMessage("Successfully removed player path '" + pathId + "' from player '" + playerId + "'");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Given player id or path id does not exist; player path not deleted");
-            }
+            status = ApiStatus.badRequest("Given player id or path id does not exist; player path not deleted");
         }
         return status;
     }

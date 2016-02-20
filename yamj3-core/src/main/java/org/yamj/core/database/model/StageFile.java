@@ -22,21 +22,49 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
+@NamedQueries({    
+    @NamedQuery(name = "stageFile.findNfoFile",
+        query = "SELECT distinct sf FROM StageFile sf "+
+                "WHERE sf.fileType=:fileType AND lower(sf.baseName)=:searchName AND sf.stageDirectory=:stageDirectory AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.getValidNFOFilesForVideo",
+        query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel JOIN nfrel.nfoRelationPK.videoData vd "+
+                "WHERE vd.id=:videoDataId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
+    ),
+    @NamedQuery(name = "stageFile.getValidNFOFilesForSeries",
+        query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel "+
+                "JOIN nfrel.nfoRelationPK.videoData vd JOIN vd.season sea JOIN sea.series ser "+
+                "WHERE ser.id=:seriesId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeries",
+        query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE ser.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeason",
+        query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE sea.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "stageFile.findVideoStageFiles.forVideoData",
+        query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE vd.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+    )
+})
+    
 @Entity
 @Table(name = "stage_file",
        uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"}),
@@ -44,10 +72,10 @@ import org.yamj.core.database.model.type.FileType;
                   @Index(name = "IX_STAGEFILE_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
-public class StageFile extends AbstractAuditable implements Serializable {
+public class StageFile extends AbstractStateful {
 
     private static final long serialVersionUID = -6247352843375054146L;
-
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "directory_id", nullable = false, foreignKey = @ForeignKey(name = "FK_STAGEFILE_DIRECTORY"))
@@ -76,10 +104,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "full_path", nullable = false, length = 1000)
     private String fullPath;
 
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.stageFile")
     private List<NfoRelation> nfoRelations = new ArrayList<>(0);
 
@@ -102,6 +126,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     private MediaFile mediaFile;
 
     // GETTER and SETTER
+    
     public StageDirectory getStageDirectory() {
         return stageDirectory;
     }
@@ -158,14 +183,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
         this.fullPath = fullPath;
     }
 
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
-    }
-
     public String getContent() {
         return content;
     }
@@ -191,7 +208,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     }
 
     public void addNfoRelation(NfoRelation nfoRelation) {
-        this.nfoRelations.add(nfoRelation);
+        getNfoRelations().add(nfoRelation);
     }
 
     private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
@@ -221,19 +238,15 @@ public class StageFile extends AbstractAuditable implements Serializable {
     // TRANSIENT METHODS
     
     public String getFileName() {
-        return this.getBaseName() + "." + this.getExtension();
+        return getBaseName().concat(".").concat(getExtension());
     }
 
     public String getHashCode() {
-        int hash = this.getFullPath().hashCode();
-        return String.valueOf((hash < 0 ? 0 - hash : hash));
+        return getHashCode(0);
     }
 
     public String getHashCode(int increase) {
-        int hash = this.getFullPath().hashCode();
-        if (hash < 0 ) hash=(0-hash);
-        hash = hash + increase;
-        return String.valueOf(hash);
+        return Integer.toString(Math.abs(getFullPath().hashCode()) + increase);
     }
 
     // EQUALITY CHECKS
@@ -257,7 +270,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
         if (!(obj instanceof StageFile)) {
             return false;
         }
-        final StageFile other = (StageFile) obj;
+        StageFile other = (StageFile) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
@@ -283,7 +296,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
         sb.append(getFileDate());
         sb.append(", fileSize=");
         sb.append(getFileSize());
-        if (this.stageDirectory != null && Hibernate.isInitialized(this.stageDirectory)) {
+        if (getStageDirectory() != null && Hibernate.isInitialized(getStageDirectory())) {
             sb.append(", stageDirectory=");
             sb.append(getStageDirectory().getDirectoryPath());
         }

@@ -22,10 +22,10 @@
  */
 package org.yamj.core.web.apis;
 
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+import static org.yamj.core.tools.Constants.UTF8;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -37,9 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.ResponseTools;
 
 public class SearchEngineTools {
 
@@ -47,7 +48,6 @@ public class SearchEngineTools {
     // Literals
     private static final String HTTP_LITERAL = "http://";
     private static final String HTTPS_LITERAL = "https://";
-    private static final String UTF8 = "UTF-8";
     private static final String SITE = "+site%3A";
     private static final String PAREN_RIGHT = "%29";
     private static final String PAREN_LEFT = "+%28";
@@ -55,21 +55,21 @@ public class SearchEngineTools {
     private final CommonHttpClient httpClient;
     private final Charset charset;
     private final LinkedList<String> searchSites;
+    private final String country;
+    private final String language;
 
-    private String searchSuffix = "";
-    private String country = Locale.US.getCountry();
-    private String language = Locale.US.getLanguage();
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
     private String bingHost = "www.bing.com";
     private String blekkoHost = "www.blekko.com";
+    private String searchSuffix = "";
 
     public SearchEngineTools(CommonHttpClient httpClient) {
         this(httpClient, Locale.US);
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
-        this(httpClient, locale, Charset.forName("UTF-8"));
+        this(httpClient, locale, UTF8);
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
@@ -78,10 +78,9 @@ public class SearchEngineTools {
         
         // sites to search for URLs
         searchSites = new LinkedList<>();
-        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(",")));
-
-        // country specific presets
+        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(DEFAULT_SPLITTER)));
         
+        // country specific presets
         if (Locale.GERMANY.getCountry().equalsIgnoreCase(locale.getCountry())) {
             country = Locale.GERMAN.getCountry();
             language = Locale.GERMAN.getLanguage();
@@ -109,7 +108,7 @@ public class SearchEngineTools {
             googleHost = "www.google.ru";
             yahooHost = "ru.search.yahoo.com";
         } else if ("IL".equalsIgnoreCase(locale.getCountry())) {
-            this.country = "il";
+            country = "IL";
             language = "il";
             googleHost = "www.google.co.il";
         } else if (Locale.FRANCE.getCountry().equalsIgnoreCase(locale.getCountry())) {
@@ -117,15 +116,18 @@ public class SearchEngineTools {
             language = Locale.FRANCE.getLanguage();
             googleHost = "www.google.fr";
         } else if ("NL".equalsIgnoreCase(locale.getCountry())) {
-            this.country = "NL";
+            country = "NL";
             language = "nl";
             googleHost = "www.google.nl";
+        } else {
+            country = Locale.US.getCountry();
+            language = Locale.US.getLanguage();
         }
     }
 
     public void setSearchSites(String searchSites) {
         this.searchSites.clear();
-        this.searchSites.addAll(Arrays.asList(searchSites.split(",")));
+        this.searchSites.addAll(Arrays.asList(searchSites.split(DEFAULT_SPLITTER)));
     }
 
     public void setSearchSuffix(String searchSuffix) {
@@ -186,7 +188,7 @@ public class SearchEngineTools {
                 sb.append("&");
             }
             sb.append("as_q=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -194,11 +196,12 @@ public class SearchEngineTools {
             }
             if (StringUtils.isNotBlank(additional)) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             sb.append("&as_sitesearch=");
             sb.append(site);
-
+            LOG.trace("Google search: {}", sb);
+            
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
                 if (throwTempError && ResponseTools.isTemporaryError(response)) {
@@ -231,7 +234,7 @@ public class SearchEngineTools {
                 sb.append("&rd=r2");
             }
             sb.append("&ei=UTF-8&p=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -241,8 +244,9 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
+            LOG.trace("Yahoo search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
@@ -278,7 +282,7 @@ public class SearchEngineTools {
             StringBuilder sb = new StringBuilder(HTTP_LITERAL);
             sb.append(bingHost);
             sb.append("/search?q=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -288,13 +292,14 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             if (country != null) {
                 sb.append("&cc=");
                 sb.append(country);
                 sb.append("&filt=rf");
             }
+            LOG.trace("Bing search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
@@ -323,7 +328,7 @@ public class SearchEngineTools {
             StringBuilder sb = new StringBuilder(HTTP_LITERAL);
             sb.append(blekkoHost);
             sb.append("/ws/?q=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -333,8 +338,9 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
+            LOG.trace("Blekko search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {

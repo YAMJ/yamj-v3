@@ -50,8 +50,7 @@ public class DateTimeToolsTest {
      * Test of convertDateToString method, of class DateTimeTools.
      */
     @Test
-    public void testConvertDateToString_Date() {
-        System.out.println("convertDateToString");
+    public void testConvertDateToStringWithoutFormat() {
         String result = DateTimeTools.convertDateToString(dateJava);
         assertEquals(EXP_YYYY_MM_DD, result);
     }
@@ -60,8 +59,7 @@ public class DateTimeToolsTest {
      * Test of convertDateToString method, of class DateTimeTools.
      */
     @Test
-    public void testConvertDateToString_Date_String() {
-        System.out.println("convertDateToString");
+    public void testConvertDateToStringWithFormat() {
         String dateFormat = "dd-MM-yyyy";
         String result = DateTimeTools.convertDateToString(dateJava, dateFormat);
         assertEquals(EXP_DD_MM_YYYY, result);
@@ -71,8 +69,7 @@ public class DateTimeToolsTest {
      * Test of convertDateToString method, of class DateTimeTools.
      */
     @Test
-    public void testConvertDateToString_DateTime() {
-        System.out.println("convertDateToString");
+    public void testConvertDateTimeToStringWithoutFormat() {
         String result = DateTimeTools.convertDateToString(dateTime);
         assertEquals(EXP_YYYY_MM_DD, result);
     }
@@ -81,8 +78,7 @@ public class DateTimeToolsTest {
      * Test of convertDateToString method, of class DateTimeTools.
      */
     @Test
-    public void testConvertDateToString_DateTime_String() {
-        System.out.println("convertDateToString");
+    public void testConvertDateTimeToStringWithFormat() {
         String dateFormat = "dd-MM-yyyy";
         String result = DateTimeTools.convertDateToString(dateTime, dateFormat);
         assertEquals(EXP_DD_MM_YYYY, result);
@@ -92,8 +88,7 @@ public class DateTimeToolsTest {
      * Test of getDuration method, of class DateTimeTools.
      */
     @Test
-    public void testGetDuration_Date_Date() {
-        System.out.println("getDuration");
+    public void testGetDurationWithDateValue() {
         long expResult = EXP_1H_1M_1S * 1000;
         Date start = dateJava;
         Date end = new Date(dateJava.getTime() + expResult);
@@ -105,8 +100,7 @@ public class DateTimeToolsTest {
      * Test of getDuration method, of class DateTimeTools.
      */
     @Test
-    public void testGetDuration_Long_Long() {
-        System.out.println("getDuration");
+    public void testGetDurationWithLongValue() {
         long start = dateTime.getMillis();
         long end = dateTime.getMillis() + 3661000;
         long expResult = end - start;
@@ -118,11 +112,10 @@ public class DateTimeToolsTest {
      * Test of getDuration method, of class DateTimeTools.
      */
     @Test
-    public void testGetDuration_DateTime_DateTime() {
-        System.out.println("getDuration");
+    public void testGetDurationWithDateTimeValue() {
         DateTime start = dateTime;
         DateTime end = dateTime.plusHours(1).plusMinutes(1).plusSeconds(1);
-        long expResult = (3600 + 60 + 1) * 1000;
+        long expResult = end.getMillis() - start.getMillis();
         long result = DateTimeTools.getDuration(start, end);
         assertEquals(expResult, result);
     }
@@ -132,7 +125,6 @@ public class DateTimeToolsTest {
      */
     @Test
     public void testProcessRuntime() {
-        System.out.println("processRuntime");
         String runtime = "1hr30";
         int expResult = 90;
         int result = DateTimeTools.processRuntime(runtime);
@@ -144,7 +136,6 @@ public class DateTimeToolsTest {
      */
     @Test
     public void testFormatDurationColon() {
-        System.out.println("formatDurationColon");
         String expResult = "1:01:01";
         String result = DateTimeTools.formatDurationColon(EXP_1H_1M_1S);
         assertEquals(expResult, result);
@@ -159,7 +150,6 @@ public class DateTimeToolsTest {
      */
     @Test
     public void testFormatDurationText() {
-        System.out.println("formatDurationText");
         String expResult = "1h01m01s";
         String result = DateTimeTools.formatDurationText(EXP_1H_1M_1S);
         assertEquals(expResult, result);

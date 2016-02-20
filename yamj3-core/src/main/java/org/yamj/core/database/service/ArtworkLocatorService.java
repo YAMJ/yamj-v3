@@ -23,17 +23,16 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -47,99 +46,88 @@ public class ArtworkLocatorService {
     @Autowired
     private StagingDao stagingDao;
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
 
-    private static Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories) {
-        Set<String> artworkNames = new HashSet<>();
-
-        // generic names (placed in folder)
-        if (ArtworkType.POSTER == artworkType) {
-            artworkNames.add("poster");
-            artworkNames.add("cover");
-            artworkNames.add("folder");
-        } else if (ArtworkType.FANART == artworkType) {
-            artworkNames.add("fanart");
-            artworkNames.add("backdrop");
-            artworkNames.add("background");
-        } else if (ArtworkType.BANNER == artworkType) {
-            artworkNames.add("banner");
-        } else {
-            // no artwork names for this type
-            return artworkNames;
+    @Value("${yamj3.folder.name.artwork:null}")
+    private String artworkFolderName;
+    @Value("${yamj3.folder.name.photo:null}")
+    private String photoFolderName;
+    
+    private static Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories, List<String> tokens) {
+        if (artworkType != ArtworkType.POSTER && artworkType != ArtworkType.FANART && artworkType != ArtworkType.BANNER) {
+            // just poster, backdrop and banner will be searched
+            return Collections.emptySet();
         }
+
+        final Set<String> artworkNames = new HashSet<>();
+        // add all tokens
+        artworkNames.addAll(tokens);
         
         for (StageFile videoFile : videoFiles) {
             directories.add(videoFile.getStageDirectory());
+            final String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
+            final String fileName = StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase());
             
-            // same name than video file
-            if (ArtworkType.POSTER == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName()).toLowerCase());
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
-            } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
-            } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
-            }
-            
-            // same name as directory
-            String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
-            if (ArtworkType.POSTER == artworkType) {
+            switch (artworkType) {
+            case POSTER:
+                artworkNames.add(fileName);
                 artworkNames.add(directoryName);
-                artworkNames.add(directoryName + ".poster");
-                artworkNames.add(directoryName + "-poster");
-            } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(directoryName + ".fanart");
-                artworkNames.add(directoryName + "-fanart");
-            } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(directoryName + ".banner");
-                artworkNames.add(directoryName + "-banner");
+                //$FALL-THROUGH$
+            default:
+                addNameWithTokens(artworkNames, fileName, tokens);
+                addNameWithTokens(artworkNames, directoryName, tokens);
+                break;
             }
         }
         return artworkNames;
     }
 
-    private static Set<String> buildSpecialMap(ArtworkType artworkType, List<StageFile> videoFiles) {
-        Set<String> artworkNames = new HashSet<>();
+    private static Set<String> buildSpecialMap(ArtworkType artworkType, List<StageFile> videoFiles, List<String> tokens) {
+        final Set<String> artworkNames = new HashSet<>();
+        
         for (StageFile videoFile : videoFiles) {
-            if (ArtworkType.POSTER == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase()));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
-            } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
-            } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
+            final String fileName = StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase());
+            
+            switch (artworkType) {
+            case POSTER:
+                artworkNames.add(fileName);
+                //$FALL-THROUGH$
+            default:
+                addNameWithTokens(artworkNames, fileName, tokens);
             }
         }
         return artworkNames;
     }
 
+    private static void addNameWithTokens(Set<String> artworkNames, String name, List<String> tokens) {
+        for (String token : tokens) {
+            artworkNames.add(name.concat(".").concat(token));
+            artworkNames.add(name.concat("-").concat(token));
+        }
+    }
+    
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null;
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
         }
 
+        // get the tokens to use
+        List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
+        
         // search in same directory than video files
         Set<StageDirectory> directories = new HashSet<>();
-        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories);
+        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
-        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            
             Library library = null;
-            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
                 library = videoFiles.get(0).getStageDirectory().getLibrary();
             }
             
-            artworkNames = buildSpecialMap(artworkType, videoFiles);
+            artworkNames = buildSpecialMap(artworkType, videoFiles, tokens);
             List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
             artworks.addAll(specials);
         }
@@ -152,24 +140,25 @@ public class ArtworkLocatorService {
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
         List<StageFile> videoFiles = findVideoFiles(season);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null;
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
         }
+
+        // get the tokens to use
+        List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
 
         // search in same directory than video files
         Set<StageDirectory> directories = new HashSet<>();
-        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories);
+        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
-        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            
             Library library = null;
-            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
                 library = videoFiles.get(0).getStageDirectory().getLibrary();
             }
 
-            artworkNames = buildSpecialMap(artworkType, videoFiles);
+            artworkNames = buildSpecialMap(artworkType, videoFiles, tokens);
             List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
             artworks.addAll(specials);
         }
@@ -200,7 +189,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("fileType", FileType.IMAGE);
         
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
     }
     
     private List<StageFile> findVideoFiles(VideoData videoData) {
@@ -219,7 +208,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("extra", Boolean.FALSE);
 
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
     }
 
     private List<StageFile> findVideoFiles(Season season) {
@@ -239,7 +228,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("extra", Boolean.FALSE);
         
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
     }
 
     private List<StageFile> findArtworkStageFiles(Set<StageDirectory> directories, Set<String> artworkNames) {
@@ -256,12 +245,10 @@ public class ArtworkLocatorService {
         params.put("artworkNames", artworkNames);
         params.put("deleted", StatusType.DELETED);
 
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
     }
 
     public List<StageFile> getPhotos(Person person) {
-        List<StageFile> artworks;
-
         Set<String> artworkNames = new HashSet<>();
         artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase()));
         artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase() + ".photo"));
@@ -269,9 +256,8 @@ public class ArtworkLocatorService {
         artworkNames.add(person.getIdentifier().toLowerCase());
         artworkNames.add(person.getIdentifier().toLowerCase() + ".photo");
         artworkNames.add(person.getIdentifier().toLowerCase() + "-photo");
-
         
-        String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
+        List<StageFile> artworks;
         if (StringUtils.isNotBlank(photoFolderName)) {
             artworks = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, photoFolderName, null, artworkNames);
         } else {

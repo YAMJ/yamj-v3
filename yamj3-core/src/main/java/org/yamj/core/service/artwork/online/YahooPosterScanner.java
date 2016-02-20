@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -32,11 +30,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.web.PoolingHttpClient;
-import org.yamj.core.web.ResponseTools;
+import org.yamj.core.web.HTMLTools;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner implements IMoviePosterScanner {
@@ -55,18 +54,18 @@ public class YahooPosterScanner implements IMoviePosterScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Yahoo poster scanner");
+        LOG.trace("Initialize Yahoo poster scanner");
 
         artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>();
+        List<ArtworkDetailDTO> dtos = new ArrayList<>(1);
 
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
-            sb.append(URLEncoder.encode(videoData.getTitle(), "UTF-8"));
+            sb.append(HTMLTools.encodeUrl(videoData.getTitle()));
             sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
 
             DigestedResponse response = httpClient.requestContent(sb.toString());
@@ -76,10 +75,10 @@ public class YahooPosterScanner implements IMoviePosterScanner {
                 if (beginIndex > 0) {
                     int endIndex = response.getContent().indexOf("rurl=", beginIndex);
                     if (endIndex > 0) {
-                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7, endIndex - 1), "UTF-8");
+                        String url = HTMLTools.decodeUrl(response.getContent().substring(beginIndex + 7, endIndex - 1));
                         dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                     } else {
-                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7), "UTF-8");
+                        String url = HTMLTools.decodeUrl(response.getContent().substring(beginIndex + 7));
                         dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                     }
                 }

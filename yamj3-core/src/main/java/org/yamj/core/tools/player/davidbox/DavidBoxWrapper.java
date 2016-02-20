@@ -30,9 +30,6 @@ public class DavidBoxWrapper {
     private DavidBoxResponse response;
     private int returnValue;
 
-    public DavidBoxWrapper() {
-    }
-
     public List<String> getRequest() {
         return request;
     }
@@ -56,5 +53,4 @@ public class DavidBoxWrapper {
     public void setReturnValue(int returnValue) {
         this.returnValue = returnValue;
     }
-
 }

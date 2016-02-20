@@ -45,30 +45,36 @@ public class CachingConfiguration implements CachingConfigurer {
 
     private static final String TMDB_ARTWORK = "tmdbArtworkCache";
     private static final String ATTACHMENTS = "attachmentCache";
+    private static final int TTL_10_MINUTES = 600;
+    private static final int TTL_30_MINUTES = 1800;
+    private static final int TTL_ONE_DAY = 86400;
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
         return net.sf.ehcache.CacheManager.create(
             new net.sf.ehcache.config.Configuration()
                 // default cache
-                .defaultCache(cacheConfig("default", 100, 600))
+                .defaultCache(cacheConfig("default", 100, TTL_10_MINUTES))
                 
                 // API caches
-                .cache(cacheConfig(CachingNames.API_TVDB, 500, 1800))
-                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, 1800))
-                .cache(cacheConfig(CachingNames.API_IMDB, 500, 1800))
-                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800))
-                .cache(cacheConfig(ATTACHMENTS, 300, 600))
+                .cache(cacheConfig(CachingNames.API_TVDB, 500, TTL_30_MINUTES))
+                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, TTL_30_MINUTES))
+                .cache(cacheConfig(CachingNames.API_IMDB, 500, TTL_30_MINUTES))
+                .cache(cacheConfig(CachingNames.API_FANARTTV, 500, TTL_30_MINUTES))
+                .cache(cacheConfig(TMDB_ARTWORK, 100, TTL_30_MINUTES))
+                .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 
                 // caches for database objects
-                .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_STUDIO, 50, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_COUNTRY, 50, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_CERTIFICATION, 100, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_PERSON, 500, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_BOXEDSET, 50, 86400))
-                .cache(cacheConfigDatabase(CachingNames.DB_AWARD, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_STUDIO, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_COUNTRY, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_CERTIFICATION, 100, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_PERSON, 500, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_BOXEDSET, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_AWARD, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(CachingNames.DB_STAGEFILE, 100, 180))
+                .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_PROFILE, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_IMAGE, 2000, TTL_ONE_DAY))
             );
     }
 

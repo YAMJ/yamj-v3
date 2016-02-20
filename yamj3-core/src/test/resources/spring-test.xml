@@ -25,7 +25,6 @@
                 <value>classpath:/yamj3-core-static.properties</value>
                 <value>file:${yamj3.home}/config/yamj3-core-static.properties</value>
                 <value>file:${yamj3.home}/config/yamj3-core-static.user.properties</value>
-                <value>classpath:/yamj3-test.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>

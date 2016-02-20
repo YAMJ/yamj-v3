@@ -29,12 +29,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.common.remote.service.GitHubService;
+import org.yamj.core.AbstractTest;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class GitHubServiceImplTest extends AbstractJUnit4SpringContextTests {
+public class GitHubServiceImplTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(GitHubServiceImplTest.class);
     

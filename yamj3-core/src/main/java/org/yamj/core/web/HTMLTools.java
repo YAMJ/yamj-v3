@@ -316,7 +316,7 @@ public final class HTMLTools {
     }
 
     private HTMLTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     public static String decodeHtml(String src) {
@@ -398,24 +398,29 @@ public final class HTMLTools {
         if (StringUtils.isNotBlank(url)) {
             try {
                 return URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException ignored) {
+            } catch (UnsupportedEncodingException ignored) { // NOSONAR
                 LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", url);
             }
         }
         return url;
     }
 
+
     public static String encodeUrl(String url) {
+        return encodePlain(url).replace("+", "%20");
+    }
+
+    public static String encodePlain(String url) {
         String returnUrl = url;
 
-        if (StringUtils.isNotBlank(url)) {
-            try {
-                returnUrl = URLEncoder.encode(url, "UTF-8");
-                returnUrl = returnUrl.replace("+", "%20"); // why does URLEncoder do that??!!
-            } catch (UnsupportedEncodingException ignored) {
-                LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", returnUrl);
-            }
+        try {
+            returnUrl = URLEncoder.encode(url.trim(), "UTF-8");
+        } catch (NullPointerException ignored) { // NOSONAR
+            returnUrl = StringUtils.EMPTY;
+        } catch (UnsupportedEncodingException ignored) { // NOSONAR
+            LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", returnUrl);
         }
+        
         return returnUrl;
     }
 

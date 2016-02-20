@@ -22,9 +22,15 @@
  */
 package org.yamj.core.tools;
 
+import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 public final class CommonTools {
+
+    private CommonTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 
     /**
      * Get the hash code of an URL.
@@ -34,8 +40,7 @@ public final class CommonTools {
      */
     public static String getSimpleHashCode(String string) {
         // hash code of string
-        int hash = string.hashCode();
-        return String.valueOf((hash < 0 ? 0 - hash : hash));
+        return Integer.toString(Math.abs(string.hashCode()));
     }
     
     /**
@@ -65,4 +70,16 @@ public final class CommonTools {
         
         return hashCode;
     }
+    
+    public static <T extends Object> T getEqualObject(Collection<T> coll, T object) {
+        if (CollectionUtils.isEmpty(coll)) {
+            return null;
+        }
+        for (T col : coll) {
+            if (col.equals(object)) {
+                return col;
+            }
+        }
+        return null;
+   }
 }

@@ -28,13 +28,10 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.dto.CreditDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
+public class TheMovieDbScannerTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScannerTest.class);
     private static final String SCANNER_ID = "tmdb";
@@ -70,8 +67,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         tmdbScanner.scanFilmography(person);
         assertEquals(Boolean.FALSE, person.getNewFilmography().isEmpty());
         for (FilmParticipation p : person.getNewFilmography()) {
-            System.err.println(p);
-            
+            LOG.info("Filmo: {}", p);
         }
     }
 
@@ -98,11 +94,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         episode.setSeason(season);
         season.getVideoDatas().add(episode);
         tmdbScanner.scanSeries(series);
-        
-        System.err.println(episode.getTitle());
-        for (CreditDTO credit : episode.getCreditDTOS()) {
-            System.err.println(credit);
-        }
-        
+
+        logCredits(episode, getClass());
     }
 }

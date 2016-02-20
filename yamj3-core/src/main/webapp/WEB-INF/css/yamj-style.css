@@ -28,17 +28,18 @@ body {
     border-bottom: 1px solid                          #111111/*{table-border}*/;
     font-weight: bold;
     background-color: #222222;
+    vertical-align: middle;
 }
 
 #tablelist td, #headertable td
 {
     font-size:1em;
     text-align:left;
-    width:20%;
     font-weight:bold;
     padding:4px;
     border-bottom: 1px solid                          #111111 /*{headertable-border}*/;
     color:#ffffff;
+    vertical-align: middle;
 }
 
 #tablelist tr:nth-child(odd)
@@ -48,6 +49,7 @@ body {
     text-align:left;
     color:#444444;
     background-color:#111111;
+    vertical-align: middle;
 }
 
 #tablelist th.title, #headertable th.title
@@ -79,13 +81,6 @@ body {
     border-bottom:1px solid #111111;
 }
 
-#message
-{
-    text-align:center;
-    font-weight: bold;
-    color: tomato;
-}
-
 #tablelist th.span, #tablelist td.span, #headertable th.span, #headertable td.span
 {
     column-span: all;
@@ -111,8 +106,31 @@ a:-webkit-any-link
     text-align:center;
 }
 
-h1 {
+h1 
+{
     margin-bottom: 18px;
     font-size: 30px;
     line-height: 36px;
+}
+
+.nobr
+{
+    white-space:nowrap;
+}
+
+#messageInfo 
+{
+    text-align:center;
+    font-weight: bold;
+    color: tomato;
+}
+
+#messageError {
+    font-weight: bold;
+    color: #ff3030;
+}
+
+#messageSuccess {
+    font-weight: bold;
+    color: #66cd00;
 }

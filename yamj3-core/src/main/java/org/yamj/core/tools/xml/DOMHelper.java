@@ -57,7 +57,7 @@ public final class DOMHelper {
     public static final String TYPE_EPISODE = "episodedetails";
 
     private DOMHelper() {
-        throw new UnsupportedOperationException("Class cannot be instantiated");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**

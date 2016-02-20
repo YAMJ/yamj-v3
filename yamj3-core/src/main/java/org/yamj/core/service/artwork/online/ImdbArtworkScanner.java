@@ -27,6 +27,8 @@ import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +60,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb artwork scanner");
+        LOG.trace("Initialize IMDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);
@@ -80,19 +82,21 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
     public List<ArtworkDetailDTO> getPhotos(Person person) {
         String imdbId = imdbScanner.getPersonId(person);
         if (StringUtils.isBlank(imdbId)) {
-            return null;
+            return Collections.emptyList();
         }
         
         ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, Locale.US);
-        if (imdbPerson.getImage() == null) return null;
+        if (imdbPerson.getImage() == null) {
+            return Collections.emptyList();
+        }
         
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
+        final ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
         return Collections.singletonList(dto);
     }
 
     private List<ArtworkDetailDTO> getArtworks(String imdbId, ArtworkType artworkType) {
         if (StringUtils.isBlank(imdbId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<ArtworkDetailDTO> dtos = new ArrayList<>();
@@ -107,28 +111,38 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
         TreeSet<ImdbArtwork> result = new TreeSet<>();
         for (ImdbImage image : imdbApiWrapper.getTitlePhotos(imdbId)) {
             ImdbArtwork ia = buildImdbArtwork(image, artworkType);
-            if (ia != null) result.add(ia);
+            if (ia != null) {
+                result.add(ia);
+            }
         }
         return result;
     }
 
     private static ImdbArtwork buildImdbArtwork(ImdbImage image, ArtworkType artworkType) {
-        if (image.getImage() == null) return null;
-        if (!"presskit".equalsIgnoreCase(image.getSource())) return null;
-        if (StringUtils.isBlank(image.getImage().getUrl())) return null;
-        if (StringUtils.startsWithIgnoreCase(image.getCaption(), "Still of")) return null;
+        if (image.getImage() == null ||
+            StringUtils.isBlank(image.getImage().getUrl()) ||
+            !"presskit".equalsIgnoreCase(image.getSource()) ||
+            StringUtils.startsWithIgnoreCase(image.getCaption(), "Still of"))
+        {
+            return null;
+        }
+        
         final int width = image.getImage().getWidth();
         final int height = image.getImage().getHeight();
         
         ArtworkType imdbArtworkType;
         if (width > height) {
             imdbArtworkType = ArtworkType.FANART;
-            if (width > (2*height)) imdbArtworkType = ArtworkType.BANNER;
+            if (width > (2*height)) {
+                imdbArtworkType = ArtworkType.BANNER;
+            }
         } else if (height == width) {
             return null;
         } else  {
             imdbArtworkType = ArtworkType.POSTER;
-            if (height > (2*width)) return null;
+            if (height > (2*width)) {
+                return null;
+            }
         }
         
         if (imdbArtworkType != artworkType) {
@@ -145,8 +159,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
             }
         }
         
-        final int size = (image.getImage().getWidth() * image.getImage().getHeight());
-        return new ImdbArtwork(image.getImage().getUrl(), hashCode, size);
+        return new ImdbArtwork(image.getImage().getUrl(), hashCode, image.getImage().getWidth() * image.getImage().getHeight());
     }
     
     private static class ImdbArtwork implements Comparable<ImdbArtwork>{
@@ -169,9 +182,41 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
         }
 
         @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .append(url)
+                    .append(hashCode)
+                    .append(size)
+                    .toHashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof ImdbArtwork)) {
+                return false;
+            }
+            final ImdbArtwork other = (ImdbArtwork) obj;
+            return new EqualsBuilder()
+                    .append(url, other.url)
+                    .append(hashCode, other.hashCode)
+                    .append(size, other.size)
+                    .isEquals();
+        }
+        
+        @Override
         public int compareTo(ImdbArtwork obj) {
-            if (size > obj.size) return -1;
-            if (size < obj.size) return 1;
+            if (size > obj.size) {
+                return -1;
+            }
+            if (size < obj.size) {
+                return 1;
+            }
             return 0;
         }
     }

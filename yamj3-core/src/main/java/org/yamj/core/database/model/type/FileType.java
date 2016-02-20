@@ -31,10 +31,10 @@ public enum FileType {
     WATCHED,
     UNKNOWN;
 
-    public static FileType fromString(String type) {
+    public static FileType fromString(final String type) {
         try {
             return FileType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

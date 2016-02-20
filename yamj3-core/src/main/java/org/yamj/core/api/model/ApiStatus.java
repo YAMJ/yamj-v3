@@ -22,23 +22,20 @@
  */
 package org.yamj.core.api.model;
 
+import org.apache.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
- *
- * @author Stuart
- */
 public class ApiStatus {
 
-    private int status;
-    private String message;
+    public static final ApiStatus OK = ApiStatus.ok("OK");
+    public static final ApiStatus NO_RECORD = ApiStatus.notFound("No record found");
+    public static final ApiStatus INVALID_ID = ApiStatus.badRequest("Not a valid ID");
+    
+    private final int status;
+    private final String message;
 
-    public ApiStatus() {
-        this.status = 100;
-        this.message = "Unknown status";
-    }
-
-    public ApiStatus(int status, String message) {
+    private ApiStatus(int status, String message) {
         this.status = status;
         this.message = message;
     }
@@ -47,29 +44,36 @@ public class ApiStatus {
         return status;
     }
 
-    /**
-     * The status of the response. Should be one of:<br>
-     * 1xx - Provisional status<br>
-     * 2xx - Success<br>
-     * 4xx - Client error<br>
-     * 5xx - Server error<br>
-     *
-     * @param status
-     */
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    @JsonIgnore
-    public boolean isSuccessful() {
-        return (status == 200);
-    }
-
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    @JsonIgnore
+    public boolean isSuccessful() {
+        return HttpStatus.SC_OK == status;
+    }
+
+    public static ApiStatus ok(String message) {
+        return new ApiStatus(HttpStatus.SC_OK, message);
+    }
+
+    public static ApiStatus badRequest(String message) {
+        return new ApiStatus(HttpStatus.SC_BAD_REQUEST, message);
+    }
+
+    public static ApiStatus notFound(String message) {
+        return new ApiStatus(HttpStatus.SC_NOT_FOUND, message);
+    }
+
+    public static ApiStatus conflict(String message) {
+        return new ApiStatus(HttpStatus.SC_CONFLICT, message);
+    }
+
+    public static ApiStatus unsupportedMediaType(String message) {
+        return new ApiStatus(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, message);
+    }
+
+    public static ApiStatus internalError(String message) {
+        return new ApiStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, message);
     }
 }

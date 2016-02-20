@@ -32,51 +32,75 @@ public enum MetaDataType {
     /**
      * This is a movie
      */
-    MOVIE(true),
+    MOVIE(true, true, true, true, true),
     /**
      * This is a TV Series
      */
-    SERIES(true),
+    SERIES(true, true, true, true, true),
     /**
      * This is a season of a TV series
      */
-    SEASON(true),
+    SEASON(true, true, true, true, false),
     /**
      * This is an episode of a TV season
      */
-    EPISODE(true),
+    EPISODE(true, true, true, true, false),
     /**
      * This is a person, an actor or crew member
      */
-    PERSON(true),
+    PERSON(true, true, false, true, false),
     /**
      * This is a person filmography
      */
-    FILMOGRAPHY(false),
+    FILMOGRAPHY(false, true, false, false, false),
     /**
      * This is a boxed set
      */
-    BOXSET(false),
+    BOXSET(false, false, false, true, false),
     /**
      * The type is unknown
      */
-    UNKNOWN(false);
+    UNKNOWN(false, false, false, false, false);
 
     private final boolean realMetaData;
-
-    private MetaDataType(boolean realMetaData) {
+    private final boolean rescanMetaData;
+    private final boolean withVideos;
+    private final boolean withArtwork;
+    private final boolean withTrailer;
+    
+    private MetaDataType(boolean realMetaData, boolean rescanMetaData, boolean withVideos, boolean withArtwork, boolean withTrailer) {
         this.realMetaData = realMetaData;
+        this.rescanMetaData = rescanMetaData;
+        this.withVideos = withVideos;
+        this.withArtwork = withArtwork;
+        this.withTrailer = withTrailer; 
     }
 
     public static MetaDataType fromString(String type) {
         try {
             return MetaDataType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }
 
     public boolean isRealMetaData() {
         return realMetaData;
+    }
+    
+    public boolean isRescanMetaData() {
+        return rescanMetaData;
+    }
+
+    public boolean isWithVideos() {
+        return withVideos;
+    }
+
+    public boolean isWithArtwork() {
+        return withArtwork;
+    }
+
+    public boolean isWithTrailer() {
+        return withTrailer;
     }
 }

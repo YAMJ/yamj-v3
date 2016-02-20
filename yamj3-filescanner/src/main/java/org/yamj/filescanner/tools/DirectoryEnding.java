@@ -45,7 +45,7 @@ public final class DirectoryEnding {
     }
 
     private DirectoryEnding() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**

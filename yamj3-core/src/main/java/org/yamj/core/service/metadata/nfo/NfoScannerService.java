@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
@@ -41,7 +44,7 @@ public class NfoScannerService {
 
     public static final String SCANNER_ID = "nfo";
     private static final Logger LOG = LoggerFactory.getLogger(NfoScannerService.class);
-
+    
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -57,7 +60,7 @@ public class NfoScannerService {
             videoData.setSkippendScansNfo(null);
             if (videoData.isWatchedNfo()) {
                 // the date where the NFO change for watch was detected
-                videoData.setWatchedNfo(false,  new Date(System.currentTimeMillis()));
+                videoData.setWatchedNfo(false, new Date());
             }
             return;
         }
@@ -86,7 +89,7 @@ public class NfoScannerService {
             // add skipped scans to modified sources if they are not skipped before NFO reading
             if (!videoData.isAllScansSkipped()) {
                 for (String skippedSourceDb : infoDTO.getSkippedScans()) {
-                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !videoData.isSkippedScan(skippedSourceDb)) {
+                    if (!ALL.equalsIgnoreCase(skippedSourceDb) && !videoData.isSkippedScan(skippedSourceDb)) {
                         videoData.addModifiedSource(skippedSourceDb);
                     }
                 }
@@ -101,7 +104,7 @@ public class NfoScannerService {
             
             // set watched by NFO
             if (infoDTO.isWatched() != videoData.isWatchedNfo()) {
-                videoData.setWatchedNfo(infoDTO.isWatched(), infoDTO.getWatchedDate());
+                videoData.setWatchedNfo(infoDTO.isWatched(), infoDTO.getWatchedDate()); 
             }
             
             // set sort title
@@ -155,7 +158,8 @@ public class NfoScannerService {
 
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                LOG.debug("Add movie nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
             }
 
             // add credit DTOs for update in database
@@ -186,7 +190,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            final Date actualDate = new Date(System.currentTimeMillis());
+            final Date watchedDate = new Date();
             series.setSkippendScansNfo(null);
             
             for (Season season : series.getSeasons()) {
@@ -201,7 +205,7 @@ public class NfoScannerService {
                     }
                     if (videoData.isWatchedNfo()) {
                         // the date where the NFO change for watch was detected
-                        videoData.setWatchedNfo(false, actualDate);
+                        videoData.setWatchedNfo(false, watchedDate);
                         
                         videoData.setTvEpisodeNotFound();
                     }
@@ -234,7 +238,7 @@ public class NfoScannerService {
             // add skipped scans to modified sources if they are not skipped before NFO reading
             if (!series.isAllScansSkipped()) {
                 for (String skippedSourceDb : infoDTO.getSkippedScans()) {
-                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !series.isSkippedScan(skippedSourceDb)) {
+                    if (!ALL.equalsIgnoreCase(skippedSourceDb) && !series.isSkippedScan(skippedSourceDb)) {
                         series.addModifiedSource(skippedSourceDb);
                         for (Season season : series.getSeasons()) {
                             season.addModifiedSource(skippedSourceDb);
@@ -278,7 +282,8 @@ public class NfoScannerService {
             
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                LOG.debug("Add series nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
             }
             
             for (Season season : series.getSeasons()) {
@@ -309,7 +314,6 @@ public class NfoScannerService {
                 season.setTvSeasonDone();
                 
                 for (VideoData videoData : season.getVideoDatas()) {
-                    
                     InfoEpisodeDTO episode = infoDTO.getEpisode(season.getSeason(), videoData.getEpisode());
                     if (episode == null) {
                         if (videoData.removeOverrideSource(SCANNER_ID)) {

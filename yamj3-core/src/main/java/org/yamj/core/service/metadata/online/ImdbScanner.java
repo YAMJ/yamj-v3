@@ -22,38 +22,21 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.imdbapi.model.*;
 import java.io.IOException;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
@@ -64,11 +47,6 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-
-import com.omertron.imdbapi.model.ImdbCast;
-import com.omertron.imdbapi.model.ImdbCredit;
-import com.omertron.imdbapi.model.ImdbMovieDetails;
-import com.omertron.imdbapi.model.ImdbPerson;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
@@ -81,7 +59,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_H4_END = ":</h4>";
     private static final String HTML_TABLE_END = "</table>";
     private static final String HTML_TD_END = "</td>";
-    private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
+    private static final String LITERAL_NORMAL = "normal";
     
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
@@ -101,7 +79,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb scanner");
+        LOG.trace("Initialize IMDb scanner");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -152,11 +130,14 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return imdbId;
     }
     
+    private boolean throwTempError() {
+        return configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
+    }
+    
     @Override
     public ScanResult scanMovie(VideoData videoData) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
-
+            final boolean throwTempError = this.throwTempError();
             String imdbId = getMovieId(videoData, throwTempError);
             
             if (StringUtils.isBlank(imdbId)) {
@@ -167,7 +148,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             LOG.debug("IMDb id available ({}), updating movie", imdbId);
             return updateMovie(videoData, imdbId, throwTempError);
             
-        } catch (TemporaryUnavailableException tue) {
+        } catch (TemporaryUnavailableException tue) { //NOSONAR
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.movie", 0);
             if (videoData.getRetries() < maxRetries) {
@@ -184,9 +165,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updateMovie(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
         }
 
@@ -214,9 +195,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // TOP250
-        String strTop = HTMLTools.extractTag(xml, "Top 250 #");
-        if (StringUtils.isNumeric(strTop)) {
-            videoData.setTopRank(NumberUtils.toInt(strTop, -1));
+        Integer rank = this.imdbApiWrapper.getTop250().get(imdbId);
+        if (rank != null) {
+            videoData.setTopRank(rank.intValue());
         }
 
         // GENRES
@@ -254,7 +235,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // RELEASE DATE
         if (MapUtils.isNotEmpty(movieDetails.getReleaseDate()) && OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            Date releaseDate = MetadataTools.parseToDate(movieDetails.getReleaseDate().get("normal"));
+            final Date releaseDate = MetadataTools.parseToDate(movieDetails.getReleaseDate().get(LITERAL_NORMAL));
             videoData.setRelease(releaseDate, SCANNER_ID);
         }
 
@@ -274,17 +255,18 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // QUOTE
-        if (OverrideTools.checkOverwriteQuote(videoData, SCANNER_ID)) {
-            if (movieDetails.getQuote() != null && CollectionUtils.isNotEmpty(movieDetails.getQuote().getLines())) {
-                videoData.setQuote(MetadataTools.cleanPlot(movieDetails.getQuote().getLines().get(0).getQuote()), SCANNER_ID);
-            }
+        if (movieDetails.getQuote() != null &&
+            CollectionUtils.isNotEmpty(movieDetails.getQuote().getLines()) &&
+            OverrideTools.checkOverwriteQuote(videoData, SCANNER_ID))
+        {
+            videoData.setQuote(MetadataTools.cleanPlot(movieDetails.getQuote().getLines().get(0).getQuote()), SCANNER_ID);
         }
         
         // RATING
         videoData.addRating(SCANNER_ID, MetadataTools.parseRating(movieDetails.getRating()));
 
         // CERTIFICATIONS
-        videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
+        videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale, movieDetails));
 
         // CAST/CREW
         parseCastCrew(videoData, imdbId);
@@ -293,8 +275,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Override
     public ScanResult scanSeries(Series series) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
-
+            final boolean throwTempError = this.throwTempError();
             String imdbId = getSeriesId(series, throwTempError);
             
             if (StringUtils.isBlank(imdbId)) {
@@ -305,7 +286,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             LOG.debug("IMDb id available ({}), updating series", imdbId);
             return updateSeries(series, imdbId, throwTempError);
             
-        } catch (TemporaryUnavailableException tue) {
+        } catch (TemporaryUnavailableException tue) { //NOSONAR
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.tvshow", 0);
             if (series.getRetries() < maxRetries) {
@@ -322,9 +303,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updateSeries(Series series, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
         }
         
@@ -347,26 +328,21 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // START YEAR and END YEAR
         if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
             series.setStartYear(movieDetails.getYear(), SCANNER_ID);
-            if (StringUtils.isNumeric(movieDetails.getYearEnd())) {
-               series.setEndYear(Integer.parseInt(movieDetails.getYearEnd()), SCANNER_ID);
-            }
+            series.setEndYear(NumberUtils.toInt(movieDetails.getYearEnd(), -1), SCANNER_ID);
         }
 
         // PLOT
-        final String plot = (movieDetails.getBestPlot() == null ? null : MetadataTools.cleanPlot(movieDetails.getBestPlot().getSummary()));
-        if (plot != null && OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+        final String plot = (movieDetails.getBestPlot() == null) ? null : MetadataTools.cleanPlot(movieDetails.getBestPlot().getSummary());
+        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
             series.setPlot(plot, SCANNER_ID);
         }
 
         // OUTLINE
-        final String outline = (movieDetails.getPlot() == null ? null : MetadataTools.cleanPlot(movieDetails.getPlot().getOutline()));
-        if (outline != null && OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+        final String outline = (movieDetails.getPlot() == null) ? null : MetadataTools.cleanPlot(movieDetails.getPlot().getOutline());
+        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
             series.setOutline(outline, SCANNER_ID);
         }
         
-        // CERTIFICATIONS
-        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
-
         // ORIGINAL TITLE
         final String titleOriginal = parseOriginalTitle(headerXml);
         if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
@@ -389,7 +365,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // CERTIFICATIONS
-        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
+        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale, movieDetails));
 
         // RELEASE INFO
         parseReleasedTitles(series, imdbId, imdbLocale);
@@ -418,7 +394,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     season.setTitle(title, SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-                    season.setTitle(titleOriginal, SCANNER_ID);
+                    season.setTitleOriginal(titleOriginal, SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                     season.setPlot(plot, SCANNER_ID);
@@ -432,11 +408,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     for (ImdbEpisodeDTO episode : episodes.values()) {
                         if (publicationYear == null) {
                             publicationYear = episode.getReleaseDate();
-                        } else if (episode.getReleaseDate() != null) {
-                            if (publicationYear.after(episode.getReleaseDate())) {
-                                // previous episode
-                                publicationYear = episode.getReleaseDate();
-                            }
+                        } else if (episode.getReleaseDate() != null && publicationYear.after(episode.getReleaseDate())) {
+                            // previous episode
+                            publicationYear = episode.getReleaseDate();
                         }
                     }
                     season.setPublicationYear(MetadataTools.extractYearAsInt(publicationYear), SCANNER_ID);
@@ -444,23 +418,24 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
                 // mark season as done
                 season.setTvSeasonDone();
-            
-                for (VideoData videoData : season.getVideoDatas()) {
-                    if (videoData.isTvEpisodeDone(SCANNER_ID)) {
-                        // nothing to do if already done
-                        continue;
-                    }
 
-                    // scan episode
-                    this.scanEpisode(videoData, episodes.get(videoData.getEpisode()), imdbLocale);
+                // scan episodes
+                for (VideoData videoData : season.getVideoDatas()) {
+                    this.scanEpisode(videoData, episodes, imdbLocale);
                 }
             }
         }
     }
 
-    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
+    private void scanEpisode(VideoData videoData, Map<Integer, ImdbEpisodeDTO> episodes, Locale imdbLocale) {
+        if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+            // episode already done
+            return;
+        }
         
+        ImdbEpisodeDTO dto = episodes.get(Integer.valueOf(videoData.getEpisode()));
         if (dto == null) {
+            // mark episode as not found
             videoData.removeOverrideSource(SCANNER_ID);
             videoData.removeSourceDbId(SCANNER_ID);
             videoData.setTvEpisodeNotFound();
@@ -479,7 +454,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // get movie details from IMDB
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(dto.getImdbId(), imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             videoData.setTvEpisodeNotFound();
             return;
         }
@@ -507,67 +482,70 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private void parseReleasedTitles(AbstractMetadata metadata, String imdbId, Locale locale) {
-
+        
+        // get the AKS
+        Map<String, String> akas = getAkaMap(imdbId);
+        if (MapUtils.isEmpty(akas)) {
+            return;
+        }
+        
         // ORIGINAL TITLE
         if (OverrideTools.checkOverwriteOriginalTitle(metadata, SCANNER_ID)) {
             // get the AKAs from release info XML
-            Map<String, String> akas = getAkaMap(imdbId);
-            if (MapUtils.isNotEmpty(akas)) {
-                for (Map.Entry<String, String> aka : akas.entrySet()) {
-                    if (StringUtils.indexOfIgnoreCase(aka.getKey(), "original title") > 0) {
-                        metadata.setTitleOriginal(aka.getValue().trim(), SCANNER_ID);
-                        break;
-                    }
+            for (Map.Entry<String, String> aka : akas.entrySet()) {
+                if (StringUtils.indexOfIgnoreCase(aka.getKey(), "original title") > 0) {
+                    metadata.setTitleOriginal(aka.getValue().trim(), SCANNER_ID);
+                    break;
                 }
             }
         }
 
         // TITLE for preferred country from AKAS
         boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
-        if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
-            Map<String, String> akas = getAkaMap(imdbId);
-            
-            if (MapUtils.isNotEmpty(akas)) {
-                List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
+        if (!akaScrapeTitle || !OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
+            return;
+        }
+        
+        List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
 
-                // build countries to search for within AKA list
-                Set<String> akaMatchingCountries = new TreeSet<>(localeService.getCountryNames(locale.getCountry()));
-                for (String fallback : configServiceWrapper.getPropertyAsList("imdb.aka.fallback.countries", "")) {
-                    String countryCode = localeService.findCountryCode(fallback);
-                    akaMatchingCountries.addAll(localeService.getCountryNames(countryCode));
+        // build countries to search for within AKA list
+        Set<String> akaMatchingCountries = new TreeSet<>(localeService.getCountryNames(locale.getCountry()));
+        for (String fallback : configServiceWrapper.getPropertyAsList("imdb.aka.fallback.countries", "")) {
+            String countryCode = localeService.findCountryCode(fallback);
+            akaMatchingCountries.addAll(localeService.getCountryNames(countryCode));
+        }
+
+        String foundValue = null;
+        // NOTE: First matching country is the preferred country
+        outerLoop: for (String matchCountry : akaMatchingCountries) {
+            innerLoop: for (Map.Entry<String, String> aka : akas.entrySet()) {
+                int startIndex = aka.getKey().indexOf(matchCountry);
+                if (startIndex < 0) {
+                    continue innerLoop;
                 }
 
-                String foundValue = null;
-                // NOTE: First matching country is the preferred country
-                outerLoop: for (String matchCountry : akaMatchingCountries) {
-                    for (Map.Entry<String, String> aka : akas.entrySet()) {
-                        int startIndex = aka.getKey().indexOf(matchCountry);
-                        if (startIndex > -1) {
-                            String extracted = aka.getKey().substring(startIndex);
-                            int endIndex = extracted.indexOf('/');
-                            if (endIndex > -1) {
-                                extracted = extracted.substring(0, endIndex);
-                            }
-
-                            boolean valid = Boolean.TRUE;
-                            innerLoop: for (String ignore : akaIgnoreVersions) {
-                                if (StringUtils.isNotBlank(ignore) && StringUtils.containsIgnoreCase(extracted, ignore.trim())) {
-                                    valid = Boolean.FALSE;
-                                    break innerLoop;
-                                }
-                            }
-
-                            if (valid) {
-                                foundValue = aka.getValue().trim();
-                                break outerLoop;
-                            }
-                        }
-                    }
+                String extracted = aka.getKey().substring(startIndex);
+                int endIndex = extracted.indexOf('/');
+                if (endIndex > -1) {
+                    extracted = extracted.substring(0, endIndex);
                 }
 
-                metadata.setTitle(foundValue, SCANNER_ID);
+                if (isNotIgnored(extracted, akaIgnoreVersions)) {
+                    foundValue = aka.getValue().trim();
+                    break outerLoop;
+                }
             }
         }
+        metadata.setTitle(foundValue, SCANNER_ID);
+    }
+    
+    private static final boolean isNotIgnored(String value, List<String> ignoreVersions) {
+        for (String ignore : ignoreVersions) {
+            if (StringUtils.isNotBlank(ignore) && StringUtils.containsIgnoreCase(value, ignore.trim())) {
+                return false;
+            }
+        }
+        return true;
     }
     
     private Map<String, String> getAkaMap(String imdbId) {
@@ -581,17 +559,19 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private static String parseOriginalTitle(String xml) {
-        String originalTitle = HTMLTools.extractTag(xml, "<span class=\"title-extra\">", "</span>");
-        StringUtils.remove(originalTitle, "<i>(original title)</i>");
-        StringUtils.remove(originalTitle, "\"");
-        return StringUtils.trimToNull(originalTitle);
+       return HTMLTools.extractTag(xml, "<span class=\"title-extra\">", "</span>")
+                       .replaceFirst("<i>(original title)</i>", StringUtils.EMPTY)
+                       .replace("\"", StringUtils.EMPTY)
+                       .trim();
     }
 
     private Set<String> parseCountryCodes(String xml) {
         Set<String> countryCodes = new HashSet<>();
         for (String country : HTMLTools.extractTags(xml, "Country" + HTML_H4_END, HTML_DIV_END, "<a href=\"", HTML_A_END)) {
             final String countryCode = localeService.findCountryCode(HTMLTools.removeHtmlTags(country));
-            if (countryCode != null) countryCodes.add(countryCode);
+            if (countryCode != null) {
+                countryCodes.add(countryCode);
+            }
         }
         return countryCodes;
     }
@@ -610,7 +590,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 String key = list.get(i++);
                 String value = list.get(i++);
                 map.put(key, value);
-            } catch (Exception ignore) {
+            } catch (Exception ignore) { //NOSONAR
                 i = -1;
             }
         } while (i != -1);
@@ -734,23 +714,27 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
     
     private void addCredits(VideoData videoData, JobType jobType, EnumMap<JobType,List<ImdbCast>> jobs, boolean skipUncredited, boolean skipFaceless) {
-        if (CollectionUtils.isEmpty(jobs.get(jobType))) return;
-        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) return;
+        if (CollectionUtils.isEmpty(jobs.get(jobType))) {
+            return;
+        }
+        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+            return;
+        }
             
         for (ImdbCast cast : jobs.get(jobType)) {
             final ImdbPerson person = cast.getPerson();
             if (person == null || StringUtils.isBlank(person.getName())) {
-                continue;
+                continue; //NOSONAR
             }
             
             if (skipUncredited && StringUtils.contains(cast.getAttr(), "(uncredited")) {
-                continue;
+                continue; //NOSONAR
             }
 
-            final String photoURL = (person.getImage() == null ? null : person.getImage().getUrl());
+            final String photoURL = (person.getImage() == null) ? null : person.getImage().getUrl();
             if (skipFaceless && JobType.ACTOR.equals(jobType) && StringUtils.isEmpty(photoURL)) {
                 // skip faceless actors only
-                continue;
+                continue; //NOSONAR
             }
             
             CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());
@@ -806,9 +790,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Override
     public ScanResult scanPerson(Person person) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
-
+            final boolean throwTempError = this.throwTempError();
             String imdbId = getPersonId(person, throwTempError);
+            
             if (StringUtils.isBlank(imdbId)) {
                 LOG.debug("IMDb id not available: {}", person.getName());
                 return ScanResult.MISSING_ID;
@@ -817,7 +801,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             LOG.debug("IMDb id available ({}), updating person", imdbId);
             return updatePerson(person, imdbId, throwTempError);
             
-        } catch (TemporaryUnavailableException tue) {
+        } catch (TemporaryUnavailableException tue) { //NOSONAR
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.person", 0);
             if (person.getRetries() < maxRetries) {
@@ -834,117 +818,63 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updatePerson(Person person, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, imdbLocale);
         if (StringUtils.isBlank(imdbPerson.getActorId())) {
             return ScanResult.NO_RESULT;
         }
         
-        // BIO xml is still needed for some values
-        final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
-        
-        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
-            // split person names
-            PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-                person.setName(nameDTO.getName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
-                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
-                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
-            }
+        // split person names
+        PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(nameDTO.getName(), SCANNER_ID);
         }
-
+        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
+            person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+            person.setLastName(nameDTO.getLastName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+            person.setBirthName(imdbPerson.getRealName(), SCANNER_ID);
+        }
+        
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
             final String apiBio = MetadataTools.cleanBiography(imdbPerson.getBiography());
             if (StringUtils.isNotBlank(apiBio)) {
                 person.setBiography(apiBio, SCANNER_ID);
-            } else if (bio.contains(">Mini Bio (1)</h4>")) {
-                String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
-                if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
-                    biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+            } else {
+                // try biography from web site
+                final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
+                if (bio.contains(">Mini Bio (1)</h4>")) {
+                    String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
+                    if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
+                        biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+                    }
+                    person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
                 }
-                person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
             }
         }
-
-        int endIndex;
-        int beginIndex;
         
-        if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Birth</td>");
-            if (beginIndex > -1) {
-                StringBuilder date = new StringBuilder();
-                endIndex = bio.indexOf(">Date of Death</td>");
-                beginIndex = bio.indexOf("birth_monthday=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
-                    if (m.find()) {
-                        date.append(m.group(2)).append("-").append(m.group(1));
-                    }
-                }
+        if (imdbPerson.getBirth() != null) {
+            if (imdbPerson.getBirth().getDate() != null && OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+                final String birthDay = imdbPerson.getBirth().getDate().get(LITERAL_NORMAL);
+                person.setBirthDay(MetadataTools.parseToDate(birthDay), SCANNER_ID);
+            }
 
-                beginIndex = bio.indexOf("birth_year=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    if (date.length() > 0) {
-                        date.append("-");
-                    }
-                    date.append(bio.substring(beginIndex + 11, beginIndex + 15));
-                }
-
-                person.setBirthDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
+            if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+                person.setBirthPlace(imdbPerson.getBirth().getPlace(), SCANNER_ID);
             }
         }
 
-        if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Birth</td>");
-            if (beginIndex > -1) {
-                beginIndex = bio.indexOf("birth_place=", beginIndex);
-                String place;
-                if (beginIndex > -1) {
-                    place = HTMLTools.extractTag(bio, "birth_place=", HTML_A_END);
-                    int start = place.indexOf('>');
-                    if (start > -1 && start < place.length()) {
-                        place = place.substring(start + 1);
-                    }
-                    person.setBirthPlace(place, SCANNER_ID);
-                }
+        if (imdbPerson.getDeath() != null) {
+            if (imdbPerson.getDeath().getDate() != null && OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+                final String deathDay = imdbPerson.getDeath().getDate().get(LITERAL_NORMAL);
+                person.setDeathDay(MetadataTools.parseToDate(deathDay), SCANNER_ID);
             }
-        }
 
-        if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Death</td>");
-            if (beginIndex > -1) {
-                StringBuilder date = new StringBuilder();
-                endIndex = bio.indexOf(">Mini Bio (1)</h4>", beginIndex);
-                beginIndex = bio.indexOf("death_monthday=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
-                    if (m.find()) {
-                        date.append(m.group(2));
-                        date.append("-");
-                        date.append(m.group(1));
-                    }
-                }
-                beginIndex = bio.indexOf("death_date=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    if (date.length() > 0) {
-                        date.append("-");
-                    }
-                    date.append(bio.substring(beginIndex + 11, beginIndex + 15));
-                }
-                person.setDeathDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
-            }
-        }
-
-        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Birth Name</td>");
-            if (beginIndex > -1) {
-                beginIndex += 20;
-                String name = bio.substring(beginIndex, bio.indexOf(HTML_TD_END, beginIndex));
-                person.setBirthName(HTMLTools.decodeHtml(name), SCANNER_ID);
+            if (OverrideTools.checkOverwriteDeathPlace(person, SCANNER_ID)) {
+                person.setDeathPlace(imdbPerson.getDeath().getPlace(), SCANNER_ID);
             }
         }
 

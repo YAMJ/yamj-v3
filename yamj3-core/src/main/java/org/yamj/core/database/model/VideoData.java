@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -29,12 +31,17 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
@@ -44,6 +51,62 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+
+@NamedQueries({    
+    @NamedQuery(name = "videoData.findVideoDatas.byLibrary",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf JOIN sf.stageDirectory sd "+
+                "WHERE sf.fileType=:fileType AND mf.extra=:extra AND lower(sf.baseName)=:baseName AND sd.library=:library AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "videoData.findVideoDatas.byStageDirectories",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
+                "WHERE sf.fileType=:fileType AND mf.extra=:extra AND sf.stageDirectory in (:stageDirectories) AND sf.status != :deleted"
+    ),
+    @NamedQuery(name = "videoData.findVideoDatas.byPerson",
+        query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
+    )
+})
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = "videoData.trakttv.updated.movies",
+        query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id, vd.create_timestamp, vd.update_timestamp "+
+                "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
+                "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.updated.episodes",
+        query = "SELECT concat(sid.sourcedb,'#',sid.sourcedb_id,'#',sea.season,'#',vd.episode), vd.id, vd.create_timestamp, vd.update_timestamp, vd.episode, sea.season "+
+                "FROM series_ids sid JOIN series ser on ser.id=sid.series_id "+
+                "JOIN season sea on ser.id=sea.series_id JOIN videodata vd on vd.season_id=sea.id "+
+                "WHERE vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.watched.movies",
+        query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, vd.watched, vd.watched_date, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
+                "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
+                "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.watched.episodes",
+        query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, vd.watched, vd.watched_date, sea.season, vd.episode, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
+                "FROM series_ids sid JOIN season sea on sea.series_id=sid.series_id JOIN videodata vd on vd.season_id=sea.id "+
+                "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched != vd.watched_trakttv OR vd.watched_date != vd.watched_trakttv_last_date)"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.collected.movies",
+        query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, vd.title, vd.title_original, vd.publication_year "+
+                "FROM videodata vd JOIN videodata_ids vid on vd.id=vid.videodata_id JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
+                "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
+                "WHERE vd.episode<0 and vd.status='DONE' "+
+                "AND ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
+                "     not exists (select 1 from videodata_ids vid2 where vd.id=vid2.videodata_id and vid2.sourcedb='trakttv')) "+
+                "GROUP BY vd.id, vid.sourcedb, vid.sourcedb_id, vd.identifier, vd.title, vd.title_original, vd.publication_year"
+    ),
+    @NamedNativeQuery(name = "videoData.trakttv.collected.episodes",
+    query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, sea.season, vd.episode, ser.title, ser.title_original, ser.start_year "+
+            "FROM series ser JOIN series_ids sid on ser.id=sid.series_id JOIN season sea on ser.id=sea.series_id "+
+            "JOIN videodata vd on sea.id=vd.season_id and vd.status='DONE' JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
+            "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
+            "WHERE ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
+            "       not exists (select 1 from series_ids sid2 where ser.id=sid2.series_id and sid2.sourcedb='trakttv')) "+
+            "GROUP BY vd.id, sid.sourcedb, sid.sourcedb_id, sea.season, vd.episode, vd.identifier, ser.title, ser.title_original, ser.start_year"
+    )    
+})
 
 @Entity
 @Table(name = "videodata",
@@ -94,9 +157,17 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_api_last_date")
     private Date watchedApiLastDate;
 
+    @Column(name = "watched_trakttv", nullable = false)
+    private boolean watchedTraktTv = false;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "watched_trakttv_last_date")
+    private Date watchedTraktTvLastDate;
+    
     @Column(name = "watched", nullable = false)
     private boolean watched = false;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "watched_date")
     private Date watchedDate;
 
@@ -117,7 +188,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_ids",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -125,7 +196,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_ratings",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -133,7 +204,7 @@ public class VideoData extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "videodata_override",
             joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
@@ -268,7 +339,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setPublicationYear(int publicationYear, String source) {
         if (publicationYear > 0) {
-            this.publicationYear = publicationYear;
+            setPublicationYear(publicationYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
@@ -276,9 +347,9 @@ public class VideoData extends AbstractMetadata {
     public void removePublicationYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
             if (isMovie()) { // just for movies
-                String[] splitted = this.getIdentifier().split("_");
+                String[] splitted = getIdentifier().split("_");
                 int splitYear = Integer.parseInt(splitted[1]);
-                this.publicationYear = (splitYear > 0 ? splitYear : -1); 
+                setPublicationYear(splitYear > 0 ? splitYear : -1); 
             }
             removeOverrideFlag(OverrideFlag.YEAR);
         }
@@ -314,16 +385,16 @@ public class VideoData extends AbstractMetadata {
 
     public void setRelease(String releaseCountryCode, Date releaseDate, String source) {
         if (releaseDate != null) {
-            this.releaseCountryCode = releaseCountryCode;
-            this.releaseDate = releaseDate;
+            setReleaseCountryCode(releaseCountryCode);
+            setReleaseDate(releaseDate);
             setOverrideFlag(OverrideFlag.RELEASEDATE, source);
         }
     }
 
     public void removeRelease(String source) {
         if (hasOverrideSource(OverrideFlag.RELEASEDATE, source)) {
-            this.releaseCountryCode = null;
-            this.releaseDate = null;
+            setReleaseCountryCode(null);
+            setReleaseDate(null);
             removeOverrideFlag(OverrideFlag.RELEASEDATE);
         }
     }
@@ -337,10 +408,6 @@ public class VideoData extends AbstractMetadata {
             this.topRank = topRank;
         }
     }
-
-    public void removeTopRank() {
-        this.topRank = -1;
-    }
     
     public String getTagline() {
         return tagline;
@@ -352,14 +419,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setTagline(String tagline, String source) {
         if (StringUtils.isNotBlank(tagline)) {
-            this.tagline = StringUtils.abbreviate(tagline.trim(), 2000);
+            setTagline(StringUtils.abbreviate(tagline.trim(), 2000));
             setOverrideFlag(OverrideFlag.TAGLINE, source);
         }
     }
 
     public void removeTagline(String source) {
         if (hasOverrideSource(OverrideFlag.TAGLINE, source)) {
-            this.tagline = null;
+            setTagline(null);
             removeOverrideFlag(OverrideFlag.TAGLINE);
         }
     }
@@ -374,14 +441,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setQuote(String quote, String source) {
         if (StringUtils.isNotBlank(quote)) {
-            this.quote = StringUtils.abbreviate(quote.trim(), 2000);
+            setQuote(StringUtils.abbreviate(quote.trim(), 2000));
             setOverrideFlag(OverrideFlag.QUOTE, source);
         }
     }
 
     public void removeQuote(String source) {
         if (hasOverrideSource(OverrideFlag.QUOTE, source)) {
-            this.quote = null;
+            setQuote(null);
             removeOverrideFlag(OverrideFlag.QUOTE);
         }
     }
@@ -411,15 +478,17 @@ public class VideoData extends AbstractMetadata {
         this.watchedNfoLastDate = watchedNfoLastDate;
     }
 
-    public void setWatchedNfo(boolean watchedNfo, Date watchedNfoLastDate) {
-        if (watchedNfoLastDate == null) return;
-        
-        setWatchedNfo(watchedNfo);
-        setWatchedNfoLastDate(watchedNfoLastDate);
+    public void setWatchedNfo(final boolean watchedNfo, final Date watchedNfoLastDate) {
+        if (watchedNfoLastDate != null) {
+            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedNfoLastDate,0);
 
-        if (getWatchedDate() == null || getWatchedDate().before(watchedNfoLastDate)) {
-            setWatched(watchedNfo);
-            setWatchedDate(watchedNfoLastDate);
+            setWatchedNfo(watchedNfo);
+            setWatchedNfoLastDate(dateWithoutMS);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(dateWithoutMS)) {
+                setWatched(watchedNfo);
+                setWatchedDate(dateWithoutMS);
+            }
         }
     }
     
@@ -439,18 +508,50 @@ public class VideoData extends AbstractMetadata {
         this.watchedApiLastDate = watchedApiLastDate;
     }
 
-    public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
-        if (watchedApiLastDate == null) return;
-        
-        setWatchedApi(watchedApi);
-        setWatchedApiLastDate(watchedApiLastDate);
-
-        if (getWatchedDate() == null || getWatchedDate().before(watchedApiLastDate)) {
-            setWatched(watchedApi);
-            setWatchedDate(watchedApiLastDate);
+    public void setWatchedApi(final boolean watchedApi, final Date watchedApiLastDate) {
+        if (watchedApiLastDate != null) {
+            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedApiLastDate,0);
+            
+            setWatchedApi(watchedApi);
+            setWatchedApiLastDate(dateWithoutMS);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(dateWithoutMS)) {
+                setWatched(watchedApi);
+                setWatchedDate(dateWithoutMS);
+            }
         }
     }
     
+    public boolean isWatchedTraktTv() {
+        return watchedTraktTv;
+    }
+
+    private void setWatchedTraktTv(boolean watchedTraktTv) {
+        this.watchedTraktTv = watchedTraktTv;
+    }
+
+    public Date getWatchedTraktTvLastDate() {
+        return watchedTraktTvLastDate;
+    }
+
+    private void setWatchedTraktTvLastDate(Date watchedTraktTvLastDate) {
+        this.watchedTraktTvLastDate = watchedTraktTvLastDate;
+    }
+
+    public void setWatchedTraktTv(boolean watchedTraktTv, Date watchedTraktTvLastDate) {
+        if (watchedTraktTvLastDate != null) {
+            // NOTE: given watchedTraktTvLastDate is always without milliseconds
+            
+            setWatchedTraktTv(watchedTraktTv);
+            setWatchedTraktTvLastDate(watchedTraktTvLastDate);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(watchedTraktTvLastDate)) {
+                setWatched(watchedTraktTv);
+                setWatchedDate(watchedTraktTvLastDate);
+            }
+        }
+    }
+
     public boolean isWatched() {
         return watched;
     }
@@ -467,11 +568,11 @@ public class VideoData extends AbstractMetadata {
         this.watchedDate = watchedDate;
     }
 
-    public void setWatched(boolean watched, Date watchedDate) {
-        if (watchedDate == null) return;
-
-        setWatched(watched);
-        setWatchedDate(watchedDate);
+    public void setWatched(final boolean watched, final Date watchedDate) {
+        if (watchedDate != null) {
+            setWatched(watched);
+            setWatchedDate(DateUtils.setMilliseconds(watchedDate,0));
+        }
     }
     
     private String getSkipScanNfo() {
@@ -502,16 +603,23 @@ public class VideoData extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating > 0)) {
-            this.ratings.put(sourceDb, rating);
+            getRatings().put(sourceDb, rating);
         }
     }
 
     public void removeRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            this.ratings.remove(sourceDb);
+            getRatings().remove(sourceDb);
         }
     }
-   
+
+    public int getRating(String sourceDb) {
+        if (StringUtils.isNotBlank(sourceDb)) {
+            return getRatings().get(sourceDb);
+        }
+        return -1;
+    }
+
     @Override
     protected Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
@@ -522,22 +630,22 @@ public class VideoData extends AbstractMetadata {
     }
 
     public boolean isAllScansSkipped() {
-        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-        return false;
+        return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }
 
     @Override
     public boolean isSkippedScan(String sourceDb) {
         if (isMovie()) {
             // skip movie
-            if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;
-            if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-            if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-            if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) return true;
-            if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
-            return false;
+            if (getSkipScanNfo() == null && getSkipScanApi() == null) {
+                return false;
+            }
+            
+            return isAllScansSkipped() ||
+                   StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb) ||
+                   StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb);
         }
+        
         // skip episode
         return getSeason().isSkippedScan(sourceDb);
     }
@@ -615,7 +723,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addMediaFile(MediaFile mediaFile) {
-        this.mediaFiles.add(mediaFile);
+        getMediaFiles().add(mediaFile);
     }
 
     public List<CastCrew> getCredits() {
@@ -652,7 +760,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addBoxedSet(BoxedSetOrder boxedSet) {
-        this.boxedSets.add(boxedSet);
+        getBoxedSets().add(boxedSet);
     }
 
     public List<NfoRelation> getNfoRelations() {
@@ -664,7 +772,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addNfoRelation(NfoRelation nfoRelation) {
-        this.nfoRelations.add(nfoRelation);
+        getNfoRelations().add(nfoRelation);
     }
 
     public List<MovieAward> getMovieAwards() {
@@ -690,11 +798,11 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCreditDTO(CreditDTO creditDTO) {
-        this.creditDTOS.add(creditDTO);
+        getCreditDTOS().add(creditDTO);
     }
 
     public void addCreditDTOS(Collection<CreditDTO> creditDTOS) {
-        this.creditDTOS.addAll(creditDTOS);
+        getCreditDTOS().addAll(creditDTOS);
     }
 
     public Collection<String> getGenreNames() {
@@ -737,7 +845,7 @@ public class VideoData extends AbstractMetadata {
     public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
             for (Entry<String, String> entry : certificationInfos.entrySet()) {
-                this.addCertificationInfo(entry.getKey(), entry.getValue());
+                addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
     }
@@ -745,13 +853,13 @@ public class VideoData extends AbstractMetadata {
     public void addCertificationInfo(String countryCode, String certificate) {
         if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
             // check if country code already present
-            for (String storedCode : this.certificationInfos.keySet()) {
+            for (String storedCode : getCertificationInfos().keySet()) {
                 if (countryCode.equals(storedCode)) {
                     // certificate for country already present
                     return;
                 }
             }
-            this.certificationInfos.put(countryCode, certificate);
+            getCertificationInfos().put(countryCode, certificate);
         }
     }
 
@@ -759,17 +867,9 @@ public class VideoData extends AbstractMetadata {
         return boxedSetDTOS;
     }
 
-    public void addBoxedSetDTO(String source, String name) {
-        this.addBoxedSetDTO(source, name, null, null);
-    }
-
-    public void addBoxedSetDTO(String source, String name, Integer ordering) {
-        this.addBoxedSetDTO(source, name, ordering, null);
-    }
-
     public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
-            this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
+            getBoxedSetDTOS().add(new BoxedSetDTO(source, name, ordering, sourceId));
         }
     }
 
@@ -779,7 +879,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addPosterDTO(String source, String url) {
          if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.posterDTOS.add(new ArtworkDetailDTO(source, url));
+             getPosterDTOS().add(new ArtworkDetailDTO(source, url));
         }
     }
 
@@ -789,7 +889,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addFanartDTO(String source, String url) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.fanartDTOS.add(new ArtworkDetailDTO(source, url));
+            getFanartDTOS().add(new ArtworkDetailDTO(source, url));
         }
     }
 
@@ -806,48 +906,54 @@ public class VideoData extends AbstractMetadata {
             if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
                 continue;
             }
-            this.awardDTOS.add(awardDTO);
+            getAwardDTOS().add(awardDTO);
         }
     }
 
     public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            this.awardDTOS.add(new AwardDTO(event, category, source, year).setWon(true));
+            getAwardDTOS().add(new AwardDTO(event, category, source, year).setWon(true));
         }
     }
 
     // TV CHECKS
     
     public boolean isTvEpisodeDone(String sourceDb) {
-        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+        if (StringUtils.isBlank(getSourceDbId(sourceDb))) {
             // not done if episode ID not set
             return false;
         }
-        return (StatusType.DONE.equals(this.getStatus()));
+        return StatusType.DONE.equals(getStatus());
     }
 
     public void setTvEpisodeDone() {
-        this.setStatus(StatusType.TEMP_DONE);
+        setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvEpisodeNotFound() {
-        if (StatusType.DONE.equals(this.getStatus())) {
+        if (StatusType.DONE.equals(getStatus())) {
             // reset to temporary done state
-            this.setStatus(StatusType.TEMP_DONE);
-        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
+            setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(getStatus())) {
             // do not reset temporary done
-            this.setStatus(StatusType.NOTFOUND);
+            setStatus(StatusType.NOTFOUND);
         }
+    }
+    
+    public void setTvEpisodeFinished() {
+        if (StatusType.TEMP_DONE.equals(getStatus())) {
+            setStatus(StatusType.DONE);
+        }        
     }
 
     @Override
     public int getEpisodeNumber() {
-        return episode;
+        return getEpisode();
     }
 
     @Override
     public boolean isMovie() {
-        return (episode < 0);
+        return getEpisode() < 0;
     }
 
     // EQUALITY CHECKS
@@ -870,7 +976,7 @@ public class VideoData extends AbstractMetadata {
         if (!(obj instanceof VideoData)) {
             return false;
         }
-        final VideoData other = (VideoData) obj;
+        VideoData other = (VideoData) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

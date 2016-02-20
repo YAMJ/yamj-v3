@@ -29,14 +29,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public final class DeletionDTO {
 
     private final Set<String> filesToDelete;
-    private boolean updateTrigger = false;
+    private final boolean updateTrigger;
     
-    public DeletionDTO(Set<String> filesToDelete) {
-        this.filesToDelete = filesToDelete;
-    }
-
     public DeletionDTO(Set<String> filesToDelete, boolean updateTrigger) {
-        this(filesToDelete);
+        this.filesToDelete = filesToDelete;
         this.updateTrigger = updateTrigger;
     }
 
@@ -46,10 +42,6 @@ public final class DeletionDTO {
     
     public boolean isUpdateTrigger() {
         return updateTrigger;
-    }
-
-    public void setUpdateTrigger(boolean updateTrigger) {
-        this.updateTrigger = updateTrigger;
     }
 
     @Override

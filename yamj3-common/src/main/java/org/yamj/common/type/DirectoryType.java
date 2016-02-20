@@ -31,7 +31,7 @@ public enum DirectoryType {
     public static DirectoryType fromString(String type) {
         try {
             return DirectoryType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) { //NOSONAR
             return STANDARD;
         }
     }

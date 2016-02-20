@@ -22,460 +22,418 @@
  */
 package org.yamj.core.api.json;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiCertificationDTO;
+import org.yamj.core.api.model.dto.ApiCountryDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.options.OptionsRating;
+import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ScanningScheduler;
-import org.yamj.core.service.TrailerProcessScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.TrailerProcessScheduler;
 
 @RestController
-@RequestMapping(value = "/api/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api", produces = "application/json; charset=utf-8")
 public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
+    private static final String INVALID_META_DATA_TYPE = "Invalid meta data type '";
+    
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
     @Autowired 
     private ScanningScheduler scanningScheduler;
     @Autowired
     private TrailerProcessScheduler trailerProcessScheduler;
-    
+
+    //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
+    @RequestMapping(value = "/alphabetical/list", method = RequestMethod.GET)
+    public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
+        LOG.debug("Getting alphabetical list - Options: {}", options);
+
+        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
+        return wrapper;
+    }
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
-    @RequestMapping("/watched/movie/{id}")
-    public ApiStatus markWatchedMovie(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.updateWatchedSingle(MetaDataType.MOVIE, options.getId(), true);
+    @RequestMapping(value = "/watched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus markWatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!metaDataType.isWithVideos()) {
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for watching videos");
+        }
+
+        return jsonApiStorageService.updateWatchedSingle(metaDataType, id, true);
     }
 
-    @RequestMapping("/unwatched/movie/{id}")
-    public ApiStatus markUnwatchedMovie(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.updateWatchedSingle(MetaDataType.MOVIE, options.getId(), false);
-    }
+    @RequestMapping(value = "/unwatched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus markUnwatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+        
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!metaDataType.isWithVideos()) {
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for unwatching videos");
+        }
 
-    @RequestMapping("/watched/series/{id}")
-    public ApiStatus markWatchedSeries(@ModelAttribute("options") OptionsId options) {
-        List<Long> list = jsonApiStorageService.getSeriesVideoIds(options.getId());
-        return jsonApiStorageService.updateWatchedList(MetaDataType.SERIES, list, true, options.getId());
-    }
-
-    @RequestMapping("/unwatched/series/{id}")
-    public ApiStatus markUnwatchedSeries(@ModelAttribute("options") OptionsId options) {
-        List<Long> list = jsonApiStorageService.getSeriesVideoIds(options.getId());
-        return jsonApiStorageService.updateWatchedList(MetaDataType.SERIES, list, false, options.getId());
-    }
-
-    @RequestMapping("/watched/season/{id}")
-    public ApiStatus markWatchedSeason(@ModelAttribute("options") OptionsId options) {
-        List<Long> list = jsonApiStorageService.getSeasonVideoIds(options.getId());
-        return jsonApiStorageService.updateWatchedList(MetaDataType.SEASON, list, true, options.getId());
-    }
-
-    @RequestMapping("/unwatched/season/{id}")
-    public ApiStatus markUnwatchedSeason(@ModelAttribute("options") OptionsId options) {
-        List<Long> list = jsonApiStorageService.getSeasonVideoIds(options.getId());
-        return jsonApiStorageService.updateWatchedList(MetaDataType.SEASON, list, false, options.getId());
-    }
-
-    @RequestMapping("/watched/episode/{id}")
-    public ApiStatus markWatchedEpisode(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.updateWatchedSingle(MetaDataType.EPISODE, options.getId(), true);
-    }
-
-    @RequestMapping("/unwatched/episode/{id}")
-    public ApiStatus markUnwatchedEpisode(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.updateWatchedSingle(MetaDataType.EPISODE, options.getId(), false);
+        return jsonApiStorageService.updateWatchedSingle(metaDataType, id, false);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Rescan Methods">
-    @RequestMapping("/rescan/movie/{id}")
-    public ApiStatus rescanMovie(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.MOVIE, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+    @RequestMapping(value = "/rescan/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus rescanMetaData(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!metaDataType.isRescanMetaData()) {
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for rescan");
+        }
+
+        ApiStatus apiStatus = jsonApiStorageService.rescanMetaData(metaDataType, id);
+        if (apiStatus.isSuccessful()) {
+            this.scanningScheduler.triggerScanMetaData();
+        }
         return apiStatus;
     }
 
-    @RequestMapping("/rescan/movie/artwork/{id}")
-    public ApiStatus rescanMovieArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.MOVIE, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
+    @RequestMapping(value = "/rescan/{type}/artwork/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus rescanArtwork(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!metaDataType.isWithArtwork()) {
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for artwork rescan");
+        }
+
+        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(metaDataType, id);
+        if (apiStatus.isSuccessful()) {
+            this.scanningScheduler.triggerScanArtwork();
+        }
         return apiStatus;
     }
 
-    @RequestMapping("/rescan/movie/trailer/{id}")
-    public ApiStatus rescanMovieTrailer(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanTrailer(MetaDataType.MOVIE, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
+    @RequestMapping(value = "/rescan/{type}/trailer/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus rescanTrailer(@PathVariable("type") String type, @PathVariable("id") Long id) {
+
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!metaDataType.isWithTrailer()) {
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for trailer rescan");
+        }
+
+        ApiStatus apiStatus = jsonApiStorageService.rescanTrailer(metaDataType, id);
+        if (apiStatus.isSuccessful()) {
+            this.scanningScheduler.triggerScanTrailer();
+        }
         return apiStatus;
     }
 
-    @RequestMapping("/rescan/series/{id}")
-    public ApiStatus rescanSeries(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.SERIES, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/series/artwork/{id}")
-    public ApiStatus rescanSeriesArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.SERIES, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/series/trailer/{id}")
-    public ApiStatus rescanSeriesTrailer(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanTrailer(MetaDataType.SERIES, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/season/{id}")
-    public ApiStatus rescanSeason(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.SEASON, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/season/artwork/{id}")
-    public ApiStatus rescanSeasonArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.SEASON, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/episode/{id}")
-    public ApiStatus rescanEpisode(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.EPISODE, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/episode/artwork/{id}")
-    public ApiStatus rescanEpisodeArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.EPISODE, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/person/{id}")
-    public ApiStatus rescanPerson(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.PERSON, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanPeopleData();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/person/artwork/{id}")
-    public ApiStatus rescanPersonArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.PERSON, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/filmography/{id}")
-    public ApiStatus rescanFilmography(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(MetaDataType.FILMOGRAPHY, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanFilmography();
-        return apiStatus;
-    }
-    
-    @RequestMapping("/rescan/boxset/artwork/{id}")
-    public ApiStatus rescanBoxedSetArtwork(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(MetaDataType.BOXSET, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
-        return apiStatus;
-    }
-
-    @RequestMapping("/rescan/all")
+    @RequestMapping(value = "/rescan/all", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus rescanAll() {
         ApiStatus apiStatus = jsonApiStorageService.rescanAll();
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerAllScans();
+        if (apiStatus.isSuccessful()) {
+            this.scanningScheduler.triggerAllScans();
+        }
         return apiStatus;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Trailer Methods">
-    @RequestMapping("/trailer/delete/{id}")
-    public ApiStatus trailerDelete(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.setTrailerStatus(options.getId(), StatusType.DELETED);
+    @RequestMapping(value = "/trailer/delete/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus trailerDelete(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        return jsonApiStorageService.setTrailerStatus(id, StatusType.DELETED);
     }
 
-    @RequestMapping("/trailer/ignore/{id}")
-    public ApiStatus trailerIgnore(@ModelAttribute("options") OptionsId options) {
-        return jsonApiStorageService.setTrailerStatus(options.getId(), StatusType.IGNORE);
+    @RequestMapping(value = "/trailer/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus trailerIgnore( @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        return jsonApiStorageService.setTrailerStatus(id, StatusType.IGNORE);
     }
 
-    @RequestMapping("/trailer/download/{id}")
-    public ApiStatus trailerDownload(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApiStorageService.setTrailerStatus(options.getId(), StatusType.UPDATED);
-        if (apiStatus.isSuccessful()) trailerProcessScheduler.triggerProcess();
+    @RequestMapping(value = "/trailer/download/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus trailerDownload( @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        ApiStatus apiStatus = jsonApiStorageService.setTrailerStatus(id, StatusType.UPDATED);
+        if (apiStatus.isSuccessful()) {
+            trailerProcessScheduler.triggerProcess();
+        }
         return apiStatus;
     }
 
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
-    @RequestMapping("/genre")
+    @RequestMapping(value = "/genre", method = RequestMethod.GET)
     public ApiWrapperList<ApiGenreDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
-        LOG.info("Getting genres for filename '{}'", filename);
+        LOG.debug("Getting genres for filename '{}'", filename);
+        
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
-        List<ApiGenreDTO> results = jsonApiStorageService.getGenreFilename(wrapper, filename);
-        wrapper.setResults(results);
-        wrapper.setStatusCheck();
+        wrapper.setResults(jsonApiStorageService.getGenreFilename(wrapper, filename));
         return wrapper;
     }
 
-    @RequestMapping("/genre/{name}")
-    public ApiWrapperSingle<ApiGenreDTO> getGenre(@PathVariable String name) {
-        Genre genre;
+    @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
+    public ApiWrapperSingle<ApiGenreDTO> getGenre(@PathVariable("name") String name) {
         ApiWrapperSingle<ApiGenreDTO> wrapper = new ApiWrapperSingle<>();
+
+        Genre genre;
         if (StringUtils.isNumeric(name)) {
-            LOG.info("Getting genre with ID '{}'", name);
+            LOG.debug("Getting genre with ID {}", name);
             genre = jsonApiStorageService.getGenre(Long.parseLong(name));
         } else {
-            LOG.info("Getting genre with name '{}'", name);
+            LOG.debug("Getting genre with name '{}'", name);
             genre = jsonApiStorageService.getGenre(name);
         }
-        if (genre != null) {
-            wrapper.setResult(new ApiGenreDTO(genre));
-        }
-        wrapper.setStatusCheck();
+
+        wrapper.setResult(genre == null ? null : new ApiGenreDTO(genre));
         return wrapper;
     }
 
-    @RequestMapping("/genres/list")
+    @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
+        LOG.debug("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
-        wrapper.setResults(results);
-        wrapper.setStatusCheck();
+        wrapper.setResults(jsonApiStorageService.getGenres(wrapper));
         return wrapper;
     }
 
-    @RequestMapping("/genres/add")
+    @RequestMapping(value = "/genres/add", method = {RequestMethod.GET,RequestMethod.POST})
     public ApiStatus genreAdd(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String target) {
 
-        ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
-            LOG.info("Adding genre '{}' with target '{}'", name, target);
-            boolean result = this.jsonApiStorageService.addGenre(name, target);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully added genre '" + name + "' with target '" + target + "'");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Genre '" + name + "' already exists");
-            }
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(target)) {
+            return ApiStatus.badRequest("Invalid name/target specified, genre not added");
+        }
+
+        LOG.info("Adding genre '{}' with target '{}'", name, target);
+
+        ApiStatus status;
+        if (this.jsonApiStorageService.addGenre(name, target)) {
+            status = ApiStatus.ok("Successfully added genre '" + name + "' with target '" + target + "'");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid name/target specified, genre not added");
+            status = ApiStatus.conflict("Genre '" + name + "' already exists");
         }
         return status;
     }
 
-    @RequestMapping("/genres/update")
+    @RequestMapping(value = "/genres/update", method = {RequestMethod.GET,RequestMethod.PUT})
     public ApiStatus genreUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = false, defaultValue = "") String target) {
 
-        ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name)) {
-            LOG.info("Updating genre '{}' with target '{}'", name, target);
+        if (StringUtils.isBlank(name)) {
+            return ApiStatus.badRequest("Invalid name specified, genre not updated");
+        }
+        
+        LOG.info("Updating genre '{}' with target '{}'", name, target);
 
-            boolean result;
-            if (StringUtils.isNumeric(name)) {
-                result = this.jsonApiStorageService.updateGenre(Long.valueOf(name), target);
-            } else {
-                result = this.jsonApiStorageService.updateGenre(name, target);
-            }
-
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully updated genre '" + name + "' with target '" + target + "'");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Genre '" + name + "' does not exist");
-            }
+        boolean result;
+        if (StringUtils.isNumeric(name)) {
+            result = this.jsonApiStorageService.updateGenre(Long.valueOf(name), target);
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid name specified, genre not updated");
+            result = this.jsonApiStorageService.updateGenre(name, target);
+        }
+
+        ApiStatus status;
+        if (result) {
+            status = ApiStatus.ok("Successfully updated genre '" + name + "' with target '" + target + "'");
+        } else {
+            status = ApiStatus.notFound("Genre '" + name + "' does not exist");
         }
         return status;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
-    @RequestMapping("/studio/{name}")
-    public ApiWrapperSingle<Studio> getStudio(@PathVariable String name) {
-        Studio studio;
+    @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
+    public ApiWrapperSingle<Studio> getStudio(@PathVariable("name") String name) {
         ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<>();
+
+        Studio studio;
         if (StringUtils.isNumeric(name)) {
-            LOG.info("Getting studio with ID '{}'", name);
+            LOG.debug("Getting studio with ID {}", name);
             studio = jsonApiStorageService.getStudio(Long.parseLong(name));
         } else {
-            LOG.info("Getting studio '{}'", name);
+            LOG.debug("Getting studio '{}'", name);
             studio = jsonApiStorageService.getStudio(name);
         }
+        
         wrapper.setResult(studio);
-        wrapper.setStatusCheck();
         return wrapper;
     }
 
-    @RequestMapping("/studios/list")
+    @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
     public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting studio list with {}", options.toString());
+        LOG.debug("Getting studio list - Options: {}", options);
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<Studio> results = jsonApiStorageService.getStudios(wrapper);
-        wrapper.setResults(results);
-        wrapper.setStatus(new ApiStatus(200, "OK"));
-
+        wrapper.setResults(jsonApiStorageService.getStudios(wrapper));
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
-    @RequestMapping("/country")
-    public ApiWrapperList<ApiCountryDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
-        LOG.info("Getting countries for filename '{}'", filename);
+    @RequestMapping(value = "/country", method = RequestMethod.GET)
+    public ApiWrapperList<ApiCountryDTO> getCountryFilename(
+        @RequestParam(required = true, defaultValue = "") String filename,
+        @RequestParam(required = false) String language)
+   {
+        LOG.debug("Getting countries for filename '{}'", filename);
+
         ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
-        List<ApiCountryDTO> results = jsonApiStorageService.getCountryFilename(wrapper, filename);
-        wrapper.setResults(results);
-        wrapper.setStatusCheck();
+        OptionsId options = new OptionsId();
+        options.setLanguage(language);
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApiStorageService.getCountryFilename(wrapper, filename));
         return wrapper;
     }
 
-    @RequestMapping("/country/{countryCode}")
-    public ApiWrapperSingle<ApiCountryDTO> getCountry(@PathVariable String countryCode) {
-        ApiCountryDTO country;
+    @RequestMapping(value = "/country/{countryCode}", method = RequestMethod.GET)
+    public ApiWrapperSingle<ApiCountryDTO> getCountry(
+        @PathVariable String countryCode,
+        @RequestParam(required = false) String language)
+    {
         ApiWrapperSingle<ApiCountryDTO> wrapper = new ApiWrapperSingle<>();
+
+        ApiCountryDTO country;
         if (StringUtils.isNumeric(countryCode)) {
-            LOG.info("Getting country with ID '{}'", countryCode);
-            country = jsonApiStorageService.getCountry(Long.parseLong(countryCode), wrapper.getOptions().getLanguage());
+            LOG.info("Getting country with ID {}", countryCode);
+            country = jsonApiStorageService.getCountry(Long.parseLong(countryCode), language);
         } else {
             LOG.info("Getting country with country code {}", countryCode);
-            country = jsonApiStorageService.getCountry(countryCode, wrapper.getOptions().getLanguage());
+            country = jsonApiStorageService.getCountry(countryCode, language);
         }
+
         wrapper.setResult(country);
-        wrapper.setStatusCheck();
         return wrapper;
     }
 
-    @RequestMapping("/countries/list")
+    @RequestMapping(value = "/countries/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiCountryDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
+        LOG.debug("Getting country list - Options: {}", options);
+
         ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiCountryDTO> results = jsonApiStorageService.getCountries(wrapper);
-        wrapper.setResults(results);
-        wrapper.setStatusCheck();
+        wrapper.setResults(jsonApiStorageService.getCountries(wrapper));
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Award Methods">
-    @RequestMapping("/awards/list")
+    @RequestMapping(value = "/awards/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiAwardDTO> getAwards(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting award list with {}", options.toString());
+        LOG.debug("Getting award list - Options: {}", options);
 
         ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    @RequestMapping("/certifications/list")
+    @RequestMapping(value ="/certifications/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiCertificationDTO> getCertifications(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting certifications list with {}", options.toString());
+        LOG.debug("Getting certifications list - Options: {}", options);
 
         ApiWrapperList<ApiCertificationDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
-    @RequestMapping("/videosources/list")
+    @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting video sources list with {}", options.toString());
+        LOG.debug("Getting video sources list - Options: {}", options);
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Rating Methods">
-    @RequestMapping("/ratings/list")
+    @RequestMapping(value = "/ratings/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsRating options) {
-        LOG.info("Getting ratings list with {}", options.toString());
+        LOG.debug("Getting ratings list - Options: {}", options);
 
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
-    @RequestMapping("/alphabetical/list")
-    public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
-        LOG.info("Getting alphabetical list with {}", options.toString());
-
-        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
-    @RequestMapping("/boxset/list")
+    @RequestMapping(value = "/boxset/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiBoxedSetDTO> getBoxSets(@ModelAttribute("options") OptionsBoxedSet options) {
-        LOG.info("Getting boxset list with {}", options.toString());
+        LOG.debug("Getting boxset list - Options: {}", options);
 
         ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
-        wrapper.setStatus(new ApiStatus(200, "OK"));
-
         return wrapper;
     }
 
-    @RequestMapping("/boxset/{id}")
+    @RequestMapping(value = "/boxset/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiBoxedSetDTO> getBoxSet(@ModelAttribute("options") OptionsBoxedSet options) {
-        LOG.info("Getting boxset with {}", options.toString());
+        LOG.debug("Getting boxset - Options: {}", options);
 
         ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<>();
         wrapper.setOptions(options);
         wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>

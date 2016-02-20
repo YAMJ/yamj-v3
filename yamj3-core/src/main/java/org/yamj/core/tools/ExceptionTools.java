@@ -32,7 +32,7 @@ import org.springframework.dao.CannotAcquireLockException;
 /**
  * Exception tools
  */
-public class ExceptionTools {
+public final class ExceptionTools {
 
     private ExceptionTools() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

@@ -26,6 +26,7 @@ import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.moviemeter.MovieMeterApi;
+import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.tvrageapi.TVRageApi;
@@ -52,7 +53,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.http.WebBrowserUserAgentSelector;
+import org.yamj.api.trakttv.TraktTvApi;
 
 @Configuration
 public class WebConfiguration  {
@@ -116,6 +119,15 @@ public class WebConfiguration  {
     @Value("${APIKEY.tvrage}")
     private String tvRageApiKey;
 
+    @Value("${APIKEY.rottentomatoes}")
+    private String rottenTomatoesApiKey;
+
+    @Value("${trakttv.client.id:'unknown'}")
+    private String traktTvClientId;
+    
+    @Value("${trakttv.client.secret:'unknown'}")
+    private String traktTvClientSecret;
+    
     @Scope
     @Bean(destroyMethod="close")
     @SuppressWarnings("resource")
@@ -237,6 +249,18 @@ public class WebConfiguration  {
     public TVRageApi tvRageApi() {
         LOG.trace("Initialize TVRageApi");
         return new TVRageApi(tvRageApiKey, poolingHttpClient());
+    }
+
+    @Bean
+    public RottenTomatoesApi rottenTomatoesApi() throws Exception {
+        LOG.trace("Initialize RottenTomatoesApi");
+        return new RottenTomatoesApi(rottenTomatoesApiKey, poolingHttpClient());
+    }
+
+    @Bean
+    public TraktTvApi traktTvApi() {
+        LOG.trace("Initialize TraktTvApi");
+        return new TraktTvApi(traktTvClientId, traktTvClientSecret, poolingHttpClient());
     }
 }
 

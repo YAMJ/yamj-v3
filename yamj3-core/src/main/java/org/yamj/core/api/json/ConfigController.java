@@ -26,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -34,82 +38,77 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Configuration;
 
 @RestController
-@RequestMapping(value = "/api/config/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/config", produces = "application/json; charset=utf-8")
 public class ConfigController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigController.class);
     @Autowired
     private ConfigService configService;
 
-    @RequestMapping("/list")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ApiWrapperList<Configuration> configList(@ModelAttribute("options") OptionsConfig options) {
         if (StringUtils.isBlank(options.getConfig())) {
             LOG.info("Getting all configuration entries");
         } else {
             LOG.info("Getting configuration properties for '{}'", options.getConfig());
         }
+
         ApiWrapperList<Configuration> wrapper = new ApiWrapperList<>();
 
         // If not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
             options.setMode("EXACT");
         }
+        
         wrapper.setOptions(options);
         wrapper.setResults(configService.getConfigurations(options));
-        wrapper.setStatusCheck();
-
         return wrapper;
     }
 
-    @RequestMapping("/add")
+    @RequestMapping(value = "/add", method = {RequestMethod.GET, RequestMethod.POST})
     public ApiStatus configAdd(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
 
-        ApiStatus status = new ApiStatus();
+        ApiStatus status;
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Storing config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
-            status.setStatus(200);
-            status.setMessage("Successfully added '" + key + "' with value '" + value + "'");
+            status = ApiStatus.ok("Successfully added '" + key + "' with value '" + value + "'");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid key/value specified, configuration not added");
+            status = ApiStatus.badRequest("Invalid key/value specified, configuration not added");
         }
         return status;
     }
 
-    @RequestMapping("/delete")
+    @RequestMapping(value = "/delete", method = {RequestMethod.GET, RequestMethod.DELETE})
     public ApiStatus configDelete(
             @RequestParam(required = true, defaultValue = "") String key) {
-        ApiStatus status = new ApiStatus();
+
+        ApiStatus status;
         if (StringUtils.isNotBlank(key)) {
             LOG.info("Deleting config '{}'", key);
             configService.deleteProperty(key);
-            status.setStatus(200);
-            status.setMessage("Successfully deleted '" + key + "'");
+            status = ApiStatus.ok("Successfully deleted '" + key + "'");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid key specified, configuration not deleted");
+            status = ApiStatus.badRequest("Invalid key specified, configuration not deleted");
         }
         return status;
     }
 
-    @RequestMapping("/update")
+    @RequestMapping(value = "/update", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus configUpdate(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
-        ApiStatus status = new ApiStatus();
+
+        ApiStatus status;
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Updating config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
-            status.setStatus(200);
-            status.setMessage("Successfully updated '" + key + "' to value '" + value + "'");
+            status = ApiStatus.ok("Successfully updated '" + key + "' to value '" + value + "'");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid key/value specified, configuration not updated");
+            status = ApiStatus.badRequest("Invalid key/value specified, configuration not updated");
         }
         return status;
     }
-
 }

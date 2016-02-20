@@ -22,41 +22,51 @@
  */
 package org.yamj.core;
 
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.joda.JodaMapper;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.*;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.hibernate.HibernateAwareObjectMapper;
+import org.yamj.core.config.LocaleService;
 
 @Configuration
 @EnableScheduling
 @ComponentScan("org.yamj.core")
 public class YamjConfiguration extends WebMvcConfigurationSupport {
 
+    @Autowired
+    private LocaleService localeService;
+    
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**").addResourceLocations("WEB-INF/images/").setCachePeriod(60);
-        registry.addResourceHandler("/css/**").addResourceLocations("WEB-INF/css/").setCachePeriod(60);
         registry.addResourceHandler("/favicon.ico").addResourceLocations("WEB-INF/images/favicon.ico/").setCachePeriod(60);
+        registry.addResourceHandler("/css/**").addResourceLocations("WEB-INF/css/").setCachePeriod(60);
+        registry.addResourceHandler("/images/**").addResourceLocations("WEB-INF/images/").setCachePeriod(60);
         registry.addResourceHandler("/fonts/**").addResourceLocations("WEB-INF/fonts/").setCachePeriod(60);
         registry.addResourceHandler("/less/**").addResourceLocations("WEB-INF/less/").setCachePeriod(60);
         registry.addResourceHandler("/scss/**").addResourceLocations("WEB-INF/scss/").setCachePeriod(60);
+        registry.addResourceHandler("/scripts/**").addResourceLocations("WEB-INF/scripts/").setCachePeriod(60);
     }
 
     @Override
@@ -71,7 +81,13 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new MappingJackson2HttpMessageConverter(new HibernateAwareObjectMapper()));
+        converters.add(new MappingJackson2HttpMessageConverter(
+           new JodaMapper().registerModule(
+               new Hibernate5Module().configure(Hibernate5Module.Feature.FORCE_LAZY_LOADING, true))));
+        
+        ByteArrayHttpMessageConverter byteArrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
+        byteArrayHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(new MediaType[]{MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG}));
+        converters.add(byteArrayHttpMessageConverter);
     }
 
     @Bean
@@ -100,5 +116,37 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
         factoryBean.setLocation(new ClassPathResource("/yamj3-core-dynamic.properties"));
         return factoryBean;
+    }
+
+    @Bean
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver();
+        commonsMultipartResolver.setDefaultEncoding("UTF-8");
+        commonsMultipartResolver.setMaxUploadSize(50000000);
+        return commonsMultipartResolver;
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasenames("/WEB-INF/i18n/messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setFallbackToSystemLocale(false);
+        return messageSource;
+    }
+
+    @Bean
+    @DependsOn("localeService")
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+        localeResolver.setDefaultLocale(localeService.getLocale());
+        return localeResolver;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+        interceptor.setParamName("language");
+        registry.addInterceptor(interceptor);
     }
 }

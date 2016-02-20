@@ -25,13 +25,12 @@ package org.yamj.core.service.artwork.online;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class AllocineArtworkScannerTest extends AbstractJUnit4SpringContextTests {
+public class AllocineArtworkScannerTest extends AbstractTest {
 
     @Resource(name = "allocineArtworkScanner")
     private AllocineArtworkScanner allocineArtworkScanner;
@@ -42,10 +41,6 @@ public class AllocineArtworkScannerTest extends AbstractJUnit4SpringContextTests
         person.setSourceDbId(allocineArtworkScanner.getScannerName(), "6693");
         
         List<ArtworkDetailDTO> dtos = allocineArtworkScanner.getPhotos(person);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.PHOTO, dtos, getClass());
     }
 }

@@ -22,10 +22,9 @@
  */
 package org.yamj.core.web.apis;
 
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -37,11 +36,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
-import org.yamj.core.web.ResponseTools;
 
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine {
@@ -51,7 +51,6 @@ public class ImdbSearchEngine {
     private static final String OBJECT_PERSON = "person";
     private static final String CATEGORY_MOVIE = "movie";
     private static final String CATEGORY_TV = "tv";
-    private static final String CATEGORY_ALL = "all";
     private static final String SEARCH_FIRST = "first";
     private static final String SEARCH_EXACT = "exact";
     private static final String HTML_SLASH_QUOTE = "/\"";
@@ -69,7 +68,7 @@ public class ImdbSearchEngine {
     
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb search engine");
+        LOG.trace("Initialize IMDb search engine");
 
         Locale locale = localeService.getLocaleForConfig("imdb");
         searchEngineTools = new SearchEngineTools(httpClient, locale);
@@ -123,7 +122,7 @@ public class ImdbSearchEngine {
             if (StringUtils.isNotBlank(movieId)) {
                 StringBuilder sb = new StringBuilder("http://www.imdb.com/")
                     .append("search/name?name=")
-                    .append(URLEncoder.encode(personName, "UTF-8"))
+                    .append(HTMLTools.encodeUrl(personName))
                     .append("&role=")
                     .append(movieId);
 
@@ -162,7 +161,7 @@ public class ImdbSearchEngine {
      * @return
      */
     public String getImdbPersonId(String personName, boolean throwTempError) {
-        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, CATEGORY_ALL, throwTempError);
+        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, ALL, throwTempError);
         if (StringUtils.isBlank(imdbId)) {
             String imdbUrl = searchEngineTools.searchURL(personName, -1, "www.imdb.com/name", throwTempError);
             imdbId = getImdbIdFromURL(imdbUrl, OBJECT_PERSON);
@@ -204,12 +203,7 @@ public class ImdbSearchEngine {
 
         StringBuilder sb = new StringBuilder("http://www.imdb.com/");
         sb.append("find?q=");
-        try {
-            sb.append(URLEncoder.encode(title, "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            LOG.debug("Failed to encode title '{}'", title);
-            sb.append(title);
-        }
+        sb.append(HTMLTools.encodeUrl(title));
 
         if (year > 0) {
             sb.append("+%28").append(year).append("%29");
@@ -282,14 +276,7 @@ public class ImdbSearchEngine {
                 formattedExact = formattedName + formattedYear;
             }
         } else {
-            sb = new StringBuilder();
-            try {
-                sb.append(URLEncoder.encode(title, "UTF-8").replace("+", " "));
-            } catch (UnsupportedEncodingException ex) {
-                LOG.debug("Failed to encode title '{}'", title);
-                sb.append(title);
-            }
-            formattedName = sb.toString().toLowerCase();
+            formattedName = HTMLTools.encodePlain(title).replace("+", " ").toLowerCase();
             if (year > 0) {
                 formattedYear = "(" + year + ")";
                 formattedExact = formattedName + "</a> " + formattedYear;

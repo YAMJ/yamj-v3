@@ -31,9 +31,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
@@ -58,6 +59,7 @@ import org.yamj.core.tools.WatchedDTO;
  *
  */
 @Service("mediaImportService")
+@DependsOn("upgradeDatabaseService")
 public class MediaImportService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
@@ -65,7 +67,7 @@ public class MediaImportService {
     private static final String TVSHOW_NFO_NAME = "tvshow";
     private static final String BDMV_FOLDER = "BDMV";
     private static final String DVD_FOLDER = "VIDEO_TS";
-
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -86,6 +88,15 @@ public class MediaImportService {
     private StagingService stagingService;
     @Autowired
     private LocaleService localeService;
+    
+    @Value("${yamj3.folder.name.nfo:null}")
+    private String nfoFolderName;
+    @Value("${yamj3.folder.name.subtitle:null}")
+    private String subtitleFolderName;
+    @Value("${yamj3.folder.name.artwork:null}")
+    private String artworkFolderName;
+    @Value("${yamj3.folder.name.photo:null}")
+    private String photoFolderName;
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
@@ -152,7 +163,7 @@ public class MediaImportService {
         }
 
         // determine if watched file exists for the video file
-        Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(stageFile);
+        final Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(stageFile);
 
         // new media file
         mediaFile = new MediaFile();
@@ -237,7 +248,8 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                    LOG.debug("Add movie filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
                 }
 
                 // store associated entities (only sets right now)
@@ -304,7 +316,8 @@ public class MediaImportService {
                         if (MapUtils.isNotEmpty(dto.getSetMap())) {
                             for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                                 // add boxed set to video data
-                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                                LOG.debug("Add series filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
                             }
 
                             // store associated entities (only sets right now)
@@ -439,7 +452,6 @@ public class MediaImportService {
         }
 
         // case 2: find matching files in NFO folder
-        String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
         Set<String> searchNames = Collections.singleton(searchName.toLowerCase());
 
         Library library = null;
@@ -460,13 +472,13 @@ public class MediaImportService {
         }
 
         if (isTvShow) {
-            // case 2: tvshow.nfo in same directory as video
+            // case 3: tvshow.nfo in same directory as video
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory);
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(3));
             }
 
-            // case 3: tvshow.nfo in parent directory
+            // case 4: tvshow.nfo in parent directory
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory.getParentDirectory());
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(4));
@@ -476,7 +488,7 @@ public class MediaImportService {
         // case 10-n: apply "nfoName = dirName" to all video data
         // NOTE: 11-n are only applied if recursive scan is enabled
         boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-        LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
+        LOG.trace("Recursive scan of directories is {}", recurse ? "enabled" : "disabled");
         this.findNfoWithDirectoryName(nfoFiles, stageFile.getStageDirectory(), 10, recurse);
 
         if (MapUtils.isEmpty(nfoFiles)) {
@@ -518,7 +530,7 @@ public class MediaImportService {
 
         if (recurse) {
             // recurse until parent is null
-            this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1), recurse);
+            this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), counter+1, recurse);
         }
     }
 
@@ -536,8 +548,6 @@ public class MediaImportService {
     }
 
     private void attachSubtilesToMediaFile(MediaFile mediaFile, StageFile videoFile) {
-        String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
-
         Library library = null;
         if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
             library = videoFile.getStageDirectory().getLibrary();
@@ -571,10 +581,6 @@ public class MediaImportService {
 
     @Transactional
     public void processingError(Long id) {
-        if (id == null) {
-            return;
-        }
-
         StageFile stageFile = stagingDao.getById(StageFile.class, id);
         if (stageFile != null) {
             stageFile.setStatus(StatusType.ERROR);
@@ -663,7 +669,6 @@ public class MediaImportService {
         Map<VideoData, Integer> videoFiles = new HashMap<>();
         List<VideoData> videoDatas = null;
 
-        String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
         if (FileTools.isWithinSpecialFolder(stageFile, nfoFolderName)) {
 
             // case 2: video file has same base name in library
@@ -711,7 +716,7 @@ public class MediaImportService {
 
             if (CollectionUtils.isNotEmpty(childDirectories)) {
                 boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-                LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
+                LOG.trace("Recursive scan of directories is {}", recurse ? "enabled" : "disabled");
 
                 if (recurse) {
                     // TODO case 11-n: recursive scanning
@@ -784,77 +789,76 @@ public class MediaImportService {
     private boolean processImageFile(StageFile stageFile) {
         Collection<Artwork> artworks;
         int priority = 1;
-        if (stageFile.getBaseName().equalsIgnoreCase("poster")
-                || stageFile.getBaseName().equalsIgnoreCase("cover")
-                || stageFile.getBaseName().equalsIgnoreCase("folder")) {
+        final String fileBaseName = stageFile.getBaseName().toLowerCase();
+        
+        final List<String> tokensPoster = this.configServiceWrapper.getArtworkTokens(ArtworkType.POSTER);
+        final List<String> tokensFanart = this.configServiceWrapper.getArtworkTokens(ArtworkType.FANART);
+        final List<String> tokensBanner = this.configServiceWrapper.getArtworkTokens(ArtworkType.BANNER);
+        final int suffixFanartLength = isSuffixToken(fileBaseName, tokensFanart);
+        final int suffixBannerLength = isSuffixToken(fileBaseName, tokensBanner);
+            
+        if (tokensPoster.contains(fileBaseName)) {
             LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
-                || stageFile.getBaseName().equalsIgnoreCase("backdrop")
-                || stageFile.getBaseName().equalsIgnoreCase("background")) {
+            
+        } else if (tokensFanart.contains(fileBaseName)) {
             LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-        } else if (stageFile.getBaseName().equalsIgnoreCase("banner")) {
+            
+        } else if (tokensBanner.contains(fileBaseName)) {
             LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
+            
+        } else if (suffixFanartLength > 0) { 
             LOG.debug("Fanart found: {}", stageFile.getBaseName());
 
-            String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixFanartLength);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set fanart
                 String boxedSetName = getBoxedSetName(stripped);
                 artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.FANART);
-            } else {
-                String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
-                if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                    // artwork inside located artwork directory
-                    Library library = null;
-                    if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                        library = stageFile.getStageDirectory().getLibrary();
-                    }
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, library);
-                    // priority = 2 when inside artwork folder
-                    priority = 2;
-                } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                    // fanart for whole directory cause same name as directory
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-                } else {
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
+            } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
+                // artwork inside located artwork directory
+                Library library = null;
+                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                    library = stageFile.getStageDirectory().getLibrary();
                 }
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, library);
+                // priority = 2 when inside artwork folder
+                priority = 2;
+            } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
+                // fanart for whole directory cause same name as directory
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
+            } else {
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
             }
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".banner")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-banner")) {
+            
+        } else if (suffixBannerLength > 0) {
             LOG.debug("Banner found: {}", stageFile.getBaseName());
 
-            String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixBannerLength);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set image
                 String boxedSetName = getBoxedSetName(stripped);
                 artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.BANNER);
-            } else {
-                String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
-                if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                    // artwork inside located artwork directory
-                    Library library = null;
-                    if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                        library = stageFile.getStageDirectory().getLibrary();
-                    }
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, library);
-                    // priority = 2 when inside artwork folder
-                    priority = 2;
-                } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                    // banner for whole directory cause same name as directory
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
-                } else {
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, stageFile.getStageDirectory());
+            } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
+                // artwork inside located artwork directory
+                Library library = null;
+                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                    library = stageFile.getStageDirectory().getLibrary();
                 }
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, library);
+                // priority = 2 when inside artwork folder
+                priority = 2;
+            } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
+                // banner for whole directory cause same name as directory
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
+            } else {
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, stageFile.getStageDirectory());
             }
+            
         } else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) {
             LOG.debug("VideoImage found: {}", stageFile.getBaseName());
 
@@ -862,17 +866,17 @@ public class MediaImportService {
             artworks = Collections.emptyList();
         } else {
             // NOTE: poster and photo images may have no special image marker like poster or photo
-            String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
             boolean inPhotoFolder = FileTools.isWithinSpecialFolder(stageFile, photoFolderName);
 
-            if (inPhotoFolder
-                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".photo")
-                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-photo")) {
+            final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(ArtworkType.PHOTO);
+            final int suffixPhotoLength = isSuffixToken(fileBaseName, tokensPhoto);
+
+            if (inPhotoFolder || suffixPhotoLength > 0) {
                 LOG.debug("Photo found: {}", stageFile.getBaseName());
 
-                String stripped = stageFile.getBaseName().toLowerCase();
-                if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "photo")) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 6);
+                String stripped = fileBaseName;
+                if (suffixPhotoLength > 0) {
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPhotoLength);
                 }
 
                 // find person artwork
@@ -881,34 +885,31 @@ public class MediaImportService {
             } else {
                 LOG.debug("Poster found: {}", stageFile.getBaseName());
 
-                String stripped = stageFile.getBaseName().toLowerCase();
-                if (StringUtils.endsWith(stripped, ".poster")
-                        || StringUtils.endsWith(stripped, "-poster")) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+                final int suffixPosterLength = isSuffixToken(fileBaseName, tokensPoster);
+                String stripped = fileBaseName;
+                if (suffixPosterLength > 0) {
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPosterLength);
                 }
 
                 if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                     // boxed set poster
                     String boxedSetName = getBoxedSetName(stripped);
                     artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.POSTER);
-                } else {
-                    String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
-                    if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                        // artwork inside located artwork directory
-                        Library library = null;
-                        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                            library = stageFile.getStageDirectory().getLibrary();
-                        }
-                        // artwork inside located photo directory
-                        artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, library);
-                        // priority = 2 when inside artwork folder
-                        priority = 2;
-                    } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                        // poster for whole directory cause same name as directory
-                        artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-                    } else {
-                        artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, stageFile.getStageDirectory());
+                } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
+                    // artwork inside located artwork directory
+                    Library library = null;
+                    if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                        library = stageFile.getStageDirectory().getLibrary();
                     }
+                    // artwork inside located photo directory
+                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, library);
+                    // priority = 2 when inside artwork folder
+                    priority = 2;
+                } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
+                    // poster for whole directory cause same name as directory
+                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
+                } else {
+                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, stageFile.getStageDirectory());
                 }
             }
         }
@@ -950,6 +951,15 @@ public class MediaImportService {
         return true;
     }
 
+    private static int isSuffixToken(String name, List<String> tokens) {
+        for (String token : tokens) {
+            if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
+                return token.length()+1;
+            }
+        }
+        return -1;
+    }
+    
     private static String getBoxedSetName(final String stripped) {
         String boxedSetName = stripped.substring(4);
         int index = boxedSetName.lastIndexOf("_");

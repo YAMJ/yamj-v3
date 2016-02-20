@@ -46,15 +46,6 @@ public class OptionsMultiType extends OptionsAbstractSortSearch {
     }
 
     /**
-     * Get the filtered types
-     *
-     * @return
-     */
-    public Set<MetaDataType> splitTypes() {
-        return this.splitTypes(type);
-    }
-
-    /**
      * Get the meta data types
      *
      * @return

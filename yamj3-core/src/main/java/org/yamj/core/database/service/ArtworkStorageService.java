@@ -22,92 +22,78 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.List;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.artwork.ArtworkTools;
+import org.yamj.core.service.file.FileStorageService;
+import org.yamj.core.service.file.StorageType;
 
 @Service("artworkStorageService")
 public class ArtworkStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkStorageService.class);
+    
     @Autowired
     private ArtworkDao artworkDao;
-    
-    @Transactional
-    public void storeArtworkProfile(ArtworkProfile newProfile) {
-        ArtworkProfile profile = artworkDao.getArtworkProfile(newProfile.getProfileName(), newProfile.getArtworkType());
-        if (profile == null) {
-            this.artworkDao.saveEntity(newProfile);
-            LOG.info("Stored: {}", newProfile);
-        } else {
-            // TODO what to do if profile changed? set generated values to update?
+    @Autowired
+    private FileStorageService fileStorageService;
 
-            profile.setHeight(newProfile.getHeight());
-            profile.setWidth(newProfile.getWidth());
-            profile.setApplyToMovie(newProfile.isApplyToMovie());
-            profile.setApplyToSeries(newProfile.isApplyToSeries());
-            profile.setApplyToSeason(newProfile.isApplyToSeason());
-            profile.setApplyToEpisode(newProfile.isApplyToEpisode());
-            profile.setApplyToPerson(newProfile.isApplyToPerson());
-            profile.setApplyToBoxedSet(newProfile.isApplyToBoxedSet());
-            profile.setPreProcess(newProfile.isPreProcess());
-            profile.setRoundedCorners(newProfile.isRoundedCorners());
-            profile.setReflection(newProfile.isReflection());
-            profile.setNormalize(newProfile.isNormalize());
-            profile.setStretch(newProfile.isStretch());
-            
-            this.artworkDao.updateEntity(profile);
-            LOG.info("Updated: {}", profile);
-        }
+    @Transactional
+    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    public ArtworkProfile saveArtworkProfile(ArtworkProfile artworkProfile) {
+        this.artworkDao.saveEntity(artworkProfile);
+        return artworkProfile;
+    }
+
+    @Transactional
+    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    public ArtworkProfile updateArtworkProfile(ArtworkProfile artworkProfile) {
+        this.artworkDao.updateEntity(artworkProfile);
+        return artworkProfile;
+    }
+
+    @Transactional(readOnly = true)
+    public ArtworkProfile getArtworkProfile(Long id) {
+        return artworkDao.getById(ArtworkProfile.class, id);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value=CachingNames.DB_ARTWORK_PROFILE, key="{#profileName, #metaDataType, #artworkType}", unless="#result==null")
+    public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
+        return artworkDao.getArtworkProfile(profileName, metaDataType, artworkType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArtworkProfile> getAllArtworkProfiles() {
+        return artworkDao.getAllArtworkProfiles();
     }
 
     @Transactional(readOnly = true)
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkLocated located) {
-        MetaDataType metaDataType = null;
-
-        ArtworkType artworkType = located.getArtwork().getArtworkType();
-        if (ArtworkType.PHOTO == artworkType) {
-            metaDataType = MetaDataType.PERSON;
-        } else if (ArtworkType.VIDEOIMAGE == artworkType) {
-            metaDataType = MetaDataType.EPISODE;
-        } else if (ArtworkType.BANNER == artworkType) {
-            if (located.getArtwork().getBoxedSet() != null) {
-                metaDataType = MetaDataType.BOXSET;
-            } else if (located.getArtwork().getSeries() != null) {
-                metaDataType = MetaDataType.SERIES;
-            } else {
-                metaDataType = MetaDataType.SEASON;
-            }
-        } else if (ArtworkType.POSTER == artworkType || (ArtworkType.FANART == artworkType)) {
-            if (located.getArtwork().getBoxedSet() != null) {
-                metaDataType = MetaDataType.BOXSET;
-            } else if (located.getArtwork().getSeries() != null) {
-                metaDataType = MetaDataType.SERIES;
-            } else if (located.getArtwork().getSeason() != null) {
-                metaDataType = MetaDataType.SEASON;
-            } else {
-                metaDataType = MetaDataType.MOVIE;
-            }
-        }
-
-        return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
+        final MetaDataType metaDataType = ArtworkTools.getMetaDataType(located);
+        final ArtworkType artworkType = located.getArtwork().getArtworkType();
+        return this.artworkDao.getPreProcessArtworkProfiles(metaDataType, artworkType);
     }
 
     @Transactional
     public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
+        if (artwork.getArtworkLocated().isEmpty()) {
             // no located artwork presents; just store all
             this.artworkDao.storeAll(locatedArtworks);
         } else if (CollectionUtils.isNotEmpty(locatedArtworks)) {
@@ -199,6 +185,11 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<QueueDTO> getArtworGeneratedQueue(final int maxResults) {
+        return artworkDao.getArtworkGeneratedQueue(maxResults);
+    }
+
+    @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("FROM ArtworkLocated loc ");
@@ -215,6 +206,19 @@ public class ArtworkStorageService {
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
+    @Transactional(readOnly = true)
+    public ArtworkGenerated getRequiredArtworkGenerated(Long id) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("FROM ArtworkGenerated gen ");
+        sb.append("JOIN FETCH gen.artworkLocated loc ");
+        sb.append("JOIN FETCH gen.artworkProfile profile ");
+        sb.append("JOIN FETCH loc.artwork art ");
+        sb.append("WHERE gen.id = :id");
+
+        List<ArtworkGenerated> objects = this.artworkDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
+    }
+
     @Transactional
     public boolean errorArtworkLocated(Long id) {
         ArtworkLocated located = artworkDao.getById(ArtworkLocated.class, id);
@@ -227,19 +231,137 @@ public class ArtworkStorageService {
     }
 
     @Transactional
+    public void storeArtworkLocated(ArtworkLocated located) {
+        this.artworkDao.storeEntity(located);
+    }
+
+    @Transactional
     public void updateArtworkLocated(ArtworkLocated located) {
         this.artworkDao.updateEntity(located);
     }
 
     @Transactional
-    public void storeArtworkGenerated(ArtworkGenerated generated) {
-        ArtworkGenerated stored = this.artworkDao.getStoredArtworkGenerated(generated);
-        if (stored == null) {
-            this.artworkDao.saveEntity(generated);
-        } else {
-            stored.setCacheDirectory(generated.getCacheDirectory());
-            stored.setCacheFilename(generated.getCacheFilename());
-            this.artworkDao.updateEntity(stored);
+    @CachePut(value=CachingNames.DB_ARTWORK_IMAGE, key="{#located.id, #profile.profileName}")
+    public ArtworkGenerated storeArtworkGenerated(ArtworkLocated located, ArtworkProfile profile, String cacheDir, String cacheFileName) {
+        ArtworkGenerated generated = this.artworkDao.getStoredArtworkGenerated(located, profile);
+        if (generated == null) {
+            generated = new ArtworkGenerated();
+            generated.setArtworkLocated(located);
+            generated.setArtworkProfile(profile);
         }
+        generated.setCacheDirectory(cacheDir);
+        generated.setCacheFilename(cacheFileName);
+        generated.setStatus(StatusType.DONE);
+        this.artworkDao.storeEntity(generated);
+        return generated;
+    }
+
+    @Transactional
+    public void updateArtworkGenerated(ArtworkGenerated generated) {
+        this.artworkDao.updateEntity(generated);
+    }
+
+    @Transactional(readOnly=true)
+    public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
+        return this.artworkDao.getArtworkLocated(artwork, source, hashCode);
+    }
+    
+    @Transactional(readOnly=true)
+    public Artwork getArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT a FROM Artwork a ");
+        switch (metaDataType) {
+            case MOVIE: 
+                sb.append("JOIN FETCH a.videoData vd WHERE vd.id=:id AND vd.episode<0 ");
+                break;
+            case EPISODE:
+                sb.append("JOIN FETCH a.videoData vd WHERE vd.id=:id AND vd.episode>=0 ");
+                break;
+            case SERIES:
+                sb.append("JOIN FETCH a.series ser WHERE ser.id=:id ");
+                break;
+            case SEASON:
+                sb.append("JOIN FETCH a.season sea WHERE sea.id=:id ");
+                break;
+            case BOXSET:
+                sb.append("JOIN FETCH a.boxedSet bs WHERE bs.id=:id ");
+                break;
+            default:
+                sb.append("JOIN FETCH a.person p WHERE p.id=:id ");
+                break;
+        }
+        sb.append("AND a.artworkType=:artworkType ");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("artworkType", artworkType);
+        return this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
+    }
+
+    @Transactional
+    public long checkArtworkSanity(long lastId) {
+        long newLastId = -1;
+        
+        for (ArtworkLocated located : this.artworkDao.getArtworkLocatedWithCacheFilename(lastId)) {
+            newLastId = Math.max(newLastId, located.getId());
+
+            // if original file does not exists, then also all generated artwork can be deleted
+            final StorageType storageType = ArtworkTools.getStorageType(located);
+            
+            if (!fileStorageService.existsFile(storageType, located.getCacheDirectory(), located.getCacheFilename())) {
+                LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
+                
+                // reset status and cache file name
+                located.setStatus(StatusType.UPDATED);
+                located.setCacheDirectory(null);
+                located.setCacheFilename(null);
+                this.artworkDao.updateEntity(located);
+            } else {
+                // check if one of the generated images is missing
+                for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+                    if (!fileStorageService.existsFile(storageType, generated.getCacheDirectory(), generated.getCacheFilename())) {
+                        LOG.trace("Mark generated artwork {} for UPDATE due missing generated image", generated.getId());
+                        // set status of generated to UPDATED
+                        generated.setStatus(StatusType.UPDATED);
+                        this.artworkDao.updateEntity(generated);
+                    }
+                }
+            }
+        }
+        
+        return newLastId;
+    }
+
+    @Transactional(readOnly=true)
+    @Cacheable(value=CachingNames.DB_ARTWORK_IMAGE, key="{#locatedId, #profileName}", unless="#result==null")
+    public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
+        return this.artworkDao.getArtworkGenerated(locatedId, profileName);
+    }
+
+    @Transactional
+    public int generateImagesForProfile(long id) {
+        ArtworkProfile profile = artworkDao.getById(ArtworkProfile.class, id);
+        if (profile == null) {
+            // nothing to do if no profile found
+            return 0;
+        }
+        
+        Date profileDate = profile.getCreateTimestamp();
+        if (profile.getUpdateTimestamp() != null) {
+            profileDate = profile.getUpdateTimestamp();
+        }
+       
+        final StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ArtworkGenerated gen ");
+        sb.append("SET status='UPDATED' ");
+        sb.append("WHERE gen.artworkProfile.id=:id ");
+        sb.append("AND gen.status != 'UPDATED' ");
+        sb.append("AND ((gen.updateTimestamp is null and gen.createTimestamp<=:profileDate) OR ");
+        sb.append("     (gen.updateTimestamp is not null and gen.updateTimestamp<=:profileDate)) ");
+
+        Map<String,Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("profileDate", profileDate);
+        return this.artworkDao.executeUpdate(sb, params);
     }
 }

@@ -24,6 +24,7 @@ package org.yamj.common.tools;
 
 import java.net.*;
 import java.util.Enumeration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +33,33 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stuart
  */
-public class SystemTools {
+public final class SystemTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemTools.class);
     private static String ipv4 = null;
     private static String ipv6 = null;
 
     private SystemTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
+    /**
+     * Check to see if a system property has been set, and set it if not.
+     *
+     * @param property
+     * @param defaultValue
+     * @return
+     */
+    public static String checkSystemProperty(String property, String defaultValue) {
+        String systemProperty = System.getProperty(property, "");
+        if (StringUtils.isBlank(systemProperty)) {
+            LOG.debug("System property '{}' not found. Setting to '{}'", property, defaultValue);
+            System.setProperty(property, defaultValue);
+            return defaultValue;
+        }
+        return systemProperty;
+    }
+    
     /**
      * Search through the the network adapters and get the IPv4 address of the
      * server.
@@ -58,7 +76,7 @@ public class SystemTools {
      * @param getIpv4 return the IPv4 address, otherwise IPv6
      * @return
      */
-    public static String getIpAddress(boolean getIpv4) {
+    public static String getIpAddress(final boolean getIpv4) { //NOSONAR
         if (getIpv4 && ipv4 != null) {
             return ipv4;
         }
@@ -69,16 +87,15 @@ public class SystemTools {
 
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            boolean found = Boolean.FALSE;
-            while (!found && interfaces.hasMoreElements()) {
+            outerLoop: while (interfaces.hasMoreElements()) {
                 NetworkInterface currentInterface = interfaces.nextElement();
                 if (!currentInterface.isUp() || currentInterface.isLoopback() || currentInterface.isVirtual()) {
                     continue;
                 }
 
-                LOG.trace("Current Inteface: {}", currentInterface.toString());
+                LOG.trace("Current Interface: {}", currentInterface.toString());
                 Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
-                while (!found && addresses.hasMoreElements()) {
+                while (addresses.hasMoreElements()) {
                     InetAddress currentAddress = addresses.nextElement();
                     if (currentAddress.isLoopbackAddress()) {
                         continue;
@@ -86,24 +103,22 @@ public class SystemTools {
 
                     if (currentAddress instanceof Inet4Address) {
                         ipv4 = currentAddress.getHostAddress();
-                        LOG.trace("IPv4 Address: {}", currentAddress.getHostAddress());
+                        LOG.debug("IPv4 Address: {}", currentAddress.getHostAddress());
                     } else if (currentAddress instanceof Inet6Address) {
                         ipv6 = currentAddress.getHostAddress();
-                        LOG.trace("IPv6 Address: {}", currentAddress.getHostAddress());
+                        LOG.debug("IPv6 Address: {}", currentAddress.getHostAddress());
                     }
 
                     if (ipv4 != null && ipv6 != null) {
-                        found = Boolean.TRUE;
+                        break outerLoop;
                     }
                 }
             }
         } catch (SocketException ex) {
-            LOG.error("Failed to get IP Address, error: {}", ex.getMessage());
+            LOG.warn("Failed to get IP Address: {}", ex.getMessage());
+            LOG.trace("Socket error", ex);
         }
 
-        if (getIpv4) {
-            return ipv4;
-        }
-        return ipv6;
+        return getIpv4 ? ipv4 : ipv6;
     }
 }

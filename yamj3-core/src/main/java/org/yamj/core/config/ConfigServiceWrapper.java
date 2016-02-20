@@ -22,6 +22,9 @@
  */
 package org.yamj.core.config;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -73,33 +76,35 @@ public class ConfigServiceWrapper {
         return this.configService.getBooleanProperty(sb.toString(), Boolean.FALSE);
     }
 
-    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtwork) { //NOSONAR
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");
         addScanArtworkType(artwork, sb);
 
         String value = this.configService.getProperty(sb.toString());
         if (StringUtils.isBlank(value)) {
-            // default: true
+            // defaults to TRUE if nothing present in properties
             return true;
         }
-        if ("true".equalsIgnoreCase(value.trim())) {
+        
+        if ("true".equalsIgnoreCase(value)) {
             return true;
         }
-        if ("false".equalsIgnoreCase(value.trim())) {
+        if ("false".equalsIgnoreCase(value)) {
             return false;
         }
 
         // any other case: check if valid artwork is present
 
-        // check present artworks
+        // check present artwork
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
             if (located.isValidStatus()) {
                 return false;
             }
         }
-        // check newly scanned artworks (from file: may be new or invalid)
-        for (ArtworkLocated located : locatedArtworks) {
+        
+        // check newly scanned artwork (from file: may be new or invalid)
+        for (ArtworkLocated located : locatedArtwork) {
             if (located.isValidStatus()) {
                 return false;
             }
@@ -112,7 +117,17 @@ public class ConfigServiceWrapper {
     private static void addScanArtworkType(Artwork artwork, StringBuilder sb) {
         sb.append(artwork.getArtworkType().name().toLowerCase());
 
-        if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {
+        switch(artwork.getArtworkType()) {
+        case BANNER:
+            sb.append(".");
+            if (artwork.getSeason() != null) {
+                sb.append("tvshow.season");
+            } else {
+                sb.append("tvshow.series");
+            }
+            break;
+        case POSTER:
+        case FANART:
             sb.append(".");
             if (artwork.getBoxedSet() != null) {
                 sb.append("boxset");
@@ -123,32 +138,44 @@ public class ConfigServiceWrapper {
             } else {
                 sb.append("tvshow.series");
             }
-        } else if (ArtworkType.BANNER == artwork.getArtworkType()) {
-            sb.append(".");
-            if (artwork.getSeason() != null) {
-                sb.append("tvshow.season");
-            } else {
-                sb.append("tvshow.series");
-            }
+            break;
+        default:
+             break;
         }
     }
 
-    public boolean isCastScanEnabled(JobType jobType) {
-        if (jobType == null) {
-            return false;
+    public List<String> getArtworkTokens(ArtworkType artworkType) {
+        final String configKey = "yamj3.artwork.token." + artworkType.name().toLowerCase();
+        final String defaultValue;
+        
+        switch (artworkType) {
+        case POSTER:
+            defaultValue = "poster,cover,folder";
+            break;
+        case FANART:
+            defaultValue = "fanart,backdrop,background";
+            break;
+        case BANNER:
+            defaultValue = "banner";
+            break;
+        case VIDEOIMAGE:
+            defaultValue = "videoimage";
+            break;
+        case PHOTO:
+            defaultValue = "photo";
+            break;
+        default:
+            defaultValue = "";
+            break;
         }
-
+        
+        return Arrays.asList(this.configService.getProperty(configKey, defaultValue).toLowerCase().split(DEFAULT_SPLITTER));
+    }
+    
+    public boolean isCastScanEnabled(final JobType jobType) {
         String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
         boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);
-
-        if (LOG.isTraceEnabled()) {
-            if (value) {
-                LOG.trace("CastCrew scanning for job '{}' is enabled", jobType);
-            } else {
-                LOG.trace("CastCrew scanning for job '{}' is disabled", jobType);
-            }
-        }
-
+        LOG.trace("CastCrew scanning for job '{}' is {}", jobType, value?"enabled":"disabled");
         return value;
     }
 

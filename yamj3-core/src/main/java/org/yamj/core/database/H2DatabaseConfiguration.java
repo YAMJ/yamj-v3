@@ -26,30 +26,19 @@ import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.Server;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.context.annotation.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.yamj.core.hibernate.AuditInterceptor;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("h2")
+@Profile(DatabaseType.H2)
 public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(H2DatabaseConfiguration.class);
@@ -80,23 +69,20 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
         LOG.trace("Create new data source");
         
         JdbcDataSource dataSource = new JdbcDataSource();
-        StringBuffer url = new StringBuffer().append("jdbc:h2:");
-        url.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3;AUTO_SERVER=TRUE");
+        StringBuilder url = new StringBuilder()
+            .append("jdbc:h2:")
+            .append(System.getProperty("yamj3.home", "."))
+            .append("/database/yamj3;AUTO_SERVER=TRUE");
         dataSource.setUrl(url.toString());
         
-        dataSource.setUser("yamj3");
-        dataSource.setPassword("yamj3");
+        dataSource.setUser(YAMJ3);
+        dataSource.setPassword(YAMJ3);
+
         return dataSource;
     }
     
     @Override
-    @Bean(destroyMethod="destroy")
-    public FactoryBean<SessionFactory> sessionFactory() {
-        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-        sessionFactoryBean.setDataSource(dataSource());
-        sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());
-        sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
-        
+    protected Properties hibernateProperties() {
         Properties props = new Properties();
         props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         props.put("hibernate.show_sql", showSql);
@@ -109,9 +95,7 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
         props.put("hibernate.connection.CharSet", "utf8");
         props.put("hibernate.connection.characterEncoding", "utf8");
         props.put("hibernate.connection.useUnicode", false);
-        sessionFactoryBean.setHibernateProperties(props);
-        
-        return sessionFactoryBean;
+        return props;
     }    
 }
 

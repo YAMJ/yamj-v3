@@ -25,30 +25,19 @@ package org.yamj.core.database;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.SessionFactory;
 import org.hsqldb.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.context.annotation.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.yamj.core.hibernate.AuditInterceptor;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("hsql")
+@Profile(DatabaseType.HSQL)
 public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(HSQLDatabaseConfiguration.class);
@@ -64,13 +53,14 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         Server hsqlServer = new Server();
         hsqlServer.setLogWriter(null);
-        //hsqlServer.setLogWriter(new PrintWriter(System.err));
         hsqlServer.setSilent(true);
         hsqlServer.setNoSystemExit(true);
 
-        StringBuffer path = new StringBuffer().append("file:");
-        path.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3");
-        hsqlServer.setDatabaseName(0, "yamj3");
+        StringBuilder path = new StringBuilder()
+            .append("file:")
+            .append(System.getProperty("yamj3.home", "."))
+            .append("/database/yamj3;user=yamj3;password=yamj3"); //NOSONAR
+        hsqlServer.setDatabaseName(0, YAMJ3);
         hsqlServer.setDatabasePath(0, path.toString());
         
         hsqlServer.setPort(port);
@@ -89,9 +79,9 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-        basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:9001/yamj3");
-        basicDataSource.setUsername("sa");
-        basicDataSource.setPassword("");
+        basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:"+port+"/yamj3");
+        basicDataSource.setUsername(YAMJ3);
+        basicDataSource.setPassword(YAMJ3);
         basicDataSource.setValidationQuery("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS");
         basicDataSource.setPoolPreparedStatements(poolPreparedStatements);
         
@@ -111,17 +101,13 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
 
+        populateDatabase(basicDataSource, "update_hsql.sql");
+
         return basicDataSource;
     }
     
     @Override
-    @Bean(destroyMethod="destroy")
-    public FactoryBean<SessionFactory> sessionFactory() {
-        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-        sessionFactoryBean.setDataSource(dataSource());
-        sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());
-        sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
-        
+    protected Properties hibernateProperties() {
         Properties props = new Properties();
         props.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         props.put("hibernate.show_sql", showSql);
@@ -134,9 +120,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         props.put("hibernate.connection.CharSet", "utf8");
         props.put("hibernate.connection.characterEncoding", "utf8");
         props.put("hibernate.connection.useUnicode", false);
-        sessionFactoryBean.setHibernateProperties(props);
-        
-        return sessionFactoryBean;
+        return props;
     }    
 }
 

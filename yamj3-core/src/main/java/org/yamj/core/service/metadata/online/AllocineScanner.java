@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
@@ -45,7 +46,6 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.core.web.apis.SearchEngineTools;
@@ -56,8 +56,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
 
-    private final Lock searchEngingeLock = new ReentrantLock(true);
     private SearchEngineTools searchEngineTools;
+    private Lock searchEngineLock;
     
     @Autowired
     private PoolingHttpClient httpClient;
@@ -79,9 +79,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Allocine scanner");
+        LOG.trace("Initialize Allocine scanner");
         
         searchEngineTools = new SearchEngineTools(httpClient, Locale.FRANCE);
+        searchEngineLock = new ReentrantLock(true);
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -96,22 +97,22 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         String allocineId = videoData.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear(), throwTempError);
+            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
 
-            if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+            if (StringUtils.isBlank(allocineId) && videoData.isTitleOriginalScannable()) {
                 // try with original title
-                allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getYear(), throwTempError);
+                allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
             }
             
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
-                searchEngingeLock.lock();
+                searchEngineLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/fichefilm_gen_cfilm");
-                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getYear(), "www.allocine.fr/film", throwTempError);
+                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getPublicationYear(), "www.allocine.fr/film", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "fichefilm_gen_cfilm=", ".html");
                 } finally {
-                    searchEngingeLock.unlock();
+                    searchEngineLock.unlock();
                 }
             }
             
@@ -123,7 +124,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false, false);
+                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
                     videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
@@ -144,22 +145,22 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         String allocineId = series.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear(), throwTempError);
+            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
 
             if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
                 // try with original title
-                allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitleOriginal(), series.getYear(), throwTempError);
+                allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitleOriginal(), series.getStartYear(), throwTempError);
             }
 
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
-                searchEngingeLock.lock();
+                searchEngineLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
-                    String url = searchEngineTools.searchURL(series.getTitle(), series.getYear(), "www.allocine.fr/series", throwTempError);
+                    String url = searchEngineTools.searchURL(series.getTitle(), series.getStartYear(), "www.allocine.fr/series", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
                 } finally {
-                    searchEngingeLock.unlock();
+                    searchEngineLock.unlock();
                 }
             }
           
@@ -171,7 +172,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true, false);
+                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getStartYear(), true, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitleOriginal());
                     series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
@@ -198,13 +199,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
   
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
-                searchEngingeLock.lock();
+                searchEngineLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/fichepersonne_gen_cpersonne");
                     String url = searchEngineTools.searchURL(person.getName(), -1, "www.allocine.fr/personne", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "fichepersonne_gen_cpersonne=", ".html");
                 } finally {
-                    searchEngingeLock.unlock();
+                    searchEngineLock.unlock();
                 }
             }
             
@@ -227,7 +228,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
 
             movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
             if (videoData.getRetries() < maxRetries) {
@@ -235,7 +236,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (movieInfos.isNotValid()) {
+        if (movieInfos == null || movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -332,11 +333,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         // add awards
-        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
-            if (CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards())) {
-                for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
-                    videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
-                }
+        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE) &&
+            CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards()))
+        {
+            for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
+                videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
             }
         }
         
@@ -356,7 +357,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
 
             tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
             if (series.getRetries() < maxRetries) {
@@ -364,7 +365,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (tvSeriesInfos.isNotValid()) {
+        if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -412,11 +413,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         series.addRating(SCANNER_ID, tvSeriesInfos.getUserRating());
 
         // add awards
-        if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE)) {
-            if (CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) {
-                for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
-                    series.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
-                }
+        if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE) &&
+            CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) 
+        {
+            for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
+                series.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
             }
         }
 
@@ -589,7 +590,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
 
             personInfos = allocineApiWrapper.getPersonInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
             if (person.getRetries() < maxRetries) {
@@ -597,7 +598,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (personInfos.isNotValid()) {
+        if (personInfos == null || personInfos.isNotValid()) {
             LOG.error("Can't find informations for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -658,7 +659,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
 
             filmographyInfos = allocineApiWrapper.getFilmographyInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);
             if (person.getRetries() < maxRetries) {

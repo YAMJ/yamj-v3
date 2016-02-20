@@ -33,15 +33,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-import org.yamj.core.web.ResponseTools;
 
 @Service
 public class MovieMeterApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(MovieMeterApiWrapper.class);
-    
+    private static final String API_ERROR = "MovieMeter error";
+
     @Autowired
     private MovieMeterApi movieMeterApi;
 
@@ -50,11 +50,9 @@ public class MovieMeterApiWrapper {
             FilmInfo filmInfo = movieMeterApi.getFilm(imdbId);
             return String.valueOf(filmInfo.getId());
         } catch (MovieMeterException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get film info using IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace("MovieMeter error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
         return null;
     }
@@ -66,14 +64,12 @@ public class MovieMeterApiWrapper {
         try {
             searchResults = movieMeterApi.search(title);
         } catch (MovieMeterException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get MovieMeter ID by title '{}': {}", title, ex.getMessage());
-            LOG.trace("MovieMeter error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
 
-        if (CollectionUtils.isEmpty(searchResults)) {
+        if (searchResults == null || searchResults.isEmpty()) {
             // failed retrieving any results
             return null;
         }
@@ -108,12 +104,16 @@ public class MovieMeterApiWrapper {
         try {
             filmInfo = movieMeterApi.getFilm(NumberUtils.toInt(movieMeterId));
         } catch (MovieMeterException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get film info using MovieMeter ID {}: {}", movieMeterId, ex.getMessage());
-            LOG.trace("MovieMeter error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
         return filmInfo;
+    }
+
+    private static void checkTempError(boolean throwTempError, MovieMeterException ex) {
+        if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+            throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
+        }
     }
 }

@@ -26,10 +26,10 @@ import java.text.BreakIterator;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
-public class StringTools {
+public final class StringTools {
 
     private StringTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**

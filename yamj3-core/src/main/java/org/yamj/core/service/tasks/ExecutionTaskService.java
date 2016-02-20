@@ -26,12 +26,14 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.type.IntervalType;
 import org.yamj.core.database.service.ExecutionTaskStorageService;
 
 @Service("executionTaskService")
+@DependsOn("executionTaskInitialization")
 public class ExecutionTaskService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskService.class);
@@ -56,15 +58,16 @@ public class ExecutionTaskService {
     
     public void executeTask(ExecutionTask executionTask) {
         ITask task = registeredTasks.get(executionTask.getTaskName().toLowerCase());
-
         if (task == null) {
             LOG.warn("Task " + executionTask.getTaskName() + " not registered");
-        } else {
-            try {
-                task.execute(executionTask.getOptions());
-            } catch (Exception ex) {
-                LOG.error("Failed to execute task '" + task.getTaskName() + "'", ex);
-            }
+            return;
+        }
+
+        final Date lastExecution = new Date();
+        try {
+            task.execute(executionTask.getOptions());
+        } catch (Exception ex) {
+            LOG.error("Failed to execute task '" + task.getTaskName() + "'", ex);
         }
 
         if (IntervalType.ONCE == executionTask.getIntervalType()) {
@@ -83,41 +86,34 @@ public class ExecutionTaskService {
             nextCal.setTime(executionTask.getNextExecution());
 
             Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
+            cal.set(Calendar.MILLISECOND, 0);
+
             if (IntervalType.MONTHLY == executionTask.getIntervalType()) {
                 cal.add(Calendar.MONTH, 1);
                 cal.set(Calendar.DAY_OF_MONTH, nextCal.get(Calendar.DAY_OF_MONTH));
                 cal.set(Calendar.HOUR_OF_DAY, nextCal.get(Calendar.HOUR_OF_DAY));
                 cal.set(Calendar.MINUTE, nextCal.get(Calendar.MINUTE));
-                cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
-                cal.set(Calendar.MILLISECOND, 0);
             }
             else if (IntervalType.DAILY == executionTask.getIntervalType()) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
                 cal.set(Calendar.HOUR_OF_DAY, nextCal.get(Calendar.HOUR_OF_DAY));
                 cal.set(Calendar.MINUTE, nextCal.get(Calendar.MINUTE));
-                cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
-                cal.set(Calendar.MILLISECOND, 0);
             }
             else if (IntervalType.DAYS == executionTask.getIntervalType()) {
                 cal.add(Calendar.DAY_OF_MONTH, executionTask.getDelay());
                 cal.set(Calendar.HOUR_OF_DAY, nextCal.get(Calendar.HOUR_OF_DAY));
                 cal.set(Calendar.MINUTE, nextCal.get(Calendar.MINUTE));
-                cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
-                cal.set(Calendar.MILLISECOND, 0);
             }
             else if (IntervalType.HOURS == executionTask.getIntervalType()) {
                 cal.add(Calendar.HOUR_OF_DAY, executionTask.getDelay());
                 cal.set(Calendar.MINUTE, nextCal.get(Calendar.MINUTE));
-                cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
-                cal.set(Calendar.MILLISECOND, 0);
             }
             else if (IntervalType.MINUTES == executionTask.getIntervalType()) {
                 cal.add(Calendar.MINUTE, executionTask.getDelay());
-                cal.set(Calendar.SECOND, nextCal.get(Calendar.SECOND));
-                cal.set(Calendar.MILLISECOND, 0);
             }
             
-            executionTask.setLastExecution(new Date());
+            executionTask.setLastExecution(lastExecution);
             executionTask.setNextExecution(cal.getTime());
             this.executionTaskStorageService.updateEntity(executionTask);
         } catch (Exception ex) {

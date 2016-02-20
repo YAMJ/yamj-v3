@@ -55,7 +55,7 @@ import org.hibernate.usertype.UserType;
  *
  * @param <E>
  */
-public class EnumStringUserType<E extends Enum<E>> implements UserType, ParameterizedType {
+public class EnumStringUserType implements UserType, ParameterizedType {
 
     /**
      * Holds the SQL types
@@ -148,15 +148,10 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
      * @see UserType#equals(Object, Object)
      */
     @Override
-    public boolean equals(final Object x, final Object y) throws HibernateException {
+    public boolean equals(final Object x, final Object y) throws HibernateException { //NOSONAR
         if (null == x || null == y) {
             return false;
         }
-
-        if (x.equals(y)) {
-            return true;
-        }
-
         return x.equals(y);
     }
 

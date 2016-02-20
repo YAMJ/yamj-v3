@@ -24,7 +24,6 @@ package org.yamj.core.service.trailer;
 
 import java.io.File;
 import java.net.URL;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +34,14 @@ import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.database.service.TrailerStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.trailer.online.YouTubeDownloadParser;
 
 @Service("trailerProcessorService")
-public class TrailerProcessorService {
+public class TrailerProcessorService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerProcessorService.class);
     
@@ -52,12 +52,9 @@ public class TrailerProcessorService {
     @Autowired
     private YouTubeDownloadParser youTubeDownloadParser;
     
-    public void processTrailer(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to do
-            return;
-        }
-        
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        // get required trailer
         Trailer trailer = trailerStorageService.getRequiredTrailer(queueElement.getId());
         LOG.debug("Process trailer: {}", trailer);
 
@@ -147,29 +144,21 @@ public class TrailerProcessorService {
         
         // 3. extension
         switch (container) {
-        case FLV:
-            sb.append("flv");
-            break;
-        case WEBM:
-            sb.append("webm");
-            break;
         case GP3:
             sb.append("3gp");
             break;
         default:
-            sb.append("mp4");
+            sb.append(container.name().toLowerCase());
             break;
         }
         
         return sb.toString();
     }
 
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        LOG.error("Failed processing of trailer "+queueElement.getId(), error);
+        
         trailerStorageService.errorTrailer(queueElement.getId());
     }
 }

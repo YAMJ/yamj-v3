@@ -22,11 +22,13 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import static org.yamj.core.tools.Constants.LANGUAGE_EN;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.enumeration.ArtworkType;
 import com.omertron.themoviedbapi.model.artwork.Artwork;
-import com.omertron.themoviedbapi.model.movie.MovieBasic;
+import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.results.ResultList;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,7 +59,6 @@ public class TheMovieDbArtworkScanner implements
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_SIZE = "original";
     private static final String NO_LANGUAGE = StringUtils.EMPTY;
-    private static final String LANGUAGE_EN = "en";
     
     @Autowired
     private LocaleService localeService;
@@ -81,7 +82,7 @@ public class TheMovieDbArtworkScanner implements
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheMovieDb artwork scanner");
+        LOG.trace("Initialize TheMovieDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);
@@ -144,11 +145,10 @@ public class TheMovieDbArtworkScanner implements
             return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
         
-        MovieBasic movieBasic = findCollection(boxedSet, defaultLanguage);
-        if (movieBasic != null) {
-            boxedSet.setSourceDbId(getScannerName(), Integer.toString(movieBasic.getId()));
-            // TODO rename collection?
-            return this.getFilteredArtwork(movieBasic.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
+        Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
         
         return Collections.emptyList();
@@ -163,34 +163,33 @@ public class TheMovieDbArtworkScanner implements
             return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
-        MovieBasic movieBasic = findCollection(boxedSet, defaultLanguage);
-        if (movieBasic != null) {
-            boxedSet.setSourceDbId(getScannerName(), Integer.toString(movieBasic.getId()));
-            // TODO rename collection?
-            return this.getFilteredArtwork(movieBasic.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
+        Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
         return Collections.emptyList();
     }
 
-    public MovieBasic findCollection(BoxedSet boxedSet, String language) {
+    public Collection findCollection(BoxedSet boxedSet, String language) {
         try {
-            ResultList<MovieBasic> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
-            if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, "en")) {
-                resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, "en");
+            ResultList<Collection> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
+            if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
+                resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, LANGUAGE_EN);
             }
 
-            for (MovieBasic movieBasic : resultList.getResults()) {
-                if (StringUtils.isBlank(movieBasic.getTitle())) {
+            for (Collection collection : resultList.getResults()) {
+                if (StringUtils.isBlank(collection.getTitle())) {
                     continue;
                 }
 
                 // 1. check name
                 String boxedSetName = MetadataTools.cleanIdentifier(boxedSet.getName());
-                String collectionName = MetadataTools.cleanIdentifier(movieBasic.getTitle());
+                String collectionName = MetadataTools.cleanIdentifier(collection.getTitle());
                 if (StringUtils.equalsIgnoreCase(boxedSetName, collectionName)) {
                     // found matching collection
-                    return movieBasic;
+                    return collection;
                 }
 
                 
@@ -200,7 +199,7 @@ public class TheMovieDbArtworkScanner implements
             LOG.error("Failed retrieving collection for boxed set: {}", boxedSet.getName());
             LOG.warn("TheMovieDb error", ex);
         }
-        return null;
+        return null; //NOSONAR
     }
 
     /**
@@ -289,14 +288,14 @@ public class TheMovieDbArtworkScanner implements
                 
                 for (Artwork artwork : artworkList) {
                     if (artwork.getArtworkType() == artworkType
-                            && (StringUtils.isBlank(artwork.getLanguage())
+                        && (StringUtils.isBlank(artwork.getLanguage())
                             || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
                     {
                         this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
                     }
                 }
                 
-                if (dtos.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
+                if (dtos.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(language)) {
                     // retrieve by english language
                     for (Artwork artwork : artworkList) {
                         if (artwork.getArtworkType() == artworkType && StringUtils.equalsIgnoreCase(artwork.getLanguage(), LANGUAGE_EN)) {

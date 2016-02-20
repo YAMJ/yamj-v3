@@ -27,6 +27,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -35,9 +37,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerDownloadDTO;
-import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.HTMLTools;
 
 @Service("youTubeDownloadParser")
 public class YouTubeDownloadParser  {
@@ -48,12 +51,11 @@ public class YouTubeDownloadParser  {
      */
     
     private static final Logger LOG = LoggerFactory.getLogger(YouTubeDownloadParser.class);
-    private static final String UTF8 = "UTF-8";
     public static final String TRAILER_BASE_URL = "https://www.youtube.com/watch?v=";
     public static final String TRAILER_INFO_URL = "https://www.youtube.com/get_video_info?authuser=0&el=embedded&video_id=";
     
     private enum Quality {
-        p3072, p2304, p2160, p1440, p1080, p720, p520, p480, p360, p270, p240, p224, p144
+        P3072, P2304, P2160, P1440, P1080, P720, P520, P480, P360, P270, P240, P224, P144
     }
 
     static final class StreamInfo {
@@ -76,6 +78,34 @@ public class YouTubeDownloadParser  {
         }
 
         @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .append(streamInfo.container)
+                    .append(streamInfo.quality)
+                    .append(url)
+                    .toHashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof VideoDownload)) {
+                return false;
+            }
+            final VideoDownload other = (VideoDownload) obj;
+            return new EqualsBuilder()
+                    .append(streamInfo.container, other.streamInfo.container)
+                    .append(streamInfo.quality, other.streamInfo.quality)
+                    .append(url, other.url)
+                    .isEquals();
+        }
+
+        @Override
         public int compareTo(VideoDownload other) {
             Integer i1 = streamInfo.quality.ordinal();
             Integer i2 = other.streamInfo.quality.ordinal();
@@ -87,29 +117,29 @@ public class YouTubeDownloadParser  {
     static final Map<Integer, StreamInfo> ITAG_MAP = new HashMap<Integer, StreamInfo>() {
         private static final long serialVersionUID = 6207047619035836958L;
         {
-            put(120, new StreamInfo(ContainerType.FLV, Quality.p720));
-            put(102, new StreamInfo(ContainerType.WEBM, Quality.p720));
-            put(101, new StreamInfo(ContainerType.WEBM, Quality.p360));
-            put(100, new StreamInfo(ContainerType.WEBM, Quality.p360));
-            put(85, new StreamInfo(ContainerType.MP4, Quality.p1080));
-            put(84, new StreamInfo(ContainerType.MP4,Quality.p720));
-            put(83, new StreamInfo(ContainerType.MP4, Quality.p240));
-            put(82, new StreamInfo(ContainerType.MP4, Quality.p360));
-            put(46, new StreamInfo(ContainerType.WEBM, Quality.p1080));
-            put(45, new StreamInfo(ContainerType.WEBM, Quality.p720));
-            put(44, new StreamInfo(ContainerType.WEBM, Quality.p480));
-            put(43, new StreamInfo(ContainerType.WEBM, Quality.p360));
-            put(38, new StreamInfo(ContainerType.MP4, Quality.p3072));
-            put(37, new StreamInfo(ContainerType.MP4, Quality.p1080));
-            put(36, new StreamInfo(ContainerType.GP3, Quality.p240));
-            put(35, new StreamInfo(ContainerType.FLV, Quality.p480));
-            put(34, new StreamInfo(ContainerType.FLV, Quality.p360));
-            put(22, new StreamInfo(ContainerType.MP4, Quality.p720));
-            put(18, new StreamInfo(ContainerType.MP4, Quality.p360));
-            put(17, new StreamInfo(ContainerType.GP3, Quality.p144));
-            put(13, new StreamInfo(ContainerType.GP3, Quality.p144));
-            put(6, new StreamInfo(ContainerType.FLV, Quality.p270));
-            put(5, new StreamInfo(ContainerType.FLV, Quality.p240));
+            put(120, new StreamInfo(ContainerType.FLV, Quality.P720));
+            put(102, new StreamInfo(ContainerType.WEBM, Quality.P720));
+            put(101, new StreamInfo(ContainerType.WEBM, Quality.P360));
+            put(100, new StreamInfo(ContainerType.WEBM, Quality.P360));
+            put(85, new StreamInfo(ContainerType.MP4, Quality.P1080));
+            put(84, new StreamInfo(ContainerType.MP4,Quality.P720));
+            put(83, new StreamInfo(ContainerType.MP4, Quality.P240));
+            put(82, new StreamInfo(ContainerType.MP4, Quality.P360));
+            put(46, new StreamInfo(ContainerType.WEBM, Quality.P1080));
+            put(45, new StreamInfo(ContainerType.WEBM, Quality.P720));
+            put(44, new StreamInfo(ContainerType.WEBM, Quality.P480));
+            put(43, new StreamInfo(ContainerType.WEBM, Quality.P360));
+            put(38, new StreamInfo(ContainerType.MP4, Quality.P3072));
+            put(37, new StreamInfo(ContainerType.MP4, Quality.P1080));
+            put(36, new StreamInfo(ContainerType.GP3, Quality.P240));
+            put(35, new StreamInfo(ContainerType.FLV, Quality.P480));
+            put(34, new StreamInfo(ContainerType.FLV, Quality.P360));
+            put(22, new StreamInfo(ContainerType.MP4, Quality.P720));
+            put(18, new StreamInfo(ContainerType.MP4, Quality.P360));
+            put(17, new StreamInfo(ContainerType.GP3, Quality.P144));
+            put(13, new StreamInfo(ContainerType.GP3, Quality.P144));
+            put(6, new StreamInfo(ContainerType.FLV, Quality.P270));
+            put(5, new StreamInfo(ContainerType.FLV, Quality.P240));
         }
     };
 
@@ -242,53 +272,52 @@ public class YouTubeDownloadParser  {
         Map<String, String> map = getQueryMap(response.getContent());
         if ("fail".equals(map.get("status"))) {
             if ("150".equals(map.get("errorcode")))
-                throw new RuntimeException("Embedding is disabled");
+                throw new RuntimeException("Embedding is disabled"); //NOSONAR
             if ("100".equals(map.get("errorcode")))
-                throw new RuntimeException("Video is deleted");
-            throw new RuntimeException(URLDecoder.decode(map.get("reason"), UTF8));
+                throw new RuntimeException("Video is deleted"); //NOSONAR
+            throw new Exception(HTMLTools.decodeUrl(map.get("reason"))); //NOSONAR
         }
 
-        String url_encoded_fmt_stream_map = URLDecoder.decode(map.get("url_encoded_fmt_stream_map"), UTF8);
-        extractUrlEncodedVideos(videoDownloads, url_encoded_fmt_stream_map);
+        final String urlEncodedFmtStreamMap = HTMLTools.decodeUrl(map.get("url_encoded_fmt_stream_map"));
+        extractUrlEncodedVideos(videoDownloads, urlEncodedFmtStreamMap);
     }
 
-    private static Map<String, String> getQueryMap(String qs) {
-        try {
-            List<NameValuePair> list;
-            list = URLEncodedUtils.parse(new URI(null, null, null, -1, null, qs, null), UTF8);
-            HashMap<String, String> map = new HashMap<>();
-            for (NameValuePair p : list) {
-                map.put(p.getName(), p.getValue());
-            }
-            return map;
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e.getMessage(), e);
+    private static Map<String, String> getQueryMap(String qs) throws URISyntaxException {
+        List<NameValuePair> list = URLEncodedUtils.parse(new URI(null, null, null, -1, null, qs, null), "UTF-8");
+        HashMap<String, String> map = new HashMap<>();
+        for (NameValuePair p : list) {
+            map.put(p.getName(), p.getValue());
         }
+        return map;
     }
 
-    private static void extractHtmlInfo(Set<VideoDownload> videoDownloads, String html) throws Exception {
+    private static void extractHtmlInfo(Set<VideoDownload> videoDownloads, String html) throws Exception { //NOSONAR
         
         Matcher ageMatcher = Pattern.compile("(verify_age)").matcher(html);
-        if (ageMatcher.find()) throw new RuntimeException("Age restriction, account required");
+        if (ageMatcher.find()) {
+            throw new RuntimeException("Age restriction, account required"); //NOSONAR
+        }
         
         
         Matcher playerMatcher = Pattern.compile("(unavailable-player)").matcher(html);
-        if (playerMatcher.find()) throw new RuntimeException("Video player is unavailable");
+        if (playerMatcher.find()) {
+            throw new RuntimeException("Video player is unavailable"); //NOSONAR
+        }
 
 
         Matcher urlEncoded = Pattern.compile("\"url_encoded_fmt_stream_map\":\"([^\"]*)\"").matcher(html);
         if (urlEncoded.find()) {
-            String url_encoded_fmt_stream_map = urlEncoded.group(1);
+            final String urlEncodedFmtStreamMap = urlEncoded.group(1);
 
             // normal embedded video, unable to grab age restricted videos
-            Matcher urlMatcher = Pattern.compile("url=(.*)").matcher(url_encoded_fmt_stream_map);
+            Matcher urlMatcher = Pattern.compile("url=(.*)").matcher(urlEncodedFmtStreamMap);
             if (urlMatcher.find()) {
                 String sline = urlMatcher.group(1);
                 extractUrlEncodedVideos(videoDownloads, sline);
             }
             
             // stream video
-            Matcher streamMatcher = Pattern.compile("stream=(.*)").matcher(url_encoded_fmt_stream_map);
+            Matcher streamMatcher = Pattern.compile("stream=(.*)").matcher(urlEncodedFmtStreamMap);
             if (streamMatcher.find()) {
                 String[] urlStrings = streamMatcher.group(1).split("stream=");
                 for (String urlString : urlStrings) {
@@ -299,7 +328,7 @@ public class YouTubeDownloadParser  {
                         String itag = paramsMatcher.group(2);
                         String url = paramsMatcher.group(3);
                         url = "http" + url + "?" + sparams;
-                        url = URLDecoder.decode(url, UTF8);
+                        url = HTMLTools.decodeUrl(url);
                         filter(videoDownloads, itag, new URL(url));
                     }
                 }
@@ -309,17 +338,17 @@ public class YouTubeDownloadParser  {
         // separate streams
         Matcher adaptiveMatcher = Pattern.compile("\"adaptive_fmts\": \"([^\"]*)\"").matcher(html);
         if (adaptiveMatcher.find()) {
-            String url_encoded_fmt_stream_map = adaptiveMatcher.group(1);
+            final String urlEncodedFmtStreamMap = adaptiveMatcher.group(1);
             
             // normal embedded video, unable to grab age restricted videos
-            Matcher urlMatcher = Pattern.compile("url=(.*)").matcher(url_encoded_fmt_stream_map);
+            Matcher urlMatcher = Pattern.compile("url=(.*)").matcher(urlEncodedFmtStreamMap);
             if (urlMatcher.find()) {
                 String sline = urlMatcher.group(1);
                 extractUrlEncodedVideos(videoDownloads, sline);
             }
             
             // stream video
-            Matcher streamMatcher = Pattern.compile("stream=(.*)").matcher(url_encoded_fmt_stream_map);
+            Matcher streamMatcher = Pattern.compile("stream=(.*)").matcher(urlEncodedFmtStreamMap);
             if (streamMatcher.find()) {
                 String[] urlStrings = streamMatcher.group(1).split("stream=");
                 for (String urlString : urlStrings) {
@@ -329,8 +358,7 @@ public class YouTubeDownloadParser  {
                         String sparams = paramsMatcher.group(1);
                         String itag = paramsMatcher.group(2);
                         String url = paramsMatcher.group(3);
-                        url = "http" + url + "?" + sparams;
-                        url = URLDecoder.decode(url, UTF8);
+                        url = HTMLTools.decodeUrl("http" + url + "?" + sparams);
                         filter(videoDownloads, itag, new URL(url));
                     }
                 }
@@ -338,16 +366,16 @@ public class YouTubeDownloadParser  {
         }
     }
 
-    private static void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) throws Exception {
+    private static void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) {
         String[] urlStrings = sline.split("url=");
         for (String urlString : urlStrings) {
             urlString = StringEscapeUtils.unescapeJava(urlString);
-            String urlFull = URLDecoder.decode(urlString, UTF8);
+            String urlFull = HTMLTools.decodeUrl(urlString);
 
             String url = null;
             Matcher urlMatcher = Pattern.compile("([^&,]*)[&,]").matcher(urlString);
             if (urlMatcher.find()) {
-                url = URLDecoder.decode(urlMatcher.group(1), UTF8);
+                url = HTMLTools.decodeUrl(urlMatcher.group(1));
             }
 
             String itag = null;
@@ -368,6 +396,7 @@ public class YouTubeDownloadParser  {
                     sig = sigMatcher2.group(1);
                 }
             }
+            
             if (sig == null) {
                 Matcher sigMatcher3 = Pattern.compile("[&,]s=([^&,]*)").matcher(urlFull);
                 if (sigMatcher3.find()) {
@@ -375,11 +404,12 @@ public class YouTubeDownloadParser  {
                     sig = new DecryptSignature(sig).decrypt();
                 }
             }
+            
             if (url != null && itag != null && sig != null) {
                 try {
                     url += "&signature=" + sig;
                     filter(videoDownloads, itag, new URL(url));
-                } catch (MalformedURLException e) {
+                } catch (MalformedURLException e) { //NOSONAR
                     // ignore bad URLs
                 }
                 continue;

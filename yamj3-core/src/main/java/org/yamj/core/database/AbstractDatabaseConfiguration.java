@@ -22,12 +22,26 @@
  */
 package org.yamj.core.database;
 
+import java.util.Properties;
+import javax.sql.DataSource;
+import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.yamj.core.hibernate.AuditInterceptor;
 
-public abstract class AbstractDatabaseConfiguration  implements DatabaseConfiguration {
+public abstract class AbstractDatabaseConfiguration implements DatabaseConfiguration {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDatabaseConfiguration.class);
+    protected static final String YAMJ3 = "yamj3";
     
     @Value("${yamj3.database.showSql:false}")
     protected boolean showSql;
@@ -72,10 +86,38 @@ public abstract class AbstractDatabaseConfiguration  implements DatabaseConfigur
     protected boolean testOnReturn;
 
     @Bean
+    @Override
     public PlatformTransactionManager transactionManager() throws Exception {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
         transactionManager.setDefaultTimeout(30);
         return transactionManager;
+    }
+    
+    @Override
+    @Bean(destroyMethod="destroy")
+    public FactoryBean<SessionFactory> sessionFactory() {
+        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+        sessionFactoryBean.setDataSource(dataSource());
+        sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());
+        sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
+        sessionFactoryBean.setHibernateProperties(hibernateProperties());
+        return sessionFactoryBean;
+    }
+        
+    protected abstract Properties hibernateProperties();
+
+    protected void populateDatabase(DataSource dataSource, String scriptName) {
+        Resource resource = new ClassPathResource(scriptName);
+        if (resource.exists()) {
+            LOG.info("Populate database with update script '{}'", scriptName);
+            // populate database
+            ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+            databasePopulator.setContinueOnError(false);
+            databasePopulator.addScript(resource);
+            databasePopulator.execute(dataSource);
+        } else {
+            LOG.trace("Update script '{}' does not exist", scriptName);
+        }
     }
 }
 

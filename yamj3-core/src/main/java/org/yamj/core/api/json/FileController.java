@@ -25,17 +25,20 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
 
 @RestController
-@RequestMapping(value = "/api/file/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/file", produces = "application/json; charset=utf-8")
 public class FileController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileController.class);
+    
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -44,26 +47,22 @@ public class FileController {
     /**
      * Mark a stage file as deleted.
      *
-     * @param options
+     * @param id
      * @return
      */
-    @RequestMapping("/delete/{id}")
-    public ApiStatus deleteFileById(@ModelAttribute("options") OptionsId options) {
-        ApiStatus status = new ApiStatus();
-        Long id = options.getId();
-        if (id != null && id > 0L) {
-            LOG.info("Deleting file '{}'", id);
-            boolean result = this.stagingService.deleteStageFile(id);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as deleted");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found: " + id);
-            }
+    @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.DELETE})
+    public ApiStatus deleteFile(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+        
+        LOG.info("Deleting file {}", id);
+        
+        final ApiStatus status;
+        if (this.stagingService.deleteStageFile(id)) {
+            status = statusOK(id, "deleted");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = statusNotFound(id);
         }
         return status;
     }
@@ -71,26 +70,22 @@ public class FileController {
     /**
      * Mark a stage file as updated.
      *
-     * @param options
+     * @param id
      * @return
      */
-    @RequestMapping("/update/{id}")
-    public ApiStatus updateFileById(@ModelAttribute("options") OptionsId options) {
-        ApiStatus status = new ApiStatus();
-        Long id = options.getId();
-        if (id != null && id > 0L) {
-            LOG.info("Updating file '{}'", id);
-            boolean result = this.stagingService.updateStageFile(id);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as updated");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found: " + id);
-            }
+    @RequestMapping(value = "/update/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus updateFile(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Updating file {}", id);
+
+        final ApiStatus status;
+        if (this.stagingService.updateStageFile(id)) {
+            status = statusOK(id, "updated");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = statusNotFound(id);
         }
         return status;
     }
@@ -98,54 +93,54 @@ public class FileController {
     /**
      * Mark a stage file as watched.
      *
-     * @param options
+     * @param id
      * @return
      */
-    @RequestMapping("/watched/{id}")
-    public ApiStatus watchedFileById(@ModelAttribute("options") OptionsId options) {
-        ApiStatus status = new ApiStatus();
-        Long id = options.getId();
-        if (id != null && id > 0L) {
-            LOG.info("Watched file '{}'", id);
-            boolean result = commonStorageService.toogleWatchedStatus(id, true, true);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as watched");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found or invalid: " + id);
-            }
+    @RequestMapping(value = "/watched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus watchedFile(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Watched file {}", id);
+
+        final ApiStatus status;
+        if (this.commonStorageService.toogleWatchedStatus(id, true, true)) {
+            status = statusOK(id, "watched");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = statusNotFound(id);
         }
         return status;
     }
 
     /**
-     * Mark a stage file as watched.
+     * Mark a stage file as unwatched.
      *
-     * @param options
+     * @param id
      * @return
      */
-    @RequestMapping("/unwatched/{id}")
-    public ApiStatus unwatchedFileById(@ModelAttribute("options") OptionsId options) {
-        ApiStatus status = new ApiStatus();
-        Long id = options.getId();
-        if (id != null && id > 0L) {
-            LOG.info("Unwatched file '{}'", id);
-            boolean result = this.commonStorageService.toogleWatchedStatus(id, false, true);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as unwatched");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found or invalid: " + id);
-            }
+    @RequestMapping(value = "/unwatched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus unwatchedFile(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Unwatched file {}", id);
+
+        final ApiStatus status;
+        if (this.commonStorageService.toogleWatchedStatus(id, false, true)) {
+            status = statusOK(id, "unwatched");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = statusNotFound(id);
         }
         return status;
+    }
+    
+    private static ApiStatus statusOK(Long id, String status) {
+        return ApiStatus.ok("Sucessfully marked file " + id + " as " + status);
+    }
+
+    private static ApiStatus statusNotFound(Long id) {
+        return ApiStatus.badRequest("File " + id + " not found");
     }
 }

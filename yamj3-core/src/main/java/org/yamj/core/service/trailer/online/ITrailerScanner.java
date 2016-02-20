@@ -17,7 +17,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
  *
- *      Web: https://github.com/YAMJ/yamj-v2
+ *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
 package org.yamj.core.service.trailer.online;
@@ -26,5 +26,7 @@ import org.yamj.core.service.metadata.online.IOnlineScanner;
 
 public interface ITrailerScanner extends IOnlineScanner {
     
-    // just a marker
+    public static String RESOLUTION_1080P = "1080p";
+    public static String RESOLUTION_720P = "720p";
+    public static String RESOLUTION_SD = "sd";
 }

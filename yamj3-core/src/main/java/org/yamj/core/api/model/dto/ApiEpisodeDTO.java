@@ -50,13 +50,13 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
-    private List<ApiGenreDTO> genres = new ArrayList<>(0);
-    private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiCountryDTO> countries = new ArrayList<>(0);
-    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
-    private List<ApiRatingDTO> ratings = new ArrayList<>(0);
-    private List<ApiAwardDTO> awards = new ArrayList<>(0);
-    private List<ApiFileDTO> files = new ArrayList<>(0);
+    private List<ApiGenreDTO> genres = Collections.emptyList();
+    private List<Studio> studios = Collections.emptyList();
+    private List<ApiCountryDTO> countries = Collections.emptyList();
+    private List<ApiCertificationDTO> certifications = Collections.emptyList();
+    private List<ApiRatingDTO> ratings = Collections.emptyList();
+    private List<ApiAwardDTO> awards = Collections.emptyList();
+    private List<ApiFileDTO> files = Collections.emptyList();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">

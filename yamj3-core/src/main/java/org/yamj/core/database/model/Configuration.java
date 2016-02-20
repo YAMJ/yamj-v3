@@ -52,6 +52,7 @@ public class Configuration implements Auditable, Serializable {
     private Date updateTimestamp;
 
     // GETTER and SETTER
+    
     public String getKey() {
         return key;
     }
@@ -70,23 +71,24 @@ public class Configuration implements Auditable, Serializable {
 
     @JsonIgnore
     public Date getCreateTimestamp() {
-        return this.createTimestamp;
+        return createTimestamp;
     }
 
-    public void setCreateTimestamp(final Date createTimestamp) {
+    public void setCreateTimestamp(Date createTimestamp) {
         this.createTimestamp = createTimestamp;
     }
 
     @JsonIgnore
     public Date getUpdateTimestamp() {
-        return this.updateTimestamp;
+        return updateTimestamp;
     }
 
-    public void setUpdateTimestamp(final Date updateTimestamp) {
+    public void setUpdateTimestamp(Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -97,9 +99,8 @@ public class Configuration implements Auditable, Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Configuration) {
-            final Configuration other = (Configuration) obj;
             return new EqualsBuilder()
-                    .append(getKey(), other.getKey())
+                    .append(getKey(), ((Configuration)obj).getKey())
                     .isEquals();
         }
         return false;

@@ -26,13 +26,144 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
-public class ArtworkTools {
+public final class ArtworkTools {
 
+    protected static final String SOURCE_UPLOAD = "upload";
     private static final String TYPE_MOVIE_SCANNER = "movie_scanner";
     private static final String TYPE_SERIES_SCANNER = "series_scanner";
     private static final String TYPE_PERSON_SCANNER = "person_scanner";
+
+    private ArtworkTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
+    public static StorageType getStorageType(ArtworkLocated located) {
+        return getStorageType(located.getArtwork());
+    }
+
+    public static StorageType getStorageType(Artwork artwork) {
+        return getStorageType(artwork.getArtworkType());
+    }
+
+    public static StorageType getStorageType(ArtworkProfile profile) {
+        return getStorageType(profile.getArtworkType());
+    }
+
+    public static StorageType getStorageType(ArtworkType artworkType) {
+        return artworkType == ArtworkType.PHOTO ? StorageType.PHOTO : StorageType.ARTWORK;
+    }
+    
+    public static String buildCacheFilename(ArtworkLocated located) {
+        return buildCacheFilename(located, null);
+    }
+
+    public static String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
+        StringBuilder sb = new StringBuilder();
+        
+        // 1. video name
+        if (located.getArtwork().getVideoData() != null) {
+            sb.append(located.getArtwork().getVideoData().getIdentifier());
+            if (located.getArtwork().getVideoData().isMovie()) {
+                sb.append(".movie.");
+            } else {
+                sb.append(".episode.");
+            }
+        } else if (located.getArtwork().getSeason() != null) {
+            sb.append(located.getArtwork().getSeason().getIdentifier());
+            sb.append(".season.");
+        } else if (located.getArtwork().getSeries() != null) {
+            sb.append(located.getArtwork().getSeries().getIdentifier());
+            sb.append(".series.");
+        } else if (located.getArtwork().getPerson() != null) {
+            sb.append(located.getArtwork().getPerson().getIdentifier());
+            sb.append(".person.");
+        } else if (located.getArtwork().getBoxedSet() != null) {
+            sb.append(located.getArtwork().getBoxedSet().getIdentifier());
+            sb.append(".boxset.");
+        } else {
+            // should never happen
+            sb.append("unknown_");
+            sb.append(located.getArtwork().getId());
+            sb.append(".");
+        }
+        
+        // 2. artwork type
+        sb.append(located.getArtwork().getArtworkType().name().toLowerCase());
+        sb.append(".");
+        
+        // 3. hash code
+        if (StringUtils.isBlank(located.getHashCode())) {
+            sb.append(located.getId());
+        } else {
+            sb.append(located.getHashCode());
+        }
+        sb.append(".");
+
+        // 4. profile and suffix
+        if (artworkProfile == null) {
+            // it's the original image
+            sb.append("original.");
+            sb.append(located.getImageType().name().toLowerCase());
+        } else {
+            // it's a generated image
+            sb.append(artworkProfile.getProfileName().toLowerCase());
+            sb.append(".");
+            sb.append(artworkProfile.getImageType().name().toLowerCase());
+        }
+        
+        return sb.toString();
+    }
+
+    public static MetaDataType getMetaDataType(ArtworkLocated located) {
+        return getMetaDataType(located.getArtwork());
+    }
+
+    public static MetaDataType getMetaDataType(Artwork artwork) {
+        MetaDataType metaDataType = MetaDataType.UNKNOWN;
+
+        final ArtworkType artworkType = artwork.getArtworkType(); 
+        switch(artworkType) {
+        case PHOTO:
+            metaDataType = MetaDataType.PERSON;
+            break;
+        case VIDEOIMAGE:
+            metaDataType = MetaDataType.EPISODE;
+            break;
+        case BANNER:
+            if (artwork.getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (artwork.getSeries() != null) {
+                metaDataType = MetaDataType.SERIES;
+            } else {
+                metaDataType = MetaDataType.SEASON;
+            }
+            break;
+        case POSTER:
+        case FANART:
+            if (artwork.getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (artwork.getSeries() != null) {
+                metaDataType = MetaDataType.SERIES;
+            } else if (artwork.getSeason() != null) {
+                metaDataType = MetaDataType.SEASON;
+            } else {
+                metaDataType = MetaDataType.MOVIE;
+            }
+            break;
+        default:
+            break;
+        }
+        
+        return metaDataType;
+    }
 
     public static Set<String> determinePriorities(final String configValue, Set<String> allowedForScan) {
         final Set<String> result;

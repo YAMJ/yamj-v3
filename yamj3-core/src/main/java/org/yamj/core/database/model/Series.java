@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -78,7 +80,7 @@ public class Series extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "series_ids",
             joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -86,7 +88,7 @@ public class Series extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "series_ratings",
             joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -95,7 +97,7 @@ public class Series extends AbstractMetadata {
     @CollectionTable(name = "series_override",
             joinColumns = @JoinColumn(name = "series_id"), 
             foreignKey = @ForeignKey(name = "FK_SERIES_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
@@ -188,16 +190,16 @@ public class Series extends AbstractMetadata {
 
     public void setStartYear(int startYear, String source) {
         if (startYear > 0) {
-            this.startYear = startYear;
+            setStartYear(startYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
 
     public void removeStartYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
-            String[] splitted = this.getIdentifier().split("_");
+            String[] splitted = getIdentifier().split("_");
             int splitYear = Integer.parseInt(splitted[1]);
-            this.startYear = (splitYear > 0 ? splitYear : -1); 
+            setStartYear(splitYear > 0 ? splitYear : -1); 
             removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
@@ -212,14 +214,14 @@ public class Series extends AbstractMetadata {
 
     public void setEndYear(int endYear, String source) {
         if (endYear > 0) {
-            this.endYear = endYear;
+            setEndYear(endYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
 
     public void removeEndYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
-            this.endYear = -1;
+            setEndYear(-1);
             removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
@@ -261,14 +263,21 @@ public class Series extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, rating);
+            getRatings().put(sourceDb, rating);
         }
     }
 
     public void removeRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            this.ratings.remove(sourceDb);
+            getRatings().remove(sourceDb);
         }
+    }
+
+    public int getRating(String sourceDb) {
+        if (StringUtils.isNotBlank(sourceDb)) {
+            return getRatings().get(sourceDb);
+        }
+        return -1;
     }
 
     @Override
@@ -281,19 +290,18 @@ public class Series extends AbstractMetadata {
     }
 
     public boolean isAllScansSkipped() {
-        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-        return false;
+        return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }
 
     @Override
     public boolean isSkippedScan(String sourceDb) {
-        if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;
-        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-        if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) return true;
-        if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
-        return false;
+        if (getSkipScanNfo() == null && getSkipScanApi() == null) {
+            return false;
+        }
+        
+        return isAllScansSkipped() ||
+               StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb) ||
+               StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb);
     }
 
     public void setSkippendScansNfo(Set<String> skippedScans) {
@@ -334,7 +342,7 @@ public class Series extends AbstractMetadata {
 
     public Artwork getArtwork(ArtworkType artworkType) {
         for (Artwork artwork : getArtworks()) {
-            if (artworkType.equals(artwork.getArtworkType())) {
+            if (artworkType == artwork.getArtworkType()) {
                 return artwork;
             }
         }
@@ -447,7 +455,7 @@ public class Series extends AbstractMetadata {
     public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
             for (Entry<String, String> entry : certificationInfos.entrySet()) {
-                this.addCertificationInfo(entry.getKey(), entry.getValue());
+                addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
     }
@@ -455,13 +463,13 @@ public class Series extends AbstractMetadata {
     public void addCertificationInfo(String countryCode, String certificate) {
         if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
             // check if country already present
-            for (String storedCode : this.certificationInfos.keySet()) {
+            for (String storedCode : getCertificationInfos().keySet()) {
                 if (countryCode.equals(storedCode)) {
                     // certificate for country already present
                     return;
                 }
             }
-            this.certificationInfos.put(countryCode, certificate);
+            getCertificationInfos().put(countryCode, certificate);
         }
     }
 
@@ -469,17 +477,9 @@ public class Series extends AbstractMetadata {
         return boxedSetDTOS;
     }
 
-    public void addBoxedSetDTO(String source, String name) {
-        this.addBoxedSetDTO(source, name, null, null);
-    }
-
-    public void addBoxedSetDTO(String source, String name, Integer ordering) {
-        this.addBoxedSetDTO(source, name, ordering, null);
-    }
-
     public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
-            this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
+            getBoxedSetDTOS().add(new BoxedSetDTO(source, name, ordering, sourceId));
         }
     }
     
@@ -496,13 +496,13 @@ public class Series extends AbstractMetadata {
             if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
                 continue;
             }
-            this.awardDTOS.add(awardDTO);
+            getAwardDTOS().add(awardDTO);
         }
     }
 
     public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            this.awardDTOS.add(new AwardDTO(event, category, source, year).setWon(true));
+            getAwardDTOS().add(new AwardDTO(event, category, source, year).setWon(true));
         }
     }
 
@@ -526,7 +526,7 @@ public class Series extends AbstractMetadata {
         if (!(obj instanceof Series)) {
             return false;
         }
-        final Series other = (Series) obj;
+        Series other = (Series) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

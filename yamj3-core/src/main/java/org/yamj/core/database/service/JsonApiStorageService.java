@@ -22,13 +22,7 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,51 +33,26 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiCertificationDTO;
-import org.yamj.core.api.model.dto.ApiCountryDTO;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiFileDTO;
-import org.yamj.core.api.model.dto.ApiFilmographyDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.model.dto.ApiListDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiSubtitleDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.model.dto.ApiYearDecadeDTO;
+import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsPlayer;
+import org.yamj.core.api.options.UpdatePerson;
+import org.yamj.core.api.options.UpdateVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.dao.ApiDao;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.dao.PlayerDao;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.IScannable;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.Trailer;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.dao.*;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.tools.OverrideTools;
 
 @Service("jsonApiStorageService")
 @Transactional(readOnly = true)
 public class JsonApiStorageService {
 
+    private static final String API_SOURCE = "api";
+        
     @Autowired
     private CommonDao commonDao;
     @Autowired
@@ -103,17 +72,16 @@ public class JsonApiStorageService {
 
     
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
-    public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
-        apiDao.getVideoList(wrapper);
+    public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
+        List<ApiVideoDTO> results = apiDao.getVideoList(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiVideoDTO video : wrapper.getResults()) {
-                localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
-                localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiVideoDTO video : results) {
+            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
         }
+        
+        return results;
     }
 
     public CountTimestamp getCountTimestamp(MetaDataType type) {
@@ -127,30 +95,88 @@ public class JsonApiStorageService {
         } else if (type.equals(MetaDataType.EPISODE)) {
             ct = apiDao.getCountTimestamp(type, "videodata", "episode>=0");
         } else if (type.equals(MetaDataType.PERSON)) {
-            ct = apiDao.getCountTimestamp(type, "person", "");
+            ct = apiDao.getCountTimestamp(type, "person", "status != 'DELETED'");
         }
         return ct;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
-    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonList(wrapper);
+    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
+        return apiDao.getPersonList(wrapper);
     }
 
-    public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
-        apiDao.getPerson(wrapper);
+    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
+        ApiPersonDTO person = apiDao.getPerson(wrapper);
         
-        if (wrapper.getResult() != null && CollectionUtils.isNotEmpty(wrapper.getResult().getFilmography())) {
-            for (ApiFilmographyDTO filmo : wrapper.getResult().getFilmography()) {
+        if (person != null) {
+            for (ApiFilmographyDTO filmo : person.getFilmography()) {
                 String releaseCountry = localeService.getDisplayCountry(wrapper.getOptions().getLanguage(), filmo.getReleaseCountryCode());
                 filmo.setReleaseCountry(releaseCountry);
             }
         }
+        
+        return person;
     }
 
-    public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonListByVideoType(metaDataType, wrapper);
+    public  List<ApiPersonDTO> getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
+        return apiDao.getPersonListByVideoType(metaDataType, wrapper);
+    }
+    
+    @Transactional
+    public ApiStatus updatePerson(Long id, UpdatePerson update) {
+        Person person = metadataDao.getPerson(id);
+        if (person == null) {
+            return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
+        }
+        
+        if (OverrideTools.checkOverwriteName(person, API_SOURCE)) {
+            person.setName(update.getName(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteFirstName(person, API_SOURCE)) {
+            person.setFirstName(update.getFirstName(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteLastName(person, API_SOURCE)) {
+            person.setLastName(update.getLastName(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteBirthName(person, API_SOURCE)) {
+            person.setBirthName(update.getBirthName(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteBirthDay(person, API_SOURCE)) {
+            person.setBirthDay(update.getBirthDay(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteBirthPlace(person, API_SOURCE)) {
+            person.setBirthPlace(update.getBirthPlace(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteDeathDay(person, API_SOURCE)) {
+            person.setDeathDay(update.getDeathDay(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteDeathPlace(person, API_SOURCE)) {
+            person.setDeathPlace(update.getDeathPlace(), API_SOURCE);
+        }
+        if (OverrideTools.checkOverwriteBiography(person, API_SOURCE)) {
+            person.setBiography(update.getBiography(), API_SOURCE);
+        }
+        
+        person.setLastScanned(new Date());
+        metadataDao.updateEntity(person);
+        
+        return ApiStatus.ok("Updated person with ID "+id);
+    }
+    
+    @Transactional
+    public ApiStatus duplicatePerson(Long id, Long doubletId) {
+        Person person = metadataDao.getPerson(id);
+        if (person == null || person.getStatus() == StatusType.DELETED) {
+            return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
+        }
+        Person doubletPerson = metadataDao.getPerson(doubletId);
+        if (doubletPerson == null || doubletPerson.getStatus() == StatusType.DELETED) {
+            return ApiStatus.notFound("ID " + doubletId + " does not determine a valid person entry");
+        }
+        
+        this.metadataDao.duplicate(person, doubletPerson);
+        return ApiStatus.ok("Marked "+doubletId+" as duplicate of "+id);
     }
     //</editor-fold>
 
@@ -189,7 +215,9 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
     public ApiCountryDTO getCountry(Long id, String language) {
         Country country = commonDao.getCountry(id);
-        if (country == null) return null;
+        if (country == null) {
+            return null;
+        }
 
         ApiCountryDTO dto = new ApiCountryDTO();
         dto.setId(country.getId());
@@ -200,7 +228,9 @@ public class JsonApiStorageService {
 
     public ApiCountryDTO getCountry(String countryCode, String language) {
         Country country =  commonDao.getCountry(countryCode);
-        if (country == null) return null;
+        if (country == null) {
+            return null;
+        }
         
         ApiCountryDTO dto = new ApiCountryDTO();
         dto.setId(country.getId());
@@ -222,7 +252,6 @@ public class JsonApiStorageService {
     }
 
     private void localizeCountries(List<ApiCountryDTO> countries, String inLanguage) {
-        if (CollectionUtils.isEmpty(countries)) return;
         for (ApiCountryDTO dto : countries) {
             localize(dto, inLanguage);
         }
@@ -248,7 +277,6 @@ public class JsonApiStorageService {
     }
     
     private void localizeCertifications(List<ApiCertificationDTO> certifications, String inLanguage) {
-        if (CollectionUtils.isEmpty(certifications)) return;
         for (ApiCertificationDTO cert : certifications) {
             localize(cert, inLanguage);
         }
@@ -309,8 +337,9 @@ public class JsonApiStorageService {
     @Transactional
     public void deletePlayer(Long playerId) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return;
-        playerDao.deleteEntity(playerInfo);
+        if (playerInfo != null) {
+            playerDao.deleteEntity(playerInfo);
+        }
     }
 
     @Transactional
@@ -328,7 +357,9 @@ public class JsonApiStorageService {
     @Transactional
     public boolean storePlayerPath(Long playerId, PlayerPath playerPath) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
+        if (playerInfo == null) { 
+            return false;
+        }
         
         for (PlayerPath stored : playerInfo.getPaths()) {
             if (stored.getSourcePath().equals(playerPath.getSourcePath())) {
@@ -347,32 +378,31 @@ public class JsonApiStorageService {
     @Transactional
     public boolean storePlayerPath(Long playerId, Long pathId, PlayerPath playerPath) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
-        
-        for (PlayerPath stored : playerInfo.getPaths()) {
-            if (stored.getId() == pathId) {
-                stored.setSourcePath(playerPath.getSourcePath());
-                stored.setTargetPath(playerPath.getTargetPath());
-                playerDao.updateEntity(stored);
-                return true;
+        if (playerInfo != null) {
+            for (PlayerPath stored : playerInfo.getPaths()) {
+                if (stored.getId() == pathId) {
+                    stored.setSourcePath(playerPath.getSourcePath());
+                    stored.setTargetPath(playerPath.getTargetPath());
+                    playerDao.updateEntity(stored);
+                    return true;
+                }
             }
         }
-        
         return false;
     }
 
     @Transactional
     public boolean deletePlayerPath(Long playerId, Long pathId) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
-
-        Iterator<PlayerPath> iter = playerInfo.getPaths().iterator();
-        while (iter.hasNext()) {
-            PlayerPath path = iter.next();
-            if (path.getId() == pathId) {
-                iter.remove();
-                playerDao.updateEntity(playerInfo);
-                return true;
+        if (playerInfo != null) {
+            Iterator<PlayerPath> iter = playerInfo.getPaths().iterator();
+            while (iter.hasNext()) {
+                PlayerPath path = iter.next();
+                if (path.getId() == pathId) {
+                    iter.remove();
+                    playerDao.updateEntity(playerInfo);
+                    return true;
+                }
             }
         }
         return false;
@@ -415,32 +445,141 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
-        apiDao.getEpisodeList(wrapper);
+    public  List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+        List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiEpisodeDTO episode : wrapper.getResults()) {
-                localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
-                localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiEpisodeDTO episode : results) {
+            localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
+            localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
         }
+        
+        return results;
     }
 
-    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        apiDao.getSingleVideo(wrapper);
+    public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        ApiVideoDTO video = apiDao.getSingleVideo(wrapper);
         
-        if (wrapper.getResult() != null) {
+        if (video != null) {
             // localization
-            localizeCertifications(wrapper.getResult().getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(wrapper.getResult().getCountries(), wrapper.getOptions().getLanguage());
-            localizeFiles(wrapper.getResult().getFiles(), wrapper.getOptions().getLanguage());
+            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
+            localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
         }
+
+        return video;
+    }
+
+    @Transactional
+    public ApiStatus updateVideoData(Long id, UpdateVideo update) {
+        VideoData videoData = metadataDao.getById(VideoData.class, id);
+        if (videoData == null) {
+            return ApiStatus.notFound("ID " + id + " does not determine a valid video");
+        }
+
+        if (OverrideTools.checkOverwriteTitle(videoData, API_SOURCE)) {
+            videoData.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(videoData, API_SOURCE)) {
+            videoData.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(videoData, API_SOURCE)) {
+            videoData.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(videoData, API_SOURCE)) {
+            videoData.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteQuote(videoData, API_SOURCE)) {
+            videoData.setQuote(update.getQuote(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteTagline(videoData, API_SOURCE)) {
+            videoData.setTagline(update.getTagline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(videoData, API_SOURCE)) {
+            videoData.setPublicationYear(update.getPublicationYear(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteReleaseDate(videoData, API_SOURCE)) {
+            videoData.setRelease(update.getReleaseDate(), API_SOURCE);
+        }
+        
+        videoData.setTopRank(update.getTopRank());
+
+        metadataDao.updateEntity(videoData);
+        return ApiStatus.ok("Updated video with ID "+id);
+    }
+
+    @Transactional
+    public ApiStatus updateSeries(Long id, UpdateVideo update) {
+        Series series = metadataDao.getById(Series.class, id);
+        if (series == null) {
+            return ApiStatus.notFound("ID " + id + " does not determine a valid series");
+        }
+
+        if (OverrideTools.checkOverwriteTitle(series, API_SOURCE)) {
+            series.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(series, API_SOURCE)) {
+            series.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(series, API_SOURCE)) {
+            series.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(series, API_SOURCE)) {
+            series.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(series, API_SOURCE)) {
+            series.setStartYear(update.getStartYear(), API_SOURCE);
+            series.setEndYear(update.getEndYear(), API_SOURCE);
+        }
+        
+        metadataDao.updateEntity(series);
+        return ApiStatus.ok("Updated series with ID "+id);
+    }
+    
+    @Transactional
+    public ApiStatus updateSeason(Long id, UpdateVideo update) {
+        Season season = metadataDao.getById(Season.class, id);
+        if (season == null) {
+            return ApiStatus.notFound("ID " + id + " does not determine a valid season");
+        }
+        
+        if (OverrideTools.checkOverwriteTitle(season, API_SOURCE)) {
+            season.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(season, API_SOURCE)) {
+            season.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(season, API_SOURCE)) {
+            season.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(season, API_SOURCE)) {
+            season.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(season, API_SOURCE)) {
+            season.setPublicationYear(update.getPublicationYear(), API_SOURCE);
+        }
+        
+        metadataDao.updateEntity(season);
+        return ApiStatus.ok("Updated season with ID "+id);
     }
 
     private void localizeFiles(List<ApiFileDTO> files, String inLanguage) {
-        if (CollectionUtils.isEmpty(files)) return;
         for (ApiFileDTO file : files) {
             for (ApiAudioCodecDTO codec : file.getAudioCodecs()) {
                 final String language = localeService.getDisplayLanguage(inLanguage, codec.getLanguageCode());
@@ -457,16 +596,16 @@ public class JsonApiStorageService {
         return apiDao.getJobCount(requiredJobs);
     }
 
-    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
-        apiDao.getSeriesInfo(wrapper);
+    public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+        List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiSeriesInfoDTO series : wrapper.getResults()) {
-                localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiSeriesInfoDTO series : results) {
+            localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
         }
+        
+        return results;
     }
 
     public List<Long> getSeasonVideoIds(Long id) {
@@ -488,12 +627,8 @@ public class JsonApiStorageService {
      */
     @Transactional
     public ApiStatus updateWatchedSingle(MetaDataType type, Long id, boolean watched) {
-        if (id != null && id > 0L) {
-            updatedWatched(type, id, watched);
-            return new ApiStatus(200, "Set " + type + " " + id + " to " + watched);
-        }
-        
-        return new ApiStatus(400, "No " + type + " ID provided");
+        updatedWatched(type, id, watched);
+        return ApiStatus.ok("Set " + type + " " + id + " to " + watched);
     }
 
     /**
@@ -502,23 +637,22 @@ public class JsonApiStorageService {
      * @param type
      * @param ids
      * @param watched
-     * @param sourceId
      * @return
      */
     @Transactional
-    public ApiStatus updateWatchedList(MetaDataType type, List<Long> ids, boolean watched, Long sourceId) {
+    public ApiStatus updateWatchedList(MetaDataType type, List<Long> ids, boolean watched) {
         if (CollectionUtils.isEmpty(ids)) {
-            return new ApiStatus(400, "No " + type + " IDs provided");
+            return ApiStatus.badRequest("No " + type + " IDs provided");
         }
         
         for (Long id : ids) {
             updatedWatched(type, id, watched);
         }
         
-        return new ApiStatus(200, "Set " + type + " " + ids + " to " + watched);
+        return ApiStatus.ok("Set " + type + " " + ids + " to " + watched);
     }
     
-    private void updatedWatched(MetaDataType type, long id, boolean watched) {
+    private void updatedWatched(MetaDataType type, Long id, boolean watched) {
         Collection<VideoData> videoDatas = null;
         if (MetaDataType.SERIES.equals(type)) {
             Series series = commonDao.getById(Series.class, id);
@@ -541,9 +675,11 @@ public class JsonApiStorageService {
         }
 
         // nothing to do
-        if (videoDatas == null) return;
+        if (videoDatas == null) {
+            return;
+        }
         
-        final Date watchedApiDate = new Date(System.currentTimeMillis());
+        final Date watchedApiDate = new Date();
         for (VideoData videoData : videoDatas) {
             // this will also set watched status to watched flag due the actual date
             videoData.setWatchedApi(watched, watchedApiDate);
@@ -560,84 +696,80 @@ public class JsonApiStorageService {
      * @return
      */
     @Transactional
-    public ApiStatus rescanSingle(MetaDataType type, Long id) {
+    public ApiStatus rescanMetaData(MetaDataType type, Long id) {
         boolean rescan = false;
         
-        if (id != null && id > 0L) {
-            switch (type) {
-                case PERSON:
-                    Person person = metadataDao.getPerson(id);
-                    if (person != null) {
-                        commonDao.markAsUpdated(person.getPhoto());
-                        commonDao.markAsUpdated(person);
-                        rescan = true;
-                    }
-                    break;
-                case FILMOGRAPHY:
-                    person = metadataDao.getPerson(id);
-                    if (person != null) {
-                        commonDao.markAsUpdatedForFilmography(person);
-                        rescan = true;
-                    }
-                    break;
-                case SERIES:
-                    Series series = commonDao.getById(Series.class, id);
-                    if (series != null) {
-                        commonDao.markAsUpdated(series.getArtworks());
-                        commonDao.markAsUpdated(series);
-                        rescan = true;
-                        for (Season season : series.getSeasons()) {
-                            commonDao.markAsUpdated(season.getArtworks());
-                            commonDao.markAsUpdated(season);
-                            for (VideoData episode : season.getVideoDatas()) {
-                                commonDao.markAsUpdated(episode.getArtworks());
-                                commonDao.markAsUpdated(episode);
-                            }
-                        }
-                    }
-                    break;
-                case SEASON:
-                    Season season = commonDao.getById(Season.class, id);
-                    if (season != null) {
+        switch (type) {
+            case PERSON:
+                Person person = metadataDao.getPerson(id);
+                if (person != null) {
+                    commonDao.markAsUpdated(person.getPhoto());
+                    commonDao.markAsUpdated(person);
+                    rescan = true;
+                }
+                break;
+            case FILMOGRAPHY:
+                person = metadataDao.getPerson(id);
+                if (person != null) {
+                    commonDao.markAsUpdatedForFilmography(person);
+                    rescan = true;
+                }
+                break;
+            case SERIES:
+                Series series = commonDao.getById(Series.class, id);
+                if (series != null) {
+                    commonDao.markAsUpdated(series.getArtworks());
+                    commonDao.markAsUpdated(series);
+                    rescan = true;
+                    for (Season season : series.getSeasons()) {
                         commonDao.markAsUpdated(season.getArtworks());
                         commonDao.markAsUpdated(season);
                         for (VideoData episode : season.getVideoDatas()) {
                             commonDao.markAsUpdated(episode.getArtworks());
                             commonDao.markAsUpdated(episode);
                         }
-                        rescan = true;
                     }
-                    break;
-                case MOVIE:
-                case EPISODE:
-                    VideoData videoData = commonDao.getById(VideoData.class, id);
-                    if (videoData != null) {
-                        commonDao.markAsUpdated(videoData.getArtworks());
-                        commonDao.markAsUpdated(videoData);
-                        rescan = true;
+                }
+                break;
+            case SEASON:
+                Season season = commonDao.getById(Season.class, id);
+                if (season != null) {
+                    commonDao.markAsUpdated(season.getArtworks());
+                    commonDao.markAsUpdated(season);
+                    for (VideoData episode : season.getVideoDatas()) {
+                        commonDao.markAsUpdated(episode.getArtworks());
+                        commonDao.markAsUpdated(episode);
                     }
-                    break;
-                default:
-                    // nothing to rescan
-                    break;
-            }
-            
-            if (rescan) {
-                StringBuilder sb = new StringBuilder("Rescan ");
-                sb.append(type.name().toLowerCase());
-                sb.append(" for ID: ");
-                sb.append(id);
-                return new ApiStatus(200, sb.toString());
-            }
-            
-            StringBuilder sb = new StringBuilder("No ");
-            sb.append(type.name().toLowerCase());
-            sb.append(" found for rescanning ID: ");
-            sb.append(id);
-            return new ApiStatus(404, sb.toString());
+                    rescan = true;
+                }
+                break;
+            case MOVIE:
+            case EPISODE:
+                VideoData videoData = commonDao.getById(VideoData.class, id);
+                if (videoData != null) {
+                    commonDao.markAsUpdated(videoData.getArtworks());
+                    commonDao.markAsUpdated(videoData);
+                    rescan = true;
+                }
+                break;
+            default:
+                // nothing to rescan
+                break;
         }
-
-        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
+        
+        if (rescan) {
+            StringBuilder sb = new StringBuilder("Rescan ");
+            sb.append(type.name().toLowerCase());
+            sb.append(" for ID: ");
+            sb.append(id);
+            return ApiStatus.ok(sb.toString());
+        }
+        
+        StringBuilder sb = new StringBuilder("No ");
+        sb.append(type.name().toLowerCase());
+        sb.append(" found for rescanning ID: ");
+        sb.append(id);
+        return ApiStatus.notFound(sb.toString());
     }
 
     /**
@@ -651,65 +783,61 @@ public class JsonApiStorageService {
     public ApiStatus rescanArtwork(MetaDataType type, Long id) {
         boolean rescan = false;
         
-        if (id != null && id > 0L) {
-            switch (type) {
-                case PERSON:
-                    Person person = metadataDao.getPerson(id);
-                    if (person != null) {
-                        this.commonDao.markAsUpdated(person.getPhoto());
-                        rescan = true;
-                    }
-                    break;
-                case SERIES:
-                    Series series = commonDao.getById(Series.class, id);
-                    if (series != null) {
-                        this.commonDao.markAsUpdated(series.getArtworks());
-                        rescan = true;
-                    }
-                    break;
-                case SEASON:
-                    Season season = commonDao.getById(Season.class, id);
-                    if (season != null) {
-                        this.commonDao.markAsUpdated(season.getArtworks());
-                        rescan = true;
-                    }
-                    break;
-                case BOXSET:
-                    BoxedSet boxedSet = commonDao.getBoxedSet(id);
-                    if (boxedSet != null) {
-                        this.commonDao.markAsUpdated(boxedSet.getArtworks());
-                        rescan = true;
-                    }
-                    break;
-                case MOVIE:
-                case EPISODE:
-                    VideoData videoData = commonDao.getById(VideoData.class, id);
-                    if (videoData != null) {
-                        this.commonDao.markAsUpdated(videoData.getArtworks());
-                        rescan = true;
-                    }
-                    break;
-                default:
-                    // nothing to rescan
-                    break;
-            }
-            
-            if (rescan) {
-                StringBuilder sb = new StringBuilder("Rescan ");
-                sb.append(type.name().toLowerCase());
-                sb.append(" artwork for ID: ");
-                sb.append(id);
-                return new ApiStatus(200, sb.toString());
-            }
-            
-            StringBuilder sb = new StringBuilder("No ");
-            sb.append(type.name().toLowerCase());
-            sb.append(" found for artwork rescanning ID: ");
-            sb.append(id);
-            return new ApiStatus(404, sb.toString());
+        switch (type) {
+            case PERSON:
+                Person person = metadataDao.getPerson(id);
+                if (person != null) {
+                    this.commonDao.markAsUpdated(person.getPhoto());
+                    rescan = true;
+                }
+                break;
+            case SERIES:
+                Series series = commonDao.getById(Series.class, id);
+                if (series != null) {
+                    this.commonDao.markAsUpdated(series.getArtworks());
+                    rescan = true;
+                }
+                break;
+            case SEASON:
+                Season season = commonDao.getById(Season.class, id);
+                if (season != null) {
+                    this.commonDao.markAsUpdated(season.getArtworks());
+                    rescan = true;
+                }
+                break;
+            case BOXSET:
+                BoxedSet boxedSet = commonDao.getBoxedSet(id);
+                if (boxedSet != null) {
+                    this.commonDao.markAsUpdated(boxedSet.getArtworks());
+                    rescan = true;
+                }
+                break;
+            case MOVIE:
+            case EPISODE:
+                VideoData videoData = commonDao.getById(VideoData.class, id);
+                if (videoData != null) {
+                    this.commonDao.markAsUpdated(videoData.getArtworks());
+                    rescan = true;
+                }
+                break;
+            default:
+                // nothing to rescan
+                break;
         }
-
-        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
+        
+        if (rescan) {
+            StringBuilder sb = new StringBuilder("Rescan ");
+            sb.append(type.name().toLowerCase());
+            sb.append(" artwork for ID: ");
+            sb.append(id);
+            return ApiStatus.ok(sb.toString());
+        }
+        
+        StringBuilder sb = new StringBuilder("No ");
+        sb.append(type.name().toLowerCase());
+        sb.append(" found for artwork rescanning ID: ");
+        sb.append(id);
+        return ApiStatus.notFound(sb.toString());
     }
     
     /**
@@ -749,23 +877,23 @@ public class JsonApiStorageService {
                 sb.append(type.name().toLowerCase());
                 sb.append(" artwork for ID: ");
                 sb.append(id);
-                return new ApiStatus(200, sb.toString());
+                return ApiStatus.ok(sb.toString());
             }
             
             StringBuilder sb = new StringBuilder("No ");
             sb.append(type.name().toLowerCase());
             sb.append(" found for artwork rescanning ID: ");
             sb.append(id);
-            return new ApiStatus(404, sb.toString());
+            return ApiStatus.notFound(sb.toString());
         }
 
-        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
+        return ApiStatus.badRequest("No valid " + type.name().toLowerCase() + " ID provided");
     }
     
     @Transactional
     public ApiStatus rescanAll() {
         this.apiDao.rescanAll();
-        return new ApiStatus(200, "Rescan forced for all meta data objects");
+        return ApiStatus.ok("Rescan forced for all meta data objects");
     }
     
     //</editor-fold>
@@ -779,13 +907,13 @@ public class JsonApiStorageService {
             sb.append(sourceDb);
             sb.append(" is not valid for " );
             sb.append(type.name().toLowerCase());
-            return new ApiStatus(409, sb.toString());
+            return ApiStatus.conflict(sb.toString());
         }
 
         if (MetaDataType.PERSON == type) {
             Person person = metadataDao.getPerson(id);
             if (person == null) {
-                return new ApiStatus(404, "Person for ID " + id + " not found");
+                return ApiStatus.notFound("Person for ID " + id + " not found");
             }
             
             final boolean changed;
@@ -803,7 +931,7 @@ public class JsonApiStorageService {
         } else if (MetaDataType.SERIES == type) {
             Series series = commonDao.getById(Series.class, id);
             if (series == null) {
-                return new ApiStatus(404, "Series for ID " + id + " not found");
+                return ApiStatus.notFound("Series for ID " + id + " not found");
             }
         
             final boolean changed;
@@ -829,7 +957,7 @@ public class JsonApiStorageService {
         } else {
             VideoData videoData = commonDao.getById(VideoData.class, id);
             if (videoData == null) {
-                return new ApiStatus(404, "VideoData for ID " + id + " not found");
+                return ApiStatus.notFound("VideoData for ID " + id + " not found");
             }
 
             final boolean changed;
@@ -853,7 +981,7 @@ public class JsonApiStorageService {
         sb.append(type.name().toLowerCase());
         sb.append(" ID: ");
         sb.append(id);
-        return new ApiStatus(200, sb.toString());
+        return ApiStatus.ok(sb.toString());
     }
 
     @Transactional
@@ -865,13 +993,13 @@ public class JsonApiStorageService {
             sb.append(sourceDb);
             sb.append(" is not valid for " );
             sb.append(type.name().toLowerCase());
-            return new ApiStatus(409, sb.toString());
+            return ApiStatus.conflict(sb.toString());
         }
 
         if (MetaDataType.PERSON.equals(type)) {
             Person person = commonDao.getById(Person.class, id);
             if (person == null) {
-                return new ApiStatus(404, "Person for ID " + id + " not found");
+                return ApiStatus.notFound("Person for ID " + id + " not found");
             }
     
             if (resetSourceDbId(person, sourceDb, sourceDbId)) {
@@ -880,7 +1008,7 @@ public class JsonApiStorageService {
         } else if (MetaDataType.SERIES.equals(type)) {
             Series series =  commonDao.getById(Series.class, id);
             if (series == null) {
-                return new ApiStatus(404, "Series for ID " + id + " not found");
+                return ApiStatus.notFound("Series for ID " + id + " not found");
             }
             
             if (resetSourceDbId(series, sourceDb, sourceDbId)) {
@@ -889,7 +1017,7 @@ public class JsonApiStorageService {
         } else if (MetaDataType.SEASON.equals(type)) {
             Season season = commonDao.getById(Season.class, id);
             if (season == null) {
-                return new ApiStatus(404, "Season for ID " + id + " not found");
+                return ApiStatus.notFound("Season for ID " + id + " not found");
             }
 
             if (resetSourceDbId(season, sourceDb, sourceDbId)) {
@@ -898,11 +1026,11 @@ public class JsonApiStorageService {
         } else {
             VideoData videoData = commonDao.getById(VideoData.class, id);
             if (videoData == null) {
-                return new ApiStatus(404, "Video for ID " + id + " not found");
+                return ApiStatus.notFound("Video for ID " + id + " not found");
             } else if (MetaDataType.EPISODE.equals(type) && videoData.isMovie()) {
-                return new ApiStatus(404, "Episode for ID " + id + " not found");
+                return ApiStatus.notFound("Episode for ID " + id + " not found");
             } else if (MetaDataType.MOVIE.equals(type) && !videoData.isMovie()) {
-                return new ApiStatus(404, "Movie for ID " + id + " not found");
+                return ApiStatus.notFound("Movie for ID " + id + " not found");
             }
             
             if (resetSourceDbId(videoData, sourceDb, sourceDbId)) {
@@ -918,7 +1046,7 @@ public class JsonApiStorageService {
         sb.append(type.name().toLowerCase());
         sb.append(" ID: ");
         sb.append(id);
-        return new ApiStatus(200, sb.toString());
+        return ApiStatus.ok(sb.toString());
     }
     
     private static boolean resetSourceDbId(IScannable scannable, String sourceDb, String sourceDbId) {
@@ -947,7 +1075,7 @@ public class JsonApiStorageService {
     public ApiStatus setTrailerStatus(Long id, StatusType status) {
         Trailer trailer = commonDao.getById(Trailer.class, id);
         if (trailer == null) {
-            return new ApiStatus(404, "Trailer for ID " + id + " not found");
+            return ApiStatus.notFound("Trailer for ID " + id + " not found");
         }
         
         if (trailer.isCached() && (StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status))) {
@@ -963,17 +1091,7 @@ public class JsonApiStorageService {
         sb.append(trailer.getStatus());
         sb.append(" for trailer ID: ");
         sb.append(trailer.getId());
-        return new ApiStatus(200, sb.toString());
-    }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="List Methods">
-    public List<ApiListDTO> getMovieList(ApiWrapperList<ApiListDTO> wrapper) {
-        return apiDao.getMovieList(wrapper);
-    }
-
-    public List<ApiListDTO> getSeriesList(ApiWrapperList<ApiListDTO> wrapper) {
-        return apiDao.getSeriesList(wrapper);
+        return ApiStatus.ok(sb.toString());
     }
     //</editor-fold>
 }

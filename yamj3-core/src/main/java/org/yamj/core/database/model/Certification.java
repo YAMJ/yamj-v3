@@ -28,6 +28,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedQueries({    
+    @NamedQuery(name = "certification.getCertification",
+        query = "from Certification where lower(country_code)=:countryCode and lower(certificate)=:certificate"
+    )
+})
+
 @Entity
 @Table(name = "certification",
         uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country_code", "certificate"})
@@ -45,6 +51,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     private String certificate;
 
     // GETTER and SETTER
+    
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
@@ -62,6 +69,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -81,7 +89,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
         if (!(obj instanceof Certification)) {
             return false;
         }
-        final Certification other = (Certification) obj;
+        Certification other = (Certification) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

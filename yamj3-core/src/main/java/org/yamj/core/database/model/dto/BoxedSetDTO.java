@@ -37,14 +37,6 @@ public final class BoxedSetDTO {
     private final String sourceId;
     private Long boxedSetId;
     
-    public BoxedSetDTO(String source, String name) {
-        this(source, name, null, null);
-    }
-
-    public BoxedSetDTO(String source, String name, Integer ordering) {
-        this(source, name, ordering, null);
-    }
-
     public BoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         this.source = source;
         this.name = StringUtils.trimToNull(name);
@@ -101,8 +93,8 @@ public final class BoxedSetDTO {
             return false;
         }
         BoxedSetDTO other = (BoxedSetDTO) obj;
-        if (!StringUtils.equalsIgnoreCase(this.source, other.source)) return false;
-        return StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
+        return StringUtils.equalsIgnoreCase(this.source, other.source) &&
+               StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
     }
 
     @Override

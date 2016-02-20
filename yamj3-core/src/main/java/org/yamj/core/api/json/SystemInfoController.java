@@ -34,7 +34,7 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/system/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/system", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
@@ -62,7 +62,7 @@ public class SystemInfoController {
                     if (result == null) {
                         LOG.warn("There was an error getting the count for {}", singleType.toString());
                     } else {
-                        YAMJ_INFO.addCount(result.getType(), result.getCount());
+                        YAMJ_INFO.addCount(result.getType(), result.getCounter());
                     }
                 }
             }

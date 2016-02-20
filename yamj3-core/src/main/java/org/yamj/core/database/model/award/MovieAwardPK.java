@@ -51,6 +51,7 @@ public class MovieAwardPK implements Serializable {
     private int year = -1;
 
     public MovieAwardPK() {
+        // empty constructor
     }
 
     public MovieAwardPK(VideoData videoData, Award award, int year) {
@@ -60,6 +61,7 @@ public class MovieAwardPK implements Serializable {
     }
 
     // GETTER AND SETTER
+    
     public VideoData getVideoData() {
         return videoData;
     }
@@ -85,6 +87,7 @@ public class MovieAwardPK implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -97,7 +100,7 @@ public class MovieAwardPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MovieAwardPK) {
-            final MovieAwardPK other = (MovieAwardPK) obj;
+            MovieAwardPK other = (MovieAwardPK) obj;
             return new EqualsBuilder()
                     .append(getVideoData().getId(), other.getVideoData().getId())
                     .append(getAward().getId(), other.getAward().getId())

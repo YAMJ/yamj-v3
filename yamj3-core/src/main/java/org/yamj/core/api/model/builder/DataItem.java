@@ -51,7 +51,8 @@ public enum DataItem {
     EXTERNALID(false),
     BOXSET(false),
     TRAILER(false),
-    STATUS(true);
+    STATUS(true),
+    VIDEOSOURCE(false);
 
     private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
 
@@ -69,9 +70,8 @@ public enum DataItem {
 
     public static DataItem fromString(String item) {
         try {
-            String cleanItem = item.trim().toUpperCase();
-            return DataItem.valueOf(cleanItem);
-        } catch (Exception ex) {
+            return DataItem.valueOf(item.trim().toUpperCase());
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

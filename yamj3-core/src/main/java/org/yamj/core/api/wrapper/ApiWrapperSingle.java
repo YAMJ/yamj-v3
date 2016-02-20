@@ -48,19 +48,11 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
         // Set the count
         if (result == null) {
             setCount(0);
+            setStatusCheck(ApiStatus.NO_RECORD);
         } else {
             setCount(1);
             setTotalCount(1);
-        }
-    }
-
-    @Override
-    public void setStatusCheck() {
-        setQueryEnd();
-        if (result == null) {
-            setStatus(new ApiStatus(400, "No record found"));
-        } else {
-            setStatus(new ApiStatus(200, "OK"));
+            setStatusCheck(ApiStatus.OK);
         }
     }
 }

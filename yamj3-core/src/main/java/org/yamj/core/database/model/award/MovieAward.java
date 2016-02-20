@@ -22,28 +22,24 @@
  */
 package org.yamj.core.database.model.award;
 
-import java.io.Serializable;
-import javax.persistence.*;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.yamj.core.database.model.VideoData;
 
 @Entity
 @Table(name = "videodata_awards")
-public class MovieAward implements Serializable {
+public class MovieAward extends AbstractAward {
 
     private static final long serialVersionUID = -6333705870878639167L;
 
     @EmbeddedId
     private MovieAwardPK movieAwardPK;
     
-    @Column(name =  "won", nullable = false)
-    private boolean won = false;
-
-    @Column(name =  "nominated", nullable = false)
-    private boolean nominated = false;
-
     public MovieAward() {
+        super();
     }
 
     public MovieAward(VideoData videoData, Award award, int year) {
@@ -51,6 +47,7 @@ public class MovieAward implements Serializable {
     }
 
     // GETTER and SETTER
+    
     public MovieAwardPK getMovieAwardPK() {
         return movieAwardPK;
     }
@@ -59,23 +56,8 @@ public class MovieAward implements Serializable {
         this.movieAwardPK = movieAwardPK;
     }
 
-    public boolean isWon() {
-        return won;
-    }
-
-    public void setWon(boolean won) {
-        this.won = won;
-    }
-
-    public boolean isNominated() {
-        return nominated;
-    }
-
-    public void setNominated(boolean nominated) {
-        this.nominated = nominated;
-    }
-
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -86,9 +68,8 @@ public class MovieAward implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MovieAward) {
-            final MovieAward other = (MovieAward) obj;
             return new EqualsBuilder()
-                    .append(getMovieAwardPK(), other.getMovieAwardPK())
+                    .append(getMovieAwardPK(), ((MovieAward)obj).getMovieAwardPK())
                     .isEquals();
         }
         return false;

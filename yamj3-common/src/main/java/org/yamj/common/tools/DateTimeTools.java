@@ -26,12 +26,9 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -40,12 +37,12 @@ public final class DateTimeTools {
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":", "");
     private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");
-    // Some default formats in use
+    // some default formats in use
     public static final String ISO8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     public static final String BUILD_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
     private DateTimeTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
@@ -56,7 +53,7 @@ public final class DateTimeTools {
      * @param secondText
      * @return
      */
-    private static PeriodFormatter createPeriodFormatter(String hourText, String minuteText, String secondText) {
+    private static PeriodFormatter createPeriodFormatter(final String hourText, final String minuteText, final String secondText) {
         return new PeriodFormatterBuilder()
                 .appendHours()
                 .appendSeparator(hourText)
@@ -74,7 +71,7 @@ public final class DateTimeTools {
      * @param convertDate
      * @return converted date in the format specified in DATE_FORMAT_STRING
      */
-    public static String convertDateToString(Date convertDate) {
+    public static String convertDateToString(final Date convertDate) {
         return convertDateToString(convertDate, DATE_FORMAT_STRING);
     }
 
@@ -85,9 +82,8 @@ public final class DateTimeTools {
      * @param dateFormat
      * @return
      */
-    public static String convertDateToString(Date convertDate, final String dateFormat) {
-        DateTime dt = new DateTime(convertDate);
-        return convertDateToString(dt, dateFormat);
+    public static String convertDateToString(final Date convertDate, final String dateFormat) {
+        return convertDateToString(new DateTime(convertDate), dateFormat);
     }
 
     /**
@@ -96,7 +92,7 @@ public final class DateTimeTools {
      * @param convertDate
      * @return converted date in the format specified in DATE_FORMAT_STRING
      */
-    public static String convertDateToString(DateTime convertDate) {
+    public static String convertDateToString(final DateTime convertDate) {
         return convertDateToString(convertDate, DATE_FORMAT_STRING);
     }
 
@@ -107,9 +103,8 @@ public final class DateTimeTools {
      * @param dateFormat
      * @return
      */
-    public static String convertDateToString(DateTime convertDate, final String dateFormat) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern(dateFormat);
-        return fmt.print(convertDate);
+    public static String convertDateToString(final DateTime convertDate, final String dateFormat) {
+        return DateTimeFormat.forPattern(dateFormat).print(convertDate);
     }
 
     /**
@@ -119,8 +114,8 @@ public final class DateTimeTools {
      * @param end
      * @return
      */
-    public static long getDuration(Date start, Date end) {
-        return getDuration(new DateTime(start), new DateTime(end));
+    public static long getDuration(final Date start, final Date end) {
+        return getDuration(new DateTime(start.getTime()), new DateTime(end.getTime()));
     }
 
     /**
@@ -130,8 +125,8 @@ public final class DateTimeTools {
      * @param end
      * @return
      */
-    public static long getDuration(Long start, Long end) {
-        return getDuration(new DateTime(start), new DateTime(end));
+    public static long getDuration(final Long start, final Long end) {
+        return getDuration(new DateTime(start.longValue()), new DateTime(end.longValue()));
     }
 
     /**
@@ -141,10 +136,9 @@ public final class DateTimeTools {
      * @param end
      * @return the difference (in milliseconds) or -1 if "start" is after "end"
      */
-    public static long getDuration(DateTime start, DateTime end) {
+    public static long getDuration(final DateTime start, final DateTime end) {
         if (start.isBefore(end)) {
-            Interval interval = new Interval(start, end);
-            return interval.toDurationMillis();
+            return new Interval(start, end).toDurationMillis();
         }
         return -1L;
     }
@@ -155,7 +149,7 @@ public final class DateTimeTools {
      * @param milliseconds
      * @return
      */
-    public static String formatDurationColon(long milliseconds) {
+    public static String formatDurationColon(final long milliseconds) {
         return formatDuration(milliseconds, TIME_FORMAT_COLON);
     }
 
@@ -176,10 +170,8 @@ public final class DateTimeTools {
      * @param format
      * @return
      */
-    public static String formatDuration(long milliseconds, PeriodFormatter format) {
-        Period period = new Period(milliseconds, PeriodType.time());
-        period = period.normalizedStandard();
-        return format.print(period);
+    public static String formatDuration(final long milliseconds, final PeriodFormatter format) {
+        return format.print(new Period(milliseconds, PeriodType.time()).normalizedStandard());
     }
 
     /**
@@ -188,17 +180,14 @@ public final class DateTimeTools {
      * @param runtime
      * @return
      */
-    public static int processRuntime(String runtime) {
-        int returnValue;
-        // See if we can convert this to a number and assume it's correct if we can
-        try {
-            returnValue = Integer.parseInt(runtime);
+    public static int processRuntime(final String runtime) {
+        // see if we can convert this to a number and assume it's correct if we can
+        int returnValue = (int)NumberUtils.toFloat(runtime, -1f);
+        if (returnValue > 0) {
             return returnValue;
-        } catch (Exception ignore) {
-            returnValue = -1;
         }
-
-        // This is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
+        
+        // this is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
         Pattern hrmnPattern = Pattern.compile("(?i)(\\d+)(\\D*)(\\d*)(.*?)");
 
         Matcher matcher = hrmnPattern.matcher(runtime);
@@ -208,31 +197,25 @@ public final class DateTimeTools {
             String second = matcher.group(3);
 
             if (StringUtils.isNotBlank(second)) {
-                // Assume that this is HH(text)MM
-                returnValue = (Integer.parseInt(first) * 60) + Integer.parseInt(second);
-                return returnValue;
+                // assume that this is HH(text)MM
+                return (Integer.parseInt(first) * 60) + Integer.parseInt(second);
             }
 
             if (StringUtils.isBlank(divide)) {
-                // No divider value, so assume this is a straight minute value
-                returnValue = Integer.parseInt(first);
-                return returnValue;
+                // no divider value, so assume this is a straight minute value
+                return Integer.parseInt(first);
             }
 
-            if (StringUtils.isBlank(second) && StringUtils.isNotBlank(divide)) {
-                // this is xx(text) so we need to work out what the (text) is
-                if (divide.toLowerCase().contains("h")) {
-                    // Assume it is a form of "hours", so convert to minutes
-                    returnValue = Integer.parseInt(first) * 60;
-                } else {
-                    // Assume it's a form of "minutes"
-                    returnValue = Integer.parseInt(first);
-                }
-                return returnValue;
+            if (divide.toLowerCase().contains("h")) {
+                // assume it is a form of "hours", so convert to minutes
+                return Integer.parseInt(first) * 60;
             }
+            
+            // assume it's a form of "minutes"
+            return Integer.parseInt(first);
         }
 
-        return returnValue;
+        return -1;
     }
 
     /**
@@ -242,8 +225,7 @@ public final class DateTimeTools {
      * @param datePattern the pattern to parse
      * @return
      */
-    public static DateTime parseDate(String stringDate, String datePattern) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(datePattern);
-        return formatter.parseDateTime(stringDate);
+    public static DateTime parseDate(final String stringDate, final String datePattern) {
+        return DateTimeFormat.forPattern(datePattern).parseDateTime(stringDate);
     }
 }

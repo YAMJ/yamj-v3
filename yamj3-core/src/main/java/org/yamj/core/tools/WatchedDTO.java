@@ -23,6 +23,7 @@
 package org.yamj.core.tools;
 
 import java.util.Date;
+import org.apache.commons.lang.time.DateUtils;
 
 public final class WatchedDTO {
 
@@ -36,42 +37,51 @@ public final class WatchedDTO {
     private boolean watchedMediaApi = true;
     private Date watchedMediaApiDate;
   
-    public void watchedVideo(boolean watched, Date watchedDate) {
-        if (watchedDate == null) return;
+    public void watchedVideo(final boolean watched, final Date watchedDate) {
+        if (watchedDate == null) {
+            return;
+        }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedVideoDate == null) {
             this.watchedVideo = watched;
-            this.watchedVideoDate = watchedDate;
-        } else if (watchedDate.after(this.watchedVideoDate)) {
+            this.watchedVideoDate = watchedDateWithoutMS;
+        } else if (this.watchedVideoDate.before(watchedDateWithoutMS)) {
             this.watchedVideo = watched;
-            this.watchedVideoDate = watchedDate;
+            this.watchedVideoDate = watchedDateWithoutMS;
         }
     }
 
-    public void watchedMediaFile(boolean watched, Date watchedDate) {
-        if (watchedDate == null) return;
+    public void watchedMediaFile(final boolean watched, final Date watchedDate) {
+        if (watchedDate == null) {
+            return;
+        }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedMediaFileDate == null) {
             this.watchedMediaFile = watched;
-            this.watchedMediaFileDate = watchedDate;
+            this.watchedMediaFileDate = watchedDateWithoutMS;
         } else {
             this.watchedMediaFile = this.watchedMediaFile && watched;
-            if (watchedDate.after(this.watchedMediaFileDate)) {            
-                this.watchedMediaFileDate = watchedDate;
+            if (this.watchedMediaFileDate.before(watchedDateWithoutMS)) {
+                this.watchedMediaFileDate = watchedDateWithoutMS;
             }
         }
     }
 
-    public void watchedMediaApi(boolean watched, Date watchedDate) {
-        if (watchedDate == null) return;
+    public void watchedMediaApi(final boolean watched, final Date watchedDate) {
+        if (watchedDate == null) {
+            return;
+        }
 
+        final Date watchedDateWithoutMS = DateUtils.setMilliseconds(watchedDate, 0);
         if (this.watchedMediaApiDate == null) {
             this.watchedMediaApi = watched;
-            this.watchedMediaApiDate = watchedDate;
+            this.watchedMediaApiDate = watchedDateWithoutMS;
         } else {
             this.watchedMediaApi = this.watchedMediaApi && watched;
-            if (watchedDate.after(this.watchedMediaApiDate)) {            
-                this.watchedMediaApiDate = watchedDate;
+            if (this.watchedMediaApiDate.before(watchedDateWithoutMS)) {
+                this.watchedMediaApiDate = watchedDateWithoutMS;
             }
         }
     }
@@ -87,37 +97,39 @@ public final class WatchedDTO {
     }
 
     private void evaluateWatched() {
-        if (this.watched != null) return;
+        if (this.watched != null) {
+            return;
+        }
         
-        boolean watched = false;
-        Date watchedDate = null;
+        boolean locWatched = false;
+        Date locWatchedDate = null;
         
         if (this.watchedVideoDate != null) {
-            watched = this.watchedVideo;
-            watchedDate =  this.watchedVideoDate;
+            locWatched = this.watchedVideo;
+            locWatchedDate =  this.watchedVideoDate;
         }
         
         if (this.watchedMediaFileDate != null) {
-            if (watchedDate == null) {
-                watched = this.watchedMediaFile;
-                watchedDate = this.watchedMediaFileDate;
-            } else if (watchedDate.before(this.watchedMediaFileDate)) {
-                watched = this.watchedMediaFile;
-                watchedDate = this.watchedMediaFileDate;
+            if (locWatchedDate == null) {
+                locWatched = this.watchedMediaFile;
+                locWatchedDate = this.watchedMediaFileDate;
+            } else if (locWatchedDate.before(this.watchedMediaFileDate)) {
+                locWatched = this.watchedMediaFile;
+                locWatchedDate = this.watchedMediaFileDate;
             }
         }
 
         if (this.watchedMediaApiDate != null) {
-            if (watchedDate == null) {
-                watched = this.watchedMediaApi;
-                watchedDate = this.watchedMediaApiDate;
-            } else if (watchedDate.before(this.watchedMediaApiDate)) {
-                watched = this.watchedMediaApi;
-                watchedDate = this.watchedMediaApiDate;
+            if (locWatchedDate == null) {
+                locWatched = this.watchedMediaApi;
+                locWatchedDate = this.watchedMediaApiDate;
+            } else if (locWatchedDate.before(this.watchedMediaApiDate)) {
+                locWatched = this.watchedMediaApi;
+                locWatchedDate = this.watchedMediaApiDate;
             }
         }
 
-        this.watched = Boolean.valueOf(watched); 
-        this.watchedDate = watchedDate;
+        this.watched = Boolean.valueOf(locWatched); 
+        this.watchedDate = locWatchedDate;
     }
 }

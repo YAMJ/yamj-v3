@@ -52,7 +52,9 @@ public class CastCrewPK implements Serializable {
     @Column(name = "job", nullable = false, length = 30, insertable = false, updatable = false)
     private JobType jobType;
 
-    public CastCrewPK() {}
+    public CastCrewPK() {
+        // empty constructor
+    }
 
     public CastCrewPK(Person person, VideoData videoData, JobType jobType) {
         this.person = person;
@@ -61,6 +63,7 @@ public class CastCrewPK implements Serializable {
     }
 
     // GETTER AND SETTER
+    
     public Person getPerson() {
         return person;
     }
@@ -86,6 +89,7 @@ public class CastCrewPK implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -98,7 +102,7 @@ public class CastCrewPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof CastCrewPK) {
-            final CastCrewPK other = (CastCrewPK) obj;
+            CastCrewPK other = (CastCrewPK) obj;
             return new EqualsBuilder()
                     .append(getJobType(), other.getJobType())
                     .append(getPerson().getId(), other.getPerson().getId())

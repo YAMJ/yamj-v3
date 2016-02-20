@@ -22,7 +22,10 @@
  */
 package org.yamj.core.tools;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,7 +198,7 @@ public final class OverrideTools {
         } else {
             final String newSources = sources.toLowerCase();
             final Set<String> prios = new LinkedHashSet<>();
-            for (String newSource : newSources.split(",")) {
+            for (String newSource : newSources.split(DEFAULT_SPLITTER)) {
                 if (StringUtils.isNotBlank(newSource)) {
                     if (newSource.equalsIgnoreCase(TYPE_MOVIE_SCANNER)) {
                         prios.addAll(OnlineScannerService.MOVIE_SCANNER);
@@ -390,14 +393,6 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.YEAR, source)) return Boolean.FALSE;
         if (metadata.getYear() <= 0) return Boolean.TRUE;
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);
-    }
-
-    // PERSON OVERRIDE
-    public static boolean checkOverwritePersonNames(Person person, String source) {
-        if (checkOverwriteName(person, source)) return true;
-        if (checkOverwriteFirstName(person, source)) return true;
-        if (checkOverwriteLastName(person, source)) return true;
-        return false;
     }
     
     public static boolean checkOverwriteName(Person person, String source) {

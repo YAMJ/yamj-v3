@@ -25,27 +25,25 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.yamj.core.web.apis.SearchEngineTools;
-
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.core.AbstractTest;
+import org.yamj.core.web.apis.SearchEngineTools;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
+public class SearchEngineToolsTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchEngineToolsTest.class);
 
     @Autowired
     private PoolingHttpClient httpClient;
     
-    @Test
+    @Ignore
     public void roundTripIMDB() {
         LOG.info("roundTripIMDB");
         SearchEngineTools search = new SearchEngineTools(httpClient);
@@ -92,7 +90,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
-    @Test
+    @Ignore
     public void roundTripAllocine() {
         LOG.info("roundTripAllocine");
         SearchEngineTools search = new SearchEngineTools(httpClient, Locale.FRANCE);

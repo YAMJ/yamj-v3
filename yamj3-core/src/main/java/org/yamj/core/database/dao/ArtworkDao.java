@@ -26,13 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
-import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -41,34 +41,26 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HibernateDao.class);
-
-    public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
+    public List<ArtworkProfile> getAllArtworkProfiles() {
+        return currentSession().getNamedQuery("artworkProfile.getAllArtworkProfiles")
+                .setReadOnly(true)
+                .setCacheable(true)
+                .list();
+    }
+    
+    public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
         return currentSession().byNaturalId(ArtworkProfile.class)
                 .using("profileName", profileName)
+                .using("metaDataType", metaDataType)
                 .using("artworkType", artworkType)
                 .load();
     }
 
-    @SuppressWarnings("resource")
-    public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(ArtworkProfile.class);
+    public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
+        Criteria criteria = currentSession().createCriteria(ArtworkProfile.class);
+        criteria.add(Restrictions.eq("metaDataType", metaDataType));
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
-        if (MetaDataType.MOVIE == metaDataType) {
-            criteria.add(Restrictions.eq("applyToMovie", Boolean.TRUE));
-        } else if (MetaDataType.SERIES == metaDataType) {
-            criteria.add(Restrictions.eq("applyToSeries", Boolean.TRUE));
-        } else if (MetaDataType.SEASON == metaDataType) {
-            criteria.add(Restrictions.eq("applyToSeason", Boolean.TRUE));
-        } else if (MetaDataType.EPISODE == metaDataType) {
-            criteria.add(Restrictions.eq("applyToEpisode", Boolean.TRUE));
-        } else if (MetaDataType.PERSON == metaDataType) {
-            criteria.add(Restrictions.eq("applyToPerson", Boolean.TRUE));
-        } else if (MetaDataType.BOXSET == metaDataType) {
-            criteria.add(Restrictions.eq("applyToBoxedSet", Boolean.TRUE));
-        }
         return criteria.list();
     }
 
@@ -79,13 +71,11 @@ public class ArtworkDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
-        
         List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setArtworkType(convertRowElementToString(object[1]));
             queueElement.setDate(convertRowElementToDate(object[3]));
             if (queueElement.getDate() == null) {
@@ -111,32 +101,34 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkLocated) criteria.uniqueResult();
     }
 
-    public ArtworkGenerated getStoredArtworkGenerated(ArtworkGenerated generated) {
+    public ArtworkGenerated getStoredArtworkGenerated(ArtworkLocated located, ArtworkProfile profile) {
         Criteria criteria = currentSession().createCriteria(ArtworkGenerated.class);
-        criteria.add(Restrictions.eq("artworkLocated", generated.getArtworkLocated()));
-        criteria.add(Restrictions.eq("artworkProfile", generated.getArtworkProfile()));
+        criteria.add(Restrictions.eq("artworkLocated", located));
+        criteria.add(Restrictions.eq("artworkProfile", profile));
         criteria.setCacheable(true);
         return (ArtworkGenerated) criteria.uniqueResult();
     }
     
     public List<QueueDTO> getArtworkLocatedQueue(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
-        sql.append("FROM artwork_located loc ");
-        sql.append("WHERE loc.status in ('NEW','UPDATED')");
-        
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
+        return this.getQueue("artworkLocated.processQueue", maxResults);
+    }
+
+    public List<QueueDTO> getArtworkGeneratedQueue(final int maxResults) {
+        return this.getQueue("artworkGenerated.processQueue", maxResults);
+    }
+
+    private List<QueueDTO> getQueue(final String queryName, final int maxResults) {
+        Query query = currentSession().getNamedQuery(queryName);
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
         List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));
             if (queueElement.getDate() == null) {
                 queueElement.setDate(convertRowElementToDate(object[1]));
@@ -157,30 +149,44 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public void saveArtworkLocated(Artwork artwork, ArtworkLocated scannedLocated) {
-        if (!artwork.getArtworkLocated().contains(scannedLocated)) {
+        final int index = artwork.getArtworkLocated().indexOf(scannedLocated);
+        if (index < 0) {
             // just store if not contained before
             artwork.getArtworkLocated().add(scannedLocated);
             this.saveEntity(scannedLocated);
         } else {
-            // find matching stored located artwork and reset deletion status
-            for (ArtworkLocated stored : artwork.getArtworkLocated()) {
-                if (stored.equals(scannedLocated)) {
-                    switch (stored.getStatus()) {
-                        case DELETED:
-                            stored.setStatus(stored.getPreviousStatus());
-                            this.updateEntity(stored);
-                            break;
-                        case ERROR:
-                        case INVALID:
-                        case NOTFOUND:
-                        case IGNORE:
-                            LOG.debug("Leave status {} for located artwork {}", stored.getStatus(), stored);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            // reset deletion status
+            ArtworkLocated stored = artwork.getArtworkLocated().get(index);
+            if (stored.getStatus() == StatusType.DELETED) {
+                stored.setStatus(stored.getPreviousStatus());
+                this.updateEntity(stored);
             }
         }
+    }
+    
+    public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
+        return currentSession().createCriteria(ArtworkLocated.class)
+                .add(Restrictions.isNotNull("cacheFilename"))
+                .add(Restrictions.ne("status", StatusType.DELETED))
+                .add(Restrictions.gt("id", lastId))
+                .addOrder(Order.asc("id"))
+                .setMaxResults(100)
+                .list();
+    }
+    
+    public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
+        return currentSession().byNaturalId(ArtworkLocated.class)
+                .using("artwork", artwork)
+                .using("source", source)
+                .using("hashCode", hashCode)
+                .load();        
+        
+    }
+    
+    public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
+        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
+                .setLong("locatedId", locatedId)
+                .setString("profileName", profileName)
+                .uniqueResult();
     }
 }

@@ -31,12 +31,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
@@ -58,6 +58,11 @@ public class StagingService {
     @Autowired
     private ConfigService configService;
 
+    @Value("${yamj3.folder.name.watched:null}")
+    private String watchedFolderName;
+    @Value("${yamj3.folder.name.subtitle:null}")
+    private String subtitleFolderName;
+
     @Transactional
     public Library storeLibrary(ImportDTO libraryDTO) {
         Library library = stagingDao.getLibrary(libraryDTO.getClient(), libraryDTO.getPlayerPath());
@@ -67,7 +72,7 @@ public class StagingService {
             library.setPlayerPath(libraryDTO.getPlayerPath());
         }
         library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-        library.setLastScanned(new Date(System.currentTimeMillis()));
+        library.setLastScanned(new Date());
         stagingDao.storeEntity(library);
         return library;
     }
@@ -228,10 +233,19 @@ public class StagingService {
         return true;
     }
 
+    public void updateWatchedFile(MediaFile mediaFile, StageFile stageFile) {
+        // reset watched file date
+        Date maxWatchedFileDate = this.maxWatchedFileDate(stageFile);
+        if (maxWatchedFileDate != null) {
+            // just update last date if max watched file date has been found
+            mediaFile.setWatchedFile(true, maxWatchedFileDate);
+        } else if (mediaFile.isWatchedFile()) {
+            // set watched date to actual date if watch-change detected
+            mediaFile.setWatchedFile(false, new Date());
+        }
+    }
+    
     public Date maxWatchedFileDate(StageFile videoFile) {
-        // get the name used for WATCHED directories
-        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
-
         boolean checkLibrary = this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE);
         return this.stagingDao.maxWatchedFileDate(videoFile, watchedFolderName, checkLibrary);
     }
@@ -244,9 +258,6 @@ public class StagingService {
             videoBaseName = watchedFile.getBaseName();
             videoExtension = null;
         }
-
-        // get the name used for WATCHED directories
-        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {
@@ -272,9 +283,6 @@ public class StagingService {
             // remove extension cause that was the language
             videoBaseName = FilenameUtils.removeExtension(videoBaseName);
         }
-
-        // get the name used for SUBTITLE directories
-        String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(subtitleFile, subtitleFolderName)) {

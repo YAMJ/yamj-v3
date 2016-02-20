@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.service.MetadataStorageService;
-import org.yamj.core.service.ScanningScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
 
 /**
  * Task for checking if video, series or person is older than x days
@@ -85,5 +85,7 @@ public class RecheckTask implements ITask {
         if (updatedPersons) {
             scanningScheduler.triggerScanPeopleData();
         }
+
+        LOG.debug("Finished recheck task");
     }
 }

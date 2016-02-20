@@ -56,10 +56,6 @@ public interface IApiWrapper {
 
     void setQueryEnd();
 
-    void setStatus(ApiStatus status);
-
-    void setStatusCheck();
-
     void setStatusCheck(ApiStatus status);
 
     void setCount(int count);

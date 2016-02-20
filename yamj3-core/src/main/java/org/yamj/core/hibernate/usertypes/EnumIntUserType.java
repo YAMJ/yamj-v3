@@ -149,7 +149,10 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
      * @see UserType#equals(Object, Object)
      */
     @Override
-    public boolean equals(final Object x, final Object y) throws HibernateException {
+    public boolean equals(final Object x, final Object y) throws HibernateException { //NOSONAR
+        if (null == x || null == y) {
+            return false;
+        }
         return x.equals(y);
     }
 

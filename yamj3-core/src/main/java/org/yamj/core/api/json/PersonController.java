@@ -25,18 +25,25 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.UpdatePerson;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ScanningScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
 
 @RestController
-@RequestMapping(value = "/api/person/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/person", produces = "application/json; charset=utf-8")
 public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
@@ -45,51 +52,51 @@ public class PersonController {
     @Autowired
     private ScanningScheduler scanningScheduler;
 
-    @RequestMapping("/{id}")
-    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public ApiWrapperSingle<ApiPersonDTO> getPerson(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
-        if (options.getId() > 0) {
-            LOG.info("Getting person with ID '{}'", options.getId());
+        if (options.getId() > 0L) {
+            LOG.trace("Getting person with ID {}", options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPerson(wrapper);
-            wrapper.setStatusCheck();
+            wrapper.setResult(jsonApiStorageService.getPerson(wrapper));
         } else {
-            wrapper.setResult(null);
             wrapper.setStatusInvalidId();
         }
         return wrapper;
     }
 
-    @RequestMapping("/movie")
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public ApiStatus updatePerson(@PathVariable("id") Long id, @RequestBody UpdatePerson update) {
+        return jsonApiStorageService.updatePerson(id, update);
+    }
+
+    @RequestMapping(value = "/movie", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.MOVIE, options);
     }
 
-    @RequestMapping("/series")
+    @RequestMapping(value = "/series", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SERIES, options);
     }
 
-    @RequestMapping("/season")
+    @RequestMapping(value = "/season", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SEASON, options);
     }
 
-    @RequestMapping("/episode")
+    @RequestMapping(value = "/episode", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.EPISODE, options);
     }
 
     private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsId options) {
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
-
         if (options.getId() > 0L) {
-            LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());
+            LOG.info("Getting person list for {} with ID {}", metaDataType, options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper);
-            wrapper.setStatusCheck();
+            wrapper.setResults(jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper));
         } else {
-            wrapper.setResults(null);
             wrapper.setStatusInvalidId();
         }
         return wrapper;
@@ -98,15 +105,17 @@ public class PersonController {
     /**
      * Add or update an external id of a series.
      */
-    @RequestMapping("/updateexternalid")
+    @RequestMapping(value = "/updateexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus updateExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb,
             @RequestParam(required = true) String externalid
     ) {
-        LOG.info("Set {} external ID '{}' for person ID {}", sourcedb, externalid, id);
+        LOG.info("Set {} external id '{}' for person ID {}", sourcedb, externalid, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
         
     }
@@ -114,50 +123,72 @@ public class PersonController {
     /**
      * Add or update an external id of a series.
      */
-    @RequestMapping("/removeexternalid")
+    @RequestMapping(value = "/removeexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus removeExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb
     ) {
-        LOG.info("Remove {} external ID from person ID {}", sourcedb, id);
+        LOG.info("Remove {} external id from person ID {}", sourcedb, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
     }
 
     /**
      * Enable online scan for one person.
      */
-    @RequestMapping("/enableonlinescan")
+    @RequestMapping(value = "/enableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus enableOnlineScan(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
         
-        LOG.info("Enable {} online scan for person with ID '{}'", sourcedb, id);
+        LOG.info("Enable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
     }
 
     /**
      * Disable online scan for one person.
      */
-    @RequestMapping("/disableonlinescan")
+    @RequestMapping(value = "/disableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus disableOnlineScan(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
         
-        LOG.info("Disable {} online scan for person with ID '{}'", sourcedb, id);
+        LOG.info("Disable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus =  jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
+    }
+
+    /**
+     * Handle duplicate of a person.
+     */
+    @RequestMapping(value = "/duplicate", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus duplicate(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) Long doublet) 
+    {
+        if (id <= 0L || doublet <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+        
+        LOG.info("Handle {} as doublet of {}", doublet, id);
+        return jsonApiStorageService.duplicatePerson(id, doublet);
     }
 }

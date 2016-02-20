@@ -39,9 +39,6 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
 
-    /**
-     * This will be generated from a scanned file name.
-     */
     @NaturalId
     @Column(name = "identifier", length = 100, nullable = false)
     private String identifier;
@@ -56,14 +53,16 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     @CollectionTable(name = "boxed_set_ids",
             joinColumns = @JoinColumn(name = "boxedset_id"), 
             foreignKey = @ForeignKey(name = "FK_BOXEDSET_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     // CONSTRUCTORS
     
-    public BoxedSet() {}
+    public BoxedSet() {
+        // empty constructor
+    }
 
     public BoxedSet(String identifier) {
         setIdentifier(identifier);
@@ -95,7 +94,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.artworks = artworks;
     }
 
-    private Map<String, String> getSourceDbIdMap() {
+    public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
@@ -103,22 +102,17 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.sourceDbIdMap = sourceDbIdMap;
     }
     
-    public final String getSourceDbId(String sourceDb) {
+    public String getSourceDbId(String sourceDb) {
         return getSourceDbIdMap().get(sourceDb);
     }
     
-    public final boolean setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isBlank(id) || StringUtils.isBlank(sourceDb)) {
             return false;
         }
         String newId = id.trim();
         String oldId = getSourceDbIdMap().put(sourceDb, newId);
         return !StringUtils.equals(oldId, newId);
-    }
-
-    public final boolean removeSourceDbId(String sourceDb) {
-        String removedId = getSourceDbIdMap().remove(sourceDb);
-        return (removedId != null);
     }
     
     // EQUALITY CHECKS
@@ -142,7 +136,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof BoxedSet)) {
             return false;
         }
-        final BoxedSet other = (BoxedSet) obj;
+        BoxedSet other = (BoxedSet) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

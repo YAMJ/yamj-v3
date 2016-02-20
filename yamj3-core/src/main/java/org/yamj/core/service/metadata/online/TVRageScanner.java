@@ -62,7 +62,7 @@ public class TVRageScanner implements ISeriesScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TVRage scanner");
+        LOG.trace("Initialize TVRage scanner");
 
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -91,10 +91,7 @@ public class TVRageScanner implements ISeriesScanner {
         }
 
         // try by original title
-        if ((showInfo == null || !showInfo.isValid())
-            && StringUtils.isNotBlank(series.getTitleOriginal())
-            && !series.getTitle().equalsIgnoreCase(series.getTitleOriginal()))
-        {
+        if ((showInfo == null || !showInfo.isValid()) && series.isTitleOriginalScannable()) {
             showInfo = tvRageApiWrapper.getShowInfoByTitle(series.getTitleOriginal(), throwTempError);
         }
 
@@ -208,8 +205,8 @@ public class TVRageScanner implements ISeriesScanner {
                 if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
                     season.setTitle(title, SCANNER_ID);
                 }
-                if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
-                    series.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
+                if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                    season.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                     season.setPlot(showInfo.getSummary(), SCANNER_ID);

@@ -23,20 +23,24 @@
 package org.yamj.core.tools;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetadataToolsTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataToolsTest.class);
+
     @Test
     public void testSplitFullName() {
-        System.err.println(MetadataTools.splitFullName("David O'Meara"));
-        System.err.println(MetadataTools.splitFullName("Marco van Basten"));
-        System.err.println(MetadataTools.splitFullName("Willbur Van de Pömpel"));
-        System.err.println(MetadataTools.splitFullName("Marilyn de Queiroz"));
-        System.err.println(MetadataTools.splitFullName("Jim Yingst"));
-        System.err.println(MetadataTools.splitFullName("Sting"));
-        System.err.println(MetadataTools.splitFullName("Rebecca Romijn-Stamos"));
-        System.err.println(MetadataTools.splitFullName("Steve zu Dingsda"));
-        System.err.println(MetadataTools.splitFullName("Holla die Waldfee"));
-        System.err.println(MetadataTools.splitFullName("Edward Samuel Norton"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("David O'Meara"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Marco van Basten"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Willbur Van de Pömpel"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Marilyn de Queiroz"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Jim Yingst"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Sting"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Rebecca Romijn-Stamos"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Steve zu Dingsda"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Holla die Waldfee"));
+        LOG.info("Splitted person: {}", MetadataTools.splitFullName("Edward Samuel Norton"));
     }
 }

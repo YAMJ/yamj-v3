@@ -50,7 +50,7 @@ public class Season extends AbstractMetadata {
     private static final long serialVersionUID = 1858640563119637343L;
 
     @Column(name = "season", nullable = false)
-    private int season;
+    private int season; //NOSONAR
 
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
@@ -58,7 +58,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_ids",
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_SOURCEIDS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
@@ -66,7 +66,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_ratings", 
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_RATINGS"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
@@ -74,7 +74,7 @@ public class Season extends AbstractMetadata {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "season_override",
             joinColumns = @JoinColumn(name = "season_id"), foreignKey = @ForeignKey(name = "FK_SEASON_OVERRIDE"))
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
@@ -120,15 +120,15 @@ public class Season extends AbstractMetadata {
     }
 
     public void setPublicationYear(int publicationYear, String source) {
-        if (publicationYear >= 0) {
-            this.publicationYear = publicationYear;
+        if (publicationYear > 0) {
+            setPublicationYear(publicationYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
 
-    public final void removePublicationYear(String source) {
+    public void removePublicationYear(String source) {
         if (hasOverrideSource(OverrideFlag.YEAR, source)) {
-            this.publicationYear = -1;
+            setPublicationYear(-1);
             removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
@@ -152,13 +152,13 @@ public class Season extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, rating);
+            getRatings().put(sourceDb, rating);
         }
     }
 
     public void removeRating(String sourceDb) {
         if (StringUtils.isNotBlank(sourceDb)) {
-            this.ratings.remove(sourceDb);
+            getRatings().remove(sourceDb);
         }
     }
 
@@ -213,24 +213,24 @@ public class Season extends AbstractMetadata {
     // TV CHECKS
 
     public boolean isTvSeasonDone(String sourceDb) {
-        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+        if (StringUtils.isBlank(getSourceDbId(sourceDb))) {
             // not done if episode ID not set
             return false;
         }
-        return (StatusType.DONE.equals(this.getStatus()));
+        return StatusType.DONE.equals(getStatus());
     }
     
     public void setTvSeasonDone() {
-        this.setStatus(StatusType.TEMP_DONE);
+        setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvSeasonNotFound() {
-        if (StatusType.DONE.equals(this.getStatus())) {
+        if (StatusType.DONE.equals(getStatus())) {
             // reset to temporary done state
-            this.setStatus(StatusType.TEMP_DONE);
-        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
+            setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(getStatus())) {
             // do not reset temporary done
-            this.setStatus(StatusType.NOTFOUND);
+            setStatus(StatusType.NOTFOUND);
         }
     }
 
@@ -254,7 +254,7 @@ public class Season extends AbstractMetadata {
         if (!(obj instanceof Season)) {
             return false;
         }
-        final Season other = (Season) obj;
+        Season other = (Season) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

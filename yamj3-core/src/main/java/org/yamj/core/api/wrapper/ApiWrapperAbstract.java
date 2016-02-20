@@ -39,7 +39,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private int totalCount = 0;
     private long queryDuration = 0L;
     private DateTime queryTime = DateTime.now();
-    private ApiStatus status = new ApiStatus();
+    private ApiStatus status = ApiStatus.OK;
     private IOptions options = null;
     private String baseArtworkUrl = "";
     private String baseMediainfoUrl = "";
@@ -118,19 +118,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
         this.queryDuration = duration.getMillis();
     }
 
-    @Override
-    public void setStatus(ApiStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Shorthand method to create a default "OK" status or "FAIL" status
-     *
-     * Also marks the end of the query
-     */
-    @Override
-    public abstract void setStatusCheck();
-
     /**
      * Set the status to a specific value
      *
@@ -141,14 +128,14 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setStatusCheck(ApiStatus status) {
         setQueryEnd();
-        setStatus(status);
+        this.status = status;
     }
 
     /**
      * Set the status of the query to Invalid ID
      */
     public void setStatusInvalidId() {
-        setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+        setStatusCheck(ApiStatus.INVALID_ID);
     }
 
     @Override

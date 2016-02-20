@@ -26,19 +26,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.protocol.HTTP;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.remote.service.GitHubService;
-import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
-import org.yamj.core.web.PoolingHttpClient;
-import org.yamj.core.web.ResponseTools;
 
 /**
  * Calls GitHub to determine the last code update
@@ -52,7 +51,6 @@ public class GitHubServiceImpl implements GitHubService {
     private static final String GH_API = "https://api.github.com/repos/";
     private static final String GH_OWNER = "YAMJ";
     private static final String GH_REPO = "yamj-v3";
-    private static final String ACCEPT = "Accept";
     private static final String GH_USER_AGENT = "GitHubJava/2.1.0";
     private static final String GH_ACCEPT = "application/vnd.github.beta+json";
     private static final long MILLISECONDS_PER_DAY = 24L * 60 * 60 * 1000;
@@ -80,8 +78,8 @@ public class GitHubServiceImpl implements GitHubService {
 
         try {
             HttpGet httpGet = new HttpGet(url.toString());
-            httpGet.setHeader(HTTP.USER_AGENT, GH_USER_AGENT);
-            httpGet.addHeader(ACCEPT, GH_ACCEPT);
+            httpGet.setHeader(HttpHeaders.USER_AGENT, GH_USER_AGENT);
+            httpGet.addHeader(HttpHeaders.ACCEPT, GH_ACCEPT);
 
             URL newUrl = new URL(url.toString());
             httpGet.setURI(newUrl.toURI());
@@ -101,7 +99,7 @@ public class GitHubServiceImpl implements GitHubService {
             LOG.info("Date: '{}'", returnDate);
         } catch (IOException | RuntimeException | URISyntaxException ex) {
             LOG.error("Unable to get GitHub information, error: {}", ex.getMessage());
-            LOG.warn(ClassTools.getStackTrace(ex));
+            LOG.warn("Service error", ex);
             return returnDate;
         }
         return returnDate;

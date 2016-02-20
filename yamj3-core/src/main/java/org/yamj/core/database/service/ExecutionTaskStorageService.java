@@ -23,8 +23,6 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,54 +32,38 @@ import org.yamj.core.database.model.ExecutionTask;
 @Service("executionTaskStorageService")
 public class ExecutionTaskStorageService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskStorageService.class);
     @Autowired
     private CommonDao commonDao;
 
     @Transactional
-    public void storeExecutionTask(ExecutionTask executionTask) {
-        ExecutionTask stored = commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, "name", executionTask.getName());
+    public void saveEntity(ExecutionTask executionTask) {
+        this.commonDao.saveEntity(executionTask);
+    }
 
-        if (stored == null) {
-            this.commonDao.saveEntity(executionTask);
-            LOG.info("Stored: {}", executionTask);
-        } else {
-            // check if next execution date must be reset
-            boolean resetNextExecution = false;
-            if (executionTask.getNextExecution().after(stored.getNextExecution())) {
-                resetNextExecution = true;
-            } else if (!executionTask.getIntervalType().equals(stored.getIntervalType())) {
-                resetNextExecution = true;
-            } else if (executionTask.getDelay() != stored.getDelay()) {
-                resetNextExecution = true;
-            }
-            
-            stored.setTaskName(executionTask.getTaskName());
-            stored.setOptions(executionTask.getOptions());
-            stored.setIntervalType(executionTask.getIntervalType());
-            stored.setDelay(executionTask.getDelay());
-            if (resetNextExecution) {
-                stored.setNextExecution(executionTask.getNextExecution());
-            }
-            this.commonDao.updateEntity(stored);
-            LOG.info("Updated: {}", stored);
-        }
+    @Transactional
+    public void updateEntity(ExecutionTask executionTask) {
+        this.commonDao.updateEntity(executionTask);
+    }
+
+    @Transactional
+    public void deleteEntity(ExecutionTask executionTask) {
+        this.commonDao.deleteEntity(executionTask);
+    }
+
+    @Transactional(readOnly = true)
+    public ExecutionTask getExecutionTask(String name) {
+        return commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, "name", name);
     }
     
+    @Transactional(readOnly = true)
+    public List<ExecutionTask> getAllTasks() {
+        return this.commonDao.getAll(ExecutionTask.class, "name");
+    }
+
     @Transactional(readOnly = true)
     public List<ExecutionTask> getTasksForExecution() {
         String query = "from ExecutionTask et where et.nextExecution <= :actualDate";
         Map<String,Object> params = Collections.singletonMap("actualDate", (Object)new Date());
-        return this.commonDao.findByNamedParameters(query, params);
-    }
-    
-    @Transactional
-    public void updateEntity(Object entity) {
-        this.commonDao.updateEntity(entity);
-    }
-
-    @Transactional
-    public void deleteEntity(Object entity) {
-        this.commonDao.deleteEntity(entity);
+        return this.commonDao.findByNamedParameters(ExecutionTask.class, query, params);
     }
 }

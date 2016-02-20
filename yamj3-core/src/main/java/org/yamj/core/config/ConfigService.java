@@ -22,9 +22,11 @@
  */
 package org.yamj.core.config;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.util.*;
-import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ import org.yamj.core.database.model.Configuration;
 public class ConfigService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
-    private static final String DEFAULT_SPLITTER = ",";
     
     private Map<String, String> cachedProperties = new HashMap<>();
 
@@ -49,14 +50,14 @@ public class ConfigService {
     @Required
     @Autowired
     public void setDynamicProperties(Properties dynamicProperties) {
-        for (Entry<Object, Object> entry : dynamicProperties.entrySet()) {
-            cachedProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+        for (String key : dynamicProperties.stringPropertyNames()) {
+            cachedProperties.put(key, dynamicProperties.getProperty(key));
         }
     }
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize config service");
+        LOG.trace("Initialize config service");
         
         // get stored properties
         Map<String, String> dbConfig = configDao.readConfig();
@@ -74,74 +75,55 @@ public class ConfigService {
         return cachedProperties;
     }
 
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         return cachedProperties.get(key);
     }
 
-    public String getProperty(String key, String defaultValue) {
-        String value = cachedProperties.get(key);
-        return (value == null ? defaultValue : value);
+    public String getProperty(final String key, final String defaultValue) {
+        final String value = cachedProperties.get(key);
+        return (value == null) ? defaultValue : value;
     }
 
-    public List<String> getPropertyAsList(String key, String defaultValue) {
+    public List<String> getPropertyAsList(final String key, final String defaultValue) {
         return this.getPropertyAsList(key, defaultValue, DEFAULT_SPLITTER);
     }
 
     public List<String> getPropertyAsList(String key, String defaultValue, String splitter) {
-        String props = this.getProperty(key, defaultValue);
+        final String props = this.getProperty(key, defaultValue);
         return Arrays.asList(props.split(splitter));
     }
     
-    public boolean getBooleanProperty(String key, boolean defaultValue) {
-        String value = cachedProperties.get(key);
+    public boolean getBooleanProperty(final String key, final boolean defaultValue) {
+        final String value = cachedProperties.get(key);
         if (value != null) {
             return Boolean.parseBoolean(value.trim());
         }
         return defaultValue;
     }
 
-    public int getIntProperty(String key, int defaultValue) {
-        String value = cachedProperties.get(key);
-        if (value != null) {
-            try {
-                return Integer.parseInt(value.trim());
-            } catch (NumberFormatException nfe) {
-                // use default value if value is no valid integer
-            }
-        }
-        return defaultValue;
+    public int getIntProperty(final String key, final int defaultValue) {
+        final String value = cachedProperties.get(key);
+        return NumberUtils.toInt(value, defaultValue);
     }
 
-    public long getLongProperty(String key, long defaultValue) {
-        String value = cachedProperties.get(key);
-        if (value != null) {
-            try {
-                return Long.parseLong(value.trim());
-            } catch (NumberFormatException nfe) {
-                // use default value if value is no valid long
-            }
-        }
-        return defaultValue;
+    public long getLongProperty(final String key, final long defaultValue) {
+        final String value = cachedProperties.get(key);
+        return NumberUtils.toLong(value, defaultValue);
     }
 
-    /**
-     * Return the key property as a float
-     *
-     * @param key
-     * @param defaultValue
-     * @return
-     */
     public float getFloatProperty(String key, float defaultValue) {
         String value = cachedProperties.get(key);
-        if (value != null) {
-            try {
-                return Float.parseFloat(value.trim());
-            } catch (NumberFormatException nfe) {
-                // use default value if value is no valid float
-            }
-        }
-        return defaultValue;
+        return NumberUtils.toFloat(value, defaultValue);
     }
+
+    public Date getDateProperty(final String key) {
+        final long ms  = NumberUtils.toLong(cachedProperties.get(key), -1);
+        if (ms < 0) {
+            return null;
+        }
+        return new Date(ms);
+    }
+    
 
     public void setProperty(String key, String value) {
         // first store in database ...
@@ -166,6 +148,12 @@ public class ConfigService {
         setProperty(key, Float.toString(value));
     }
 
+    public void setProperty(String key, Date date) {
+        if (date != null) {
+            setProperty(key, Long.toString(date.getTime()));
+        }
+    }
+    
     @Transactional
     public void deleteProperty(String key) {
         // Delete the config from the database

@@ -60,7 +60,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize Allocine artwork scanner");
+        LOG.trace("Initialize Allocine artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);
@@ -70,12 +70,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
         String allocineId = allocineScanner.getMovieId(videoData);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         MovieInfos movieInfos = allocineApiWrapper.getMovieInfos(allocineId, false);
         if (movieInfos == null || movieInfos.isNotValid() || MapUtils.isEmpty(movieInfos.getPosters())) {
-            return null;
+            return Collections.emptyList();
         }
         return buildArtworkDetails(movieInfos.getPosters());
     }
@@ -84,12 +84,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(Series series) {
         String allocineId = allocineScanner.getSeriesId(series);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, false);
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid() || MapUtils.isEmpty(tvSeriesInfos.getPosters())) {
-            return null;
+            return Collections.emptyList();
         }
         return buildArtworkDetails(tvSeriesInfos.getPosters());
     }
@@ -98,12 +98,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(Season season) {
         String allocineId = season.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId);
-        if (tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
-            return null;
+        if (tvSeasonInfos == null || tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
+            return Collections.emptyList();
         }
         return buildArtworkDetails(tvSeasonInfos.getPosters());
     }
@@ -127,12 +127,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPhotos(Person person) {
         String allocineId = allocineScanner.getPersonId(person);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
         
         PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId, false);
-        if (personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
-            return null;
+        if (personInfos == null || personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
+            return Collections.emptyList();
         }
 
         ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), personInfos.getPhotoURL(), allocineId);

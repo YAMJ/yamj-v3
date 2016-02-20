@@ -24,6 +24,7 @@ package org.yamj.core.api.wrapper;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.yamj.core.api.model.ApiStatus;
 
@@ -48,25 +49,17 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
     public void setResults(Collection<T> results) {
         this.results = results;
 
-        // Add the list's size
+        // add the list's size
         if (CollectionUtils.isNotEmpty(results)) {
             setCount(results.size());
             if (getCount() > getTotalCount()) {
                 setTotalCount(getCount());
             }
+            setStatusCheck(ApiStatus.OK);
         } else {
             setCount(0);
             setTotalCount(0);
-        }
-    }
-
-    @Override
-    public void setStatusCheck() {
-        setQueryEnd();
-        if (CollectionUtils.isEmpty(results)) {
-            setStatus(new ApiStatus(400, "No records found"));
-        } else {
-            setStatus(new ApiStatus(200, "OK"));
+            setStatusCheck(ApiStatus.NO_RECORD);
         }
     }
 }

@@ -68,6 +68,8 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     @Column(name = "forced_flag", nullable = false)
     private boolean forcedFlag = false;
 
+    // GETTER and SETTER
+
     public MediaFile getMediaFile() {
         return mediaFile;
     }
@@ -125,6 +127,7 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -145,11 +148,12 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Subtitle)) {
             return false;
         }
-        final Subtitle other = (Subtitle) obj;
+        Subtitle other = (Subtitle) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
+        // check other values
         return new EqualsBuilder()
                 .append(getCounter(), other.getCounter())
                 .append(getMediaFile(), other.getMediaFile())

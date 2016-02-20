@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--  database versions -->
-        <mysql.version>5.1.36</mysql.version>
+        <mysql.version>5.1.38</mysql.version>
         <hsqldb.version>2.3.3</hsqldb.version>
         <h2.version>1.4.189</h2.version>
         <!-- other stuff -->
@@ -32,8 +32,10 @@
         <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
         <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
         <imdbapi.version>1.4-SNAPSHOT</imdbapi.version>
+        <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <moviemeterapi.version>1.1-SNAPSHOT</moviemeterapi.version>
         <tvrageapi.version>1.6-SNAPSHOT</tvrageapi.version>
+        <rottentomatoesapi.version>1.6-SNAPSHOT</rottentomatoesapi.version>
         <httpclient.version>4.5.1</httpclient.version>
     </properties>
 
@@ -81,6 +83,11 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+            <version>1.1</version>
+        </dependency>
         <!-- OTHER -->
         <dependency>
             <groupId>com.jhlabs</groupId>
@@ -112,6 +119,11 @@
             <artifactId>httpclient-cache</artifactId>
             <version>${httpclient.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
         <!--APACHE COMMONS-->
         <dependency>
             <groupId>commons-collections</groupId>
@@ -124,6 +136,10 @@
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
         </dependency>
         <!-- SERVLET -->
         <dependency>
@@ -163,11 +179,6 @@
         </dependency>
         <!-- APIs -->
         <dependency>
-            <groupId>org.yamj</groupId>
-            <artifactId>api-common</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>themoviedbapi</artifactId>
             <version>${themoviedbapi.version}</version>
@@ -202,7 +213,25 @@
             <artifactId>tvrageapi</artifactId>
             <version>${tvrageapi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.omertron</groupId>
+            <artifactId>rottentomatoesapi</artifactId>
+            <version>${rottentomatoesapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yamj</groupId>
+            <artifactId>api-trakttv</artifactId>
+            <version>${trakttvapi.version}</version>
+        </dependency>
         <!--JACKSON JSON-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>

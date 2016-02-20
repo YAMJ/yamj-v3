@@ -22,13 +22,14 @@
  */
 package org.yamj.core.tools.player;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
@@ -40,11 +41,11 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
-import org.yamj.core.web.ResponseTools;
 
 /**
  * Functions for finding information on players
@@ -57,8 +58,6 @@ public final class PlayerTools {
     private static final ObjectMapper MAPPER = new XmlMapper();
     private static final HttpClient HTTP = new SimpleHttpClientBuilder().build();
     private static final String XML_PLAYER_IDENT = "<syabasCommandServerXml>";
-    private static final String DEFAULT_CHARSET = "UTF-8";
-    private static final Charset CHARSET = Charset.forName(DEFAULT_CHARSET);
     // List of the players found
     private final List<PlayerInfo> players = new ArrayList<>();
     // Timeout for scanning
@@ -276,7 +275,7 @@ public final class PlayerTools {
         try {
             HttpGet httpGet = new HttpGet(url);
             httpGet.addHeader(HttpHeaders.ACCEPT, "application/xml");
-            final DigestedResponse response = DigestedResponseReader.requestContent(HTTP, httpGet, CHARSET);
+            final DigestedResponse response = DigestedResponseReader.requestContent(HTTP, httpGet, UTF8);
 
             return response;
         } catch (IOException ex) {

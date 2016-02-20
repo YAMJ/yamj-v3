@@ -28,7 +28,6 @@ import static org.yamj.common.type.ExitType.SUCCESS;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,10 +46,10 @@ import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
-import org.yamj.common.tools.ClassTools;
+import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.ExitType;
 
-public class Start {
+public final class Start {
 
     private static final Logger LOG = LoggerFactory.getLogger(Start.class);
     private static final String WAR_DIR = "lib/";
@@ -63,6 +62,10 @@ public class Start {
     private static final String RESOURCES_DIR = "./resources/";
     private static final String SKINS_DIR = "skins/";
     private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
+
+    private Start() {
+        // empty private constructor
+    }
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("config/log4j-core.properties");
@@ -83,6 +86,7 @@ public class Start {
             }
         } catch (CmdLineException ex) {
             LOG.error("Failed to parse command line options: {}", ex.getMessage());
+            LOG.trace("Command line parser error", ex);
             help(parser);
             status = CMDLINE_ERROR;
         }
@@ -91,7 +95,7 @@ public class Start {
         System.exit(status.getReturn());
     }
 
-    private static ExitType startUp(CmdLineParser parser) {
+    private static ExitType startUp(CmdLineParser parser) { //NOSONAR
         if (StringUtils.isNotBlank(parser.getParsedOptionValue("h"))) {
             yamjHome = parser.getParsedOptionValue("h");
         }
@@ -110,9 +114,9 @@ public class Start {
         if (warFile.exists()) {
             try {
                 // This is a temporary fix until the yamj3.home can be read from the servlet
-                ClassTools.checkSystemProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
-            } catch (IOException ex) {
-                ClassTools.checkSystemProperty("yamj3.home", yamjHome);
+                SystemTools.checkSystemProperty("yamj3.home", new File(yamjHome).getCanonicalPath());
+            } catch (IOException ex) { //NOSONAR
+                SystemTools.checkSystemProperty("yamj3.home", yamjHome);
             }
             
             LOG.info("YAMJ Home: '{}'", yamjHome);
@@ -169,12 +173,15 @@ public class Start {
             return SUCCESS;
         } catch (IOException ex) {
             LOG.error("Failed to start server, error: ", ex.getMessage());
+            LOG.trace("Server error", ex);
             return STARTUP_FAILURE;
         } catch (InterruptedException ex) {
             LOG.error("Server interrupted, error: ", ex.getMessage());
+            LOG.trace("Server error", ex);
             return STARTUP_FAILURE;
         } catch (Exception ex) {
             LOG.error("General server eror, message: ", ex.getMessage());
+            LOG.trace("Server error", ex);
             return STARTUP_FAILURE;
         }
     }

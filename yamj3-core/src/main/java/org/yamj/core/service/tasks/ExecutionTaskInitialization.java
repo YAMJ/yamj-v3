@@ -22,96 +22,52 @@
  */
 package org.yamj.core.service.tasks;
 
-import java.util.Date;
 import javax.annotation.PostConstruct;
-import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.type.IntervalType;
 import org.yamj.core.database.service.ExecutionTaskStorageService;
-import org.yamj.core.tools.MetadataTools;
 
 /**
- * Just used for initialization of artwork profiles at startup.
+ * Just used for initialization of execution tasks on startup.
  */
-@Component
+@Component("executionTaskInitialization")
+@DependsOn("upgradeDatabaseService")
 public class ExecutionTaskInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskInitialization.class);
+    
     @Autowired
     private ExecutionTaskStorageService executionTaskStorageService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.debug("Initialize execution tasks");
-        
-        String[] tasks = PropertyTools.getProperty("execution.task.init.tasks", "").split(",");
-        if (tasks.length > 0) {
-            for (String task : tasks) {
-                boolean valid = true;
-
-                String name = PropertyTools.getProperty("execution.task." + task + ".name");
-                if (StringUtils.isBlank(name)) {
-                    LOG.warn("Property 'execution.task.{}.name' is not present", task);
-                    valid = false;
-                }
-
-                String taskName = PropertyTools.getProperty("execution.task." + task + ".taskName");
-                if (StringUtils.isBlank(taskName)) {
-                    LOG.warn("Property 'execution.task.{}.taskName' is not present", task);
-                    valid = false;
-                }
-
-                String type = PropertyTools.getProperty("execution.task." + task + ".type", IntervalType.UNKNOWN.toString());
-                IntervalType intervalType = IntervalType.fromString(type);
-                if (IntervalType.UNKNOWN == intervalType) {
-                    LOG.warn("Property 'execution.task.{}.type' denotes invalid interval type: {}", task, type);
-                    valid = false;
-                }
-
-                int delay = -1;
-                if (intervalType.needsDelay()) {
-                    String delayString = PropertyTools.getProperty("execution.task." + task + ".delay");
-                    if (!StringUtils.isNumeric(delayString)) {
-                        LOG.warn("Property 'execution.task.{}.delay' is not numeric: {}", name, delayString);
-                        valid = false;
-                    } else {
-                        delay = Integer.parseInt(delayString);
-                    }
-                }
-
-                String dateString = PropertyTools.getProperty("execution.task." + task + ".nextExecution");
-                Date nextExecution = MetadataTools.parseToDate(dateString);
-                if (nextExecution == null) {
-                    LOG.warn("Property 'execution.task.{}.nextExecution' is no valid date: {}", name, dateString);
-                    valid = false;
-                }
-                
-                if (!valid) {
-                    LOG.warn("Execution task {} has no valid setup, so skipping", task);
-                    continue;
-                }
-
-                ExecutionTask executionTask = new ExecutionTask();
-                executionTask.setName(name);
-                executionTask.setTaskName(taskName);
-                executionTask.setIntervalType(intervalType);
-                executionTask.setDelay(delay);
-                executionTask.setNextExecution(nextExecution);
-                executionTask.setOptions(PropertyTools.getProperty("execution.task." + task + ".options"));
-                
-                try {
-                    // call another service to handle transactions
-                    this.executionTaskStorageService.storeExecutionTask(executionTask);
-                } catch (Exception error) {
-                    LOG.error("Failed to store execution task {}", executionTask);
-                    LOG.warn("Storage error", error);
-                }
+        storeExecutionTask("recheck", "recheck", IntervalType.DAILY, -1, new LocalDateTime(2016,1,1,3,0));
+        storeExecutionTask("delete", "delete", IntervalType.HOURS, 2, new LocalDateTime(2016,1,1,0,0));
+        storeExecutionTask("artworksanity", "artworksanity", IntervalType.MONTHLY, -1, new LocalDateTime(2016,1,1,2,0));
+        storeExecutionTask("trakttv", "trakttv", IntervalType.DAILY, -1, new LocalDateTime(2016,1,1,4,0));
+    }
+    
+    private void storeExecutionTask(String name, String taskName, IntervalType interval, int delay, LocalDateTime nextExec) {
+        try {
+            ExecutionTask task = executionTaskStorageService.getExecutionTask(name);
+            if (task == null) {
+                task = new ExecutionTask();
+                task.setName(name);
+                task.setTaskName(taskName);
+                task.setIntervalType(interval);
+                task.setDelay(delay);
+                task.setNextExecution(nextExec.toDate());
+                this.executionTaskStorageService.saveEntity(task);
             }
+        } catch (Exception e) {
+            LOG.error("Failed to initialize task: "+name, e);
         }
     }
 }

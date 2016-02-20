@@ -44,6 +44,7 @@ public class OnlineScannerService {
     public static final Set<String> SERIES_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.series", "tvdb,tmdb");
     public static final Set<String> PERSON_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.person", "tmdb,imdb");
     public static final Set<String> FILMOGRAPHY_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.filmography", "tmdb");
+    private static final String SCANNING_ERROR = "Scanning error";
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
@@ -59,21 +60,23 @@ public class OnlineScannerService {
      * @param metadataScanner
      */
     public void registerMetadataScanner(IMetadataScanner metadataScanner) {
+        final String scannerName =  metadataScanner.getScannerName().toLowerCase();
+        
         if (metadataScanner instanceof IMovieScanner) {
-            LOG.trace("Registered movie scanner: {}", metadataScanner.getScannerName().toLowerCase());
-            registeredMovieScanner.put(metadataScanner.getScannerName().toLowerCase(), (IMovieScanner)metadataScanner);
+            LOG.trace("Registered movie scanner: {}", scannerName);
+            registeredMovieScanner.put(scannerName, (IMovieScanner)metadataScanner);
         }
         if (metadataScanner instanceof ISeriesScanner) {
-            LOG.trace("Registered series scanner: {}", metadataScanner.getScannerName().toLowerCase());
-            registeredSeriesScanner.put(metadataScanner.getScannerName().toLowerCase(), (ISeriesScanner)metadataScanner);
+            LOG.trace("Registered series scanner: {}", scannerName);
+            registeredSeriesScanner.put(scannerName, (ISeriesScanner)metadataScanner);
         }
         if (metadataScanner instanceof IPersonScanner) {
-            LOG.trace("Registered person scanner: {}", metadataScanner.getScannerName().toLowerCase());
-            registeredPersonScanner.put(metadataScanner.getScannerName().toLowerCase(), (IPersonScanner)metadataScanner);
+            LOG.trace("Registered person scanner: {}", scannerName);
+            registeredPersonScanner.put(scannerName, (IPersonScanner)metadataScanner);
         }
         if (metadataScanner instanceof IFilmographyScanner) {
-            LOG.trace("Registered filmography scanner: {}", metadataScanner.getScannerName().toLowerCase());
-            registeredFilmographyScanner.put(metadataScanner.getScannerName().toLowerCase(), (IFilmographyScanner)metadataScanner);
+            LOG.trace("Registered filmography scanner: {}", scannerName);
+            registeredFilmographyScanner.put(scannerName, (IFilmographyScanner)metadataScanner);
         }
     }
     
@@ -105,7 +108,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
 
@@ -113,12 +116,14 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break loop;
+                if (!useAlternate) {
+                    break loop;
+                }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null ? innerResult : scanResult);
+                scanResult = (scanResult == null) ? innerResult : scanResult;
             }
 		}       
         
@@ -173,7 +178,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             
@@ -181,12 +186,14 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break loop;
+                if (!useAlternate) {
+                    break loop;
+                }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null ? innerResult : scanResult);
+                scanResult = (scanResult == null) ? innerResult : scanResult;
             }
     	}
 
@@ -241,7 +248,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             
@@ -249,12 +256,14 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break loop;
+                if (!useAlternate) {
+                    break loop;
+                }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null ? innerResult : scanResult);
+                scanResult = (scanResult == null) ? innerResult : scanResult;
             }
 		}
         
@@ -310,7 +319,7 @@ public class OnlineScannerService {
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                    LOG.warn(SCANNING_ERROR, error);
                 }
             }
             
@@ -322,7 +331,7 @@ public class OnlineScannerService {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null ? innerResult : scanResult);
+                scanResult = (scanResult == null) ? innerResult : scanResult;
             }
 		}
     	

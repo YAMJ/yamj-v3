@@ -47,6 +47,7 @@ public class CastCrew implements Serializable {
     private int ordering;
 
     public CastCrew() {
+        // empty constructor
     }
 
     public CastCrew(Person person, VideoData videoData, JobType jobType) {
@@ -97,9 +98,8 @@ public class CastCrew implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof CastCrew) {
-            final CastCrew other = (CastCrew) obj;
             return new EqualsBuilder()
-                    .append(getCastCrewPK(), other.getCastCrewPK())
+                    .append(getCastCrewPK(), ((CastCrew)obj).getCastCrewPK())
                     .isEquals();
         }
         return false;

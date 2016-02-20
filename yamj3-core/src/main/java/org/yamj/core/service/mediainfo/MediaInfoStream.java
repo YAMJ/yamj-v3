@@ -22,12 +22,10 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 
-public class MediaInfoStream implements Closeable  {
+public class MediaInfoStream implements AutoCloseable {
 
     private final Process process;
     private final InputStream inputStream;
@@ -47,42 +45,42 @@ public class MediaInfoStream implements Closeable  {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         if (process != null) {
             try {
                 process.waitFor();
-            } catch (Exception ignore) {
-                // error can be ignored
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
             }
         }
             
         if (inputStream != null) {
             try {
                 inputStream.close();
-            } catch (Exception ignore) {
-                // error can be ignored
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
             }
         }
         
         if (process != null) {
-            try {
-                if (process.getErrorStream() != null) {
+            if (process.getErrorStream() != null) {
+                try {
                     process.getErrorStream().close();  
+                } catch (Exception ignore)  { //NOSONAR
+                    // ignore exception
                 }
-            } catch (Exception ignore) {
-                // error can be ignored
             }
-            try {
-                if (process.getOutputStream() != null) {
+            if (process.getOutputStream() != null) {
+                try {
                     process.getOutputStream().close();
+                } catch (Exception ignore)  { //NOSONAR
+                    // ignore exception
                 }
-            } catch (Exception ignore) {
-                // error can be ignored
             }
             try {
                 process.destroy();
-            } catch (Exception ignore) {
-                // error can be ignored
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
             }
         }
     }

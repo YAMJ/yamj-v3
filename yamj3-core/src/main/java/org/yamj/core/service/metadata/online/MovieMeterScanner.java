@@ -64,7 +64,7 @@ public class MovieMeterScanner implements IMovieScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize MovieMeter scanner");
+        LOG.trace("Initialize MovieMeter scanner");
 
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -89,17 +89,15 @@ public class MovieMeterScanner implements IMovieScanner {
 
         // try to get the MovieMeter ID using title and year
         if (!StringUtils.isNumeric(movieMeterId)) {
-            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitle(), videoData.getYear(), throwTempError);
+            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
         }
 
-        // try to get the MovieMeter ID using originak title and year
-        if (!StringUtils.isNumeric(movieMeterId) 
-            && StringUtils.isNotBlank(videoData.getTitleOriginal())
-            && !videoData.getTitle().equalsIgnoreCase(videoData.getTitleOriginal())) 
-        {
-            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear(), throwTempError);
+        // try to get the MovieMeter ID using original title and year
+        if (!StringUtils.isNumeric(movieMeterId) && videoData.isTitleOriginalScannable()) {
+            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
         }
         
+        videoData.setSourceDbId(SCANNER_ID, movieMeterId);
         return movieMeterId;
     }
     

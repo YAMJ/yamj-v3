@@ -23,24 +23,44 @@
 package org.yamj.core.database.service;
 
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
+import org.yamj.core.database.DatabaseType;
 import org.yamj.core.database.dao.UpgradeDatabaseDao;
 
-@Component
+@Component("upgradeDatabaseService")
 public class UpgradeDatabaseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpgradeDatabaseService.class);
 
+    @Autowired
+    @Qualifier("sessionFactory")
+    private LocalSessionFactoryBean sessionFactory;
     @Autowired
     private UpgradeDatabaseDao upgradeDatabaseDao;
     
     @PostConstruct
     public void init() {
         LOG.trace("Upgrading database");
-        
-        // no patches right now
+
+        final String dialect = sessionFactory.getHibernateProperties().getProperty("hibernate.dialect");
+        final String databaseType;
+        if (StringUtils.containsIgnoreCase(dialect, "HSQLDialect")) {
+            databaseType = DatabaseType.HSQL;
+        } else if (StringUtils.containsIgnoreCase(dialect, "MySQL")) {
+            databaseType = DatabaseType.MYSQL;
+        } else if (StringUtils.containsIgnoreCase(dialect, "H2Dialect")) {
+            databaseType = DatabaseType.H2;
+        } else {
+            // no valid database type for patching
+            databaseType = null;
+        }
+
+        LOG.trace("Run patches for database type {}", databaseType);
     }
 }

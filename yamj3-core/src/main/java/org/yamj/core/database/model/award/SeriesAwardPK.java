@@ -51,6 +51,7 @@ public class SeriesAwardPK implements Serializable {
     private int year = -1;
 
     public SeriesAwardPK() {
+        // empty constructor
     }
 
     public SeriesAwardPK(Series series, Award award, int year) {
@@ -97,7 +98,7 @@ public class SeriesAwardPK implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SeriesAwardPK) {
-            final SeriesAwardPK other = (SeriesAwardPK) obj;
+            SeriesAwardPK other = (SeriesAwardPK) obj;
             return new EqualsBuilder()
                     .append(getSeries().getId(), other.getSeries().getId())
                     .append(getAward().getId(), other.getAward().getId())

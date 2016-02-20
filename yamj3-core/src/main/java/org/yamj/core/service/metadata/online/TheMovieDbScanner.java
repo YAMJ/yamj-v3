@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.collection.CollectionInfo;
+import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.*;
@@ -56,7 +56,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-
+                    
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
@@ -73,7 +73,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheMovieDb scanner");
+        LOG.trace("Initialize TheMovieDb scanner");
 
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -87,7 +87,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         return getMovieId(videoData, tmdbLocale, false);
     }
 
-    private String getMovieId(VideoData videoData, Locale tmdbLocale, boolean throwTempError) {
+    private String getMovieId(VideoData videoData, Locale tmdbLocale, boolean throwTempError) { //NOSONAR
         String tmdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
@@ -98,7 +98,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             // Search based on IMDb ID
             LOG.debug("Using IMDb id {} for '{}'", imdbId, videoData.getTitle());
             MovieInfo movieInfo = tmdbApiWrapper.getMovieInfoByIMDB(imdbId, tmdbLocale, throwTempError);
-            if (movieInfo != null) {
+            if (movieInfo != null && movieInfo.getId() > 0) {
                 tmdbId = String.valueOf(movieInfo.getId());
             }
         }
@@ -108,7 +108,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitle(), videoData.getPublicationYear(), tmdbLocale, throwTempError);
         }
 
-        if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+        if (!StringUtils.isNumeric(tmdbId) && videoData.isTitleOriginalScannable()) {
             LOG.debug("No TMDb id found for '{}', searching original title with year {}", videoData.getTitleOriginal(), videoData.getPublicationYear());
             tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), tmdbLocale, throwTempError);
         }
@@ -169,7 +169,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData) { //NOSONAR
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
         MovieInfo movieInfo = null;
         try {
@@ -182,7 +182,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
 
             movieInfo = tmdbApiWrapper.getMovieInfoByTMDB(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
             if (videoData.getRetries() < maxRetries) {
@@ -190,7 +190,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
         }
 
-        if (movieInfo == null) {
+        if (movieInfo == null || movieInfo.getId() <= 0) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -253,7 +253,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
         }
         
-        
         if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
             videoData.setPublicationYear(MetadataTools.extractYearAsInt(movieInfo.getReleaseDate()), SCANNER_ID);
         }
@@ -261,10 +260,10 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         // CERTIFICATIONS
         if (CollectionUtils.isNotEmpty(movieInfo.getReleases())) {
             for (String countryCode : localeService.getCertificationCountryCodes(tmdbLocale)) {
-                loop: for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
+                for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
                     if (countryCode.equalsIgnoreCase(releaseInfo.getCountry())) {
                         videoData.addCertificationInfo(countryCode, releaseInfo.getCertification());
-                        break loop;
+                        break;
                     }
                 }
             }
@@ -292,7 +291,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // COMPANIES
         if (CollectionUtils.isNotEmpty(movieInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            final Set<String> studioNames = new HashSet<>();
+            final Set<String> studioNames = new HashSet<>(movieInfo.getProductionCompanies().size());
             for (ProductionCompany company : movieInfo.getProductionCompanies()) {
                 if (StringUtils.isNotBlank(company.getName())) {
                     studioNames.add(StringUtils.trim(company.getName()));
@@ -330,9 +329,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // store collection as boxed set
         if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", Boolean.FALSE)) {
-            CollectionInfo collectionInfo = movieInfo.getBelongsToCollection();
-            if (collectionInfo != null && collectionInfo.getName() != null) {
-                videoData.addBoxedSetDTO(SCANNER_ID, collectionInfo.getName(), -1, Integer.toString(collectionInfo.getId()));
+            Collection collection = movieInfo.getBelongsToCollection();
+            if (collection != null && collection.getName() != null) {
+                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, Integer.toString(collection.getId()));
             }
         }
         
@@ -340,7 +339,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public ScanResult scanSeries(Series series) {
+    public ScanResult scanSeries(Series series) { //NOSONAR
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
         TVInfo tvInfo = null;
         try {
@@ -353,7 +352,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
 
             tvInfo = tmdbApiWrapper.getSeriesInfo(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
+        } catch (TemporaryUnavailableException ex) { //NOSONAR
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
             if (series.getRetries() < maxRetries) {
@@ -361,7 +360,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
         }
 
-        if (tvInfo == null) {
+        if (tvInfo == null || tvInfo.getId() <= 0) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -373,6 +372,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
             if (StringUtils.isBlank(series.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
                 series.setSourceDbId(TheTVDbScanner.SCANNER_ID, tvInfo.getExternalIDs().getTvdbId());
+            }
+            if (StringUtils.isBlank(series.getSourceDbId(TVRageScanner.SCANNER_ID))) {
+                series.setSourceDbId(TVRageScanner.SCANNER_ID, tvInfo.getExternalIDs().getTvrageId());
             }
         }
         
@@ -400,7 +402,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             Set<String> countryCodes = new HashSet<>();
             for (String country : tvInfo.getOriginCountry()) {
                 final String countryCode = localeService.findCountryCode(country);
-                if (countryCode != null) countryCodes.add(country);
+                if (countryCode != null) {
+                    countryCodes.add(country);
+                }
             }
             series.setCountryCodes(countryCodes, SCANNER_ID);
         }
@@ -444,7 +448,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 final String seriesId = series.getSourceDbId(SCANNER_ID);
                 TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(seriesId, season.getSeason(), tmdbLocale);
                 
-                if (seasonInfo == null) {
+                if (seasonInfo == null || seasonInfo.getId() <= 0) {
                     // mark season as not found
                     season.removeOverrideSource(SCANNER_ID);
                     season.removeSourceDbId(SCANNER_ID);
@@ -481,7 +485,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
     }
     
-    private void scanEpisodes(Season season, Locale tmdbLocale) {
+    private void scanEpisodes(Season season, Locale tmdbLocale) { //NOSONAR
         for (VideoData videoData : season.getVideoDatas()) {
             
             if (videoData.isTvEpisodeDone(SCANNER_ID)) {
@@ -492,7 +496,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             // get the episode
             String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
             TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(seriesId, season.getSeason(), videoData.getEpisode(), tmdbLocale);
-            if (episodeInfo == null) {
+            if (episodeInfo == null || episodeInfo.getId() <= 0) {
                 // mark episode as not found
                 videoData.removeOverrideSource(SCANNER_ID);
                 videoData.removeSourceDbId(SCANNER_ID);
@@ -574,7 +578,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public ScanResult scanPerson(Person person) {
+    public ScanResult scanPerson(Person person) { //NOSONAR
         PersonInfo tmdbPerson = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
@@ -594,7 +598,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
         }
 
-        if (tmdbPerson == null) {
+        if (tmdbPerson == null || tmdbPerson.getId() <= 0) {
             LOG.error("Can't find information for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -602,18 +606,16 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         // fill in data
         person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
-        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
-            // split person names
-            PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-                person.setName(nameDTO.getName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
-                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
-                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
-            }
+        // split person names
+        PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(nameDTO.getName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
+            person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+            person.setLastName(nameDTO.getLastName(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
@@ -645,7 +647,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public ScanResult scanFilmography(Person person) {
+    public ScanResult scanFilmography(Person person) { //NOSONAR
         PersonCreditList<CreditBasic> credits = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
@@ -751,7 +753,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         return filmo;
     }
 
-    private static JobType retrieveJobType(String personName, String department) {
+    private static JobType retrieveJobType(String personName, String department) { //NOSONAR
         if (StringUtils.isBlank(department)) {
             LOG.trace("No department found for person '{}'", personName);
             return JobType.UNKNOWN;
@@ -807,7 +809,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             if (beginIndex != -1) {
                 StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&é\"'(--è_çà)=$");
                 String sourceId = st.nextToken();
-                LOG.debug("Allocine ID found in NFO: {}", sourceId);
+                LOG.debug("TheMovieDb ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
                 return Boolean.TRUE;
             }

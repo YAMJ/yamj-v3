@@ -42,9 +42,7 @@ public final class TrailerDTO {
         this.container = container;
         this.url = url;
         this.title = title;
-        
-        int iHashCode = url.hashCode();
-        this.hashCode = String.valueOf(iHashCode < 0 ? 0-iHashCode : iHashCode);
+        this.hashCode = Integer.toString(Math.abs(url.hashCode()));
     }
 
     public TrailerDTO(String source, ContainerType container, String url, String title, String hashCode) {

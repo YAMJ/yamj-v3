@@ -28,24 +28,18 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
 
 /**
- *
  * @author stuart.boston
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
+public class ApiVideoDTO extends AbstractMetaDataDTO {
 
     private MetaDataType videoType;
-    private String title;
-    private String originalTitle;
     private String sortTitle;
     private Integer videoYear = -1;
-    private String outline;
-    private String plot;
     private String quote;
     private String tagline;
     private Integer topRank = -1;
@@ -53,33 +47,24 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long seasonId;
     private Long season;
     private Long episode = -1L;
-    private Boolean watched;
     private Date newest;
     private String status;
-    private List<ApiGenreDTO> genres = new ArrayList<>(0);
-    private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiCountryDTO> countries = new ArrayList<>(0);
-    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
-    private List<ApiRatingDTO> ratings = new ArrayList<>();
-    private List<ApiAwardDTO> awards = new ArrayList<>(0);
-    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
-    private List<ApiFileDTO> files = new ArrayList<>(0);
+    private String videoSource;
+    private List<ApiGenreDTO> genres = Collections.emptyList();
+    private List<Studio> studios = Collections.emptyList();
+    private List<ApiCountryDTO> countries = Collections.emptyList();
+    private List<ApiCertificationDTO> certifications = Collections.emptyList();
+    private List<ApiRatingDTO> ratings = Collections.emptyList();
+    private List<ApiAwardDTO> awards = Collections.emptyList();
+    private List<ApiFileDTO> files = Collections.emptyList();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
-    private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
-    private List<ApiBoxedSetDTO> boxedSets = new ArrayList<>(0);
-    private List<ApiTrailerDTO> trailers = new ArrayList<>(0);
+    private List<ApiExternalIdDTO> externalIds = Collections.emptyList();
+    private List<ApiBoxedSetDTO> boxedSets = Collections.emptyList();
+    private List<ApiTrailerDTO> trailers = Collections.emptyList();
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
         return videoType;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getOriginalTitle() {
-        return originalTitle;
     }
 
     public String getSortTitle() {
@@ -88,18 +73,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public Integer getVideoYear() {
         return videoYear;
-    }
-
-    public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
-        return artwork;
-    }
-
-    public int getArtworkCount() {
-        int count = 0;
-        for (Map.Entry<ArtworkType, List<ApiArtworkDTO>> entry : artwork.entrySet()) {
-            count += entry.getValue().size();
-        }
-        return count;
     }
 
     public Map<JobType, List<ApiPersonDTO>> getCast() {
@@ -162,14 +135,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return awards.size();
     }
 
-    public String getOutline() {
-        return outline;
-    }
-
-    public String getPlot() {
-        return plot;
-    }
-
     public String getQuote() {
         return quote;
     }
@@ -196,6 +161,18 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public Long getEpisode() {
         return episode;
+    }
+
+    public String getNewest() {
+        return MetadataTools.formatDateLong(this.newest);
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getVideoSource() {
+        return videoSource;
     }
 
     public List<ApiFileDTO> getFiles() {
@@ -228,14 +205,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.videoType = MetaDataType.fromString(videoType);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
-    }
-
     public void setSortTitle(String sortTitle) {
         this.sortTitle = sortTitle;
     }
@@ -254,14 +223,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
-        for (ApiArtworkDTO aadto : artworkList) {
-            addArtwork(aadto);
+        for (ApiArtworkDTO dto : artworkList) {
+            addArtwork(dto);
         }
     }
 
     public void setCast(List<ApiPersonDTO> castList) {
-        for (ApiPersonDTO acdto : castList) {
-            addCast(acdto);
+        for (ApiPersonDTO dto : castList) {
+            addCast(dto);
         }
     }
 
@@ -287,14 +256,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setAwards(List<ApiAwardDTO> awards) {
         this.awards = awards;
-    }
-
-    public void setOutline(String outline) {
-        this.outline = outline;
-    }
-
-    public void setPlot(String plot) {
-        this.plot = plot;
     }
 
     public void setQuote(String quote) {
@@ -325,20 +286,16 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.episode = episode;
     }
 
-    public Boolean getWatched() {
-        return watched;
-    }
-
-    public void setWatched(Boolean watched) {
-        this.watched = watched;
-    }
-
-    public String getNewest() {
-        return MetadataTools.formatDateLong(this.newest);
-    }
-
     public void setNewest(Date newest) {
         this.newest = newest;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setVideoSource(String videoSource) {
+        this.videoSource = videoSource;
     }
 
     public void setFiles(List<ApiFileDTO> files) {
@@ -358,24 +315,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
     //</editor-fold>
 
-    
-    public void addArtwork(ApiArtworkDTO newArtwork) {
-        // Add a blank list if it doesn't already exist
-        if (!artwork.containsKey(newArtwork.getArtworkType())) {
-            artwork.put(newArtwork.getArtworkType(), new ArrayList<ApiArtworkDTO>(1));
-        }
-        this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
-    }
-
-    public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public void addCast(ApiPersonDTO newCast) {
+    public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
         if (!cast.containsKey(newCast.getJob())) {
             cast.put(newCast.getJob(), new ArrayList<ApiPersonDTO>(1));

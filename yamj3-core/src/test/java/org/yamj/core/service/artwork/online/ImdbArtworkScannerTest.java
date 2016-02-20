@@ -25,13 +25,12 @@ package org.yamj.core.service.artwork.online;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class ImdbArtworkScannerTest extends AbstractJUnit4SpringContextTests {
+public class ImdbArtworkScannerTest extends AbstractTest {
 
     @Resource(name = "imdbArtworkScanner")
     private ImdbArtworkScanner imdbArtworkScanner;
@@ -42,11 +41,7 @@ public class ImdbArtworkScannerTest extends AbstractJUnit4SpringContextTests {
         videoData.setSourceDbId(imdbArtworkScanner.getScannerName(), "tt0499549");
 
         List<ArtworkDetailDTO> dtos = imdbArtworkScanner.getPosters(videoData);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
     @Test
@@ -55,10 +50,6 @@ public class ImdbArtworkScannerTest extends AbstractJUnit4SpringContextTests {
         videoData.setSourceDbId(imdbArtworkScanner.getScannerName(), "tt0499549");
 
         List<ArtworkDetailDTO> dtos = imdbArtworkScanner.getFanarts(videoData);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 }

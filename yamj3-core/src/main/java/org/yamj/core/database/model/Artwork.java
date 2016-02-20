@@ -22,21 +22,27 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
+
+@NamedQueries({    
+    @NamedQuery(name = "artwork.findPersonArtworks",
+        query = "select a from Artwork a join a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+    )
+})
 
 @Entity
 @Table(name = "artwork",
@@ -45,7 +51,7 @@ import org.yamj.core.database.model.type.ArtworkType;
                   @Index(name = "IX_ARTWORK_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
-public class Artwork extends AbstractAuditable implements Serializable {
+public class Artwork extends AbstractStateful {
 
     private static final long serialVersionUID = -981494909436217076L;
 
@@ -84,14 +90,11 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_BOXEDSET"))
     private BoxedSet boxedSet;
 
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
-    private Set<ArtworkLocated> artworkLocated = new HashSet<>(0);
+    private List<ArtworkLocated> artworkLocated = new ArrayList<>(0);
 
     // GETTER and SETTER
+    
     public ArtworkType getArtworkType() {
         return artworkType;
     }
@@ -140,23 +143,16 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.boxedSet = boxedSet;
     }
 
-    private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
+    private void setArtworkLocated(List<ArtworkLocated> artworkLocated) {
         this.artworkLocated = artworkLocated;
     }
 
-    public Set<ArtworkLocated> getArtworkLocated() {
+    public List<ArtworkLocated> getArtworkLocated() {
         return artworkLocated;
     }
 
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
-    }
-
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -180,7 +176,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
         if (!(obj instanceof Artwork)) {
             return false;
         }
-        final Artwork other = (Artwork) obj;
+        Artwork other = (Artwork) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
@@ -197,7 +193,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     @Override
-    public String toString() {
+    public String toString() { //NOSONAR
         StringBuilder sb = new StringBuilder();
         sb.append("Artwork [ID=");
         sb.append(getId());

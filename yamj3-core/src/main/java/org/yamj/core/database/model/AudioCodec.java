@@ -65,6 +65,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     private String languageCode;
 
     // GETTER AND SETTER
+    
     public MediaFile getMediaFile() {
         return mediaFile;
     }
@@ -122,6 +123,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -141,7 +143,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof AudioCodec)) {
             return false;
         }
-        final AudioCodec other = (AudioCodec) obj;
+        AudioCodec other = (AudioCodec) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

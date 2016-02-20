@@ -24,26 +24,41 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
+import org.yamj.core.database.model.type.ScalingType;
+
+@NamedQueries({
+    @NamedQuery(name = "artworkProfile.getAllArtworkProfiles",
+        query = "FROM ArtworkProfile ap ORDER BY ap.profileName, ap.metaDataType, ap.artworkType"
+    )
+})
 
 @Entity
 @Table(name = "artwork_profile",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "artwork_type"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "metadata_type", "artwork_type"})
 )
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -5178511945599751914L;
 
     @NaturalId
-    @Column(name = "profile_name")
+    @Column(name = "profile_name", length = 100)
     private String profileName;
 
     @NaturalId
+    @Type(type = "metaDataType")
+    @Column(name = "metadata_type", length = 20)
+    private MetaDataType metaDataType;
+
+    @NaturalId
     @Type(type = "artworkType")
-    @Column(name = "artwork_type")
+    @Column(name = "artwork_type", length = 20)
     private ArtworkType artworkType;
 
     @Column(name = "width", nullable = false)
@@ -52,38 +67,21 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "height", nullable = false)
     private int height = -1;
 
-    @Column(name = "apply_to_movie", nullable = false)
-    private boolean applyToMovie = false;
-
-    @Column(name = "apply_to_series", nullable = false)
-    private boolean applyToSeries = false;
-
-    @Column(name = "apply_to_season", nullable = false)
-    private boolean applyToSeason = false;
-
-    @Column(name = "apply_to_episode", nullable = false)
-    private boolean applyToEpisode = false;
-
-    @Column(name = "apply_to_person", nullable = false)
-    private boolean applyToPerson = false;
-
-    @Column(name = "apply_to_boxexset", nullable = false)
-    private boolean applyToBoxedSet = false;
-
-    @Column(name = "pre_process", nullable = false)
-    private boolean preProcess = false;
-
-    @Column(name = "rounded_corners", nullable = false)
-    private boolean roundedCorners = false;
+    @Type(type = "scalingType")
+    @Column(name = "scaling", length = 20, nullable=false)
+    private ScalingType scalingType;
 
     @Column(name = "reflection", nullable = false)
     private boolean reflection = false;
 
-    @Column(name = "normalize", nullable = false)
-    private boolean normalize = false;
+    @Column(name = "rounded_corners", nullable = false)
+    private boolean roundedCorners = false;
 
-    @Column(name = "stretch", nullable = false)
-    private boolean stretch = false;
+    @Column(name = "pre_process", nullable = false)
+    private boolean preProcess = false;
+
+    @Column(name = "quality", nullable = false)
+    private int quality = -1;
 
     // GETTER and SETTER
 
@@ -93,6 +91,14 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     public void setProfileName(String profileName) {
         this.profileName = profileName;
+    }
+
+    public MetaDataType getMetaDataType() {
+        return metaDataType;
+    }
+
+    public void setMetaDataType(MetaDataType metaDataType) {
+        this.metaDataType = metaDataType;
     }
 
     public ArtworkType getArtworkType() {
@@ -119,68 +125,12 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.height = height;
     }
 
-    public boolean isApplyToMovie() {
-        return applyToMovie;
+    public ScalingType getScalingType() {
+        return scalingType;
     }
 
-    public void setApplyToMovie(boolean applyToMovie) {
-        this.applyToMovie = applyToMovie;
-    }
-
-    public boolean isApplyToSeries() {
-        return applyToSeries;
-    }
-
-    public void setApplyToSeries(boolean applyToSeries) {
-        this.applyToSeries = applyToSeries;
-    }
-
-    public boolean isApplyToSeason() {
-        return applyToSeason;
-    }
-
-    public void setApplyToSeason(boolean applyToSeason) {
-        this.applyToSeason = applyToSeason;
-    }
-
-    public boolean isApplyToEpisode() {
-        return applyToEpisode;
-    }
-
-    public void setApplyToEpisode(boolean applyToEpisode) {
-        this.applyToEpisode = applyToEpisode;
-    }
-
-    public boolean isApplyToPerson() {
-        return applyToPerson;
-    }
-
-    public void setApplyToPerson(boolean applyToPerson) {
-        this.applyToPerson = applyToPerson;
-    }
-
-    public boolean isApplyToBoxedSet() {
-        return applyToBoxedSet;
-    }
-
-    public void setApplyToBoxedSet(boolean applyToBoxedSet) {
-        this.applyToBoxedSet = applyToBoxedSet;
-    }
-
-    public boolean isPreProcess() {
-        return preProcess;
-    }
-
-    public void setPreProcess(boolean preProcess) {
-        this.preProcess = preProcess;
-    }
-
-    public boolean isRoundedCorners() {
-        return roundedCorners;
-    }
-
-    public void setRoundedCorners(boolean roundedCorners) {
-        this.roundedCorners = roundedCorners;
+    public void setScalingType(ScalingType scalingType) {
+        this.scalingType = scalingType;
     }
 
     public boolean isReflection() {
@@ -191,25 +141,28 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.reflection = reflection;
     }
 
-    public boolean isNormalize() {
-        return normalize;
+    public boolean isRoundedCorners() {
+        return roundedCorners;
     }
 
-    public void setNormalize(boolean normalize) {
-        this.normalize = normalize;
+    public void setRoundedCorners(boolean roundedCorners) {
+        this.roundedCorners = roundedCorners;
     }
 
-    public boolean isStretch() {
-        return stretch;
+    public boolean isPreProcess() {
+        return preProcess;
     }
 
-    public void setStretch(boolean stretch) {
-        this.stretch = stretch;
+    public void setPreProcess(boolean preProcess) {
+        this.preProcess = preProcess;
     }
 
-    // TODO
-    public ImageType getImageType() {
-        return ImageType.JPG;
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
     }
 
     // TODO
@@ -218,14 +171,14 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     }
 
     // TODO
-    public int getQuality() {
-        return 75;
+    public ImageType getImageType() {
+        return ImageType.JPG;
     }
 
     // COMMON METHODS
 
     public float getRatio() {
-        return ((float) getWidth() / (float) getHeight());
+        return (float) getWidth() / (float) getHeight();
     }
 
     public float getRounderCornerQuality() {
@@ -239,18 +192,53 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     // EQUALITY CHECKS
 
     @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(getProfileName())
+                .append(getArtworkType().name())
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ArtworkProfile)) {
+            return false;
+        }
+        ArtworkProfile other = (ArtworkProfile) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getProfileName(), other.getProfileName())
+                .append(getArtworkType().name(), other.getArtworkType().name())
+                .isEquals();
+    }
+    
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ArtworkProfile [ID=");
         sb.append(getId());
         sb.append(", name=");
         sb.append(getProfileName());
-        sb.append(", type=");
+        sb.append(", metaDataType=");
+        sb.append(getMetaDataType());
+        sb.append(", artworkType=");
         sb.append(getArtworkType());
         sb.append(", width=");
         sb.append(getWidth());
         sb.append(", height=");
         sb.append(getHeight());
+        sb.append(", scaling=");
+        sb.append(getScalingType());
         sb.append(", preProcess=");
         sb.append(isPreProcess());
         sb.append("]");

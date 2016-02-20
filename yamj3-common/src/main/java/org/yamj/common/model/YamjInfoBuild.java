@@ -30,6 +30,7 @@ public enum YamjInfoBuild {
     JETTY;
 
     private YamjInfoBuild() {
+        // empty constructor
     }
 
     public String getFilename() {

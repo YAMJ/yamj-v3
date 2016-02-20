@@ -24,8 +24,10 @@ package org.yamj.core.database.dao;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.CacheMode;
 import org.hibernate.SQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,13 +55,11 @@ public class MetadataDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
-        
         List<Object[]> objects = query.list();
+       
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setMetadataType(convertRowElementToString(object[1]));
             queueElement.setDate(convertRowElementToDate(object[3]));
             if (queueElement.getDate() == null) {
@@ -89,6 +89,47 @@ public class MetadataDao extends HibernateDao {
         return getById(Person.class, id);
     }
 
+    @CacheEvict(value=CachingNames.DB_PERSON, key="#doubletPerson.id")
+    public void duplicate(Person person, Person doubletPerson) {
+        // find movies which contains the doublet
+        List<VideoData> videoDatas = currentSession().getNamedQuery("videoData.findVideoDatas.byPerson")
+                .setLong("id", doubletPerson.getId())
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
+        
+        for (VideoData videoData : videoDatas) {
+            // find doublet entries (for different jobs)
+            List<CastCrew> doubletCredits = new ArrayList<>();
+            for (CastCrew credit : videoData.getCredits()) {
+                if (credit.getCastCrewPK().getPerson().equals(doubletPerson)) {
+                    doubletCredits.add(credit);
+                }
+            }
+            
+            for (CastCrew doubletCredit : doubletCredits) {
+                CastCrew newCredit = new CastCrew(person, videoData, doubletCredit.getCastCrewPK().getJobType());
+                if (videoData.getCredits().contains(newCredit)) {
+                    // just remove doublet person
+                    videoData.getCredits().remove(doubletCredit);
+                } else {
+                    newCredit.setOrdering(doubletCredit.getOrdering());
+                    newCredit.setRole(doubletCredit.getRole());
+                    newCredit.setVoiceRole(doubletCredit.isVoiceRole());
+                    videoData.getCredits().remove(doubletCredit);
+                    videoData.getCredits().add(newCredit);
+                } 
+            }
+            
+            // update video data
+            this.updateEntity(videoData);
+        }
+        
+        // update doublet person
+        doubletPerson.setStatus(StatusType.DELETED);
+        this.updateEntity(doubletPerson);
+    }
+    
     public void storeMovieCredit(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
         if (person == null) {
@@ -158,17 +199,11 @@ public class MetadataDao extends HibernateDao {
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("select a ");
-        sb.append("from Artwork a ");
-        sb.append("join a.person p ");
-        sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND lower(p.identifier)=:identifier ");
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("artworkType", ArtworkType.PHOTO);
-        params.put(IDENTIFIER, identifier.toLowerCase());
-
-        return this.findByNamedParameters(sb, params);
+        return currentSession().getNamedQuery("artwork.findPersonArtworks")
+                .setParameter("artworkType", ArtworkType.PHOTO)
+                .setString(IDENTIFIER, identifier.toLowerCase())
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
     }
 }

@@ -41,6 +41,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
     private String countryCode;
 
     public Country() {
+        // empty constructor
     }
 
     public Country(String countryCode) {
@@ -48,6 +49,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
     }
 
     // GETTER and SETTER
+    
     public String getCountryCode() {
         return countryCode;
     }
@@ -57,6 +59,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -75,7 +78,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
         if (!(obj instanceof Country)) {
             return false;
         }
-        final Country other = (Country) obj;
+        Country other = (Country) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();

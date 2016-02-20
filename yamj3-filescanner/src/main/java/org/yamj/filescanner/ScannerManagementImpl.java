@@ -24,12 +24,7 @@ package org.yamj.filescanner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,10 +54,7 @@ import org.yamj.common.type.ExitType;
 import org.yamj.common.type.StatusType;
 import org.yamj.common.util.KeywordMap;
 import org.yamj.filescanner.comparator.FileTypeComparator;
-import org.yamj.filescanner.model.Library;
-import org.yamj.filescanner.model.LibraryCollection;
-import org.yamj.filescanner.model.StatType;
-import org.yamj.filescanner.model.TimeType;
+import org.yamj.filescanner.model.*;
 import org.yamj.filescanner.service.SystemInfoCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
@@ -128,8 +120,8 @@ public class ScannerManagementImpl implements ScannerManagement {
                     LOG.debug("Replaced pattern '{}' with regex '{}'", keyword, regex);
                     DIR_IGNORE_FILES.add(Pattern.compile(regex));
                 } catch (PatternSyntaxException ex) {
-                    LOG.warn("Pattern '{}' not recognised. Error: {}", keyword, ex.getMessage());
-                    LOG.trace("Exception:", ex);
+                    LOG.warn("Pattern '{}' not recognised: {}", keyword, ex.getMessage());
+                    LOG.trace("Pattern error", ex);
                 }
             }
         }
@@ -223,7 +215,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         // Wait for the libraries to be sent
         boolean allDone;
         do {
-            allDone = Boolean.TRUE;
+            allDone = true;
             for (Library library : libraryCollection.getLibraries()) {
                 LOG.info("Library '{}' sending status: {}", library.getImportDTO().getBaseDirectory(), library.isSendingComplete() ? "Done" : "Not Done");
                 allDone = allDone && library.isSendingComplete();
@@ -233,26 +225,28 @@ public class ScannerManagementImpl implements ScannerManagement {
                 try {
                     LOG.info("Waiting for library sending to complete...");
                     TimeUnit.SECONDS.sleep(WAIT_10_SECONDS);
-                } catch (InterruptedException ex) {
-                    LOG.trace("Interrupted whilst waiting for threads to complete.");
+                } catch (InterruptedException ex) { //NOSONAR
+                    LOG.trace("Interrupted whilst waiting for threads to complete");
                 }
             }
         } while (!allDone);
 
-        LOG.info(StringUtils.repeat("*", DIVIDER_LINE_LENGTH));
-        LOG.info("Completed initial sending of all libraries ({} total).", libraryCollection.size());
-        LOG.info("");
-        LOG.info("Library statistics:");
-        for (Library library : libraryCollection.getLibraries()) {
-            LOG.info("Description: '{}'", library.getDescription());
-            LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
+        if (LOG.isInfoEnabled()) {
+            LOG.info(StringUtils.repeat("*", DIVIDER_LINE_LENGTH));
+            LOG.info("Completed initial sending of all libraries ({} total)", libraryCollection.size());
+            LOG.info("");
+            LOG.info("Library statistics:");
+            for (Library library : libraryCollection.getLibraries()) {
+                LOG.info("Description: '{}'", library.getDescription());
+                LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
+            }
         }
-
+        
         if (watchEnabled) {
             Watcher wd;
             try {
                 wd = new Watcher();
-            } catch (UnsatisfiedLinkError ule) {
+            } catch (UnsatisfiedLinkError ule) { //NOSONAR
                 LOG.warn("Watching is not possible on this system; therefore watch service will not be used");
                 wd = null;
             }
@@ -275,7 +269,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                     wd.processEvents();
                     LOG.info("Watching directory '{}' completed", directoryProperty);
                 } else {
-                    LOG.info("No directories marked for watching.");
+                    LOG.info("No directories marked for watching");
                 }
             }
         } else {
@@ -340,7 +334,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
             } catch (IOException ex) {
                 LOG.trace("Failed to seach for '{}' in the directory {}", FILE_MJBIGNORE, directory.getName());
-                LOG.trace("Exception:", ex);
+                LOG.trace("IO error", ex);
             }
 
             stageDir = new StageDirectoryDTO();
@@ -350,8 +344,12 @@ public class ScannerManagementImpl implements ScannerManagement {
             library.getStatistics().increment(StatType.DIRECTORY);
 
             File[] files = directory.listFiles();
-            List<File> currentFileList = files != null ? Arrays.asList(files) : new ArrayList<File>();
-            FileTypeComparator comp = new FileTypeComparator(Boolean.FALSE);
+            if (files == null) {
+                return stageDir;
+            }
+            
+            final List<File> currentFileList = Arrays.asList(files);
+            final FileTypeComparator comp = new FileTypeComparator(false);
             Collections.sort(currentFileList, comp);
 
             /*
@@ -361,24 +359,24 @@ public class ScannerManagementImpl implements ScannerManagement {
              */
             List<String> exclusions = new ArrayList<>();
             for (File file : currentFileList) {
-                if (file.isFile()) {
-                    String lcFilename = file.getName().toLowerCase();
-                    if (DIR_EXCLUSIONS.containsKey(lcFilename)) {
-                        if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
-                            // Because the value is null or empty we exclude the whole directory, so quit now.
-                            LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
-                            // All files to be excluded, so quit
-                            return null;
-                        }
-
-                        // We found a match, so add it to our local copy
-                        LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
-                        exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
-                        // Skip to the next file, theres no need of further processing
-                    }
-                } else {
+                if (!file.isFile()) {
                     // First directory we find, we can stop (because we sorted the files first)
                     break;
+                }
+                
+                final String lcFilename = file.getName().toLowerCase();
+                if (DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                    if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
+                        // Because the value is null or empty we exclude the whole directory, so quit now.
+                        LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
+                        // All files to be excluded, so quit
+                        return null;
+                    }
+
+                    // We found a match, so add it to our local copy
+                    LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
+                    exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
+                    // Skip to the next file, theres no need of further processing
                 }
             }
 
@@ -387,32 +385,32 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             // Scan the directory properly
             for (File file : currentFileList) {
-                boolean excluded = Boolean.FALSE;
-                if (file.isFile()) {
-                    String lcFilename = file.getName().toLowerCase();
-                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
-                        LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
-                        continue;
-                    }
-
-                    // Process the DIR_IGNORE_FILES
-                    for (Pattern pattern : DIR_IGNORE_FILES) {
-                        matcher.reset(lcFilename).usePattern(pattern);
-                        if (matcher.matches()) {
-                            // Found the file pattern, so skip the file
-                            LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
-                            excluded = Boolean.TRUE;
-                            break;
-                        }
-                    }
-
-                    if (!excluded) {
-                        stageDir.addStageFile(scanFile(file));
-                        library.getStatistics().increment(StatType.FILE);
-                    }
-                } else {
+                if (!file.isFile()) {
                     // First directory we find, we can stop (because we sorted the files first)
                     break;
+                }
+
+                boolean excluded = false;
+                String lcFilename = file.getName().toLowerCase();
+                if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                    LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
+                    continue;
+                }
+
+                // Process the DIR_IGNORE_FILES
+                for (Pattern pattern : DIR_IGNORE_FILES) {
+                    matcher.reset(lcFilename).usePattern(pattern);
+                    if (matcher.matches()) {
+                        // Found the file pattern, so skip the file
+                        LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
+                        excluded = Boolean.TRUE;
+                        break;
+                    }
+                }
+
+                if (!excluded) {
+                    stageDir.addStageFile(scanFile(file));
+                    library.getStatistics().increment(StatType.FILE);
                 }
             }
 
@@ -420,18 +418,18 @@ public class ScannerManagementImpl implements ScannerManagement {
             queueForSending(library, stageDir);
 
             // Resort the files with directories first
-            comp.setDirectoriesFirst(Boolean.TRUE);
+            comp.setDirectoriesFirst(true);
             Collections.sort(currentFileList, comp);
 
             // Now scan the directories
             for (File scanDir : currentFileList) {
-                if (scanDir.isDirectory()) {
-                    if (scanDir(library, scanDir) == null) {
-                        LOG.info("Not adding directory '{}', no files found or all excluded", scanDir.getAbsolutePath());
-                    }
-                } else {
+                if (!scanDir.isDirectory()) {
                     // First file we find, we can stop (because we are sorted directories first)
                     break;
+                }
+                
+                if (scanDir(library, scanDir) == null) {
+                    LOG.info("Not adding directory '{}', no files found or all excluded", scanDir.getAbsolutePath());
                 }
             }
         }

@@ -25,6 +25,7 @@ package org.yamj.core.api.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FilenameUtils;
@@ -33,7 +34,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.StringTools;
 
 public class Skin {
@@ -164,9 +164,9 @@ public class Skin {
             setImage(xmlConfig.getString("image"));
             setFileDate(xmlFile.lastModified());
             setSupportUrl(xmlConfig.getString("supportUrl"));
-        } catch (ConfigurationException error) {
+        } catch (ConfigurationException ex) {
             LOG.error("Failed reading version information file '{}'", SKIN_VERSION_FILENAME);
-            LOG.warn(ClassTools.getStackTrace(error));
+            LOG.warn("Skin error", ex);
         }
     }
 

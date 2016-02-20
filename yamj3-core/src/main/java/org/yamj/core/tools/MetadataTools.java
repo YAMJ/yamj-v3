@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.pojava.datetime.DateTime;
+import org.pojava.datetime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
@@ -65,10 +65,12 @@ public final class MetadataTools {
     private static final boolean IDENT_TRANSLITERATE;
     private static final Transliterator TRANSLITERATOR;
 
-    private static final String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
-
+    private static final String DATE_FORMAT = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
+    private static final IDateTimeConfig DATETIME_CONFIG_DEFAULT;
+    private static final IDateTimeConfig DATETIME_CONFIG_FALLBACK;
+    
     private MetadataTools() {
-        throw new UnsupportedOperationException("Class cannot be instantiated");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     static {
@@ -95,6 +97,13 @@ public final class MetadataTools {
         FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
         FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
         FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
+
+        // default date and time configuration
+        DATETIME_CONFIG_DEFAULT = DateTimeConfig.getGlobalDefault();
+        // fall-back configuration
+        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
+        builder.setDmyOrder(!DATETIME_CONFIG_DEFAULT.isDmyOrder());
+        DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
 
         // create a new transliterator
         TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
@@ -150,7 +159,7 @@ public final class MetadataTools {
             return null;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
         return sdf.format(date);
     }
 
@@ -165,7 +174,7 @@ public final class MetadataTools {
             return null;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT + " HH:mm:ss");
         return sdf.format(date);
     }
 
@@ -323,25 +332,27 @@ public final class MetadataTools {
      * @param dateToParse
      * @return
      */
-    public static Date parseToDate(String dateToParse) {
+    public static Date parseToDate(final String dateToParse) {
         Date parsedDate = null;
 
         String parseDate = StringUtils.normalizeSpace(dateToParse);
         if (StringUtils.isNotBlank(parseDate)) {
             try {
-                DateTime dateTime;
                 if (parseDate.length() == 4 && StringUtils.isNumeric(parseDate)) {
                     // assume just the year an append "-01-01" to the end
-                    dateTime = new DateTime(parseDate + "-01-01");
+                    parseDate = parseDate + "-01-01";
                 } else {
                     // look for the date as "dd MMMM yyyy (Country)" and remove the country
-                    Matcher m = DATE_COUNTRY.matcher(dateToParse);
+                    Matcher m = DATE_COUNTRY.matcher(parseDate);
                     if (m.find()) {
                         parseDate = m.group(1);
                     }
-                    dateTime = new DateTime(parseDate);
                 }
-                parsedDate = dateTime.toDate();
+                parsedDate = parseToDate(parseDate, DATETIME_CONFIG_DEFAULT);
+                if (parsedDate == null) {
+                    // try with fall-back configuration
+                    parsedDate = parseToDate(parseDate, DATETIME_CONFIG_FALLBACK);
+                }
             } catch (Exception ex) {
                 LOG.debug("Failed to parse date '{}', error: {}", dateToParse, ex.getMessage());
                 LOG.trace("Error", ex);
@@ -350,7 +361,25 @@ public final class MetadataTools {
 
         return parsedDate;
     }
-
+    
+    /**
+     * Convert the string date using DateTools parsing
+     *
+     * @param dateToParse
+     * @param config
+     * @return
+     */
+    private static Date parseToDate(String dateToParse, IDateTimeConfig config) {
+        Date parsedDate = null;
+        try {
+            parsedDate = DateTime.parse(dateToParse, config).toDate();
+            LOG.trace("Converted date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+        } catch (IllegalArgumentException ex) {
+            LOG.debug("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+        }
+        return parsedDate;
+    }
+    
     /**
      * Get the year as string from given date.
      *
@@ -400,12 +429,12 @@ public final class MetadataTools {
         int year = -1;
         Matcher m = YEAR_PATTERN.matcher(date);
         if (m.find()) {
-            year = NumberUtils.toInt(m.group(1));
+            year = NumberUtils.toInt(m.group(1), -1);
         }
 
         return year;
     }
-
+    
     /**
      * Parse a string value and convert it into an integer rating
      *
@@ -446,6 +475,7 @@ public final class MetadataTools {
         WatchedDTO watched = new WatchedDTO();
         watched.watchedVideo(videoData.isWatchedNfo(), videoData.getWatchedNfoLastDate());
         watched.watchedVideo(videoData.isWatchedApi(), videoData.getWatchedApiLastDate());
+        watched.watchedVideo(videoData.isWatchedTraktTv(), videoData.getWatchedTraktTvLastDate());
         
         for (MediaFile mediaFile : videoData.getMediaFiles()) {
             if (mediaFile.isExtra()) {
@@ -542,7 +572,9 @@ public final class MetadataTools {
     }
 
     public static String getExternalSubtitleFormat(String extension) {
-        if (extension == null) return null;
+        if (extension == null) {
+            return null;
+        }
         
         String format;
         switch (extension.toLowerCase()) {
@@ -639,10 +671,14 @@ public final class MetadataTools {
         newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
         
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
-        if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+        if (pos >= 0) {
+            newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+        }
 
         pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
-        if (pos >= 0) newBio = newBio.substring(0, pos);
+        if (pos >= 0) {
+            newBio = newBio.substring(0, pos);
+        }
         
         return newBio;
     }
@@ -654,8 +690,7 @@ public final class MetadataTools {
      * @return
      */
     public static boolean isVoiceRole(final String role) {
-        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
-        return (idx != -1);
+        return StringUtils.indexOfIgnoreCase(role, "(voice") != -1;
     }
 
     /**
@@ -675,16 +710,19 @@ public final class MetadataTools {
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // (as ... = alternate name
-         idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // uncredited cast member
         idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // season marker
         idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
         if (idx > 0) {

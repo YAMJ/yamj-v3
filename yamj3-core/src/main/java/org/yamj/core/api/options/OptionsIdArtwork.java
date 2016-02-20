@@ -22,13 +22,18 @@
  */
 package org.yamj.core.api.options;
 
+import static org.yamj.core.tools.Constants.ALL;
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.type.ArtworkType;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  * List of the options available for the indexes
@@ -57,13 +62,13 @@ public class OptionsIdArtwork extends OptionsId {
 
     private void splitArtwork() {
         this.artworkTypes.clear();
-        if (StringUtils.containsIgnoreCase(artwork, "ALL")) {
+        if (StringUtils.containsIgnoreCase(artwork, ALL)) {
             // Add all the types to the list
             for (ArtworkType at : ArtworkType.values()) {
                 artworkTypes.add(at.toString());
             }
         } else {
-            for (String param : StringUtils.split(artwork, ",")) {
+            for (String param : StringUtils.split(artwork, DEFAULT_SPLITTER)) {
                 artworkTypes.add(ArtworkType.fromString(param).toString());
             }
         }

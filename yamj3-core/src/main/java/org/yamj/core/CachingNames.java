@@ -22,11 +22,12 @@
  */
 package org.yamj.core;
 
-public class CachingNames {
+public final class CachingNames {
 
     public static final String API_TVDB = "api_tvdb";
     public static final String API_ALLOCINE = "api_allocine";
     public static final String API_IMDB = "api_imdb";
+    public static final String API_FANARTTV = "api_fanarttv";
     
     public static final String DB_GENRE = "db_genre";
     public static final String DB_STUDIO = "db_studio";
@@ -36,4 +37,10 @@ public class CachingNames {
     public static final String DB_BOXEDSET = "db_boxedSet";
     public static final String DB_AWARD = "db_award";
     public static final String DB_STAGEFILE = "db_stageFile";
+    public static final String DB_ARTWORK_PROFILE = "db_artwork_profile";
+    public static final String DB_ARTWORK_IMAGE = "db_artwork_image";
+
+    private CachingNames() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 }

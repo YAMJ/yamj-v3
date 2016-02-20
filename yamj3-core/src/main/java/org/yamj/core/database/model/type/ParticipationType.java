@@ -37,10 +37,10 @@ public enum ParticipationType {
      * @param type
      * @return
      */
-    public static ParticipationType fromString(String type) {
+    public static ParticipationType fromString(final String type) {
         try {
             return ParticipationType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

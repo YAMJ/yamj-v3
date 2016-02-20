@@ -32,13 +32,14 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;
 import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataScannerService")
-public class MetadataScannerService {
+public class MetadataScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataScannerService.class);
 
@@ -49,14 +50,31 @@ public class MetadataScannerService {
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
+    private ExtraScannerService extraScannerService;
+    @Autowired
     private ConfigServiceWrapper configServiceWrapper;
 
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            scanMovie(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            scanSeries(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+            scanPerson(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+            scanFilmography(queueElement.getId());
+        }
+    }
+    
     /**
      * Scan a movie
      *
      * @param id
      */
-    public void scanMovie(Long id) {
+    private void scanMovie(Long id) {
         VideoData videoData = this.metadataStorageService.getRequiredVideoData(id);
 
         // empty sort title; will be reset after scan
@@ -67,6 +85,9 @@ public class MetadataScannerService {
 
         // online scanning
         this.onlineScannerService.scanMovie(videoData);
+
+        // extra scanning
+        this.extraScannerService.scanMovie(videoData);
 
         // reset sort title
         MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
@@ -95,7 +116,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanSeries(Long id) {
+    private void scanSeries(Long id) {
         Series series = this.metadataStorageService.getRequiredSeries(id);
 
         // empty sort title; will be reset after scan
@@ -113,6 +134,8 @@ public class MetadataScannerService {
         // online scanning
         this.onlineScannerService.scanSeries(series);
 
+        // extra scanning
+        this.extraScannerService.scanSeries(series);
 
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
@@ -148,7 +171,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanPerson(Long id) {
+    private void scanPerson(Long id) {
         Person person = metadataStorageService.getRequiredPerson(id);
 
         // online scanning (only)
@@ -175,7 +198,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanFilmography(Long id) {
+    private void scanFilmography(Long id) {
         Person person = metadataStorageService.getRequiredPerson(id);
 
         // online scanning (only)
@@ -197,19 +220,21 @@ public class MetadataScannerService {
         }
     }
 
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            LOG.error("Failed scan for movie "+queueElement.getId(), error);
             metadataStorageService.errorVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            LOG.error("Failed scan for series "+queueElement.getId(), error);
             metadataStorageService.errorSeries(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+            LOG.error("Failed scan for person "+queueElement.getId(), error);
             metadataStorageService.errorPerson(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+            LOG.error("Failed scan for filmography of person "+queueElement.getId(), error);
             metadataStorageService.errorFilmography(queueElement.getId());
         }
     }

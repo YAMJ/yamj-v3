@@ -46,10 +46,10 @@ public enum IntervalType {
         return true;
     }
 
-    public static IntervalType fromString(String type) {
+    public static IntervalType fromString(final String type) {
         try {
             return IntervalType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

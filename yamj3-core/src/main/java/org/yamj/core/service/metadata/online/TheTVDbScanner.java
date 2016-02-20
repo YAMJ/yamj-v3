@@ -65,7 +65,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize TheTVDb scanner");
+        LOG.trace("Initialize TheTVDb scanner");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -110,7 +110,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
         
-        if (StringUtils.isBlank(tvdbSeries.getId())) {
+        if (tvdbSeries == null || StringUtils.isBlank(tvdbSeries.getId())) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -160,7 +160,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         // CAST & CREW
         Set<CreditDTO> actors;
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+        if (tvdbActors != null && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             actors = new LinkedHashSet<>(tvdbActors.size());
             for (Actor actor : tvdbActors) {
                 actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));

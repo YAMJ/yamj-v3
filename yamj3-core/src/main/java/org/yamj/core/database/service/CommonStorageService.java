@@ -22,18 +22,12 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,21 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.Trailer;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.DeletionDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.staging.StagingService;
@@ -83,7 +66,7 @@ public class CommonStorageService {
         sb.append("WHERE f.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(Long.class, sb, params);
     }
 
     /**
@@ -144,15 +127,8 @@ public class CommonStorageService {
                         check.setStatus(StatusType.DONE);
                         this.stagingDao.updateEntity(check);
 
-                        // reset watched file date
-                        Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(check);
-                        if (maxWatchedFileDate != null) {
-                            // just update last date if max watched file date has been found
-                            mediaFile.setWatchedFile(true, maxWatchedFileDate);
-                        } else if (mediaFile.isWatchedFile()) {
-                            // set watched date to actual date if watch-change detected
-                            mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
-                        }
+                        // update watched file marker
+                        this.stagingService.updateWatchedFile(mediaFile, check);
                         
                         // media file needs an update
                         mediaFile.setStatus(StatusType.UPDATED);
@@ -332,12 +308,7 @@ public class CommonStorageService {
     }
 
     private void delete(Artwork artwork, ArtworkLocated located, Set<String> filesToDelete) {
-        StorageType storageType;
-        if (artwork.getArtworkType() == ArtworkType.PHOTO) {
-            storageType = StorageType.PHOTO;
-        } else {
-            storageType = StorageType.ARTWORK;
-        }
+        final StorageType storageType = ArtworkTools.getStorageType(artwork);
 
         // delete generated files
         for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
@@ -366,7 +337,7 @@ public class CommonStorageService {
         sb.append("WHERE al.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(Long.class, sb, params);
     }
 
     @Transactional
@@ -449,12 +420,7 @@ public class CommonStorageService {
     public Set<String> ignoreArtworkLocated(Long id) {
         ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
         if (located != null) {
-            StorageType storageType;
-            if (located.getArtwork().getArtworkType() == ArtworkType.PHOTO) {
-                storageType = StorageType.PHOTO;
-            } else {
-                storageType = StorageType.ARTWORK;
-            }
+            final StorageType storageType = ArtworkTools.getStorageType(located);
 
             Set<String> filesToDelete = new HashSet<>();
             // delete generated files
@@ -467,7 +433,7 @@ public class CommonStorageService {
             stagingDao.updateEntity(located);
             return filesToDelete;
         }
-        return null;
+        return null; // NOSONAR
     }
 
     @Transactional
@@ -496,21 +462,15 @@ public class CommonStorageService {
         // update media file
         boolean marked;
         if (apiCall) {
-            mediaFile.setWatchedApi(watched, new Date(System.currentTimeMillis()));
+            mediaFile.setWatchedApi(watched, DateTime.now().withMillisOfSecond(0).toDate());
             marked = mediaFile.isWatchedApi();
         } else {
-            Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
-            if (maxWatchedFileDate != null) {
-                // just update last date if max watched file date has been found
-                mediaFile.setWatchedFile(true, maxWatchedFileDate);
-            } else if (mediaFile.isWatchedFile()) {
-                // set watched date to actual date if watch-change detected
-                mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
-            }
+            // update watched file marker
+            this.stagingService.updateWatchedFile(mediaFile, videoFile);
             marked = mediaFile.isWatchedFile();
         }
         
-        LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (marked ? "watched" : "unwatched"), mediaFile);
+        LOG.debug("Mark media file as {} {}: {}", apiCall?"api":"file", marked?"watched":"unwatched", mediaFile);
         this.stagingDao.updateEntity(mediaFile);
 
         if (mediaFile.isExtra()) {
@@ -600,7 +560,7 @@ public class CommonStorageService {
         sb.append("WHERE t.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(Long.class, sb, params);
     }
 
     @Transactional

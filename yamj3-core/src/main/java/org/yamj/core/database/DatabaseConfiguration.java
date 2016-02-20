@@ -23,7 +23,6 @@
 package org.yamj.core.database;
 
 import javax.sql.DataSource;
-
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +31,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 public interface DatabaseConfiguration  {
 
     @Bean
-    DataSource dataSource();
+    public DataSource dataSource();
 
     @Bean
-    FactoryBean<SessionFactory> sessionFactory();
+    public FactoryBean<SessionFactory> sessionFactory();
 
     @Bean
-    PlatformTransactionManager transactionManager() throws Exception;
+    public PlatformTransactionManager transactionManager() throws Exception; //NOSONAR
 }

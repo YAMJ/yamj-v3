@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.remote.service.FileImportService;
 import org.yamj.core.database.model.Library;
-import org.yamj.core.service.ImportScheduler;
+import org.yamj.core.scheduling.ImportScheduler;
 import org.yamj.core.service.staging.StagingService;
 
 @Service("fileImportService")
@@ -51,7 +51,7 @@ public class FileImportServiceImpl implements FileImportService {
             importScheduler.triggerProcess();
         } catch (Exception error) {
             LOG.error("Failed to import scanned directory: {}", importDTO.getStageDirectory().getPath(), error);
-            throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath());
+            throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath()); //NOSONAR
         }
     }
 }
