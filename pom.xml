@@ -72,8 +72,8 @@
         <hibernate.version>5.1.0.Final</hibernate.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <org.slf4j.version>1.7.16</org.slf4j.version>
-        <jackson.version>2.7.1</jackson.version> <!-- Not working with later versions, till spring is fixed -->
-        <jetty.version>8.1.19.v20160209</jetty.version>
+        <jackson.version>2.6.5</jackson.version> <!-- Not working with later than 2.6.5 versions, until spring is fixed -->
+        <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
 
     <profiles>
