@@ -26,6 +26,7 @@ import com.omertron.imdbapi.model.ImdbEncodingFormat;
 import com.omertron.imdbapi.model.ImdbMovieDetails;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,7 +84,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
             return Collections.emptyList();
         }
         
-        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId);
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, Locale.US, false);
         if (movieDetails == null || movieDetails.getTrailer() == null || MapUtils.isEmpty(movieDetails.getTrailer().getEncodings())) {
             return Collections.emptyList();
         }

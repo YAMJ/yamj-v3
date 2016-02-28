@@ -166,8 +166,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     private ScanResult updateMovie(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
-        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale, throwTempError);
+        Map<String,Integer> top250 = imdbApiWrapper.getTop250(imdbLocale, throwTempError);
+        
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId()) || top250 == null) {
             return ScanResult.NO_RESULT;
         }
 
@@ -195,7 +197,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // TOP250
-        Integer rank = this.imdbApiWrapper.getTop250().get(imdbId);
+        Integer rank = top250.get(imdbId);
         if (rank != null) {
             videoData.setTopRank(rank.intValue());
         }
@@ -304,7 +306,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     private ScanResult updateSeries(Series series, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
-        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale, throwTempError);
         if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
         }
@@ -453,7 +455,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // get movie details from IMDB
-        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(dto.getImdbId(), imdbLocale);
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(dto.getImdbId(), imdbLocale, false);
         if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             videoData.setTvEpisodeNotFound();
             return;
@@ -819,8 +821,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     private ScanResult updatePerson(Person person, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
-        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, imdbLocale);
-        if (StringUtils.isBlank(imdbPerson.getActorId())) {
+        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, imdbLocale, throwTempError);
+        if (imdbPerson == null || StringUtils.isBlank(imdbPerson.getActorId())) {
             return ScanResult.NO_RESULT;
         }
         

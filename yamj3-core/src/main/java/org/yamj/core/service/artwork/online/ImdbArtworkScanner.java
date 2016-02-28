@@ -85,8 +85,8 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
             return Collections.emptyList();
         }
         
-        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, Locale.US);
-        if (imdbPerson.getImage() == null) {
+        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, Locale.US, false);
+        if (imdbPerson == null || imdbPerson.getImage() == null) {
             return Collections.emptyList();
         }
         
@@ -109,7 +109,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
     private Set<ImdbArtwork> getImdbArtwork(String imdbId, ArtworkType artworkType) {
         // use TreeSet just for ordering according to size
         TreeSet<ImdbArtwork> result = new TreeSet<>();
-        for (ImdbImage image : imdbApiWrapper.getTitlePhotos(imdbId)) {
+        for (ImdbImage image : imdbApiWrapper.getTitlePhotos(imdbId, Locale.US)) {
             ImdbArtwork ia = buildImdbArtwork(image, artworkType);
             if (ia != null) {
                 result.add(ia);

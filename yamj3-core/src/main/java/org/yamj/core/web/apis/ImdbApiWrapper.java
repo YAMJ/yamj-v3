@@ -25,11 +25,10 @@ package org.yamj.core.web.apis;
 import static org.yamj.core.tools.Constants.UTF8;
 
 import com.omertron.imdbapi.ImdbApi;
+import com.omertron.imdbapi.ImdbException;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -53,6 +52,7 @@ import org.yamj.core.web.HTMLTools;
 public class ImdbApiWrapper {
     
     private static final Logger LOG = LoggerFactory.getLogger(ImdbApiWrapper.class);
+    private static final String API_ERROR = "IMDb error";
     private static final String HTML_SITE_FULL = "http://www.imdb.com/";
     private static final String HTML_TITLE = "title/";
     private static final String HTML_A_END = "</a>";
@@ -60,8 +60,6 @@ public class ImdbApiWrapper {
     private static final String HTML_H5_END = ":</h5>";
     private static final String HTML_H5_START = "<h5>";
     private static final String HTML_DIV_END = "</div>";
-
-    private final Lock imdbApiLock = new ReentrantLock(true);
 
     @Autowired
     private ConfigService configService;
@@ -84,20 +82,16 @@ public class ImdbApiWrapper {
         return url;
     }
 
-    public ImdbMovieDetails getMovieDetails(String imdbId) {
-        return this.getMovieDetails(imdbId, Locale.US);
-    }
-    
-    public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
-        ImdbMovieDetails imdbMovieDetails;
-        imdbApiLock.lock();
+    public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale, boolean throwTempError) {
+        ImdbMovieDetails movieDetails = null;
         try {
-            imdbApi.setLocale(locale);
-            imdbMovieDetails = imdbApi.getFullDetails(imdbId);
-        } finally {
-            imdbApiLock.unlock();
+            movieDetails = imdbApi.getFullDetails(imdbId, locale);
+        } catch (ImdbException ex) {
+            checkTempError(throwTempError, ex);
+            LOG.error("Failed to get movie details using IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
-        return imdbMovieDetails;
+        return movieDetails;
     }
         
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
@@ -116,59 +110,75 @@ public class ImdbApiWrapper {
     }
     
     public List<ImdbCredit> getFullCast(String imdbId) {
-        List<ImdbCredit> fullCast;
-        imdbApiLock.lock();
+        List<ImdbCredit> fullCast = null;
         try {
             // use US locale to check for uncredited cast
-            imdbApi.setLocale(Locale.US);
-            fullCast = imdbApi.getFullCast(imdbId);
-        } finally {
-            imdbApiLock.unlock();
+            fullCast = imdbApi.getFullCast(imdbId, Locale.US);
+        } catch (ImdbException ex) {
+            LOG.error("Failed to get full cast using IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
-        return (fullCast == null ? new ArrayList<ImdbCredit>() : fullCast);
+        return fullCast;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
-    public ImdbPerson getPerson(String imdbId, Locale locale) {
-        ImdbPerson imdbPerson;
-        imdbApiLock.lock();
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}", unless="#result==null")
+    public ImdbPerson getPerson(String imdbId, Locale locale, boolean throwTempError) {
+        ImdbPerson imdbPerson = null;
         try {
-            imdbApi.setLocale(locale);
-            imdbPerson = imdbApi.getActorDetails(imdbId);
-        } finally {
-            imdbApiLock.unlock();
+            imdbPerson = imdbApi.getActorDetails(imdbId, locale);
+        } catch (ImdbException ex) {
+            checkTempError(throwTempError, ex);
+            LOG.error("Failed to get movie details using IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
-        return (imdbPerson == null ? new ImdbPerson() : imdbPerson);
+        return imdbPerson;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName}")
-    public Map<String,Integer> getTop250() {
-        Map<String,Integer> result = new HashMap<>();
-        int rank = 0;
-        for (ImdbList imdbList : imdbApi.getTop250()) {
-            rank++;
-            if (StringUtils.isNotBlank(imdbList.getImdbId())) {
-                result.put(imdbList.getImdbId(), Integer.valueOf(rank));
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName}", unless="#result==null")
+    public Map<String,Integer> getTop250(Locale locale, boolean throwTempError) {
+        try {
+            Map<String,Integer> result = new HashMap<>();
+            int rank = 0;
+            for (ImdbList imdbList : imdbApi.getTop250(locale)) {
+                rank++;
+                if (StringUtils.isNotBlank(imdbList.getImdbId())) {
+                    result.put(imdbList.getImdbId(), Integer.valueOf(rank));
+                }
             }
+            return result;
+        } catch (ImdbException ex) {
+            checkTempError(throwTempError, ex);
+            LOG.error("Failed to get Top250: {}", ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+            return null;
         }
-        return result;
     }
     
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
-    public List<ImdbImage> getTitlePhotos(String imdbId) {
-        List<ImdbImage> titlePhotos = imdbApi.getTitlePhotos(imdbId);
+    public List<ImdbImage> getTitlePhotos(String imdbId, Locale locale) {
+        List<ImdbImage> titlePhotos = null;
+        try {
+            titlePhotos = imdbApi.getTitlePhotos(imdbId, locale);
+        } catch (ImdbException ex) {
+            LOG.error("Failed to get title photos using IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
         return (titlePhotos == null ? new ArrayList<ImdbImage>(0) : titlePhotos);
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}", unless="#result==null")
     public Map<Integer,List<ImdbEpisodeDTO>> getTitleEpisodes(String imdbId, Locale locale) {
-        List<ImdbSeason> seasons;
-        imdbApiLock.lock();
+        List<ImdbSeason> seasons = null;
         try {
-            imdbApi.setLocale(locale);
-            seasons = imdbApi.getTitleEpisodes(imdbId);
-        } finally {
-            imdbApiLock.unlock();
+            seasons = imdbApi.getTitleEpisodes(imdbId, locale);
+        } catch (ImdbException ex) {
+            LOG.error("Failed to get title episodes using IMDb ID {}: {}", imdbId, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
+        }
+        
+        // if nothing found, then return nothing
+        if (seasons == null) {
+            return null;
         }
 
         Map<Integer,List<ImdbEpisodeDTO>> result = new HashMap<>();
@@ -374,4 +384,9 @@ public class ImdbApiWrapper {
         }
     }
 
+    private static void checkTempError(boolean throwTempError, ImdbException ex) {
+        if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+            throw new TemporaryUnavailableException("IMDb service temporary not available: " + ex.getResponseCode(), ex);
+        }
+    }
 }   

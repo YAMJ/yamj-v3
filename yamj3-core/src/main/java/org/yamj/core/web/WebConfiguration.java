@@ -30,7 +30,6 @@ import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.tvrageapi.TVRageApi;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -234,9 +233,7 @@ public class WebConfiguration  {
     @Bean
     public ImdbApi imdbApi() {
         LOG.trace("Initialize ImdbApi");
-        ImdbApi imdbApi = new ImdbApi(poolingHttpClient());
-        imdbApi.setLocale(Locale.US);
-        return imdbApi;
+        return new ImdbApi(poolingHttpClient());
     }
 
     @Bean

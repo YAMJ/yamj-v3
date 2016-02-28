@@ -31,7 +31,7 @@
         <thetvdbapi.version>1.8-SNAPSHOT</thetvdbapi.version>
         <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
         <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
-        <imdbapi.version>1.4-SNAPSHOT</imdbapi.version>
+        <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <moviemeterapi.version>1.1-SNAPSHOT</moviemeterapi.version>
         <tvrageapi.version>1.6-SNAPSHOT</tvrageapi.version>
