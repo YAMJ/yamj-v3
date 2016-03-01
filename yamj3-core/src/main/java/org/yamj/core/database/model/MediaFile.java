@@ -32,7 +32,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
 @Entity
@@ -369,8 +368,7 @@ public class MediaFile extends AbstractStateful {
     // TRANSIENT METHODS
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
-            if (FileType.VIDEO.equals(stageFile.getFileType())
-                    && !StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+            if (FileType.VIDEO.equals(stageFile.getFileType()) && !stageFile.isDuplicate()) {
                 return stageFile;
             }
         }

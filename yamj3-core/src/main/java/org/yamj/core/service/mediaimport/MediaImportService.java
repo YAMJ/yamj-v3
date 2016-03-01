@@ -571,7 +571,7 @@ public class MediaImportService {
             subtitle.setDefaultFlag(true);
             this.mediaDao.saveEntity(subtitle);
 
-            if (StatusType.NOTFOUND.equals(subtitleFile.getStatus())) {
+            if (subtitleFile.isNotFound()) {
                 subtitleFile.getSubtitles().add(subtitle);
                 subtitleFile.setStatus(StatusType.DONE);
                 this.stagingDao.updateEntity(subtitleFile);

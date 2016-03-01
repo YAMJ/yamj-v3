@@ -153,9 +153,9 @@ public class StagingService {
                     // set changeable values in stage file
                     setChangeableValues(stageFile, stageFileDTO);
 
-                    if (StatusType.NEW.equals(stageFile.getStatus())) {
+                    if (stageFile.isNew()) {
                         // leave NEW status as NEW
-                    }  else if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+                    }  else if (stageFile.isDuplicate()) {
                         // leave DUPLICATE status as DUPLICATE
                         // Note: duplicate is only set for videos with same name
                     } else {
@@ -220,12 +220,8 @@ public class StagingService {
     @Transactional
     public boolean updateStageFile(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        if (stageFile == null) {
-            // stage file not found
-            return false;
-        }
-        if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
-            // no update of duplicates
+        if (stageFile == null || stageFile.isDuplicate()) {
+            // stage file not found or duplicate
             return false;
         }
         stageFile.setStatus(StatusType.UPDATED);

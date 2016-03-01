@@ -157,7 +157,7 @@ public class ArtworkDao extends HibernateDao {
         } else {
             // reset deletion status
             ArtworkLocated stored = artwork.getArtworkLocated().get(index);
-            if (stored.getStatus() == StatusType.DELETED) {
+            if (stored.isDeleted()) {
                 stored.setStatus(stored.getPreviousStatus());
                 this.updateEntity(stored);
             }

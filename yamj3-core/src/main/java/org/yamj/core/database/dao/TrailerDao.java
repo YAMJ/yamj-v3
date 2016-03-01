@@ -28,7 +28,6 @@ import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.hibernate.HibernateDao;
@@ -105,7 +104,7 @@ public class TrailerDao extends HibernateDao {
     }
 
     public void resetDeletionStatus(Trailer trailer) {
-        if (StatusType.DELETED.equals(trailer.getStatus())) {
+        if (trailer.isDeleted()) {
             trailer.setStatus(trailer.getPreviousStatus());
             this.updateEntity(trailer);
         }

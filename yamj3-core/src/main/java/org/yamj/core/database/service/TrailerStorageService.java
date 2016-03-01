@@ -144,7 +144,7 @@ public class TrailerStorageService {
         // update not found stage files to DONE
         for (Trailer trailer : trailers) {
             StageFile stageFile = trailer.getStageFile();
-            if (stageFile != null && StatusType.NOTFOUND.equals(stageFile.getStatus())) {
+            if (stageFile != null && stageFile.isNotFound()) {
                 stageFile.setStatus(StatusType.DONE);
                 this.trailerDao.updateEntity(stageFile);
             }
@@ -185,7 +185,7 @@ public class TrailerStorageService {
         // update not found stage files to DONE
         for (Trailer trailer : trailers) {
             StageFile stageFile = trailer.getStageFile();
-            if (stageFile != null && StatusType.NOTFOUND.equals(stageFile.getStatus())) {
+            if (stageFile != null && stageFile.isNotFound()) {
                 stageFile.setStatus(StatusType.DONE);
                 this.trailerDao.updateEntity(stageFile);
             }

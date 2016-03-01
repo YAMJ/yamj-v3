@@ -515,10 +515,7 @@ public class CommonDao extends HibernateDao {
     public void markAsDeleted(Artwork artwork, Set<String> sources) {
         markAsUpdated(artwork);
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
-            if (located.getUrl() != null 
-                && sources.contains(located.getSource())
-                && !StatusType.DELETED.equals(located.getStatus()))
-            {
+            if (located.getUrl() != null  && sources.contains(located.getSource()) && !located.isDeleted()) {
                 located.setStatus(StatusType.DELETED);
                 this.updateEntity(located);
             }
@@ -532,7 +529,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public void markAsDeleted(Trailer trailer) {
-        if (!StatusType.DELETED.equals(trailer.getStatus())) {
+        if (!trailer.isDeleted()) {
             trailer.setStatus(StatusType.DELETED);
             this.updateEntity(trailer);
         }
@@ -545,14 +542,14 @@ public class CommonDao extends HibernateDao {
     }
 
     public void markAsUpdated(Artwork artwork) {
-        if (!StatusType.NEW.equals(artwork.getStatus()) && !StatusType.UPDATED.equals(artwork.getStatus())) {
+        if (artwork.isNotUpdated()) {
             artwork.setStatus(StatusType.UPDATED);
             this.updateEntity(artwork);
         }
     }
 
     public void markAsUpdated(Person person) {
-        if (!StatusType.NEW.equals(person.getStatus()) && !StatusType.UPDATED.equals(person.getStatus())) {
+        if (person.isNotUpdated()) {
             person.setStatus(StatusType.UPDATED);
             person.setFilmographyStatus(StatusType.UPDATED);
             this.updateEntity(person);
@@ -567,7 +564,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public void markAsUpdated(VideoData videoData) {
-        if (!StatusType.NEW.equals(videoData.getStatus()) && !StatusType.UPDATED.equals(videoData.getStatus())) {
+        if (videoData.isNotUpdated()) {
             videoData.setStatus(StatusType.UPDATED);
             if (videoData.isMovie()) {
                 videoData.setTrailerStatus(StatusType.UPDATED);
@@ -584,14 +581,14 @@ public class CommonDao extends HibernateDao {
     }
 
     public void markAsUpdated(Season season) {
-        if (!StatusType.NEW.equals(season.getStatus()) && !StatusType.UPDATED.equals(season.getStatus())) {
+        if (season.isNotUpdated()) {
             season.setStatus(StatusType.UPDATED);
             this.updateEntity(season);
         }
     }
 
     public void markAsUpdated(Series series) {
-        if (!StatusType.NEW.equals(series.getStatus()) && !StatusType.UPDATED.equals(series.getStatus())) {
+        if (series.isNotUpdated()) {
             series.setStatus(StatusType.UPDATED);
             series.setTrailerStatus(StatusType.UPDATED);
             this.updateEntity(series);

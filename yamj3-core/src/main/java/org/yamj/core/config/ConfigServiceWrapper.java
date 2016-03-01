@@ -98,14 +98,14 @@ public class ConfigServiceWrapper {
 
         // check present artwork
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
-            if (located.isValidStatus()) {
+            if (located.isValid()) {
                 return false;
             }
         }
         
         // check newly scanned artwork (from file: may be new or invalid)
         for (ArtworkLocated located : locatedArtwork) {
-            if (located.isValidStatus()) {
+            if (located.isValid()) {
                 return false;
             }
         }

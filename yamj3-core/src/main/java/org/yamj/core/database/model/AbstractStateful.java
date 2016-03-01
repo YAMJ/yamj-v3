@@ -25,6 +25,7 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 
@@ -56,7 +57,40 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
         this.status = status;
     }
     
-    public boolean isValidStatus() {
+    // TRANSIENT METHODS
+    
+    @Transient
+    public final boolean isDeleted() {
+        return StatusType.DELETED.equals(getStatus());
+    }
+
+    @Transient
+    public final boolean isNotFound() {
+        return StatusType.NOTFOUND.equals(getStatus());
+    }
+
+    @Transient
+    public final boolean isDuplicate() {
+        return StatusType.DUPLICATE.equals(getStatus());
+    }
+    
+    @Transient
+    public final boolean isUpdated() {
+        return StatusType.NEW.equals(getStatus()) || StatusType.UPDATED.equals(getStatus());
+    }
+
+    @Transient
+    public final boolean isNotUpdated() {
+        return !isUpdated();
+    }
+
+    @Transient
+    public final boolean isNew() {
+        return StatusType.NEW.equals(getStatus());
+    }
+    
+    @Transient
+    public final boolean isValid() {
         return StatusType.DONE.equals(getStatus()) || StatusType.NEW.equals(getStatus()) || StatusType.UPDATED.equals(getStatus());
     }
 }

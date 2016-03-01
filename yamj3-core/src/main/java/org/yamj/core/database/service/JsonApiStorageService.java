@@ -167,11 +167,11 @@ public class JsonApiStorageService {
     @Transactional
     public ApiStatus duplicatePerson(Long id, Long doubletId) {
         Person person = metadataDao.getPerson(id);
-        if (person == null || person.getStatus() == StatusType.DELETED) {
+        if (person == null || person.isDeleted()) {
             return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
         }
         Person doubletPerson = metadataDao.getPerson(doubletId);
-        if (doubletPerson == null || doubletPerson.getStatus() == StatusType.DELETED) {
+        if (doubletPerson == null || doubletPerson.isDeleted()) {
             return ApiStatus.notFound("ID " + doubletId + " does not determine a valid person entry");
         }
         
@@ -1078,7 +1078,7 @@ public class JsonApiStorageService {
             return ApiStatus.notFound("Trailer for ID " + id + " not found");
         }
         
-        if (trailer.isCached() && (StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status))) {
+        if (trailer.isCached() && trailer.isUpdated()) {
             // no download for already stored trailer
             trailer.setStatus(StatusType.DONE);
         } else {

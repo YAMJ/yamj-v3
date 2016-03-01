@@ -86,7 +86,7 @@ public class CommonStorageService {
             // not found
             return Collections.emptySet();
         }
-        if (StatusType.DELETED != stageFile.getStatus()) {
+        if (!stageFile.isDeleted()) {
             // status must still be DELETED
             return Collections.emptySet();
         }
@@ -123,7 +123,7 @@ public class CommonStorageService {
             } else {
                 // mark first duplicate as DONE and reset media file status
                 for (StageFile check : mediaFile.getStageFiles()) {
-                    if (StatusType.DUPLICATE.equals(check.getStatus())) {
+                    if (check.isDuplicate()) {
                         check.setStatus(StatusType.DONE);
                         this.stagingDao.updateEntity(check);
 
@@ -450,7 +450,7 @@ public class CommonStorageService {
         if (!FileType.VIDEO.equals(videoFile.getFileType())) {
             return false;
         }
-        if (StatusType.DUPLICATE.equals(videoFile.getStatus())) {
+        if (videoFile.isDuplicate()) {
             return false;
         }
 

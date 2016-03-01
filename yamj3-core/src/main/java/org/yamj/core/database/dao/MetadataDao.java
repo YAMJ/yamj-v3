@@ -166,7 +166,7 @@ public class MetadataDao extends HibernateDao {
             if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
-            } else if (StatusType.DELETED.equals(person.getStatus())) {
+            } else if (person.isDeleted()) {
                 // if previously deleted then set as updated now
                 person.setStatus(StatusType.UPDATED);
             }

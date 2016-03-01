@@ -105,7 +105,7 @@ public class ArtworkStorageService {
         // update not found stage files to DONE
         for (ArtworkLocated located : locatedArtworks) {
             StageFile stageFile = located.getStageFile();
-            if (stageFile != null && StatusType.NOTFOUND.equals(stageFile.getStatus())) {
+            if (stageFile != null && stageFile.isNotFound()) {
                 stageFile.setStatus(StatusType.DONE);
                 this.artworkDao.updateEntity(stageFile);
             }
