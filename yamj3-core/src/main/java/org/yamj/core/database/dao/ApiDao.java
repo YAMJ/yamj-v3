@@ -2367,6 +2367,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(" AND al.id is not null");
         sbSQL.append(" AND v.id IN (:id)");
         sbSQL.append(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
+        sbSQL.append(" ORDER BY al.create_timestamp");
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.trace("Artwork SQL: {}", sqlScalars.getSql());
