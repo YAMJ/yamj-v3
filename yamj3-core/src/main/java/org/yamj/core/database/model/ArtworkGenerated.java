@@ -22,22 +22,14 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
 
 @NamedQueries({
     @NamedQuery(name = "artworkGenerated.getArtworkGenerated",
@@ -58,7 +50,7 @@ import org.yamj.common.type.StatusType;
     uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_GENERATED", columnNames = {"located_id", "profile_id"}),
     indexes = @Index(name = "IX_ARTWORKGENERATED_STATUS", columnList = "status")
 )
-public class ArtworkGenerated extends AbstractAuditable implements Serializable {
+public class ArtworkGenerated extends AbstractStateful {
 
     private static final long serialVersionUID = 2326614430648326340L;
 
@@ -79,10 +71,6 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
 
     @Column(name = "cache_dir", nullable = false, length = 50)
     private String cacheDirectory;
-
-    @Type(type = "statusType")
-    @Column(name = "status", length = 30) // TODO implement AbstractStateful if done
-    private StatusType status;
     
     // GETTER and SETTER
 
@@ -116,14 +104,6 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
 
     public void setArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkProfile = artworkProfile;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-    
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     // TRANSIENT METHODS
