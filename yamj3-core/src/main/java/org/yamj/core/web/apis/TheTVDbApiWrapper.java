@@ -177,7 +177,7 @@ public class TheTVDbApiWrapper {
                 year = tvdbApi.getSeasonYear(id, season, altLanguage);
             }
         } catch (TvDbException ex) {
-            LOG.error("Failed to season year for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
+            LOG.error("Failed to get season year for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
             LOG.trace(API_ERROR, ex);
         }
         

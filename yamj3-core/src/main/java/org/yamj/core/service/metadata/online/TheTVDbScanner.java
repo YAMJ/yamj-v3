@@ -90,7 +90,6 @@ public class TheTVDbScanner implements ISeriesScanner {
     public ScanResult scanSeries(Series series) {
         Locale tvdbLocale = localeService.getLocaleForConfig("thetvdb");
         com.omertron.thetvdbapi.model.Series tvdbSeries = null;
-        List<Actor> tvdbActors = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("thetvdb.throwError.tempUnavailable", Boolean.TRUE);
             String tvdbId = getSeriesId(series, tvdbLocale, throwTempError); 
@@ -101,7 +100,6 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
 
             tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, tvdbLocale.getLanguage(), throwTempError);
-            tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("thetvdb.maxRetries.tvshow", 0);
@@ -160,10 +158,18 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         // CAST & CREW
         Set<CreditDTO> actors;
-        if (tvdbActors != null && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            actors = new LinkedHashSet<>(tvdbActors.size());
-            for (Actor actor : tvdbActors) {
-                actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            // get actors from TVDb
+            List<Actor> tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), false);
+            
+            // tvdbActors may be null if series has no actors and therefore an error occured
+            if (tvdbActors == null) {
+                actors = Collections.emptySet();
+            } else {
+                actors = new LinkedHashSet<>(tvdbActors.size());
+                for (Actor actor : tvdbActors) {
+                    actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+                }
             }
         } else {
             actors = Collections.emptySet();
