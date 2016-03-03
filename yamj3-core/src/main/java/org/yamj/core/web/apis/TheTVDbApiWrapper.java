@@ -59,7 +59,7 @@ public class TheTVDbApiWrapper {
         try {
             // retrieve banners from TheTVDb
             banners = tvdbApi.getBanners(id);
-        } catch (TvDbException ex) {
+        } catch (Exception ex) {
             LOG.error("Failed to get banners using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace(API_ERROR, ex);
         }
@@ -100,6 +100,9 @@ public class TheTVDbApiWrapper {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get series using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace(API_ERROR, ex);
+        } catch (Exception ex) {
+            LOG.error("Failed to get series using TVDb ID {}: {}", id, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
         
         return series;
@@ -133,6 +136,9 @@ public class TheTVDbApiWrapper {
             checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving TVDb id for series '{}': {}", title, ex.getMessage());
             LOG.trace(API_ERROR, ex);
+        } catch (Exception ex) {
+            LOG.error("Failed retrieving TVDb id for series '{}': {}", title, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
         
         return (tvdbId == null) ? StringUtils.EMPTY : tvdbId;
@@ -162,6 +168,9 @@ public class TheTVDbApiWrapper {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get actors using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace(API_ERROR, ex);
+        } catch (Exception ex) {
+            LOG.error("Failed to get actors using TVDb ID {}: {}", id, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
         
         return actorList;
@@ -176,7 +185,7 @@ public class TheTVDbApiWrapper {
             if (StringUtils.isBlank(year) && !altLanguage.equalsIgnoreCase(language)) {
                 year = tvdbApi.getSeasonYear(id, season, altLanguage);
             }
-        } catch (TvDbException ex) {
+        } catch (Exception ex) {
             LOG.error("Failed to get season year for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
             LOG.trace(API_ERROR, ex);
         }
@@ -195,7 +204,7 @@ public class TheTVDbApiWrapper {
             if (tvdbEpisode == null && !altLanguage.equalsIgnoreCase(language)) {
                 tvdbEpisode = tvdbApi.getEpisode(id, season, episode, altLanguage);
             }
-        } catch (TvDbException ex) {
+        } catch (Exception ex) {
             LOG.error("Failed to get episode {} for TVDb ID {} and season {}: {}", episode, id, season, ex.getMessage());
             LOG.trace(API_ERROR, ex);
         }
