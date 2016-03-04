@@ -85,13 +85,10 @@ public class TraktTvService {
             // nothing to do cause synchronization is not enabled
             return;
         }
-        
+
         if (isExpired()) {
             // refresh access token
-            if (refreshWhenExpired()) {
-                // in success case: set access token
-                traktTvApi.setAccessToken(configService.getProperty(TRAKTTV_ACCESS_TOKEN));
-            }
+            refreshWhenExpired();
         } else {
             // set access token in API
             traktTvApi.setAccessToken(configService.getProperty(TRAKTTV_ACCESS_TOKEN));
@@ -130,6 +127,7 @@ public class TraktTvService {
             configService.setProperty(TRAKTTV_ACCESS_TOKEN, response.getAccessToken());
             
             // no authorization error
+            REFRESH_FAILED = false;
             return null;
         } catch (TraktTvException e) {
             LOG.debug(TRAKTTV_ERROR, e);
@@ -165,6 +163,9 @@ public class TraktTvService {
                     configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
                     configService.setProperty(TRAKTTV_ACCESS_TOKEN, response.getAccessToken());
                     
+                    // set access token in API
+                    traktTvApi.setAccessToken(response.getAccessToken());
+
                     REFRESH_FAILED = false;
                 } catch (Exception ex) {
                     LOG.error("Failed to refresh access token", ex);
