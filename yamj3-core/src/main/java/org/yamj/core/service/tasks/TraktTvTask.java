@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.yamj.core.service.trakttv.TraktTvService;
 
@@ -34,6 +35,7 @@ import org.yamj.core.service.trakttv.TraktTvService;
  * Task for periodical synchronization with Trakt.TV
  */
 @Component
+@DependsOn("traktTvService")
 public class TraktTvTask implements ITask {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
@@ -65,7 +67,11 @@ public class TraktTvTask implements ITask {
         LOG.debug("Execute Trakt.TV task");
 
         if (traktTvService.isExpired()) {
-            return;
+            if (!traktTvService.refreshWhenExpired()) {
+                // refresh failed, to nothing can be done now
+                // --> new authorization should be done
+                return;
+            }
         }
 
         // 1. collect

@@ -23,6 +23,7 @@
 package org.yamj.core.service.trakttv;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +60,9 @@ public class TraktTvService {
     private static final String TRAKTTV_LAST_PUSH_EPISODES = "trakttv.last.push.episodes";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     
+    private static final ReentrantLock REFRESH_LOCK = new ReentrantLock();
+    private static boolean REFRESH_FAILED = false;
+    
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -77,9 +81,19 @@ public class TraktTvService {
     
     @PostConstruct
     public void init() {
+        if (!isSynchronizationEnabled()) {
+            // nothing to do cause synchronization is not enabled
+            return;
+        }
+        
         if (isExpired()) {
-            // TODO request new access token by refresh token (if present)
+            // refresh access token
+            if (refreshWhenExpired()) {
+                // in success case: set access token
+                traktTvApi.setAccessToken(configService.getProperty(TRAKTTV_ACCESS_TOKEN));
+            }
         } else {
+            // set access token in API
             traktTvApi.setAccessToken(configService.getProperty(TRAKTTV_ACCESS_TOKEN));
         }
     }
@@ -91,11 +105,7 @@ public class TraktTvService {
     public boolean isExpired() {
         // check expiration date
         final Date expirationDate = configService.getDateProperty(TRAKTTV_EXPIRATION);
-        if (expirationDate == null || expirationDate.getTime() < System.currentTimeMillis()) {
-            LOG.warn("Trakt.TV synchronization not possible cause expired");
-            return true;
-        }
-        return false;
+        return (expirationDate == null || expirationDate.getTime() < System.currentTimeMillis());
     }
 
     public TraktTvInfo getTraktTvInfo() {
@@ -114,11 +124,8 @@ public class TraktTvService {
             // set access token for API
             traktTvApi.setAccessToken(response.getAccessToken());
 
-            // expiration date: creation date + expiration period * 1000 (cause given in seconds)
-            long expireDate = (response.getCreatedAt() + response.getExpiresIn()) * 1000L;
-            
             // store values in configuration settings
-            configService.setProperty(TRAKTTV_EXPIRATION, expireDate);
+            configService.setProperty(TRAKTTV_EXPIRATION, buildExpirationDate(response));
             configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
             configService.setProperty(TRAKTTV_ACCESS_TOKEN, response.getAccessToken());
             
@@ -133,6 +140,48 @@ public class TraktTvService {
         }
     }
 
+    public boolean refreshWhenExpired() {
+        REFRESH_LOCK.lock();
+        try {
+            if (REFRESH_FAILED) {
+                // previous refresh failed
+                return false;
+            }
+            
+            LOG.info("Authorization expired; requesting new access token");
+    
+            String refreshToken = configService.getProperty(TRAKTTV_REFRESH_TOKEN);
+            if (StringUtils.isBlank(refreshToken)) {
+                LOG.warn("Refresh token not present; please authorize again");
+                REFRESH_FAILED = true;
+            } else {       
+                try {
+                    // retrieve access token via access token
+                    TokenResponse response = traktTvApi.requestAccessTokenByRefresh(refreshToken);
+                    LOG.info("Sucessfully refreshed access token");
+                    
+                    // store values in configuration settings
+                    configService.setProperty(TRAKTTV_EXPIRATION, buildExpirationDate(response));
+                    configService.setProperty(TRAKTTV_REFRESH_TOKEN, response.getRefreshToken());
+                    configService.setProperty(TRAKTTV_ACCESS_TOKEN, response.getAccessToken());
+                    
+                    REFRESH_FAILED = false;
+                } catch (Exception ex) {
+                    LOG.error("Failed to refresh access token", ex);
+                    REFRESH_FAILED = true;
+                }
+            }
+            return !REFRESH_FAILED;
+        } finally {
+            REFRESH_LOCK.unlock();
+        }
+    }
+    
+    private static long buildExpirationDate(TokenResponse response) {
+        // expiration date: creation date + expiration period * 1000 (cause given in seconds)
+        return (response.getCreatedAt() + response.getExpiresIn()) * 1000L;
+    }
+    
     // SEARCH BY ID
     
     public Integer searchMovieIdByIMDB(final String imdbId) {
