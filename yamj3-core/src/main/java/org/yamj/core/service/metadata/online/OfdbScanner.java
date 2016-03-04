@@ -216,12 +216,10 @@ public class OfdbScanner implements IMovieScanner {
     }
 
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("ofdb.throwError.tempUnavailable", Boolean.TRUE);
-
+            // get movie id
             String ofdbUrl = getMovieId(videoData, throwTempError);
-    
             if (StringUtils.isBlank(ofdbUrl)) {
                 LOG.debug("OFDb url not available: {}", videoData.getIdentifier());
                 return ScanResult.MISSING_ID;
@@ -229,16 +227,6 @@ public class OfdbScanner implements IMovieScanner {
     
             LOG.debug("OFDb url available ({}), updating video data", ofdbUrl);
             return updateMovie(videoData, ofdbUrl, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) {
-            int maxRetries = this.configServiceWrapper.getIntProperty("ofdb.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                LOG.info("OFDb service temporary not available; trigger retry: '{}'", videoData.getIdentifier());
-                return ScanResult.RETRY;
-            }
-            
-            LOG.warn("OFDb service temporary not available; no retry: '{}'", videoData.getIdentifier());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("OFDb service error: '{}': {}", videoData.getIdentifier(), ioe.getMessage());

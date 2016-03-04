@@ -86,7 +86,8 @@ public class OnlineScannerService {
      * @param videoData
      */
     public void scanMovie(VideoData videoData) {
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
         ScanResult scanResult = null;
         
     	loop: for (String scanner : MOVIE_SCANNER) {
@@ -104,11 +105,21 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                        innerResult = movieScanner.scanMovie(videoData);
+                        innerResult = movieScanner.scanMovie(videoData, throwTempError);
                     }
-                } catch (Exception error) {
-                    LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
-                    LOG.warn(SCANNING_ERROR, error);
+                } catch (TemporaryUnavailableException ex) {
+                    // check retry
+                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.movie", 0);
+                    if (videoData.getRetries() < maxRetries) {
+                        LOG.info("{} service temporary not available; trigger retry: '{}'", movieScanner.getScannerName(), videoData.getIdentifier());
+                        innerResult = ScanResult.RETRY;
+                    } else {
+                        LOG.error("Temporary scanning error for movie '{}' with {} scanner", videoData.getIdentifier(), movieScanner.getScannerName());
+                        LOG.warn(SCANNING_ERROR, ex);
+                    }
+                } catch (Exception ex) {
+                    LOG.error("Failed scanning movie '{}' with {} scanner", videoData.getIdentifier(), movieScanner.getScannerName());
+                    LOG.warn(SCANNING_ERROR, ex);
                 }
             }
 
@@ -156,7 +167,8 @@ public class OnlineScannerService {
      * @param series
      */
     public void scanSeries(Series series) {
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
 		ScanResult scanResult = null;
 
     	loop: for (String scanner : SERIES_SCANNER) {
@@ -174,10 +186,20 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                        innerResult = seriesScanner.scanSeries(series);
+                        innerResult = seriesScanner.scanSeries(series, throwTempError);
+                    }
+                } catch (TemporaryUnavailableException ex) {
+                    // check retry
+                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.tvshow", 0);
+                    if (series.getRetries() < maxRetries) {
+                        LOG.info("{} service temporary not available; trigger retry: '{}'", seriesScanner.getScannerName(), series.getIdentifier());
+                        innerResult = ScanResult.RETRY;
+                    } else {
+                        LOG.error("Temporary scanning error for series '{}' with {} scanner", series.getIdentifier(), seriesScanner.getScannerName());
+                        LOG.warn(SCANNING_ERROR, ex);
                     }
                 } catch (Exception error) {
-                    LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
+                    LOG.error("Failed scanning series '{}' with {} scanner", series.getIdentifier(), seriesScanner.getScannerName());
                     LOG.warn(SCANNING_ERROR, error);
                 }
             }
@@ -226,7 +248,8 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanPerson(Person person) {
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
     	ScanResult scanResult = null;
         
     	loop: for (String scanner : PERSON_SCANNER) {
@@ -244,10 +267,20 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
-                        innerResult = personScanner.scanPerson(person);
+                        innerResult = personScanner.scanPerson(person, throwTempError);
+                    }
+                } catch (TemporaryUnavailableException ex) {
+                    // check retry
+                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.person", 0);
+                    if (person.getRetries() < maxRetries) {
+                        LOG.info("{} service temporary not available; trigger retry: '{}'", personScanner.getScannerName(), person.getName());
+                        innerResult = ScanResult.RETRY;
+                    } else {
+                        LOG.error("Temporary scanning error for person '{}' with {} scanner", person.getName(), personScanner.getScannerName());
+                        LOG.warn(SCANNING_ERROR, ex);
                     }
                 } catch (Exception error) {
-                    LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
+                    LOG.error("Failed scanning person '{}' with {} scanner", person.getName(), personScanner.getScannerName());
                     LOG.warn(SCANNING_ERROR, error);
                 }
             }
@@ -298,6 +331,7 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanFilmography(Person person) {
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
         ScanResult scanResult = null;
 
         for (String scanner : FILMOGRAPHY_SCANNER) {
@@ -315,11 +349,21 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                        innerResult = filmographyScanner.scanFilmography(person);
+                        innerResult = filmographyScanner.scanFilmography(person, throwTempError);
                     }
-                } catch (Exception error) {
-                    LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
-                    LOG.warn(SCANNING_ERROR, error);
+                } catch (TemporaryUnavailableException ex) {
+                    // check retry
+                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.filmography", 0);
+                    if (person.getRetries() < maxRetries) {
+                        LOG.info("{} service temporary not available; trigger retry: '{}'", filmographyScanner.getScannerName(), person.getName());
+                        innerResult = ScanResult.RETRY;
+                    } else {
+                        LOG.error("Temporary scanning error for filmography of '{}' with {} scanner", person.getName(), filmographyScanner.getScannerName());
+                        LOG.warn(SCANNING_ERROR, ex);
+                    }
+                } catch (Exception ex) {
+                    LOG.error("Failed scanning filmography of '{}' with {} scanner", person.getName(), filmographyScanner.getScannerName());
+                    LOG.warn(SCANNING_ERROR, ex);
                 }
             }
             

@@ -142,12 +142,10 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     }
 
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("comingsoon.throwError.tempUnavailable", Boolean.TRUE);
-
+            // get movie id
             String comingSoonId = getMovieId(videoData, throwTempError);
-    
             if (isNoValidComingSoonId(comingSoonId)) {
                 LOG.debug("ComingSoon ID not available: {}", videoData.getIdentifier());
                 return ScanResult.MISSING_ID;
@@ -155,16 +153,6 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     
             LOG.debug("ComingSoon ID available ({}), updating video data", comingSoonId);
             return updateMovie(videoData, comingSoonId, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) {
-            int maxRetries = this.configServiceWrapper.getIntProperty("comingsoon.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                LOG.info("ComingSoon service temporary not available; trigger retry: '{}'", videoData.getIdentifier());
-                return ScanResult.RETRY;
-            }
-            
-            LOG.warn("ComingSoon service temporary not available; no retry: '{}'", videoData.getIdentifier());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("ComingSoon service error: '{}': {}", videoData.getIdentifier(), ioe.getMessage());
@@ -327,12 +315,10 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     }
 
     @Override
-    public ScanResult scanSeries(Series series) {
+    public ScanResult scanSeries(Series series, boolean throwTempError) {
         try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("comingsoon.throwError.tempUnavailable", Boolean.TRUE);
-
+            // get series id
             String comingSoonId = getSeriesId(series, throwTempError);
-    
             if (isNoValidComingSoonId(comingSoonId)) {
                 LOG.debug("ComingSoon ID not available: {}", series.getIdentifier());
                 return ScanResult.MISSING_ID;
@@ -340,16 +326,6 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     
             LOG.debug("ComingSoon ID available ({}), updating series", comingSoonId);
             return updateSeries(series, comingSoonId, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) {
-            int maxRetries = this.configServiceWrapper.getIntProperty("comingsoon.maxRetries.movie", 0);
-            if (series.getRetries() < maxRetries) {
-                LOG.info("ComingSoon service temporary not available; trigger retry: '{}'", series.getIdentifier());
-                return ScanResult.RETRY;
-            }
-            
-            LOG.warn("ComingSoon service temporary not available; no retry: '{}'", series.getIdentifier());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("ComingSoon service error: '{}': {}", series.getIdentifier(), ioe.getMessage());

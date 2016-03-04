@@ -26,6 +26,7 @@ import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,27 +88,18 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
     
     @Override
-    public ScanResult scanSeries(Series series) {
+    public ScanResult scanSeries(Series series, boolean throwTempError) {
         Locale tvdbLocale = localeService.getLocaleForConfig("thetvdb");
-        com.omertron.thetvdbapi.model.Series tvdbSeries = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("thetvdb.throwError.tempUnavailable", Boolean.TRUE);
-            String tvdbId = getSeriesId(series, tvdbLocale, throwTempError); 
-
-            if (StringUtils.isBlank(tvdbId)) {
-                LOG.debug("TVDb id not available '{}'", series.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, tvdbLocale.getLanguage(), throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("thetvdb.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
         
+        // get series id
+        String tvdbId = getSeriesId(series, tvdbLocale, throwTempError); 
+        if (StringUtils.isBlank(tvdbId)) {
+            LOG.debug("TVDb id not available '{}'", series.getIdentifier());
+            return ScanResult.MISSING_ID;
+        }
+
+        // get series info
+        com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, tvdbLocale.getLanguage(), throwTempError);
         if (tvdbSeries == null || StringUtils.isBlank(tvdbSeries.getId())) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -156,23 +148,16 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
 
-        // CAST & CREW
-        Set<CreditDTO> actors;
+        // ACTORS (to store in episodes)
+        Set<CreditDTO> actors = null;
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            // get actors from TVDb
-            List<Actor> tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), false);
-            
-            // tvdbActors may be null if series has no actors and therefore an error occured
-            if (tvdbActors == null) {
-                actors = Collections.emptySet();
-            } else {
+            List<Actor> tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId());
+            if (CollectionUtils.isNotEmpty(tvdbActors)) {
                 actors = new LinkedHashSet<>(tvdbActors.size());
                 for (Actor actor : tvdbActors) {
                     actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
                 }
             }
-        } else {
-            actors = Collections.emptySet();
         }
         
         // SCAN SEASONS

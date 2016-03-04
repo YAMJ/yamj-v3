@@ -26,5 +26,5 @@ import org.yamj.core.database.model.Person;
 
 public interface IFilmographyScanner extends IMetadataScanner {
     
-    ScanResult scanFilmography(Person person);
+    ScanResult scanFilmography(Person person, boolean throwTempError);
 }

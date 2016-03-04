@@ -87,7 +87,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         return getMovieId(videoData, tmdbLocale, false);
     }
 
-    private String getMovieId(VideoData videoData, Locale tmdbLocale, boolean throwTempError) { //NOSONAR
+    private String getMovieId(VideoData videoData, Locale tmdbLocale, boolean throwTempError) {
         String tmdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
@@ -169,27 +169,18 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public ScanResult scanMovie(VideoData videoData) { //NOSONAR
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-        MovieInfo movieInfo = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            String tmdbId = getMovieId(videoData, tmdbLocale, throwTempError);
-
-            if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", videoData.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            movieInfo = tmdbApiWrapper.getMovieInfoByTMDB(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+        
+        // get movie id
+        String tmdbId = getMovieId(videoData, tmdbLocale, throwTempError);
+        if (!StringUtils.isNumeric(tmdbId)) {
+            LOG.debug("TMDb id not available '{}'", videoData.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
 
+        // get movie info
+        MovieInfo movieInfo = tmdbApiWrapper.getMovieInfoByTMDB(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
         if (movieInfo == null || movieInfo.getId() <= 0) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -339,27 +330,18 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public ScanResult scanSeries(Series series) { //NOSONAR
+    public ScanResult scanSeries(Series series, boolean throwTempError) { //NOSONAR
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-        TVInfo tvInfo = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            String tmdbId = getSeriesId(series, tmdbLocale, throwTempError);
 
-            if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", series.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            tvInfo = tmdbApiWrapper.getSeriesInfo(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+        // get series id
+        String tmdbId = getSeriesId(series, tmdbLocale, throwTempError);
+        if (!StringUtils.isNumeric(tmdbId)) {
+            LOG.debug("TMDb id not available '{}'", series.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
 
+        // get series info
+        TVInfo tvInfo = tmdbApiWrapper.getSeriesInfo(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
         if (tvInfo == null || tvInfo.getId() <= 0) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -485,7 +467,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
     }
     
-    private void scanEpisodes(Season season, Locale tmdbLocale) { //NOSONAR
+    private void scanEpisodes(Season season, Locale tmdbLocale) {
         for (VideoData videoData : season.getVideoDatas()) {
             
             if (videoData.isTvEpisodeDone(SCANNER_ID)) {
@@ -578,26 +560,16 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public ScanResult scanPerson(Person person) { //NOSONAR
-        PersonInfo tmdbPerson = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            String tmdbId = getPersonId(person, throwTempError);
-
-            if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", person.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            tmdbPerson = tmdbApiWrapper.getPersonInfo(Integer.parseInt(tmdbId), throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanPerson(Person person, boolean throwTempError) {
+        // get person id
+        String tmdbId = getPersonId(person, throwTempError);
+        if (!StringUtils.isNumeric(tmdbId)) {
+            LOG.debug("TMDb id not available '{}'", person.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
 
+        // get person info
+        PersonInfo tmdbPerson = tmdbApiWrapper.getPersonInfo(Integer.parseInt(tmdbId), throwTempError);
         if (tmdbPerson == null || tmdbPerson.getId() <= 0) {
             LOG.error("Can't find information for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -647,29 +619,17 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public ScanResult scanFilmography(Person person) { //NOSONAR
-        PersonCreditList<CreditBasic> credits = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            String tmdbId = getPersonId(person, throwTempError);
-
-            if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", person.getName());
-                return ScanResult.MISSING_ID;
-            }
-
-            // locale for TMDb
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-
-            credits = tmdbApiWrapper.getPersonCredits(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanFilmography(Person person, boolean throwTempError) {
+        // get person id
+        String tmdbId = getPersonId(person, throwTempError);
+        if (!StringUtils.isNumeric(tmdbId)) {
+            LOG.debug("TMDb id not available '{}'", person.getName());
+            return ScanResult.MISSING_ID;
         }
 
+        // get filmography
+        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+        PersonCreditList<CreditBasic> credits = tmdbApiWrapper.getPersonCredits(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
         if (credits == null) {
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;

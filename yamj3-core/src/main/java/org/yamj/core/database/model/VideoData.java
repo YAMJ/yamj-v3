@@ -802,7 +802,9 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCreditDTOS(Collection<CreditDTO> creditDTOS) {
-        getCreditDTOS().addAll(creditDTOS);
+        if (creditDTOS != null) {
+            getCreditDTOS().addAll(creditDTOS);
+        }
     }
 
     public Collection<String> getGenreNames() {

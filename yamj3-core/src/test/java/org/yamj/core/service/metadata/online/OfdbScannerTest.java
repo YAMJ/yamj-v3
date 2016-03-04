@@ -49,7 +49,7 @@ public class OfdbScannerTest extends AbstractTest {
     public void testScanMovie() {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(ofdbScanner.getScannerName(), "http://www.ofdb.de/film/188514,Avatar---Aufbruch-nach-Pandora");
-        ofdbScanner.scanMovie(videoData);
+        ofdbScanner.scanMovie(videoData, false);
 
         assertEquals("Avatar - Aufbruch nach Pandora", videoData.getTitle());
         assertEquals("Avatar", videoData.getTitleOriginal());

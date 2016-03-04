@@ -216,26 +216,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
-        MovieInfos movieInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getMovieId(videoData, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", videoData.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
+        // get movie id
+        String allocineId = getMovieId(videoData, throwTempError);
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", videoData.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
         
+        // get movie info 
+        MovieInfos movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
         if (movieInfos == null || movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -345,26 +335,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scanSeries(Series series) {
-        TvSeriesInfos tvSeriesInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getSeriesId(series, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", series.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanSeries(Series series, boolean throwTempError) {
+        // get series id
+        String allocineId = getSeriesId(series, throwTempError);
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", series.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
-        
+
+        // get series info
+        TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -578,26 +558,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scanPerson(Person person) {
-        PersonInfos  personInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getPersonId(person, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", person.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            personInfos = allocineApiWrapper.getPersonInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanPerson(Person person, boolean throwTempError) {
+        // get person id
+        String allocineId = getPersonId(person, throwTempError);
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", person.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
-        
+
+        // get person info
+        PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId, throwTempError);
         if (personInfos == null || personInfos.isNotValid()) {
             LOG.error("Can't find informations for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
@@ -647,26 +617,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scanFilmography(Person person) {
-        FilmographyInfos  filmographyInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getPersonId(person, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", person.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            filmographyInfos = allocineApiWrapper.getFilmographyInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) { //NOSONAR
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanFilmography(Person person, boolean throwTempError) {
+        // get person id 
+        String allocineId = getPersonId(person, throwTempError);
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", person.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
-        
+
+        // get filmography
+        FilmographyInfos filmographyInfos = allocineApiWrapper.getFilmographyInfos(allocineId, throwTempError);
         if (filmographyInfos == null || filmographyInfos.isNotValid() || CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
             LOG.trace("No filmography present for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;

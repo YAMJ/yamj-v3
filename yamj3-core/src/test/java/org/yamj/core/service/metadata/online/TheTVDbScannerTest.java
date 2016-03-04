@@ -88,7 +88,7 @@ public class TheTVDbScannerTest extends AbstractTest {
         LOG.info("scan");
         Series series = new Series();
         series.setSourceDbId(tvdbScanner.getScannerName(), "70726");
-        ScanResult result = tvdbScanner.scanSeries(series);
+        ScanResult result = tvdbScanner.scanSeries(series, false);
 
         LOG.info("***** SERIES {} *****", ToStringBuilder.reflectionToString(series, ToStringStyle.MULTI_LINE_STYLE));
         assertEquals("Wrong ScanResult returned", ScanResult.OK, result);

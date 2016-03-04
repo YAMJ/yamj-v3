@@ -105,33 +105,25 @@ public class TVRageScanner implements ISeriesScanner {
     }
 
     @Override
-    public ScanResult scanSeries(Series series) {
+    public ScanResult scanSeries(Series series, boolean throwTempError) {
         final Locale tvRageLocale = localeService.getLocaleForConfig("tvrage");
-        ShowInfo showInfo = null;
-        EpisodeList episodeList = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("tvrage.throwError.tempUnavailable", Boolean.TRUE);
-            String tvRageId = getSeriesId(series, throwTempError); 
 
-            if (!StringUtils.isNumeric(tvRageId)) {
-                LOG.debug("TVRage id not available '{}'", series.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            showInfo = tvRageApiWrapper.getShowInfo(tvRageId, throwTempError);
-            episodeList = tvRageApiWrapper.getEpisodeList(tvRageId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("tvrage.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+        // get series id
+        String tvRageId = getSeriesId(series, throwTempError); 
+        if (!StringUtils.isNumeric(tvRageId)) {
+            LOG.debug("TVRage id not available '{}'", series.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
 
+        // set series info
+        ShowInfo showInfo = tvRageApiWrapper.getShowInfo(tvRageId, throwTempError);
         if (showInfo == null || !showInfo.isValid()) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
+
+        // get episodes
+        EpisodeList episodeList = tvRageApiWrapper.getEpisodeList(tvRageId, throwTempError);
 
         String title = showInfo.getShowName();
         if (showInfo.getAkas() != null) {

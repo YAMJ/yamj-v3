@@ -130,16 +130,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return imdbId;
     }
     
-    private boolean throwTempError() {
-        return configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
-    }
-    
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
         try {
-            final boolean throwTempError = this.throwTempError();
+            // get movie id
             String imdbId = getMovieId(videoData, throwTempError);
-            
             if (StringUtils.isBlank(imdbId)) {
                 LOG.debug("IMDb id not available : {}", videoData.getTitle());
                 return ScanResult.MISSING_ID;
@@ -147,16 +142,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
             LOG.debug("IMDb id available ({}), updating movie", imdbId);
             return updateMovie(videoData, imdbId, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) { //NOSONAR
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                LOG.info("IMDb service temporary not available; trigger retry: '{}'", videoData.getTitle());
-                return ScanResult.RETRY;
-            }
-            LOG.warn("IMDb service temporary not available; no retry: '{}'", videoData.getTitle());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("IMDb service error: '" + videoData.getTitle() + "'", ioe);
@@ -275,11 +260,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
     
     @Override
-    public ScanResult scanSeries(Series series) {
+    public ScanResult scanSeries(Series series, boolean throwTempError) {
         try {
-            final boolean throwTempError = this.throwTempError();
+            // get series id
             String imdbId = getSeriesId(series, throwTempError);
-            
             if (StringUtils.isBlank(imdbId)) {
                 LOG.debug("IMDb id not available: {}", series.getIdentifier());
                 return ScanResult.MISSING_ID;
@@ -287,16 +271,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
             LOG.debug("IMDb id available ({}), updating series", imdbId);
             return updateSeries(series, imdbId, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) { //NOSONAR
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                LOG.info("IMDb service temporary not available; trigger retry: '{}'", series.getIdentifier());
-                return ScanResult.RETRY;
-            }
-            LOG.warn("IMDb service temporary not available; no retry: '{}'", series.getIdentifier());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("IMDb service error: '" + series.getIdentifier() + "'", ioe);
@@ -790,11 +764,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     @Override
-    public ScanResult scanPerson(Person person) {
+    public ScanResult scanPerson(Person person, boolean throwTempError) {
         try {
-            final boolean throwTempError = this.throwTempError();
+            // get person id
             String imdbId = getPersonId(person, throwTempError);
-            
             if (StringUtils.isBlank(imdbId)) {
                 LOG.debug("IMDb id not available: {}", person.getName());
                 return ScanResult.MISSING_ID;
@@ -802,16 +775,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
             LOG.debug("IMDb id available ({}), updating person", imdbId);
             return updatePerson(person, imdbId, throwTempError);
-            
-        } catch (TemporaryUnavailableException tue) { //NOSONAR
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries) {
-                LOG.info("IMDb service temporary not available; trigger retry: '{}'", person.getName());
-                return ScanResult.RETRY;
-            }
-            LOG.warn("IMDb service temporary not available; no retry: '{}'", person.getName());
-            return ScanResult.ERROR;
             
         } catch (IOException ioe) {
             LOG.error("IMDb service error: '" + person.getName() + "'", ioe);

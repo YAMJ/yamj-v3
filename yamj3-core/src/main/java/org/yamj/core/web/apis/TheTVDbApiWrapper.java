@@ -100,9 +100,6 @@ public class TheTVDbApiWrapper {
             checkTempError(throwTempError, ex);
             LOG.error("Failed to get series using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace(API_ERROR, ex);
-        } catch (Exception ex) {
-            LOG.error("Failed to get series using TVDb ID {}: {}", id, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
         }
         
         return series;
@@ -136,9 +133,6 @@ public class TheTVDbApiWrapper {
             checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving TVDb id for series '{}': {}", title, ex.getMessage());
             LOG.trace(API_ERROR, ex);
-        } catch (Exception ex) {
-            LOG.error("Failed retrieving TVDb id for series '{}': {}", title, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
         }
         
         return (tvdbId == null) ? StringUtils.EMPTY : tvdbId;
@@ -159,21 +153,14 @@ public class TheTVDbApiWrapper {
         return new Series();
     }
     
-    public List<Actor> getActors(String id, boolean throwTempError) {
-        List<Actor> actorList = null;
-        
+    public List<Actor> getActors(String id) {
         try {
-            actorList = tvdbApi.getActors(id);
-        } catch (TvDbException ex) {
-            checkTempError(throwTempError, ex);
-            LOG.error("Failed to get actors using TVDb ID {}: {}", id, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
+            return tvdbApi.getActors(id);
         } catch (Exception ex) {
             LOG.error("Failed to get actors using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace(API_ERROR, ex);
+            return null;
         }
-        
-        return actorList;
     }
 
     public String getSeasonYear(String id, int season, String language) {

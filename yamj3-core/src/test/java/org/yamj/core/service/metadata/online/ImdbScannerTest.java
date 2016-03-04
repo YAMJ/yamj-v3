@@ -41,7 +41,7 @@ public class ImdbScannerTest extends AbstractTest {
         VideoData videoData = new VideoData();
         
         videoData.setSourceDbId(imdbScanner.getScannerName(), "tt0499549");
-        ScanResult scanResult = imdbScanner.scanMovie(videoData);
+        ScanResult scanResult = imdbScanner.scanMovie(videoData, false);
 
         assertEquals(ScanResult.OK, scanResult);
         assertEquals("Avatar - Aufbruch nach Pandora", videoData.getTitle());
@@ -78,7 +78,7 @@ public class ImdbScannerTest extends AbstractTest {
         episode2.setSeason(season);
         season.getVideoDatas().add(episode2);
         
-        imdbScanner.scanSeries(series);
+        imdbScanner.scanSeries(series, false);
 
         assertEquals("Game of Thrones - Das Lied von Eis und Feuer", series.getTitle());
         assertEquals("Game of Thrones", series.getTitleOriginal());
@@ -98,7 +98,7 @@ public class ImdbScannerTest extends AbstractTest {
     public void testPerson() {
         Person person = new Person();
         person.setSourceDbId(imdbScanner.getScannerName(), "nm0001352");
-        imdbScanner.scanPerson(person);
+        imdbScanner.scanPerson(person, false);
 
         assertEquals("Terence Hill", person.getName());
         assertEquals("Mario Girotti", person.getBirthName());

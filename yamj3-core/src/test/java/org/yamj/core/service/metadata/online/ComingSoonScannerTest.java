@@ -26,10 +26,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.yamj.core.AbstractTest;
-
 import javax.annotation.Resource;
 import org.junit.Test;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -52,7 +51,7 @@ public class ComingSoonScannerTest extends AbstractTest {
     public void testScanMovie() {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(comingSoonScanner.getScannerName(), "846");
-        comingSoonScanner.scanMovie(videoData);
+        comingSoonScanner.scanMovie(videoData, false);
 
         assertEquals("Avatar", videoData.getTitle());
         assertEquals("Avatar", videoData.getTitleOriginal());
@@ -94,7 +93,7 @@ public class ComingSoonScannerTest extends AbstractTest {
         episode2.setSeason(season);
         season.getVideoDatas().add(episode2);
 
-        comingSoonScanner.scanSeries(series);
+        comingSoonScanner.scanSeries(series, false);
 
         assertEquals("Due Uomini E Mezzo", series.getTitle());
         assertEquals("Two and a Half Men", series.getTitleOriginal());

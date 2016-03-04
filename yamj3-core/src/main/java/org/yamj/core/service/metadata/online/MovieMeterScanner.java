@@ -102,26 +102,16 @@ public class MovieMeterScanner implements IMovieScanner {
     }
     
     @Override
-    public ScanResult scanMovie(VideoData videoData) {
-        FilmInfo filmInfo = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("moviemeter.throwError.tempUnavailable", Boolean.TRUE);
-            String movieMeterId = getMovieId(videoData, throwTempError);
-
-            if (!StringUtils.isNumeric(movieMeterId)) {
-                LOG.debug("MovieMeter ID not available '{}'", videoData.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            filmInfo = movieMeterApiWrapper.getFilmInfo(movieMeterId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("moviemeter.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
+    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
+        // get movie id
+        String movieMeterId = getMovieId(videoData, throwTempError);
+        if (!StringUtils.isNumeric(movieMeterId)) {
+            LOG.debug("MovieMeter ID not available '{}'", videoData.getIdentifier());
+            return ScanResult.MISSING_ID;
         }
 
+        // get movie info 
+        FilmInfo filmInfo = movieMeterApiWrapper.getFilmInfo(movieMeterId, throwTempError);
         if (filmInfo == null) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;

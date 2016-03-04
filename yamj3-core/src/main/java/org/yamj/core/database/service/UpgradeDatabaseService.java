@@ -62,5 +62,12 @@ public class UpgradeDatabaseService {
         }
 
         LOG.trace("Run patches for database type {}", databaseType);
+
+        // patch error handling configuration entries
+        try {
+            upgradeDatabaseDao.deleteErrorHandlingConfigs();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'deleteErrorHandlingConfigs' for database type "+databaseType, ex);
+        }
     }
 }

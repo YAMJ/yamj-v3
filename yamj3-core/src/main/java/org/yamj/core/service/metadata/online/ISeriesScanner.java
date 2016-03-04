@@ -28,5 +28,5 @@ public interface ISeriesScanner extends INfoScanner {
 
     String getSeriesId(Series series);
 
-    ScanResult scanSeries(Series series);
+    ScanResult scanSeries(Series series, boolean throwTempError);
 }

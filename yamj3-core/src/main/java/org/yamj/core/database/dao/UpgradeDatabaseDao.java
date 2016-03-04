@@ -126,4 +126,25 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // PATCHES
     
+    public void deleteErrorHandlingConfigs() {
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.throwError.tempUnavailable'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.maxRetries.movie' and config_key not like 'yamj3.error.%'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.maxRetries.tvshow' and config_key not like 'yamj3.error.%'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.maxRetries.person' and config_key not like 'yamj3.error.%'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.maxRetries.filmography' and config_key not like 'yamj3.error.%'")
+        .executeUpdate();
+    }
 }

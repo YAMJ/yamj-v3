@@ -54,7 +54,7 @@ public class TheMovieDbScannerTest extends AbstractTest {
         LOG.info("testScanMovie");
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(SCANNER_ID, "19995");
-        tmdbScanner.scanMovie(videoData);
+        tmdbScanner.scanMovie(videoData, false);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TheMovieDbScannerTest extends AbstractTest {
         person.setSourceDbId(SCANNER_ID, "12795");
 
         // Test that we get an error when scanning without an ID
-        tmdbScanner.scanFilmography(person);
+        tmdbScanner.scanFilmography(person, false);
         assertEquals(Boolean.FALSE, person.getNewFilmography().isEmpty());
         for (FilmParticipation p : person.getNewFilmography()) {
             LOG.info("Filmo: {}", p);
@@ -93,7 +93,7 @@ public class TheMovieDbScannerTest extends AbstractTest {
         episode.setEpisode(5);
         episode.setSeason(season);
         season.getVideoDatas().add(episode);
-        tmdbScanner.scanSeries(series);
+        tmdbScanner.scanSeries(series, false);
 
         logCredits(episode, getClass());
     }
