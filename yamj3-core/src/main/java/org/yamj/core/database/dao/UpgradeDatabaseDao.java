@@ -146,5 +146,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.maxRetries.filmography' and config_key not like 'yamj3.error.%'")
         .executeUpdate();
+        
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='ofdb.search.imdb'")
+        .executeUpdate();
     }
 }

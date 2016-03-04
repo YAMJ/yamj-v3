@@ -80,8 +80,14 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     private String getSeriesId(Series series, Locale tvdbLocale, boolean throwTempError) {
         String tvdbId = series.getSourceDbId(SCANNER_ID);
+        // search by title
         if (StringUtils.isBlank(tvdbId)) {
             tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), tvdbLocale.getLanguage(), throwTempError);
+            series.setSourceDbId(SCANNER_ID, tvdbId);
+        }
+        // search by original title
+        if (StringUtils.isBlank(tvdbId) && series.isTitleOriginalScannable()) {
+            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitleOriginal(), series.getStartYear(), tvdbLocale.getLanguage(), throwTempError);
             series.setSourceDbId(SCANNER_ID, tvdbId);
         }
         return tvdbId;

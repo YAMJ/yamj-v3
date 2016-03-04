@@ -40,10 +40,8 @@ public abstract class StatList<T> {
     private T first = null;
     private T last = null;
 
-    public StatList() {
-    }
 
-//<editor-fold defaultstate="collapsed" desc="Getters and Setters">
+    //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
     public List<T> getItems() {
         return items;
     }
@@ -75,7 +73,7 @@ public abstract class StatList<T> {
     public void setLast(T last) {
         this.last = last;
     }
-//</editor-fold>
+    //</editor-fold>
 
     /**
      * Get the total number of items in the list

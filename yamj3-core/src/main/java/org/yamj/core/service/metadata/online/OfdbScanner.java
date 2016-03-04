@@ -101,14 +101,18 @@ public class OfdbScanner implements IMovieScanner {
         // get and check IMDb id
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            boolean searchImdb = configServiceWrapper.getBooleanProperty("ofdb.search.imdb", false);
-            if (searchImdb) {
-                // search IMDb id if not present (don't throw error if temporary not available)
-                imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false, false);
-                if (StringUtils.isNotBlank(imdbId)) {
-                    LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitle());
-                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
-                }
+            // search IMDb id if not present (don't throw error if temporary not available)
+                
+            // search by title
+            imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false, false);
+            if (StringUtils.isBlank(imdbId) && videoData.isTitleOriginalScannable()) {
+                // search by original title if not found by title
+                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
+            }
+            
+            if (StringUtils.isNotBlank(imdbId)) {
+                LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitle());
+                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
             }
         }
 

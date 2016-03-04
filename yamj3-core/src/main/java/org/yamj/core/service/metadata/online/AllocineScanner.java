@@ -121,14 +121,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
         // we also get IMDb id for extra infos
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
-        if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
-            boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
-            if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
-                if (StringUtils.isNotBlank(imdbId)) {
-                    LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
-                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
-                }
+        if (StringUtils.isBlank(imdbId) && 
+            StringUtils.isNotBlank(videoData.getTitleOriginal()) &&
+            configServiceWrapper.getBooleanProperty("allocine.search.imdb", false))
+        {
+            imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
+            if (StringUtils.isNotBlank(imdbId)) {
+                LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
+                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
             }
         }
 
