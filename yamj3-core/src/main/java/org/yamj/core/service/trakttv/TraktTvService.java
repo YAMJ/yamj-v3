@@ -461,16 +461,7 @@ public class TraktTvService {
 
     private static TrackedMovie findMovie(TraktMovieDTO dto, List<TrackedMovie> movies) {
         for (TrackedMovie movie : movies) {
-            if (match(movie.getMovie().getIds().trakt(), dto.getTrakt())) {
-                return movie;
-            }
-            if (match(movie.getMovie().getIds().imdb(), dto.getImdb())) {
-                return movie;
-            }
-            if (match(movie.getMovie().getIds().tmdb(), dto.getTmdb())) {
-                return movie;
-            }
-            if (match(movie.getMovie().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(movie.getMovie().getTitle(), dto.getTitle())) {
+            if (match(movie, dto)) {
                 return movie;
             }
         }
@@ -534,27 +525,7 @@ public class TraktTvService {
     private static TrackedEpisode findEpisode(TraktEpisodeDTO dto, List<TrackedShow> shows) {
         List<TrackedSeason> seasons = null;
         for (TrackedShow show : shows) {
-            if (match(show.getShow().getIds().trakt(), dto.getTrakt())) {
-                seasons = show.getSeasons();
-                break;
-            }
-            if (match(show.getShow().getIds().imdb(), dto.getImdb())) {
-                seasons = show.getSeasons();
-                break;
-            }
-            if (match(show.getShow().getIds().tmdb(), dto.getTmdb())) {
-                seasons = show.getSeasons();
-                break;
-            }
-            if (match(show.getShow().getIds().tvdb(), dto.getTvdb())) {
-                seasons = show.getSeasons();
-                break;
-            }
-            if (match(show.getShow().getIds().tvRage(), dto.getTvRage())) {
-                seasons = show.getSeasons();
-                break;
-            }
-            if (match(show.getShow().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(show.getShow().getTitle(), dto.getTitle())) {
+            if (match (show, dto)) {
                 seasons = show.getSeasons();
                 break;
             }
@@ -797,23 +768,7 @@ public class TraktTvService {
         // find matching show in already processed shows
         SyncShow syncShow = null;
         for (SyncShow show : syncShows) {
-            if (match(show.ids().trakt(), dto.getTrakt())) {
-                syncShow = show;
-                break;
-            }
-            if (match(show.ids().imdb(), dto.getImdb())) {
-                syncShow = show;
-                break;
-            }
-            if (match(show.ids().tmdb(), dto.getTmdb())) {
-                syncShow = show;
-                break;
-            }
-            if (match(show.ids().tvdb(), dto.getTvdb())) {
-                syncShow = show;
-                break;
-            }
-            if (match(show.ids().tvRage(), dto.getTvRage())) {
+            if (match(show, dto)) {
                 syncShow = show;
                 break;
             }
@@ -844,6 +799,63 @@ public class TraktTvService {
         SyncEpisode episode = new SyncEpisode().number(dto.getEpisode()).season(dto.getSeason());
         syncSeason.episode(episode);
         return episode;
+    }
+
+    private static boolean match(TrackedMovie movie, TraktMovieDTO dto) {
+        if (match(movie.getMovie().getIds().trakt(), dto.getTrakt())) {
+            return true;
+        }
+        if (match(movie.getMovie().getIds().imdb(), dto.getImdb())) {
+            return true;
+        }
+        if (match(movie.getMovie().getIds().tmdb(), dto.getTmdb())) {
+            return true;
+        }
+        if (match(movie.getMovie().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(movie.getMovie().getTitle(), dto.getTitle())) {
+            return true;
+        }
+        return false;
+    }
+    
+    private static boolean match(TrackedShow show, TraktEpisodeDTO dto) {
+        if (match(show.getShow().getIds().trakt(), dto.getTrakt())) {
+            return true;
+        }
+        if (match(show.getShow().getIds().imdb(), dto.getImdb())) {
+            return true;
+        }
+        if (match(show.getShow().getIds().tmdb(), dto.getTmdb())) {
+            return true;
+        }
+        if (match(show.getShow().getIds().tvdb(), dto.getTvdb())) {
+            return true;
+        }
+        if (match(show.getShow().getIds().tvRage(), dto.getTvRage())) {
+            return true;
+        }
+        if (match(show.getShow().getYear(), dto.getYear()) && StringUtils.equalsIgnoreCase(show.getShow().getTitle(), dto.getTitle())) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean match(SyncShow show, TraktEpisodeDTO dto) {
+        if (match(show.ids().trakt(), dto.getTrakt())) {
+            return true;
+        }
+        if (match(show.ids().imdb(), dto.getImdb())) {
+            return true;
+        }
+        if (match(show.ids().tmdb(), dto.getTmdb())) {
+            return true;
+        }
+        if (match(show.ids().tvdb(), dto.getTvdb())) {
+            return true;
+        }
+        if (match(show.ids().tvRage(), dto.getTvRage())) {
+            return true;
+        }
+        return false;
     }
 
     private static boolean match(Object id1, Object id2) {
