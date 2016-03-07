@@ -41,5 +41,7 @@ public interface IScannable {
     
     int getRetries();
 
+    boolean isAllScansSkipped();
+    
     boolean isSkippedScan(String sourceDb);
 }

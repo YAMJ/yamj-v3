@@ -182,6 +182,11 @@ public class Season extends AbstractMetadata {
     }
     
     @Override
+    public boolean isAllScansSkipped() {
+        return getSeries().isAllScansSkipped();
+    }
+    
+    @Override
     public boolean isSkippedScan(String sourceDb) {
         return getSeries().isSkippedScan(sourceDb);
     }

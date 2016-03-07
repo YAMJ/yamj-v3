@@ -86,13 +86,20 @@ public class OnlineScannerService {
      * @param videoData
      */
     public void scanMovie(VideoData videoData) {
+        if (videoData.isAllScansSkipped()) {
+            LOG.info("All movie scans skipped for '{}'", videoData.getTitle());
+            videoData.setRetries(0);
+            videoData.setStatus(StatusType.DONE);
+            return;
+        }
+        
         final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
         final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
         ScanResult scanResult = null;
         
     	loop: for (String scanner : MOVIE_SCANNER) {
     	    // holds the inner scan result
-    	    ScanResult innerResult = ScanResult.ERROR;
+    	    ScanResult innerResult = ScanResult.NO_RESULT;
     	    
     		IMovieScanner movieScanner = registeredMovieScanner.get(scanner);
             if (movieScanner == null) {
@@ -109,8 +116,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.movie", 0);
-                    if (videoData.getRetries() < maxRetries) {
+                    if (scanResult == null && videoData.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.movie", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", movieScanner.getScannerName(), videoData.getIdentifier());
                         innerResult = ScanResult.RETRY;
                     } else {
@@ -167,13 +173,20 @@ public class OnlineScannerService {
      * @param series
      */
     public void scanSeries(Series series) {
+        if (series.isAllScansSkipped()) {
+            LOG.info("All series scans skipped for '{}'", series.getTitle());
+            series.setRetries(0);
+            series.setStatus(StatusType.DONE);
+            return;
+        }
+        
         final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
         final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
 		ScanResult scanResult = null;
 
     	loop: for (String scanner : SERIES_SCANNER) {
             // holds the inner scan result
-            ScanResult innerResult = ScanResult.ERROR;
+            ScanResult innerResult = ScanResult.NO_RESULT;
             
     		ISeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
             if (seriesScanner == null) {
@@ -190,8 +203,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.tvshow", 0);
-                    if (series.getRetries() < maxRetries) {
+                    if (scanResult == null  && series.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.tvshow", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", seriesScanner.getScannerName(), series.getIdentifier());
                         innerResult = ScanResult.RETRY;
                     } else {
@@ -248,13 +260,21 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanPerson(Person person) {
+        if (person.isAllScansSkipped()) {
+            LOG.info("All person scans skipped for '{}'", person.getName());
+            person.setRetries(0);
+            person.setStatus(StatusType.DONE);
+            person.setFilmographyStatus(StatusType.DONE);
+            return;
+        }
+        
         final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
         final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
     	ScanResult scanResult = null;
         
     	loop: for (String scanner : PERSON_SCANNER) {
             // holds the inner scan result
-            ScanResult innerResult = ScanResult.ERROR;
+            ScanResult innerResult = ScanResult.NO_RESULT;
             
     		IPersonScanner personScanner = registeredPersonScanner.get(scanner);
             if (personScanner == null) {
@@ -271,8 +291,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.person", 0);
-                    if (person.getRetries() < maxRetries) {
+                    if (scanResult == null  && person.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.person", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", personScanner.getScannerName(), person.getName());
                         innerResult = ScanResult.RETRY;
                     } else {
@@ -331,6 +350,13 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanFilmography(Person person) {
+        if (person.isAllScansSkipped()) {
+            LOG.info("All person scans skipped for '{}'", person.getName());
+            person.setRetries(0);
+            person.setFilmographyStatus(StatusType.DONE);
+            return;
+        }
+
         final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
         ScanResult scanResult = null;
 
@@ -353,8 +379,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    int maxRetries = configService.getIntProperty("yamj3.error.maxRetries.filmography", 0);
-                    if (person.getRetries() < maxRetries) {
+                    if (scanResult == null && person.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.filmography", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", filmographyScanner.getScannerName(), person.getName());
                         innerResult = ScanResult.RETRY;
                     } else {

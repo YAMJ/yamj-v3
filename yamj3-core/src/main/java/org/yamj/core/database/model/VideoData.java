@@ -629,6 +629,7 @@ public class VideoData extends AbstractMetadata {
         this.overrideFlags = overrideFlags;
     }
 
+    @Override
     public boolean isAllScansSkipped() {
         return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }

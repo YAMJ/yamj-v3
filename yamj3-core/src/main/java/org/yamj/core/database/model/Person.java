@@ -355,10 +355,15 @@ public class Person extends AbstractScannable {
     protected void setSkipScanApi(String skipScanApi) {
         this.skipScanApi = skipScanApi;
     }
-    
+
+    @Override
+    public boolean isAllScansSkipped() {
+        return ALL.equalsIgnoreCase(getSkipScanApi());
+    }
+
     @Override
     public boolean isSkippedScan(String sourceDb) {
-        return ALL.equalsIgnoreCase(getSkipScanApi());
+        return StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb);
     }
     
     public StatusType getFilmographyStatus() {
