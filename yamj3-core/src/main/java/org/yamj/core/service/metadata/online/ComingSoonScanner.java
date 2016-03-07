@@ -881,7 +881,9 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     private static Collection<CreditDTO> parseEpisodeCredits(String xml, String startTag, JobType jobType) {
         List<CreditDTO> credits = new ArrayList<>();
         for (String name : HTMLTools.extractTag(xml, startTag, "</li>").split(",")) {
-            credits.add(new CreditDTO(SCANNER_ID, jobType, name));
+            if (StringUtils.isNotBlank(name)) {
+                credits.add(new CreditDTO(SCANNER_ID, jobType, name));
+            }
         }
         return credits;
     }

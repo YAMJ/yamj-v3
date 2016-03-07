@@ -349,7 +349,10 @@ public class OfdbScanner implements IMovieScanner {
         if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
             tags = HTMLTools.extractHtmlTags(xml, "<i>Regie</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
             for (String tag : tags) {
-                videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, extractName(tag)));
+                final String name = extractName(tag);
+                if (StringUtils.isNotBlank(name)) {
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, name));
+                }
             }
         }
 
@@ -357,7 +360,10 @@ public class OfdbScanner implements IMovieScanner {
         if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
             tags = HTMLTools.extractHtmlTags(xml, "<i>Drehbuchautor(in)</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
             for (String tag : tags) {
-                videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, extractName(tag)));
+                final String name = extractName(tag);
+                if (StringUtils.isNotBlank(name)) {
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, name));
+                }
             }
         }
 
@@ -365,7 +371,10 @@ public class OfdbScanner implements IMovieScanner {
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             tags = HTMLTools.extractHtmlTags(xml, "<i>Darsteller</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
             for (String tag : tags) {
-                videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.ACTOR, extractName(tag), extractRole(tag)));
+                final String name = extractName(tag);
+                if (StringUtils.isNotBlank(name)) {
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.ACTOR, name, extractRole(tag)));
+                }
             }
         }
         

@@ -161,7 +161,9 @@ public class TheTVDbScanner implements ISeriesScanner {
             if (CollectionUtils.isNotEmpty(tvdbActors)) {
                 actors = new LinkedHashSet<>(tvdbActors.size());
                 for (Actor actor : tvdbActors) {
-                    actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+                    if (StringUtils.isNotBlank(actor.getName())) {
+                        actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+                    }
                 }
             }
         }
@@ -251,34 +253,29 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
 
             // directors
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                for (String director : tvdbEpisode.getDirectors()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
-                }
-            }
-            
+            addCredits(videoData, JobType.DIRECTOR, tvdbEpisode.getDirectors());
             // writers
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                for (String writer : tvdbEpisode.getWriters()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, writer));
-                }
-            }
-
+            addCredits(videoData, JobType.WRITER, tvdbEpisode.getWriters());
             // actors
             videoData.addCreditDTOS(actors);
-
             // guest stars
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
-                for (String guestStar : tvdbEpisode.getGuestStars()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.GUEST_STAR, guestStar));
-                }
-            }
+            addCredits(videoData, JobType.GUEST_STAR, tvdbEpisode.getGuestStars());
             
             // mark episode as done
             videoData.setTvEpisodeDone();
         }
     }
 
+    private void addCredits(VideoData videoData, JobType jobType, Collection<String> persons) {
+        if (persons != null && this.configServiceWrapper.isCastScanEnabled(jobType)) {
+            for (String person : persons) {
+                if (StringUtils.isNotBlank(person)) {
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, jobType, person));
+                }
+            }
+        }
+    }
+    
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file

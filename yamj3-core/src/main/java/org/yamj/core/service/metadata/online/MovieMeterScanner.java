@@ -161,15 +161,19 @@ public class MovieMeterScanner implements IMovieScanner {
 
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             for (Actor actor : filmInfo.getActors()) {
-                CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName());
-                creditDTO.setVoice(actor.isVoice());
-                videoData.addCreditDTO(creditDTO);
+                if (StringUtils.isNotBlank(actor.getName())) {
+                    CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName());
+                    creditDTO.setVoice(actor.isVoice());
+                    videoData.addCreditDTO(creditDTO);
+                }
             }
         }
 
         if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
             for (String director : filmInfo.getDirectors()) {
-                videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
+                if (StringUtils.isNotBlank(director)) {
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
+                }
             }
         }
 
