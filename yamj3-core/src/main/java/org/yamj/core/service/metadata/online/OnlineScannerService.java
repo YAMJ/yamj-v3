@@ -203,7 +203,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    if (scanResult == null  && series.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.tvshow", 0)) {
+                    if (scanResult == null && series.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.tvshow", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", seriesScanner.getScannerName(), series.getIdentifier());
                         innerResult = ScanResult.RETRY;
                     } else {
@@ -291,7 +291,7 @@ public class OnlineScannerService {
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
-                    if (scanResult == null  && person.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.person", 0)) {
+                    if (scanResult == null && person.getRetries() < configService.getIntProperty("yamj3.error.maxRetries.person", 0)) {
                         LOG.info("{} service temporary not available; trigger retry: '{}'", personScanner.getScannerName(), person.getName());
                         innerResult = ScanResult.RETRY;
                     } else {
