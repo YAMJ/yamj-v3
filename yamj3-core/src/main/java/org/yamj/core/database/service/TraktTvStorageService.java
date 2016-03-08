@@ -94,7 +94,7 @@ public class TraktTvStorageService {
             }
             
             if (updated) {
-                LOG.debug("Trakt.TV watched movie: {}", videoData.getIdentifier());
+                LOG.debug("Trakt.TV watched video: {}", videoData.getIdentifier());
                 traktTvDao.updateEntity(videoData);
             }
         }
@@ -106,7 +106,7 @@ public class TraktTvStorageService {
             VideoData videoData = metadataStorageService.getRequiredVideoData(id);
             if (videoData.getWatchedTraktTvLastDate() == null || videoData.getWatchedTraktTvLastDate().before(lastWatched)) {
                 videoData.setWatchedTraktTv(true, lastWatched);
-                LOG.debug("Trakt.TV watched episode: {}", videoData.getIdentifier());
+                LOG.debug("Trakt.TV watched video: {}", videoData.getIdentifier());
                 traktTvDao.updateEntity(videoData);
             }
         }
