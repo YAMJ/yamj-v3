@@ -63,6 +63,7 @@ public class RecheckTask implements ITask {
     @Override
     public void execute(String options) throws Exception {
         LOG.debug("Execute recheck task");
+        final long startTime = System.currentTimeMillis();
 
         int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 45);
         Calendar cal = Calendar.getInstance();
@@ -86,6 +87,6 @@ public class RecheckTask implements ITask {
             scanningScheduler.triggerScanPeopleData();
         }
 
-        LOG.debug("Finished recheck task");
+        LOG.debug("Finished recheck task after {} ms", System.currentTimeMillis()-startTime);
     }
 }

@@ -65,6 +65,7 @@ public class TraktTvTask implements ITask {
     @Override
     public void execute(String options) throws Exception {
         LOG.debug("Execute Trakt.TV task");
+        final long startTime = System.currentTimeMillis();
 
         if (traktTvService.isExpired()) {
             if (!traktTvService.refreshWhenExpired()) {
@@ -98,6 +99,6 @@ public class TraktTvTask implements ITask {
             LOG.debug("Trakt.TV pushing is not enabled");
         }
 
-        LOG.debug("Finished Trakt.TV task");
+        LOG.debug("Finished Trakt.TV task after {} ms", System.currentTimeMillis()-startTime);
     }
 }

@@ -58,7 +58,8 @@ public class ArtworkSanityTask implements ITask {
     @Override
     public void execute(String options) throws Exception {
         LOG.debug("Execute artwork sanity task");
-        
+        final long startTime = System.currentTimeMillis();
+
         long lastId = -1;
         do {
             lastId = this.artworkStorageService.checkArtworkSanity(lastId);
@@ -67,6 +68,6 @@ public class ArtworkSanityTask implements ITask {
         // trigger artwork processing in any case
         this.artworkProcessScheduler.triggerProcess();
 
-        LOG.debug("Finished artwork sanity task");
+        LOG.debug("Finished artwork sanity task after {} ms", System.currentTimeMillis()-startTime);
     }
 }
