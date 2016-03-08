@@ -64,6 +64,11 @@ public class TraktTvTask implements ITask {
 
     @Override
     public void execute(String options) throws Exception {
+        if (!collectionEnabled && !pushEnabled && !pullEnabled) {
+            // nothing to do
+            return;
+        }
+
         LOG.debug("Execute Trakt.TV task");
         final long startTime = System.currentTimeMillis();
 
