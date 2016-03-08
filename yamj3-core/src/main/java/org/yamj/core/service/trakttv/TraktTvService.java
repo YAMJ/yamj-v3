@@ -27,6 +27,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -393,13 +395,13 @@ public class TraktTvService {
 
     // COLLECTION
     
-    private Date getCheckDate(String property) {
+    private DateTime getCheckDate(String property) {
         Date checkDate = this.configService.getDateProperty(property);
         if (checkDate == null) {
             // build a date long, long ago ...
-            checkDate = DateTime.now().minusYears(20).toDate();
+            return DateTime.now().minusYears(100);
         }
-        return checkDate;
+        return new DateTime(checkDate.getTime());
     }
     
     public void collectMovies() {
@@ -407,7 +409,7 @@ public class TraktTvService {
         final Date lastCollection = new Date();
 
         // get the collected movies
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_MOVIES);
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_MOVIES).toDate();
         Collection<TraktMovieDTO> collectedMovies = this.traktTvStorageService.getCollectedMovies(checkDate);
         LOG.info("Found {} collected movies", collectedMovies.size());
 
@@ -422,10 +424,10 @@ public class TraktTvService {
         try {
             trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.MINIMAL);
         } catch (Exception e) {
-            LOG.error("Failed to get tracked movies", e);
+            LOG.error("Failed to get collected movies", e);
             return;
         }
-        LOG.debug("Found {} collection movies on Trakt.TV", trackedMovies.size());
+        LOG.debug("Found {} collected movies on Trakt.TV", trackedMovies.size());
         
         // determine movies to add to collection
         List<SyncMovie> syncMovies = new ArrayList<>();
@@ -448,7 +450,7 @@ public class TraktTvService {
             try {
                 this.traktTvApi.syncService().addItemsToCollection(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
-                LOG.error("Failed to add movie items to collection");
+                LOG.error("Failed to add movies to collection");
                 LOG.warn(TRAKTTV_ERROR, ex);
                 noError = false;
             }
@@ -473,7 +475,7 @@ public class TraktTvService {
         final Date lastCollection = new Date();
 
         // get the collected episodes
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_EPISODES);
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_COLLECT_EPISODES).toDate();
         Collection<TraktEpisodeDTO> collectedEpisodes = this.traktTvStorageService.getCollectedEpisodes(checkDate);
         LOG.info("Found {} collected episodes", collectedEpisodes.size());
 
@@ -488,10 +490,10 @@ public class TraktTvService {
         try {
             trackedShows = traktTvApi.syncService().getCollectionShows(Extended.MINIMAL);
         } catch (Exception e) {
-            LOG.error("Failed to get tracked movies", e);
+            LOG.error("Failed to get collected shows", e);
             return;
         }
-        LOG.debug("Found {} collection shows on Trakt.TV", trackedShows.size());
+        LOG.debug("Found {} collected shows on Trakt.TV", trackedShows.size());
 
         // determine movies to add to collection
         List<SyncShow> syncShows = new ArrayList<>();
@@ -511,7 +513,7 @@ public class TraktTvService {
             try {
                 this.traktTvApi.syncService().addItemsToCollection(new SyncItems().shows(syncShows));
             } catch (Exception ex) {
-                LOG.error("Failed to add episode items to collection");
+                LOG.error("Failed to add episodes to collection");
                 LOG.warn(TRAKTTV_ERROR, ex);
                 noError = false;
             }
@@ -557,34 +559,55 @@ public class TraktTvService {
     // SYNCHRONIZATION
 
     public void pullWatchedMovies() {
-        List<TrackedMovie> trackedMovies;
+        // store last pull date for later use (without milliseconds)
+        final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
+        
+        // get watched movies from Trakt.TV
+        List<TrackedMovie> watchedMovies;
         try {
-            trackedMovies = traktTvApi.syncService().getWatchedMovies(Extended.MINIMAL);
+            watchedMovies = traktTvApi.syncService().getWatchedMovies(Extended.MINIMAL);
         } catch (Exception e) {
-            LOG.error("Failed to get tracked movies", e);
+            LOG.error("Failed to get watched movies", e);
             return;
         }
-        LOG.info("Found {} watched movies on Trakt.TV", trackedMovies.size());
-        
-        // store last pull date for later use
-        final Date lastPull = new Date();
-        
-        // get the updated movie IDs for setting watched status
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_PULL_MOVIES);
-        Map<String,List<Long>> updatedMovies = this.traktTvStorageService.getUpdatedMovieIds(checkDate);
-        
-        // nothing to do if empty
-        if (updatedMovies.isEmpty()) {
+        if (watchedMovies.isEmpty()) {
+            // nothing to do, cause nothing has been watched
+            LOG.trace("No watched movies found on Trakt.TV");
+            return;
+        }
+
+        // filter out movies which has been watched before check date
+        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_MOVIES);
+        List<TrackedMovie> filteredMovies = new ArrayList<>();
+        for (TrackedMovie movie : watchedMovies) {
+            if (movie.getLastWatchedAt().isAfter(checkDate)) {
+                filteredMovies.add(movie);
+            }
+        }
+        LOG.info("Found {} new watched movies on Trakt.TV", filteredMovies.size());
+        if (filteredMovies.isEmpty()) {
+            // nothing to do, cause nothing has been watched after last pull date
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
             return;
         }
         
+        // get all movie IDs from database
+        Map<String,List<Long>> allMovieIds = this.traktTvStorageService.getAllMovieIds();
+        if (allMovieIds.isEmpty()) {
+            // nothing to do if no movies found
+            this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
+            return;
+        }
+        
+        // update watched status for filtered movies
         boolean noError = true;
-        for (TrackedMovie movie : trackedMovies) {
-            final Set<Long> updateable = getUpdateableMovies(movie.getMovie().getIds(), updatedMovies);
+        for (TrackedMovie movie : filteredMovies) {
+            final Set<Long> updateable = getUpdateableMovies(movie.getMovie().getIds(), allMovieIds);
             if (updateable.size() > 0) {
                 try {
-                    this.traktTvStorageService.updateWatched(movie, updateable);
+                    final String traktTvId = movie.getMovie().getIds().trakt().toString();
+                    final Date lastWatched = movie.getLastWatchedAt().withMillisOfSecond(0).toDate();
+                    this.traktTvStorageService.updateWatched(traktTvId, lastWatched, updateable);
                 } catch (Exception ex) {
                     LOG.error("Failed to updated watched movie: {}", movie);
                     LOG.warn(TRAKTTV_ERROR, ex);
@@ -617,42 +640,62 @@ public class TraktTvService {
     }
 
     public void pullWatchedEpisodes() {
-        List<TrackedShow> trackedShows;
+        // store last pull date for later use (without milliseconds)
+        final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
+
+        // get watched shows from Trakt.TV
+        List<TrackedShow> watchedShows;
         try {
-            trackedShows = traktTvApi.syncService().getWatchedShows(Extended.MINIMAL);
+            watchedShows = traktTvApi.syncService().getWatchedShows(Extended.MINIMAL);
         } catch (Exception e) {
-            LOG.error("Failed to get tracked shows", e);
+            LOG.error("Failed to get watched shows", e);
             return;
         }
-        LOG.info("Found {} watched shows on Trakt.TV", trackedShows.size());
+        if (watchedShows.isEmpty()) {
+            // nothing to do, cause nothing has been watched
+            LOG.trace("No watched shows found on Trakt.TV");
+            return;
+        }
 
-        // store last pull date for later use
-        final Date lastPull = new Date();
-        
-        // get the updated episode IDs for setting watched status
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_PULL_EPISODES);
-        Map<String,List<Long>> updatedEpisodes = this.traktTvStorageService.getUpdatedEpisodeIds(checkDate);
-        
-        // nothing to do if empty
-        if (updatedEpisodes.isEmpty()) {
+        // filter out episodes which has been watched before check date
+        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_EPISODES);
+        List<WatchedEpisode> watchedEpisodes = new ArrayList<>();
+        for (TrackedShow show : watchedShows) {
+            for (TrackedSeason season : show.getSeasons()) {
+                for (TrackedEpisode episode : season.getEpisodes()) {
+                    if (episode.getLastWatchedAt() != null && episode.getLastWatchedAt().isAfter(checkDate)) {
+                        final Date lastWatched = episode.getLastWatchedAt().withMillisOfSecond(0).toDate();
+                        watchedEpisodes.add(new WatchedEpisode(show.getShow().getIds(), season.getNumber(), episode.getNumber(), lastWatched));
+                    }
+                }
+            }
+        }
+        LOG.info("Found {} new watched episodes on Trakt.TV", watchedEpisodes.size());
+        if (watchedEpisodes.isEmpty()) {
+            // nothing to do, cause nothing has been watched
             this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
             return;
         }
         
+        // get all episode IDs from database
+        Map<String,List<Long>> allEpisodeIds = this.traktTvStorageService.getAllEpisodeIds();
+        if (allEpisodeIds.isEmpty()) {
+            // nothing to do if no episodes found
+            this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
+            return;
+        }
+        
+        // update watched status for filtered episodes
         boolean noError = true;
-        for (TrackedShow show : trackedShows) {
-            for (TrackedSeason season : show.getSeasons()) {
-                for (TrackedEpisode episode : season.getEpisodes()) {
-                    final Set<Long> updateable = getUpdateableEpisodes(show.getShow().getIds(), season.getNumber(), episode.getNumber(), updatedEpisodes);
-                    if (updateable.size() > 0) {
-                        try {
-                            this.traktTvStorageService.updateWatched(episode, updateable);
-                        } catch (Exception ex) {
-                            LOG.error("Failed to updated watched movie: {}", episode);
-                            LOG.warn(TRAKTTV_ERROR, ex);
-                            noError = false;
-                        }
-                    }
+        for (WatchedEpisode episode : watchedEpisodes) {
+            final Set<Long> updateable = getUpdateableEpisodes(episode.ids, episode.season, episode.episode, allEpisodeIds);
+            if (updateable.size() > 0) {
+                try {
+                    this.traktTvStorageService.updateWatched(episode.lastWatched, updateable);
+                } catch (Exception ex) {
+                    LOG.error("Failed to updated watched episode: {}", episode);
+                    LOG.warn(TRAKTTV_ERROR, ex);
+                    noError = false;
                 }
             }
         }
@@ -693,7 +736,7 @@ public class TraktTvService {
         final Date lastPush = new Date();
         
         // get the updated movie IDs for setting watched status
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES);
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES).toDate();
         Collection<TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
         
         List<SyncMovie> syncMovies = new ArrayList<>();
@@ -728,7 +771,7 @@ public class TraktTvService {
         final Date lastPush = new Date();
         
         // get the updated movie IDs for setting watched status
-        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_EPISODES);
+        final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_EPISODES).toDate();
         Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
         
         List<SyncShow> syncShows = new ArrayList<>();
@@ -863,5 +906,25 @@ public class TraktTvService {
             return false;
         }
         return id1.equals(id2);
+    }
+
+    static class WatchedEpisode {
+        
+        private final Ids ids;
+        private final int season;
+        private final int episode;
+        private final Date lastWatched;
+        
+        public WatchedEpisode(Ids ids, int season, int episode, Date lastWatched) {
+            this.ids = ids;
+            this.season = season;
+            this.episode = episode;
+            this.lastWatched = lastWatched;
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        }
     }
 }

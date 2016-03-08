@@ -35,11 +35,10 @@ import org.yamj.core.service.metadata.online.*;
 @Repository("traktTvDao")
 public class TraktTvDao extends HibernateDao {
     
-    public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
+    public Map<String,List<Long>> getAllMovieIds() {
         final Map<String,List<Long>> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.updated.movies")
-                .setTimestamp("checkDate", checkDate)
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.movies")
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
@@ -62,11 +61,10 @@ public class TraktTvDao extends HibernateDao {
         return result;
     }
 
-    public Map<String,List<Long>> getUpdatedEpisodeIds(Date checkDate) {
+    public Map<String,List<Long>> getAllEpisodeIds() {
         final Map<String,List<Long>> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.updated.episodes")
-                .setTimestamp("checkDate", checkDate)
+        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.episodes")
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )

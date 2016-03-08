@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.api.trakttv.model.TrackedEpisode;
-import org.yamj.api.trakttv.model.TrackedMovie;
 import org.yamj.core.database.dao.TraktTvDao;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
@@ -49,13 +47,13 @@ public class TraktTvStorageService {
     private MetadataStorageService metadataStorageService;
 
     @Transactional(readOnly = true)
-    public Map<String,List<Long>> getUpdatedMovieIds(Date checkDate) {
-        return this.traktTvDao.getUpdatedMovieIds(checkDate);
+    public Map<String,List<Long>> getAllMovieIds() {
+        return this.traktTvDao.getAllMovieIds();
     }
 
     @Transactional(readOnly = true)
-    public Map<String,List<Long>> getUpdatedEpisodeIds(Date checkDate) {
-        return this.traktTvDao.getUpdatedEpisodeIds(checkDate);
+    public Map<String,List<Long>> getAllEpisodeIds() {
+        return this.traktTvDao.getAllEpisodeIds();
     }
 
     @Transactional(readOnly = true)
@@ -79,13 +77,12 @@ public class TraktTvStorageService {
     }
 
     @Transactional
-    public void updateWatched(TrackedMovie trackedMovie, Collection<Long> ids) {
-        final String traktTvId = trackedMovie.getMovie().getIds().trakt().toString();
-        final Date lastWatched = trackedMovie.getLastWatchedAt().withMillisOfSecond(0).toDate();
-        
+    public void updateWatched(String traktTvId, Date lastWatched, Collection<Long> ids) {
+        boolean updated;
         for (Long id : ids) {
-            boolean updated = false;
+            updated = false;
             VideoData videoData = metadataStorageService.getRequiredVideoData(id);
+            
             if (!StringUtils.equals(videoData.getSourceDbId(TraktTvScanner.SCANNER_ID), traktTvId)) {
                 updated = true;
                 videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, traktTvId);
@@ -104,9 +101,7 @@ public class TraktTvStorageService {
     }    
 
     @Transactional
-    public void updateWatched(TrackedEpisode trackedEpisode, Collection<Long> ids) {
-        final Date lastWatched = trackedEpisode.getLastWatchedAt().withMillisOfSecond(0).toDate();
-        
+    public void updateWatched(Date lastWatched, Collection<Long> ids) {
         for (Long id : ids) {
             VideoData videoData = metadataStorageService.getRequiredVideoData(id);
             if (videoData.getWatchedTraktTvLastDate() == null || videoData.getWatchedTraktTvLastDate().before(lastWatched)) {
