@@ -89,17 +89,30 @@ public class TraktTvTask implements ITask {
         }
         
         // 2. pull
+        boolean pulledMovies = true;
+        boolean pulledEpisodes = true;
         if (pullEnabled) {
-            traktTvService.pullWatchedMovies();
-            traktTvService.pullWatchedEpisodes();
+            pulledMovies = traktTvService.pullWatchedMovies();
+            pulledEpisodes = traktTvService.pullWatchedEpisodes();
         } else {
             LOG.debug("Trakt.TV pulling is not enabled");
         }
 
         // 2. push
         if (pushEnabled) {
-            traktTvService.pushWatchedMovies();
-            traktTvService.pushWatchedEpisodes();
+            if (pulledMovies) {
+                // push movies after pull
+                traktTvService.pushWatchedMovies();
+            } else {
+                LOG.warn("No push of watched movies when previous pull was not successful");
+            }
+            
+            if (pulledEpisodes) {
+                // push episodes after pull
+                traktTvService.pushWatchedEpisodes();
+            } else {
+                LOG.warn("No push of watched episodes when previous pull was not successful");
+            }
         } else {
             LOG.debug("Trakt.TV pushing is not enabled");
         }

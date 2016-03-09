@@ -559,7 +559,7 @@ public class TraktTvService {
 
     // SYNCHRONIZATION
 
-    public void pullWatchedMovies() {
+    public boolean pullWatchedMovies() {
         // store last pull date for later use (without milliseconds)
         final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
         
@@ -569,12 +569,12 @@ public class TraktTvService {
             watchedMovies = traktTvApi.syncService().getWatchedMovies(Extended.MINIMAL);
         } catch (Exception e) {
             LOG.error("Failed to get watched movies", e);
-            return;
+            return false;
         }
         if (watchedMovies.isEmpty()) {
             // nothing to do, cause nothing has been watched
             LOG.trace("No watched movies found on Trakt.TV");
-            return;
+            return true;
         }
 
         // filter out movies which has been watched before check date
@@ -589,7 +589,7 @@ public class TraktTvService {
         if (filteredMovies.isEmpty()) {
             // nothing to do, cause nothing has been watched after last pull date
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
-            return;
+            return true;
         }
         
         // get all movie IDs from database
@@ -597,7 +597,7 @@ public class TraktTvService {
         if (allMovieIds.isEmpty()) {
             // nothing to do if no movies found
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
-            return;
+            return true;
         }
         
         // update watched status for filtered movies
@@ -621,6 +621,7 @@ public class TraktTvService {
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_PULL_MOVIES, lastPull);
         }
+        return noError;
     }
 
     private static Set<Long> getUpdateableMovies(Ids movieIds, Map<String,List<Long>> updatedMovies) {
@@ -640,7 +641,7 @@ public class TraktTvService {
         return updateable;
     }
 
-    public void pullWatchedEpisodes() {
+    public boolean pullWatchedEpisodes() {
         // store last pull date for later use (without milliseconds)
         final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
 
@@ -650,12 +651,12 @@ public class TraktTvService {
             watchedShows = traktTvApi.syncService().getWatchedShows(Extended.MINIMAL);
         } catch (Exception e) {
             LOG.error("Failed to get watched shows", e);
-            return;
+            return false;
         }
         if (watchedShows.isEmpty()) {
             // nothing to do, cause nothing has been watched
             LOG.trace("No watched shows found on Trakt.TV");
-            return;
+            return true;
         }
 
         // filter out episodes which has been watched before check date
@@ -675,7 +676,7 @@ public class TraktTvService {
         if (watchedEpisodes.isEmpty()) {
             // nothing to do, cause nothing has been watched
             this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
-            return;
+            return true;
         }
         
         // get all episode IDs from database
@@ -683,7 +684,7 @@ public class TraktTvService {
         if (allEpisodeIds.isEmpty()) {
             // nothing to do if no episodes found
             this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
-            return;
+            return true;
         }
         
         // update watched status for filtered episodes
@@ -705,6 +706,7 @@ public class TraktTvService {
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_PULL_EPISODES, lastPull);
         }
+        return noError;
     }
 
     private static Set<Long> getUpdateableEpisodes(Ids showIds, int season, int episode, Map<String,List<Long>> updatedEpisodes) {
