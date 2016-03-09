@@ -86,7 +86,7 @@ public class OnlineScannerService {
      */
     public void scanMovie(VideoData videoData) {
         if (videoData.isAllScansSkipped()) {
-            LOG.info("All movie scans skipped for '{}'", videoData.getTitle());
+            LOG.info("All movie scans skipped for {}-'{}'", videoData.getId(), videoData.getTitle());
             videoData.setRetries(0);
             videoData.setStatus(StatusType.DONE);
             return;
@@ -173,7 +173,7 @@ public class OnlineScannerService {
      */
     public void scanSeries(Series series) {
         if (series.isAllScansSkipped()) {
-            LOG.info("All series scans skipped for '{}'", series.getTitle());
+            LOG.info("All series scans skipped for {}-'{}', skipped", series.getId(), series.getTitle());
             skipSeries(series);
             return;
         }
@@ -270,7 +270,7 @@ public class OnlineScannerService {
      */
     public void scanPerson(Person person) {
         if (person.isAllScansSkipped()) {
-            LOG.info("All person scans skipped for '{}'", person.getName());
+            LOG.info("All person scans skipped for {}-'{}'", person.getId(), person.getName());
             person.setRetries(0);
             person.setStatus(StatusType.DONE);
             person.setFilmographyStatus(StatusType.DONE);
@@ -360,7 +360,7 @@ public class OnlineScannerService {
      */
     public void scanFilmography(Person person) {
         if (person.isAllScansSkipped()) {
-            LOG.info("All person scans skipped for '{}'", person.getName());
+            LOG.info("All filmography scans skipped for {}-'{}'", person.getId(), person.getName());
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.DONE);
             return;
