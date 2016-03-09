@@ -62,6 +62,7 @@ public class TraktTvService {
     private static final String TRAKTTV_LAST_PUSH_MOVIES = "trakttv.last.push.movies";
     private static final String TRAKTTV_LAST_PUSH_EPISODES = "trakttv.last.push.episodes";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
+    private static final int SYNC_MAX_RESULTS = 100;
     
     private static final ReentrantLock REFRESH_LOCK = new ReentrantLock();
     private static boolean REFRESH_FAILED = false;
@@ -447,7 +448,7 @@ public class TraktTvService {
                 LOG.debug("Trakt.TV collected movie: {}", dto.getIdentifier());
                 counter++;
                 
-                if (counter == 100) {
+                if (counter == SYNC_MAX_RESULTS) {
                     // sync every 100 movies
                     noError = noError && syncCollectedMovies(syncMovies);
                     counter = 0;
@@ -528,7 +529,7 @@ public class TraktTvService {
                 LOG.debug("Trakt.TV collected episode: {}", dto.getIdentifier());
                 counter++;
                 
-                if (counter == 100) {
+                if (counter == SYNC_MAX_RESULTS) {
                     // sync every 100 episodes
                     noError = noError && syncCollectedShows(syncShows);
                     counter = 0;
@@ -587,12 +588,13 @@ public class TraktTvService {
                 LOG.warn(TRAKTTV_ERROR, ex);
                 noError = false;
             }
+            // clear synchronized shows
             syncShows.clear();
         }
         return noError;
     }
 
-    // SYNCHRONIZATION
+    // PULL SYNCHRONIZATION
 
     public boolean pullWatchedMovies() {
         // store last pull date for later use (without milliseconds)
@@ -769,6 +771,8 @@ public class TraktTvService {
         return updateable;
     }
 
+    // PULL SYNCHRONIZATION
+
     public void pushWatchedMovies() {
         // store last push date for later use
         final Date lastPush = new Date();
@@ -777,7 +781,10 @@ public class TraktTvService {
         final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES).toDate();
         Collection<TraktMovieDTO> watchedMovies = this.traktTvStorageService.getWatchedMovies(checkDate);
         
+        // synchronize movies
         List<SyncMovie> syncMovies = new ArrayList<>();
+        boolean noError = true;
+        int counter = 0;
         for (TraktMovieDTO dto : watchedMovies) {
             if (!dto.isValid()) {
                 continue;
@@ -786,22 +793,38 @@ public class TraktTvService {
             // build episode and set watched date
             addSyncMovie(dto, syncMovies).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
+            counter++;
+            
+            if (counter == SYNC_MAX_RESULTS) {
+                // sync every 100 movies
+                noError = noError && syncWatchedMovies(syncMovies);
+                counter = 0;
+            }
         }
         
+        // sync outstanding movies
+        noError = noError && syncWatchedMovies(syncMovies);
+        
+        // if no error then set last push date for next run
+        if (noError) {
+            this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
+        }
+    }
+
+    private boolean syncWatchedMovies(List<SyncMovie> syncMovies) {
         boolean noError = true;
         if (syncMovies.size() > 0) {
             try {
                 this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
-                LOG.error("Failed to add movie items to watched history");
+                LOG.error("Failed to add {} movies to watched history", syncMovies.size());
                 LOG.warn(TRAKTTV_ERROR, ex);
                 noError = false;
             }
+            // clear synchronized movies
+            syncMovies.clear();
         }
-
-        if (noError) {
-            this.configService.setProperty(TRAKTTV_LAST_PUSH_MOVIES, lastPush);
-        }
+        return noError;
     }
 
     public void pushWatchedEpisodes() {
@@ -813,6 +836,8 @@ public class TraktTvService {
         Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
         
         List<SyncShow> syncShows = new ArrayList<>();
+        boolean noError = true;
+        int counter = 0;
         for (TraktEpisodeDTO dto : watchedEpisodes) {
             if (!dto.isValid()) {
                 continue;
@@ -821,24 +846,42 @@ public class TraktTvService {
             // build episode and set watched date
             addSyncEpisode(dto, syncShows).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
-        }
-        
-        boolean noError = true;
-        if (syncShows.size() > 0) {
-            try {
-                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
-            } catch (Exception ex) {
-                LOG.error("Failed to add episode items to watched history");
-                LOG.warn(TRAKTTV_ERROR, ex);
-                noError = false;
+            counter++;
+            
+            if (counter == SYNC_MAX_RESULTS) {
+                // sync every 100 episodes
+                noError = noError && syncWatchedShows(syncShows);
+                counter = 0;
             }
         }
-
+        
+        // sync outstanding episodes
+        noError = noError && syncWatchedShows(syncShows);
+        
+        // if no error then set last push date for next run
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_PUSH_EPISODES, lastPush);
         }
     }
 
+    private boolean syncWatchedShows(List<SyncShow> syncShows) {
+        boolean noError = true;
+        if (syncShows.size() > 0) {
+            try {
+                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
+            } catch (Exception ex) {
+                LOG.error("Failed to add episodes to watched history");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+            // clear synchronized shows
+            syncShows.clear();
+        }
+        return noError;
+    }
+
+    // COMMON METHODS
+    
     private static SyncMovie addSyncMovie(final TraktMovieDTO dto, final List<SyncMovie> syncMovies) {
         SyncMovie syncMovie = new SyncMovie().ids(new Ids().trakt(dto.getTrakt()).imdb(dto.getImdb()).tmdb(dto.getTmdb()));
         syncMovies.add(syncMovie.title(dto.getTitle()).year(dto.getYear()));
