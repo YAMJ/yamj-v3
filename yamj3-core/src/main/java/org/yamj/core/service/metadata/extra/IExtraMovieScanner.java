@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata;
+package org.yamj.core.service.metadata.extra;
 
-import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 
-public interface IExtraSeriesScanner extends IExtraScanner {
+public interface IExtraMovieScanner extends IExtraScanner {
 
-    void scanSeries(Series series);
+    void scanMovie(VideoData videoData);
 }

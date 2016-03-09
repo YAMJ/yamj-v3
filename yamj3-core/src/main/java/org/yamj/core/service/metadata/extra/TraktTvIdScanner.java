@@ -31,8 +31,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.ExtraScannerService;
-import org.yamj.core.service.metadata.IExtraMovieScanner;
-import org.yamj.core.service.metadata.IExtraSeriesScanner;
 import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.trakttv.TraktTvService;
 

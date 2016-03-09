@@ -22,6 +22,10 @@
  */
 package org.yamj.core.service.metadata;
 
+import org.yamj.core.service.metadata.extra.IExtraMovieScanner;
+import org.yamj.core.service.metadata.extra.IExtraScanner;
+import org.yamj.core.service.metadata.extra.IExtraSeriesScanner;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
