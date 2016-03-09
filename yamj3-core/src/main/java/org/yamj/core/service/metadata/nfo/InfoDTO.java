@@ -363,10 +363,8 @@ public final class InfoDTO {
     }
     
     public void addEpisode(InfoEpisodeDTO episodeDTO) {
-        if (episodeDTO != null && episodeDTO.isValid()) {
-            this.episodes.add(episodeDTO);
-            this.changed = true;
-        }
+        this.episodes.add(episodeDTO);
+        this.changed = true;
     }
     
     public InfoEpisodeDTO getEpisode(int season, int episode) {

@@ -74,9 +74,9 @@ public final class InfoReader {
      * @param dto
      */
     public void readNfoFile(StageFile stageFile, InfoDTO dto) {
-        String nfoFilename = stageFile.getFileName();
-
+        final String nfoFilename = stageFile.getFileName();
         File nfoFile = new File(stageFile.getFullPath());
+        
         String nfoContent = null;
         try {
             nfoContent = FileUtils.readFileToString(nfoFile, UTF8);
@@ -196,7 +196,11 @@ public final class InfoReader {
                 xmlDoc = DOMHelper.getDocFromFile(nfoFile);
             }
         } catch (Exception ex) {
-            LOG.error("Failed parsing NFO file: " + nfoFilename, ex);
+            if (nfoFile != null) {
+                LOG.error("Failed parsing NFO file: " + nfoFile.getAbsolutePath(), ex);
+            } else {
+                LOG.error("Failed parsing NFO file: " + nfoFilename, ex);
+            }
             return Boolean.FALSE;
         }
 
@@ -224,142 +228,138 @@ public final class InfoReader {
             nlMovies = xmlDoc.getElementsByTagName(DOMHelper.TYPE_MOVIE);
             dto.setTvShow(false);
         }
+
+        // holds the watched flag
+        boolean watched = false;
         
-        // just one movie per file
-        if (nlMovies == null || nlMovies.getLength() == 0) {
-            LOG.warn("NFO {} contains no infos", nfoFilename);
-            return;
-        }
-        // get first info element
-        Node nMovie = nlMovies.item(0);
-        if (nMovie.getNodeType() != Node.ELEMENT_NODE) {
-            LOG.warn("NFO {} contains no infos", nfoFilename);
-            return;
-        }          
-        Element eCommon = (Element) nMovie;
-        
-        // parse title
-        parseTitle(eCommon, dto);
-
-        // parse year
-        String value = DOMHelper.getValueFromElement(eCommon, "year");
-        dto.setYear(value);
-
-        // get the movie IDs
-        parseIds(eCommon.getElementsByTagName("id"), dto, isTV);
-
-        // parsed watched
-        value = DOMHelper.getValueFromElement(eCommon, "watched");
-        final boolean watched = Boolean.parseBoolean(value);
-        
-        if (dto.isTvShow()) {
-            // TV show specific
-
-            // specific TVDB id
-            value = DOMHelper.getValueFromElement(eCommon, "tvdbid");
-            if (StringUtils.isNotBlank(value)) {
-                dto.addId(TheTVDbScanner.SCANNER_ID, value);
+        // just one movie/TVshow per file
+        if ((nlMovies != null) && (nlMovies.getLength() > 0) && (nlMovies.item(0).getNodeType() == Node.ELEMENT_NODE)) {
+            // get first info element
+            final Element eCommon = (Element) nlMovies.item(0);
+            
+            // parse title
+            parseTitle(eCommon, dto);
+    
+            // parse year
+            String value = DOMHelper.getValueFromElement(eCommon, "year");
+            dto.setYear(value);
+    
+            // get the movie IDs
+            parseIds(eCommon.getElementsByTagName("id"), dto, isTV);
+    
+            // parsed watched
+            value = DOMHelper.getValueFromElement(eCommon, "watched");
+            watched = Boolean.parseBoolean(value);
+            
+            if (dto.isTvShow()) {
+                // TV show specific
+    
+                // specific TVDB id
+                value = DOMHelper.getValueFromElement(eCommon, "tvdbid");
+                if (StringUtils.isNotBlank(value)) {
+                    dto.addId(TheTVDbScanner.SCANNER_ID, value);
+                }
+                
+                // TODO series watched status
+            } else {
+                // movie specific
+            
+                // movie watched status
+                dto.setWatched(watched, nfoFileDate);
             }
             
-            // TODO series watched status
-        } else {
-            // movie specific
-        
-            // movie watched status
-            dto.setWatched(watched, nfoFileDate);
-        }
-        
-        // parse sets
-        parseSets(eCommon.getElementsByTagName("set"), dto);
-
-        // parse rating
-        int rating = MetadataTools.parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
-        dto.setRating(rating);
-
-        // parse certification
-        parseCertification(eCommon, dto);
-
-        // parse plot
-        value = DOMHelper.getValueFromElement(eCommon, "plot");
-        dto.setPlot(value);
-
-        // parse outline
-        value = DOMHelper.getValueFromElement(eCommon, "outline");
-        dto.setOutline(value);
-
-        // parse tagline
-        value = DOMHelper.getValueFromElement(eCommon, "tagline");
-        dto.setTagline(value);
-
-        // parse quote
-        value = DOMHelper.getValueFromElement(eCommon, "quote");
-        dto.setQuote(value);
-
-        // parse company (may be studio)
-        value = DOMHelper.getValueFromElement(eCommon, "studio", "company");
-        dto.setCompany(value);
-
-        // parse genres
-        parseGenres(eCommon.getElementsByTagName("genre"), dto);
-
-        // premiered / release date
-        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
-
-        // parse Top250
-        value = DOMHelper.getValueFromElement(eCommon, "top250");
-        dto.setTop250(NumberUtils.toInt(value, -1));
-        
-        // director and writers
-        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.crew", false)) {
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                parseDirectors(eCommon.getElementsByTagName("director"), dto);
+            // parse sets
+            parseSets(eCommon.getElementsByTagName("set"), dto);
+    
+            // parse rating
+            int rating = MetadataTools.parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
+            dto.setRating(rating);
+    
+            // parse certification
+            parseCertification(eCommon, dto);
+    
+            // parse plot
+            value = DOMHelper.getValueFromElement(eCommon, "plot");
+            dto.setPlot(value);
+    
+            // parse outline
+            value = DOMHelper.getValueFromElement(eCommon, "outline");
+            dto.setOutline(value);
+    
+            // parse tagline
+            value = DOMHelper.getValueFromElement(eCommon, "tagline");
+            dto.setTagline(value);
+    
+            // parse quote
+            value = DOMHelper.getValueFromElement(eCommon, "quote");
+            dto.setQuote(value);
+    
+            // parse company (may be studio)
+            value = DOMHelper.getValueFromElement(eCommon, "studio", "company");
+            dto.setCompany(value);
+    
+            // parse genres
+            parseGenres(eCommon.getElementsByTagName("genre"), dto);
+    
+            // premiered / release date
+            movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
+    
+            // parse Top250
+            value = DOMHelper.getValueFromElement(eCommon, "top250");
+            dto.setTop250(NumberUtils.toInt(value, -1));
+            
+            // director and writers
+            if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.crew", false)) {
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                    parseDirectors(eCommon.getElementsByTagName("director"), dto);
+                }
+                
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                    List<Node> writerNodes = new ArrayList<>();
+                    // get writers list
+                    NodeList nlWriters = eCommon.getElementsByTagName("writer");
+                    if (nlWriters != null && nlWriters.getLength() > 0) {
+                        for (int looper = 0; looper < nlWriters.getLength(); looper++) {
+                            Node node = nlWriters.item(looper);
+                            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                                writerNodes.add(node);
+                            }
+                        }
+                    }
+                    // get credits list (old style)
+                    nlWriters = eCommon.getElementsByTagName("credits");
+                    if (nlWriters != null && nlWriters.getLength() > 0) {
+                        for (int looper = 0; looper < nlWriters.getLength(); looper++) {
+                            Node node = nlWriters.item(looper);
+                            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                                writerNodes.add(node);
+                            }
+                        }
+                    }
+                    // parse writers
+                    parseWriters(writerNodes, dto);
+                }
+            }
+    
+            // parse actors
+            if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.cast", false)
+                && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) 
+            {
+                parseActors(eCommon.getElementsByTagName("actor"), dto);
             }
             
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                List<Node> writerNodes = new ArrayList<>();
-                // get writers list
-                NodeList nlWriters = eCommon.getElementsByTagName("writer");
-                if (nlWriters != null && nlWriters.getLength() > 0) {
-                    for (int looper = 0; looper < nlWriters.getLength(); looper++) {
-                        Node node = nlWriters.item(looper);
-                        if (node.getNodeType() == Node.ELEMENT_NODE) {
-                            writerNodes.add(node);
-                        }
-                    }
-                }
-                // get credits list (old style)
-                nlWriters = eCommon.getElementsByTagName("credits");
-                if (nlWriters != null && nlWriters.getLength() > 0) {
-                    for (int looper = 0; looper < nlWriters.getLength(); looper++) {
-                        Node node = nlWriters.item(looper);
-                        if (node.getNodeType() == Node.ELEMENT_NODE) {
-                            writerNodes.add(node);
-                        }
-                    }
-                }
-                // parse writers
-                parseWriters(writerNodes, dto);
+            // parse artwork URLs
+            if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.posterURL", true)) {
+                dto.addPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
             }
-        }
-
-        // parse actors
-        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.cast", false)
-            && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) 
-        {
-            parseActors(eCommon.getElementsByTagName("actor"), dto);
-        }
-        
-        // parse artwork URLs
-        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.posterURL", true)) {
-            dto.addPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
-        }
-        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.fanartURL", true)) {
-            dto.addFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
-        }
-
-        // parse trailer
-        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.trailerURL", false)) {
-            parseTrailers(eCommon.getElementsByTagName("trailer"), dto);
+            if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.fanartURL", true)) {
+                dto.addFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
+            }
+    
+            // parse trailer
+            if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.trailerURL", false)) {
+                parseTrailers(eCommon.getElementsByTagName("trailer"), dto);
+            }
         }
         
         // parse all episodes
@@ -693,8 +693,11 @@ public final class InfoReader {
             
             Element eEpisodeDetail = (Element) nEpisodeDetails;
             InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
-            episodeDTO.setWatched(watched);
-            dto.addEpisode(episodeDTO);
+            if (episodeDTO.isValid()) {
+                // just add valid episodes to series
+                episodeDTO.setWatched(watched);
+                dto.addEpisode(episodeDTO);
+            }
         }
     }
 
