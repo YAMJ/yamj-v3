@@ -364,7 +364,7 @@ public final class InfoReader {
         
         // parse all episodes
         if (dto.isTvShow()) {
-            parseAllEpisodeDetails(dto, xmlDoc.getElementsByTagName(DOMHelper.TYPE_EPISODE), watched);
+            parseAllEpisodeDetails(dto, xmlDoc.getElementsByTagName(DOMHelper.TYPE_EPISODE), watched, nfoFileDate);
         }
     }
 
@@ -683,7 +683,7 @@ public final class InfoReader {
      * @param dto
      * @param nlEpisodeDetails
      */
-    private static void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails, boolean watched) {
+    private static void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails, boolean watched, Date nfoFileDate) {
         Node nEpisodeDetails;
         for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
             nEpisodeDetails = nlEpisodeDetails.item(looper);
@@ -695,7 +695,7 @@ public final class InfoReader {
             InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
             if (episodeDTO.isValid()) {
                 // just add valid episodes to series
-                episodeDTO.setWatched(watched);
+                episodeDTO.setWatched(watched, nfoFileDate);
                 dto.addEpisode(episodeDTO);
             }
         }

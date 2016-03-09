@@ -124,9 +124,8 @@ public final class InfoDTO {
     
     public void setWatched(boolean watched, Date watchedDate) {
         this.watched = this.watched || watched;
-        if (this.watchedDate == null) {
-            this.watchedDate = watchedDate;
-        } else if (watchedDate != null && this.watchedDate.before(watchedDate)) {
+        if (watchedDate != null && (this.watchedDate == null || this.watchedDate.before(watchedDate))) {
+            // set last watched date
             this.watchedDate = watchedDate;
         }
         this.changed = true;
@@ -171,7 +170,8 @@ public final class InfoDTO {
 
     public void setYear(String year) {
         int testYear = MetadataTools.extractYearAsInt(year);
-        if (testYear > 0)  {
+        if (testYear > 0 && testYear < this.year)  {
+            // use first year given in any NFO
             this.year = testYear;
             this.changed = true;
         }
@@ -182,7 +182,8 @@ public final class InfoDTO {
     }
 
     public void setReleaseDate(Date releaseDate) {
-        if (releaseDate != null) {
+        if (releaseDate != null && (this.releaseDate == null || this.releaseDate.after(releaseDate))) {
+            // use first release date given in any NFO
             this.releaseDate = releaseDate;
             this.changed = true;
         }
@@ -386,19 +387,14 @@ public final class InfoDTO {
         return episodeDTOs;
     }
     
-    public Date getSeasonYear(int season) {
-        Date yearDate = null;
+    public Date getSeasonFirstDate(int season) {
         for (InfoEpisodeDTO episodeDTO : this.getEpisodes(season)) {
-            Date parsedDate = episodeDTO.getFirstAired();
-            if (parsedDate != null) {
-                if (yearDate == null) {
-                    yearDate = parsedDate;
-                } else if (parsedDate.before(yearDate)) {
-                    yearDate = parsedDate;
-                }
+            if (episodeDTO.getEpisode() == 1) {
+                // use just first aired date from first episode of season
+                return episodeDTO.getFirstAired();
             }
         }
-        return yearDate;
+        return null;
     }
 
     public String getOnlineScanner() {

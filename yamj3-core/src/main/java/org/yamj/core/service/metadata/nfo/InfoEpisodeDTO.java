@@ -42,6 +42,7 @@ public final class InfoEpisodeDTO {
     private String airsBeforeEpisode;
     private int rating = -1;
     private boolean watched = false;
+    private Date watchedDate; 
 
     public boolean isValid() {
         return ((this.season >= 0) && (this.episode >= 0));
@@ -148,8 +149,16 @@ public final class InfoEpisodeDTO {
         return watched;
     }
 
-    public void setWatched(boolean watched) {
-        this.watched = watched;
+    public Date getWatchedDate() {
+        return this.watchedDate;
+    }
+    
+    public void setWatched(boolean watched, Date watchedDate) {
+        this.watched = this.watched || watched;
+        if (watchedDate != null && (this.watchedDate == null || this.watchedDate.before(watchedDate))) {
+            // set last watched date
+            this.watchedDate = watchedDate;
+        }
     }
 
     @Override

@@ -306,8 +306,8 @@ public class NfoScannerService {
                 }
 
                 if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                    Date seasonYear = infoDTO.getSeasonYear(season.getSeason());
-                    season.setPublicationYear(MetadataTools.extractYearAsInt(seasonYear), SCANNER_ID);
+                    Date seasonFirstDate = infoDTO.getSeasonFirstDate(season.getSeason());
+                    season.setPublicationYear(MetadataTools.extractYearAsInt(seasonFirstDate), SCANNER_ID);
                 }
 
                 // mark season as done
@@ -332,8 +332,8 @@ public class NfoScannerService {
                         videoData.removeOverrideSource(SCANNER_ID);
                         
                         if (episode.isWatched() != videoData.isWatchedNfo()) {
-                            // set NFO watched flag
-                            videoData.setWatchedNfo(episode.isWatched(), infoDTO.getWatchedDate());
+                            // set NFO watched flag if watched flag changed
+                            videoData.setWatchedNfo(episode.isWatched(), episode.getWatchedDate());
                         }
 
                         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
