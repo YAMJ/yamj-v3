@@ -305,23 +305,29 @@ public class YamjInfo {
      * Calculate the database name and IP address from the connection URL
      */
     private void findDatabaseInfo() {
-        String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
-        if ("mysql".equals(System.getProperty("spring.profiles.active"))) {
-            this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
-            this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
-        } else if ("hsql".equals(System.getProperty("spring.profiles.active"))) {
-            this.databaseName = "HSQL: yamj3"; 
-            this.databaseIp = "localhost:9001";
-        } else if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
-            this.databaseName = "Derby: embedded";
-            this.databaseIp = "localhost";
-        } else if (dbUrl.contains("/") && StringUtils.containsIgnoreCase(dbUrl, "mysql")) {
-            this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
-            this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
-        } else if (StringUtils.containsIgnoreCase(dbUrl, "hsql")) {
-            this.databaseName = "HSQL: InProc Server";
-            this.databaseIp = "localhost";
-        } else {
+        try {
+            String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
+            if ("mysql".equals(System.getProperty("spring.profiles.active"))) {
+                this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+                this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
+            } else if ("hsql".equals(System.getProperty("spring.profiles.active"))) {
+                this.databaseName = "HSQL: yamj3"; 
+                this.databaseIp = "localhost:9001";
+            } else if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
+                this.databaseName = "Derby: embedded";
+                this.databaseIp = "localhost";
+            } else if (dbUrl.contains("/") && StringUtils.containsIgnoreCase(dbUrl, "mysql")) {
+                this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+                this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
+            } else if (StringUtils.containsIgnoreCase(dbUrl, "hsql")) {
+                this.databaseName = "HSQL: InProc Server";
+                this.databaseIp = "localhost";
+            }   else {
+                this.databaseName = "UNKNOWN";
+                this.databaseIp = "UNKNOWN";
+            }
+        } catch (Exception ex) {
+            LOG.warn("Failed to determine database name", ex);
             this.databaseName = "UNKNOWN";
             this.databaseIp = "UNKNOWN";
         }
