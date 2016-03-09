@@ -157,6 +157,12 @@ public class MetadataStorageService {
         
         // store persons
         for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+            if (StringUtils.isBlank(creditDTO.getIdentifier())) {
+                // this may be the case for chinese or hebrew names without transliteration
+                LOG.error("No identifier for person: {}", creditDTO.getName());
+                continue;
+            }
+            
             PERSON_STORAGE_LOCK.lock();
             try {
                 this.metadataDao.storeMovieCredit(creditDTO);
