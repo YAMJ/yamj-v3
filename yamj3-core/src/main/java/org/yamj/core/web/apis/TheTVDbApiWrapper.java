@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class TheTVDbApiWrapper {

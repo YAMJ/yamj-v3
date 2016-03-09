@@ -46,6 +46,7 @@ import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
 import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {

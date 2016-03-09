@@ -34,8 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class TVRageApiWrapper {

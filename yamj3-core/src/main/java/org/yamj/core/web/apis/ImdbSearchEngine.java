@@ -40,8 +40,8 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine {

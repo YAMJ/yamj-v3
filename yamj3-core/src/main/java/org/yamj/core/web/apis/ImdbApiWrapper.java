@@ -44,9 +44,9 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.service.metadata.online.OnlineScannerException;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.web.HTMLTools;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class ImdbApiWrapper {

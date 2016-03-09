@@ -24,7 +24,6 @@ package org.yamj.core.service.metadata;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -61,14 +60,23 @@ public class ExtraScannerService {
      * @param videoData
      */
     public void scanMovie(VideoData videoData) {
+        if (videoData.isAllScansSkipped()) {
+            // all scans skipped
+            return;
+        }
+
         for (IExtraMovieScanner extraScanner : registeredExtraMovieScanner) {
             if (extraScanner.isEnabled()) {
-                LOG.info("Scanning movie extras for '{}' using {}", videoData.getTitle(), extraScanner.getScannerName());
-                try {
-                    extraScanner.scanMovie(videoData);
-                } catch (Exception error) {
-                    LOG.error("Failed scanning movie with {} scanner", extraScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                if (videoData.isSkippedScan(extraScanner.getScannerName())) {
+                    LOG.info("Movie scan skipped for '{}' using {}", videoData.getTitle(), extraScanner.getScannerName());
+                } else {
+                    LOG.debug("Scanning movie extras for '{}' using {}", videoData.getTitle(), extraScanner.getScannerName());
+                    try {
+                        extraScanner.scanMovie(videoData);
+                    } catch (Exception error) {
+                        LOG.error("Failed scanning movie with {} scanner", extraScanner.getScannerName());
+                        LOG.warn("Scanning error", error);
+                    }
                 }
             }
 		}       
@@ -80,14 +88,23 @@ public class ExtraScannerService {
      * @param series
      */
     public void scanSeries(Series series) {
+        if (series.isAllScansSkipped()) {
+            // all scans skipped
+            return;
+        }
+        
         for (IExtraSeriesScanner extraScanner : registeredExtraSeriesScanner) {
             if (extraScanner.isEnabled()) {
-                LOG.info("Scanning series extras for '{}' using {}", series.getTitle(), extraScanner.getScannerName());
-                try {
-                    extraScanner.scanSeries(series);
-                } catch (Exception error) {
-                    LOG.error("Failed scanning series with {} scanner", extraScanner.getScannerName());
-                    LOG.warn("Scanning error", error);
+                if (series.isSkippedScan(extraScanner.getScannerName())) {
+                    LOG.info("Series scan skipped for '{}' using {}", series.getTitle(), extraScanner.getScannerName());
+                } else {
+                    LOG.debug("Scanning series extras for '{}' using {}", series.getTitle(), extraScanner.getScannerName());
+                    try {
+                        extraScanner.scanSeries(series);
+                    } catch (Exception error) {
+                        LOG.error("Failed scanning series with {} scanner", extraScanner.getScannerName());
+                        LOG.warn("Scanning error", error);
+                    }
                 }
             }
         }       

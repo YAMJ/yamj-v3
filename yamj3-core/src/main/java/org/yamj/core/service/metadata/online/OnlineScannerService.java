@@ -31,10 +31,9 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service("onlineScannerService")
 public class OnlineScannerService {
@@ -175,8 +174,7 @@ public class OnlineScannerService {
     public void scanSeries(Series series) {
         if (series.isAllScansSkipped()) {
             LOG.info("All series scans skipped for '{}'", series.getTitle());
-            series.setRetries(0);
-            series.setStatus(StatusType.DONE);
+            skipSeries(series);
             return;
         }
         
@@ -195,7 +193,7 @@ public class OnlineScannerService {
                 // scan series
                 try {
                     if (series.isSkippedScan(seriesScanner.getScannerName())) {
-                        LOG.warn("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
+                        LOG.info("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
@@ -238,8 +236,7 @@ public class OnlineScannerService {
             series.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
             LOG.info("Series {}-'{}', skipped", series.getId(), series.getTitle());
-            series.setRetries(0);
-            series.setStatus(StatusType.DONE);
+            skipSeries(series);
        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
             LOG.warn("Series {}-'{}', not found", series.getId(), series.getTitle());
             series.setRetries(0);
@@ -251,6 +248,18 @@ public class OnlineScannerService {
         } else {
             series.setRetries(0);
             series.setStatus(StatusType.ERROR);
+        }
+    }
+    
+    private static void skipSeries(Series series) {
+        series.setRetries(0);
+        series.setStatus(StatusType.DONE);
+        // set all seasons and episodes to DONE
+        for (Season season : series.getSeasons()) {
+            season.setTvSeasonDone();
+            for (VideoData videoData : season.getVideoDatas()) {
+                videoData.setTvEpisodeDone();
+            }
         }
     }
 
