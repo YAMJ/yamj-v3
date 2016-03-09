@@ -38,7 +38,7 @@ import org.yamj.core.service.trakttv.TraktTvService;
 @DependsOn("traktTvService")
 public class TraktTvTask implements ITask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TraktTvTask.class);
 
     @Autowired
     private ExecutionTaskService executionTaskService;

@@ -36,7 +36,7 @@ import org.yamj.core.service.delete.DeletionService;
 @Component
 public class DeleteTask implements ITask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DeleteTask.class);
 
     @Autowired
     private ExecutionTaskService executionTaskService;
