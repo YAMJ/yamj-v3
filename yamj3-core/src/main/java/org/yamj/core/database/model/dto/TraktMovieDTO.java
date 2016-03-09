@@ -107,7 +107,9 @@ public class TraktMovieDTO {
     }
 
     public void setYear(Integer year) {
-        this.year = year;
+        if (year != null && year.intValue() > 0) {
+            this.year = year;
+        }
     }
 
     public boolean isValid() {

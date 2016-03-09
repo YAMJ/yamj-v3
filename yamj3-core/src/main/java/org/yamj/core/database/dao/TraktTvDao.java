@@ -116,10 +116,7 @@ public class TraktTvDao extends HibernateDao {
                         dto.setTitle(convertRowElementToString(row[5]));
                     }
                     
-                    Integer year = convertRowElementToInteger(row[7]);
-                    if (year != null && year.intValue() > 0) {
-                        dto.setYear(year);
-                    }
+                    dto.setYear(convertRowElementToInteger(row[7]));
                 }
                 
                 setMovieId(dto, row);
@@ -192,10 +189,7 @@ public class TraktTvDao extends HibernateDao {
                         dto.setTitle(convertRowElementToString(row[7]));
                     }
                     
-                    Integer year = convertRowElementToInteger(row[9]);
-                    if (year != null && year.intValue() > 0) {
-                        dto.setYear(year);
-                    }
+                    dto.setYear(convertRowElementToInteger(row[9]));
                 }
                 
                 setMovieId(dto, row);

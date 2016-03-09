@@ -430,8 +430,10 @@ public class TraktTvService {
         }
         LOG.debug("Found {} collected movies on Trakt.TV", trackedMovies.size());
         
-        // determine movies to add to collection
+        // synchronize movies
         List<SyncMovie> syncMovies = new ArrayList<>();
+        boolean noError = true;
+        int counter = 0;
         for (TraktMovieDTO dto : collectedMovies) {
             final TrackedMovie movie = findMovie(dto, trackedMovies);
             if (movie != null) {
@@ -443,20 +445,20 @@ public class TraktTvService {
                 // build movie and set collection date
                 addSyncMovie(dto, syncMovies).collectedAt(dto.getCollectDate());
                 LOG.debug("Trakt.TV collected movie: {}", dto.getIdentifier());
+                counter++;
+                
+                if (counter == 100) {
+                    // sync every 100 movies
+                    noError = noError && syncCollectedMovies(syncMovies);
+                    counter = 0;
+                }
             }
         }
         
-        boolean noError = true;
-        if (syncMovies.size() > 0) {
-            try {
-                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().movies(syncMovies));
-            } catch (Exception ex) {
-                LOG.error("Failed to add movies to collection");
-                LOG.warn(TRAKTTV_ERROR, ex);
-                noError = false;
-            }
-        }
-
+        // sync outstanding movies
+        noError = noError && syncCollectedMovies(syncMovies);
+        
+        // if no error then set last collection date for next run
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_COLLECT_MOVIES, lastCollection);
         }
@@ -470,7 +472,23 @@ public class TraktTvService {
         }
         return null;
     }
-    
+
+    private boolean syncCollectedMovies(List<SyncMovie> syncMovies) {
+        boolean noError = true;
+        if (syncMovies.size() > 0) {
+            try {
+                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().movies(syncMovies));
+            } catch (Exception ex) {
+                LOG.error("Failed to add {} movies to collection", syncMovies.size());
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+            // clear synchronized movies
+            syncMovies.clear();
+        }
+        return noError;
+    }
+
     public void collectEpisodes() {
         // store last collection date for later use
         final Date lastCollection = new Date();
@@ -496,8 +514,10 @@ public class TraktTvService {
         }
         LOG.debug("Found {} collected shows on Trakt.TV", trackedShows.size());
 
-        // determine movies to add to collection
+        // synchronize episodes
         List<SyncShow> syncShows = new ArrayList<>();
+        boolean noError = true;
+        int counter = 0;
         for (TraktEpisodeDTO dto : collectedEpisodes) {
             final TrackedEpisode episode = findEpisode(dto, trackedShows);
             if (episode != null) {
@@ -506,20 +526,20 @@ public class TraktTvService {
                 // build episode and set collection date
                 addSyncEpisode(dto, syncShows).collectedAt(dto.getCollectDate());
                 LOG.debug("Trakt.TV collected episode: {}", dto.getIdentifier());
-            }
-        }
-        
-        boolean noError = true;
-        if (syncShows.size() > 0) {
-            try {
-                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().shows(syncShows));
-            } catch (Exception ex) {
-                LOG.error("Failed to add episodes to collection");
-                LOG.warn(TRAKTTV_ERROR, ex);
-                noError = false;
+                counter++;
+                
+                if (counter == 100) {
+                    // sync every 100 episodes
+                    noError = noError && syncCollectedShows(syncShows);
+                    counter = 0;
+                }
             }
         }
 
+        // sync outstanding episodes
+        noError = noError && syncCollectedShows(syncShows);
+        
+        // if no error then set last collection date for next run
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_COLLECT_EPISODES, lastCollection);
         }
@@ -555,6 +575,21 @@ public class TraktTvService {
             }
         }
         return null;
+    }
+
+    private boolean syncCollectedShows(List<SyncShow> syncShows) {
+        boolean noError = true;
+        if (syncShows.size() > 0) {
+            try {
+                this.traktTvApi.syncService().addItemsToCollection(new SyncItems().shows(syncShows));
+            } catch (Exception ex) {
+                LOG.error("Failed to add episodes to collection");
+                LOG.warn(TRAKTTV_ERROR, ex);
+                noError = false;
+            }
+            syncShows.clear();
+        }
+        return noError;
     }
 
     // SYNCHRONIZATION
