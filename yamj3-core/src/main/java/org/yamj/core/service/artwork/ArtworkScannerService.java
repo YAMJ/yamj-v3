@@ -181,7 +181,8 @@ public class ArtworkScannerService implements IQueueProcessService {
             // scan season poster
             posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
-            // TODO scan series poster
+            // scan series poster
+            posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getSeries());
         } else if (artwork.getBoxedSet() != null) {
             // scan boxed set poster
             posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getBoxedSet());
@@ -282,7 +283,8 @@ public class ArtworkScannerService implements IQueueProcessService {
             // scan season fanart
             fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
-            // TODO scan series fanart
+            // scan series fanart
+            fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getSeries());
         } else if (artwork.getBoxedSet() != null) {
             // scan boxed set fanart
             fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getBoxedSet());
@@ -381,7 +383,8 @@ public class ArtworkScannerService implements IQueueProcessService {
             // scan season banner
             banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
-            // TODO scan series banner
+            // scan series banner
+            banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getSeries());
         } else if (artwork.getBoxedSet() != null) {
             // scan boxed set banner
             banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getBoxedSet());

@@ -53,13 +53,121 @@ public class ArtworkLocatorService {
     @Value("${yamj3.folder.name.photo:null}")
     private String photoFolderName;
     
-    private static Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories, List<String> tokens) {
-        if (artworkType != ArtworkType.POSTER && artworkType != ArtworkType.FANART && artworkType != ArtworkType.BANNER) {
-            // just poster, backdrop and banner will be searched
-            return Collections.emptySet();
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
+        List<StageFile> videoFiles = findVideoFiles(videoData);
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
         }
 
+        // get the tokens to use
+        final List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
+
+        // build search map for artwork
+        Set<StageDirectory> directories = new HashSet<>();
+        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
+        // add special movie artwork names
+        artworkNames.add("movie");
+        addNameWithTokens(artworkNames, "movie", tokens);
+        // search in same directory than video files
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
+
+        // find artwork in possible given artwork folder
+        artworks.addAll(searchInArtworkFolder(artworkType, videoFiles, tokens));
+
+        LOG.debug("Found {} local {}s for movie {}", artworks.size(), artworkType.toString().toLowerCase(), videoData.getIdentifier());
+        return artworks;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
+        List<StageFile> videoFiles = findVideoFiles(season);
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // get the tokens to use
+        final List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
+        final String seasonNr = "season"+StringUtils.leftPad(Integer.toString(season.getSeason()), 2, '0');
+
+        // build search map for artwork
+        Set<StageDirectory> directories = new HashSet<>();
+        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
+        // add special season artwork names
+        artworkNames.add("season");
+        addNameWithTokens(artworkNames, "season", tokens);
+        addNameWithTokens(artworkNames, seasonNr, tokens);
+        // search in same directory than video files
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
+
+        // search in parent directories for season specific artwork names
+        artworkNames.clear();
+        addNameWithTokens(artworkNames, seasonNr, tokens);
+        artworks.addAll(findArtworkStageFiles(getParentDirectories(directories), artworkNames));
+
+        // find artwork in possible given artwork folder
+        artworks.addAll(searchInArtworkFolder(artworkType, videoFiles, tokens));
+        
+        LOG.debug("Found {} local {}s for season {}", artworks.size(), artworkType.toString().toLowerCase(), season.getIdentifier());
+        return artworks;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Series series) {
+        List<StageDirectory> directories  = findVideoDirectories(series);
+        if (directories.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // get the tokens to use
+        List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
+
+        // build map for artwork names
+        Set<String> artworkNames = new HashSet<>();
+        artworkNames.add("show");
+        artworkNames.add("series");
+        artworkNames.add("season-all");
+
+        // search series specific names in same directory than video files
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
+
+        // extend artwork names for parent folder specific series names
+        Set<StageDirectory> parentDirectories = getParentDirectories(directories);
+        artworkNames.addAll(tokens);
+        for (StageDirectory parent : parentDirectories) {
+            final String directoryName = StringEscapeUtils.escapeSql(parent.getDirectoryName().toLowerCase());
+            switch (artworkType) {
+            case POSTER:
+                artworkNames.add(directoryName);
+                //$FALL-THROUGH$
+            default:
+                addNameWithTokens(artworkNames, directoryName, tokens);
+                break;
+            }
+        }
+        // search series specific names in parent directory of video files
+        artworks.addAll(findArtworkStageFiles(parentDirectories, artworkNames));
+        
+        LOG.debug("Found {} local {}s for series {}", artworks.size(), artworkType.toString().toLowerCase(), series.getIdentifier());
+        return artworks;
+    }
+    
+    private List<StageFile> searchInArtworkFolder(ArtworkType artworkType, List<StageFile> videoFiles, List<String> tokens) {
+        if (StringUtils.isNotBlank(artworkFolderName)) {
+            Library library = null;
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                library = videoFiles.get(0).getStageDirectory().getLibrary();
+            }
+
+            Set<String> artworkNames = buildSpecialMap(artworkType, videoFiles, tokens);
+            return this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
+        }
+        return Collections.emptyList(); 
+    }
+    
+    private static Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories, List<String> tokens) {
         final Set<String> artworkNames = new HashSet<>();
+        
         // add all tokens
         artworkNames.addAll(tokens);
         
@@ -105,68 +213,17 @@ public class ArtworkLocatorService {
             artworkNames.add(name.concat("-").concat(token));
         }
     }
+
+    private static Set<StageDirectory> getParentDirectories(Collection<StageDirectory> directories) {
+        Set<StageDirectory> parentDirectories = new HashSet<>();
+        for (StageDirectory directory : directories) {
+            if (directory.getParentDirectory() != null) {
+                parentDirectories.add(directory.getParentDirectory());
+            }
+        }
+        return parentDirectories;
+    }
     
-    @Transactional(readOnly = true)
-    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
-        List<StageFile> videoFiles = findVideoFiles(videoData);
-        if (videoFiles.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // get the tokens to use
-        List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
-        
-        // search in same directory than video files
-        Set<StageDirectory> directories = new HashSet<>();
-        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
-        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
-
-        if (StringUtils.isNotBlank(artworkFolderName)) {
-            Library library = null;
-            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                library = videoFiles.get(0).getStageDirectory().getLibrary();
-            }
-            
-            artworkNames = buildSpecialMap(artworkType, videoFiles, tokens);
-            List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
-            artworks.addAll(specials);
-        }
-
-        // search
-        LOG.debug("Found {} local {}s for movie {}", artworks.size(), artworkType.toString().toLowerCase(), videoData.getIdentifier());
-        return artworks;
-    }
-
-    @Transactional(readOnly = true)
-    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
-        List<StageFile> videoFiles = findVideoFiles(season);
-        if (videoFiles.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // get the tokens to use
-        List<String> tokens = this.configServiceWrapper.getArtworkTokens(artworkType);
-
-        // search in same directory than video files
-        Set<StageDirectory> directories = new HashSet<>();
-        Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
-        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
-
-        if (StringUtils.isNotBlank(artworkFolderName)) {
-            Library library = null;
-            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                library = videoFiles.get(0).getStageDirectory().getLibrary();
-            }
-
-            artworkNames = buildSpecialMap(artworkType, videoFiles, tokens);
-            List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
-            artworks.addAll(specials);
-        }
-
-        LOG.debug("Found {} local {}s for season {}", artworks.size(), artworkType.toString().toLowerCase(), season.getIdentifier());
-        return artworks;
-    }
-
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
         final StringBuilder sb = new StringBuilder();
@@ -231,7 +288,29 @@ public class ArtworkLocatorService {
         return stagingDao.findByNamedParameters(StageFile.class, sb, params);
     }
 
-    private List<StageFile> findArtworkStageFiles(Set<StageDirectory> directories, Set<String> artworkNames) {
+    private List<StageDirectory> findVideoDirectories(Series series) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("select distinct d from StageDirectory d ");
+        sb.append("join d.stageFiles f ");
+        sb.append("join f.mediaFile m ");
+        sb.append("join m.videoDatas v ");
+        sb.append("join v.season sea ");
+        sb.append("join sea.series ser ");
+        sb.append("where ser.id=:seriesId ");
+        sb.append("and m.extra=:extra ");
+        sb.append("and f.status != :duplicate ");
+        sb.append("and f.status != :deleted ");
+        
+        final Map<String,Object> params = new HashMap<>();
+        params.put("seriesId", series.getId());
+        params.put("duplicate", StatusType.DUPLICATE);
+        params.put("deleted", StatusType.DELETED);
+        params.put("extra", Boolean.FALSE);
+        
+        return stagingDao.findByNamedParameters(StageDirectory.class, sb, params);
+    }
+
+    private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
         final StringBuilder sb = new StringBuilder();
         sb.append("select distinct f from StageFile f ");
         sb.append("where f.stageDirectory in (:directories) ");
