@@ -67,9 +67,8 @@ public class ArtworkLocatorService {
         // build search map for artwork
         Set<StageDirectory> directories = new HashSet<>();
         Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
-        // add special movie artwork names
-        artworkNames.add("movie");
-        addNameWithTokens(artworkNames, "movie", tokens);
+        // add special generic movie artwork names
+        addGenericNameWithTokens(artworkNames, artworkType, "movie", tokens);
         // search in same directory than video files
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
@@ -94,10 +93,9 @@ public class ArtworkLocatorService {
         // build search map for artwork
         Set<StageDirectory> directories = new HashSet<>();
         Set<String> artworkNames = buildSearchMap(artworkType, videoFiles, directories, tokens);
-        // add special season artwork names
-        artworkNames.add("season");
-        addNameWithTokens(artworkNames, "season", tokens);
-        addNameWithTokens(artworkNames, seasonNr, tokens);
+        // add special generic season artwork names
+        addGenericNameWithTokens(artworkNames, artworkType, "season", tokens);
+        addGenericNameWithTokens(artworkNames, artworkType, seasonNr, tokens);
         // search in same directory than video files
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
@@ -125,10 +123,10 @@ public class ArtworkLocatorService {
 
         // build map for artwork names
         Set<String> artworkNames = new HashSet<>();
-        artworkNames.add("show");
-        artworkNames.add("series");
-        artworkNames.add("season-all");
-
+        // add special generic series artwork names
+        addGenericNameWithTokens(artworkNames, artworkType, "show", tokens);
+        addGenericNameWithTokens(artworkNames, artworkType, "series", tokens);
+        addGenericNameWithTokens(artworkNames, artworkType, "season-all", tokens);
         // search series specific names in same directory than video files
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
@@ -214,7 +212,14 @@ public class ArtworkLocatorService {
             artworkNames.add(name.concat("-").concat(token));
         }
     }
-    
+
+    private static void addGenericNameWithTokens(Set<String> artworkNames, ArtworkType artworkType, String name, List<String> tokens) {
+        if (ArtworkType.POSTER == artworkType) {
+            artworkNames.add(name);
+        }
+        addNameWithTokens(artworkNames, name, tokens);
+    }
+
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
         final StringBuilder sb = new StringBuilder();
