@@ -216,11 +216,7 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, StageDirectory stageDirectory) {
-        return this.findMatchingArtworksForVideo(artworkType, null, stageDirectory);
-    }
-
-    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
+    public Set<Artwork> findMatchingArtworksForMovieOrSeason(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
         Set<Artwork> result = new HashSet<>();
@@ -272,8 +268,19 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
+        return result;
+    }
+
+    public List<Artwork> findMatchingArtworksForSeries(ArtworkType artworkType, StageDirectory stageDirectory, boolean videosOnlyInSubDirs) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("artworkType", artworkType);
+        params.put("fileType", FileType.VIDEO);
+        params.put("extra", Boolean.FALSE);
+        params.put("statusSet", standardStatusSet);
+        params.put("stageDirectory", stageDirectory);
+
         // for series
-        sb.setLength(0);
+        StringBuilder sb = new StringBuilder();
         sb.append("SELECT a ");
         sb.append("FROM Artwork a ");
         sb.append("JOIN a.series ser ");
@@ -286,16 +293,15 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status in (:statusSet) ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode >= 0 ");
-        if (baseName != null) {
-            sb.append("AND lower(sf.baseName)=:baseName ");
+        if (videosOnlyInSubDirs) {
+            sb.append("AND sf.stageDirectory.parentDirectory=:stageDirectory ");
+        } else {
+            sb.append("AND (sf.stageDirectory=:stageDirectory OR sf.stageDirectory.parentDirectory=:stageDirectory) ");
         }
-        sb.append("AND sf.stageDirectory=:stageDirectory ");
-        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
-
-        return result;
+        return this.findByNamedParameters(Artwork.class, sb, params);
     }
 
-    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, Library library) {
+    public Set<Artwork> findMatchingArtworksForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
         Set<Artwork> result = new HashSet<>();
@@ -331,6 +337,7 @@ public class StagingDao extends HibernateDao {
         }
         result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
+        // for season
         sb.setLength(0);
         sb.append("SELECT a ");
         sb.append("FROM Artwork a ");

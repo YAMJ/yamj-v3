@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
@@ -787,133 +788,250 @@ public class MediaImportService {
     }
 
     private boolean processImageFile(StageFile stageFile) {
-        Collection<Artwork> artworks;
-        int priority = 1;
+        // get the base file name
         final String fileBaseName = stageFile.getBaseName().toLowerCase();
         
+        // get image tokens to regard
         final List<String> tokensPoster = this.configServiceWrapper.getArtworkTokens(ArtworkType.POSTER);
         final List<String> tokensFanart = this.configServiceWrapper.getArtworkTokens(ArtworkType.FANART);
         final List<String> tokensBanner = this.configServiceWrapper.getArtworkTokens(ArtworkType.BANNER);
-        final int suffixFanartLength = isSuffixToken(fileBaseName, tokensFanart);
-        final int suffixBannerLength = isSuffixToken(fileBaseName, tokensBanner);
+        final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(ArtworkType.PHOTO);
             
+        // determine artwork type and metadataTypes to which image could be applied
+        final boolean generic;
+        final ArtworkType artworkType;
+        final EnumSet<MetaDataType> metaDataTypes;
+        
         if (tokensPoster.contains(fileBaseName)) {
-            LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-            
+            // determine a generic poster image which can match several metadata objects
+            generic = true;
+            artworkType = ArtworkType.POSTER;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+
         } else if (tokensFanart.contains(fileBaseName)) {
-            LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-            
+            // determine a generic fanart image which can match several metadata objects
+            generic = true;
+            artworkType = ArtworkType.FANART;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+
         } else if (tokensBanner.contains(fileBaseName)) {
-            LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
+            // determine a generic banner image which can match several metadata objects
+            generic = true;
+            artworkType = ArtworkType.BANNER;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+
+        } else if (fileBaseName.indexOf(".videoimage") > 0) {
+            // determined a video image of an episode
+            generic = false;
+            artworkType = ArtworkType.VIDEOIMAGE;
+            metaDataTypes = EnumSet.of(MetaDataType.EPISODE);
             
-        } else if (suffixFanartLength > 0) { 
-            LOG.debug("Fanart found: {}", stageFile.getBaseName());
+        } else if (fileBaseName.equals("movie") || isSpecialImage(fileBaseName, "movie", tokensPoster)) {
+            // this is a generic movie poster
+            generic = true;
+            artworkType = ArtworkType.POSTER;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
 
-            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixFanartLength);
+        } else if (fileBaseName.startsWith("movie") && isSpecialImage(fileBaseName, "movie", tokensFanart)) {
+            // this is a generic movie fanart
+            generic = true;
+            artworkType = ArtworkType.FANART;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
 
-            if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
-                // boxed set fanart
-                String boxedSetName = getBoxedSetName(stripped);
-                artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.FANART);
-            } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                // artwork inside located artwork directory
-                Library library = null;
-                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                    library = stageFile.getStageDirectory().getLibrary();
-                }
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, library);
-                // priority = 2 when inside artwork folder
-                priority = 2;
-            } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                // fanart for whole directory cause same name as directory
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
+        } else if (fileBaseName.startsWith("movie") && isSpecialImage(fileBaseName, "movie", tokensBanner)) {
+            // this is a generic movie banner
+            generic = true;
+            artworkType = ArtworkType.BANNER;
+            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
+
+        } else if (fileBaseName.equals("season") || isSpecialImage(fileBaseName, "season", tokensPoster)) {
+            // this is a generic season poster
+            generic = true;
+            artworkType = ArtworkType.POSTER;
+            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+
+        } else if (fileBaseName.startsWith("season") && isSpecialImage(fileBaseName, "season", tokensFanart)) {
+            // this is a generic season fanart
+            generic = true;
+            artworkType = ArtworkType.FANART;
+            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+
+        } else if (fileBaseName.startsWith("season") && isSpecialImage(fileBaseName, "season", tokensBanner)) {
+            // this is a generic season banner
+            generic = true;
+            artworkType = ArtworkType.BANNER;
+            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+
+        } else if (fileBaseName.equals("show") || isSpecialImage(fileBaseName, "season", tokensPoster) ||
+                   fileBaseName.equals("series") || isSpecialImage(fileBaseName, "series", tokensPoster) ||
+                   fileBaseName.equals("season-all") || isSpecialImage(fileBaseName, "season-all", tokensPoster))
+        {
+            // this is a generic series poster
+            generic = true;
+            artworkType = ArtworkType.POSTER;
+            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+
+        } else if ((fileBaseName.startsWith("show") && isSpecialImage(fileBaseName, "show", tokensFanart)) ||
+                   (fileBaseName.startsWith("series") && isSpecialImage(fileBaseName, "series", tokensFanart)) ||
+                   (fileBaseName.startsWith("season-all") && isSpecialImage(fileBaseName, "season-all", tokensFanart)))
+        {
+            // this is a generic series fanart
+            generic = true;
+            artworkType = ArtworkType.FANART;
+            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+
+        } else if ((fileBaseName.startsWith("show") && isSpecialImage(fileBaseName, "show", tokensBanner)) ||
+                   (fileBaseName.startsWith("series") && isSpecialImage(fileBaseName, "series", tokensBanner)) ||
+                   (fileBaseName.startsWith("season-all") && isSpecialImage(fileBaseName, "season-all", tokensBanner)))
+        {
+            // this is a generic series banner
+            generic = true;
+            artworkType = ArtworkType.BANNER;
+            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+            
+        } else if (fileBaseName.startsWith("set_")) {
+            // this is a set image
+            generic = false;
+            metaDataTypes = EnumSet.of(MetaDataType.BOXSET);
+            
+            // determine artwork type
+            if (endsWithToken(fileBaseName, tokensFanart)) {
+                artworkType = ArtworkType.FANART;
+            } else if (endsWithToken(fileBaseName, tokensBanner)) {
+                artworkType = ArtworkType.BANNER;
             } else {
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
+                // everything else is a poster
+                artworkType = ArtworkType.POSTER;
             }
             
-        } else if (suffixBannerLength > 0) {
-            LOG.debug("Banner found: {}", stageFile.getBaseName());
-
-            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixBannerLength);
-
-            if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
-                // boxed set image
-                String boxedSetName = getBoxedSetName(stripped);
-                artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.BANNER);
-            } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                // artwork inside located artwork directory
-                Library library = null;
-                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                    library = stageFile.getStageDirectory().getLibrary();
-                }
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, library);
-                // priority = 2 when inside artwork folder
-                priority = 2;
-            } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                // banner for whole directory cause same name as directory
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
-            } else {
-                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, stageFile.getStageDirectory());
-            }
+        } else if (endsWithToken(fileBaseName, tokensFanart)) {
+            // this is a fanart
+            artworkType = ArtworkType.FANART;
             
-        } else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) {
-            LOG.debug("VideoImage found: {}", stageFile.getBaseName());
+            if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensFanart))) {
+                // generic image if file name equals directory name
+                generic = true;
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+            } else {
+                generic = false;
+                // could just be applied to season or movie   
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
+            }
 
-            // TODO apply episode image (which may be for just a part)
-            artworks = Collections.emptyList();
+        } else if (endsWithToken(fileBaseName, tokensBanner)) {
+            // this is a banner
+            artworkType = ArtworkType.BANNER;
+            
+            if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensBanner))) {
+                // generic image if file name equals directory name
+                generic = true;
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+            } else {
+                generic = false;
+                // could just be applied to season or movie   
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
+            }
+
         } else {
             // NOTE: poster and photo images may have no special image marker like poster or photo
-            boolean inPhotoFolder = FileTools.isWithinSpecialFolder(stageFile, photoFolderName);
-
-            final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(ArtworkType.PHOTO);
-            final int suffixPhotoLength = isSuffixToken(fileBaseName, tokensPhoto);
-
-            if (inPhotoFolder || suffixPhotoLength > 0) {
-                LOG.debug("Photo found: {}", stageFile.getBaseName());
-
-                String stripped = fileBaseName;
-                if (suffixPhotoLength > 0) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPhotoLength);
-                }
-
-                // find person artwork
-                String identifier = MetadataTools.cleanIdentifier(stripped);
-                artworks = this.metadataDao.findPersonArtworks(identifier);
+            final boolean inPhotoFolder = FileTools.isWithinSpecialFolder(stageFile, photoFolderName);
+            
+            if (inPhotoFolder || endsWithToken(fileBaseName, tokensPhoto)) {
+                // this image determines a photo
+                generic = false;
+                artworkType = ArtworkType.PHOTO;
+                metaDataTypes = EnumSet.of(MetaDataType.PERSON);
+            } else if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensPoster))) {
+                // generic image if file name equals directory name
+                generic = true;
+                artworkType = ArtworkType.POSTER;
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
             } else {
-                LOG.debug("Poster found: {}", stageFile.getBaseName());
-
-                final int suffixPosterLength = isSuffixToken(fileBaseName, tokensPoster);
-                String stripped = fileBaseName;
-                if (suffixPosterLength > 0) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPosterLength);
-                }
-
-                if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
-                    // boxed set poster
-                    String boxedSetName = getBoxedSetName(stripped);
-                    artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, ArtworkType.POSTER);
-                } else if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
-                    // artwork inside located artwork directory
-                    Library library = null;
-                    if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
-                        library = stageFile.getStageDirectory().getLibrary();
-                    }
-                    // artwork inside located photo directory
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, library);
-                    // priority = 2 when inside artwork folder
-                    priority = 2;
-                } else if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
-                    // poster for whole directory cause same name as directory
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-                } else {
-                    artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, stageFile.getStageDirectory());
-                }
+                // this image determines a poster
+                generic = false;
+                artworkType = ArtworkType.POSTER;
+                // could just be applied to season or movie   
+                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
             }
         }
+        
+        LOG.info("Determined {} for metadata {}: {}", (generic?"generic ":"")+artworkType.name().toLowerCase(), metaDataTypes, stageFile.getBaseName());
 
+        // holds matching artwork
+        final Collection<Artwork> artworks;
+        int priority = 1;
+        
+        if (metaDataTypes.contains(MetaDataType.PERSON)) {
+            // PERSON PHOTO
+            final String stripped = stripToken(fileBaseName, tokensPhoto);
+
+            // find person artwork
+            String identifier = MetadataTools.cleanIdentifier(stripped);
+            artworks = this.metadataDao.findPersonArtworks(identifier);
+            
+        } else if (metaDataTypes.contains(MetaDataType.BOXSET)) {
+            // BOXSET IMAGE
+            String boxedSetName = getBoxedSetName(fileBaseName);
+            artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, artworkType);
+            
+        } else if (metaDataTypes.contains(MetaDataType.EPISODE)) {
+            // EPISODE IMAGE
+            
+            // TODO get matching episode images
+            artworks = Collections.emptyList();
+            
+        } else if (generic) {
+            // GENERIC IMAGES
+            
+            if (metaDataTypes.contains(MetaDataType.MOVIE) || metaDataTypes.contains(MetaDataType.SEASON)) {
+                // generic select without base name which forces just to obey the directory
+                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, null, stageFile.getStageDirectory());
+                
+                if (metaDataTypes.contains(MetaDataType.SERIES)) {
+                    // additional for series:
+                    // search artwork where image files are in sub directories
+                    artworks.addAll(this.stagingDao.findMatchingArtworksForSeries(artworkType, stageFile.getStageDirectory(), true));
+                }
+            } else {
+                // just series possible:
+                // search in same directory as image where video files are in same or sub directories
+                artworks = this.stagingDao.findMatchingArtworksForSeries(artworkType, stageFile.getStageDirectory(), false);
+            }
+            
+        } else {
+            // handle non-generic images in same directory, so that just movies and seasons will be obeyed
+            // cause series images are always generic and depending on the directory structure
+            
+            final String stripped;
+            switch(artworkType) {
+            case FANART:
+                stripped = stripToken(fileBaseName, tokensFanart);
+                break;
+            case BANNER:
+                stripped = stripToken(fileBaseName, tokensBanner);
+                break;
+            default:
+                stripped = stripToken(fileBaseName, tokensPoster);
+                break;
+            }
+            
+            if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
+                // artwork inside located artwork directory
+                Library library = null;
+                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                    library = stageFile.getStageDirectory().getLibrary();
+                }
+                // priority = 2 when inside artwork folder
+                priority = 2;
+
+                // find matching artwork
+                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, stripped, library);
+            } else {
+                // find matching artwork in same directory
+                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, stripped, stageFile.getStageDirectory());
+            }
+        }
+        
         LOG.debug("Found {} matching artwork entries", artworks.size());
         if (CollectionUtils.isEmpty(artworks)) {
             // no artwork found so return
@@ -951,13 +1069,31 @@ public class MediaImportService {
         return true;
     }
 
-    private static int isSuffixToken(String name, List<String> tokens) {
+    private static boolean endsWithToken(String name, List<String> tokens) {
         for (String token : tokens) {
             if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
-                return token.length()+1;
+                return true;
             }
         }
-        return -1;
+        return false;
+    }
+
+    private static boolean isSpecialImage(String name, String special, List<String> tokens) {
+        for (String token : tokens) {
+            if (name.equals(special.concat(".").concat(token)) || name.equals(special.concat("-").concat(token))) {
+                return true;
+            }
+        }
+        return false;
+    }
+        
+    private static String stripToken(String name, List<String> tokens) {
+        for (String token : tokens) {
+            if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
+                return name.substring(0, name.length() - token.length() -1);
+            }
+        }
+        return name;
     }
     
     private static String getBoxedSetName(final String stripped) {
