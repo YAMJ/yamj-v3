@@ -37,6 +37,7 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.service.file.FileTools;
 
 @Service("artworkLocatorService")
 public class ArtworkLocatorService {
@@ -103,7 +104,7 @@ public class ArtworkLocatorService {
         // search in parent directories for season specific artwork names
         artworkNames.clear();
         addNameWithTokens(artworkNames, seasonNr, tokens);
-        artworks.addAll(findArtworkStageFiles(getParentDirectories(directories), artworkNames));
+        artworks.addAll(findArtworkStageFiles(FileTools.getParentDirectories(directories), artworkNames));
 
         // find artwork in possible given artwork folder
         artworks.addAll(searchInArtworkFolder(artworkType, videoFiles, tokens));
@@ -132,7 +133,7 @@ public class ArtworkLocatorService {
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
         // extend artwork names for parent folder specific series names
-        Set<StageDirectory> parentDirectories = getParentDirectories(directories);
+        Set<StageDirectory> parentDirectories = FileTools.getParentDirectories(directories);
         artworkNames.addAll(tokens);
         for (StageDirectory parent : parentDirectories) {
             final String directoryName = StringEscapeUtils.escapeSql(parent.getDirectoryName().toLowerCase());
@@ -212,16 +213,6 @@ public class ArtworkLocatorService {
             artworkNames.add(name.concat(".").concat(token));
             artworkNames.add(name.concat("-").concat(token));
         }
-    }
-
-    private static Set<StageDirectory> getParentDirectories(Collection<StageDirectory> directories) {
-        Set<StageDirectory> parentDirectories = new HashSet<>();
-        for (StageDirectory directory : directories) {
-            if (directory.getParentDirectory() != null) {
-                parentDirectories.add(directory.getParentDirectory());
-            }
-        }
-        return parentDirectories;
     }
     
     @Transactional(readOnly = true)

@@ -27,6 +27,9 @@ import static org.yamj.core.tools.Constants.UTF8;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
@@ -313,6 +316,16 @@ public final class FileTools {
         return FilenameUtils.separatorsToUnix("/" + folderName + "/");
     }
     
+    public static Set<StageDirectory> getParentDirectories(Collection<StageDirectory> directories) {
+        Set<StageDirectory> parentDirectories = new HashSet<>();
+        for (StageDirectory directory : directories) {
+            if (directory.getParentDirectory() != null) {
+                parentDirectories.add(directory.getParentDirectory());
+            }
+        }
+        return parentDirectories;
+    }
+
     /**
      * Read the input skipping any blank lines
      *
