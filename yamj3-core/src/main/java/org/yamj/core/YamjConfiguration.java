@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -52,6 +53,7 @@ import org.yamj.core.config.LocaleService;
 
 @Configuration
 @EnableScheduling
+@EnableAsync
 @ComponentScan("org.yamj.core")
 public class YamjConfiguration extends WebMvcConfigurationSupport {
 
