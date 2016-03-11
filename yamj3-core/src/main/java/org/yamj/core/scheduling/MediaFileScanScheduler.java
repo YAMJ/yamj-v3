@@ -33,28 +33,28 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.TrailerStorageService;
-import org.yamj.core.service.trailer.TrailerProcessorService;
+import org.yamj.core.database.service.MediaStorageService;
+import org.yamj.core.service.mediainfo.MediaInfoService;
 
 @Component
-public class TrailerProcessScheduler extends AbstractQueueScheduler {
+public class MediaFileScanScheduler extends AbstractQueueScheduler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrailerProcessScheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MediaFileScanScheduler.class);
     private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
 
     @Autowired
     private ConfigService configService;
     @Autowired
-    private TrailerStorageService trailerStorageService;
+    private MediaStorageService mediaStorageService;
     @Autowired
-    private TrailerProcessorService trailerProcessorService;
+    private MediaInfoService mediaInfoService;
     
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
     @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
     public void trigger() {
-        LOG.trace("Trigger trailer processing");
+        LOG.trace("Trigger media file scan");
         watchProcess.set(true);
     }
 
@@ -62,40 +62,40 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
     public void run() {
         if (watchProcess.get() && PROCESS_LOCK.tryLock()) {
             try {
-                processTrailer();
+                scanMediaFiles();
             } finally {
                 PROCESS_LOCK.unlock();
             }
         }
     }
     
-    private void processTrailer() {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxThreads", 0);
+    private void scanMediaFiles() {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
                 messageDisabled = Boolean.TRUE;
-                LOG.info("Trailer processing is disabled");
+                LOG.info("Media file scanning is disabled");
             }
             watchProcess.set(false);
             return;
         }
         
         if (messageDisabled) {
-            LOG.info("Trailer processing is enabled");
+            LOG.info("Media file scanning is enabled");
             messageDisabled = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxResults", 50);
-        List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForProcessing(maxResults);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 50);
+        List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.trace("No trailer found to process");
+            LOG.trace("No media files found to scan");
             watchProcess.set(false);
             return;
         }
 
-        LOG.info("Found {} trailer objects to process; process with {} threads", queueElements.size(), maxThreads);
-        this.threadedProcessing(queueElements, maxThreads, trailerProcessorService);
-        
-        LOG.debug("Finished trailer processing");
+        LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
+        threadedProcessing(queueElements, maxThreads, mediaInfoService);
+
+        LOG.debug("Finished media file scanning");
     }
 }

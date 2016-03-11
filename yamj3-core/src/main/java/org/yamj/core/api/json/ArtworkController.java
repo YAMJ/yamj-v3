@@ -123,7 +123,7 @@ public class ArtworkController {
         int count = this.artworkStorageService.generateImagesForProfile(id);
         if (count > 0) {
             LOG.debug("Trigger regeneration of {} images", count);
-            artworkProcessScheduler.triggerProcess();
+            artworkProcessScheduler.trigger();
             return ApiStatus.ok("Trigger regeneration of "+count+" images");
         }
         
@@ -173,7 +173,7 @@ public class ArtworkController {
         
         ApiStatus apiStatus = this.artworkUploadService.uploadArtwork(artworkType, metaDataType, id, image);
         if (apiStatus.isSuccessful())  {
-            this.artworkProcessScheduler.triggerProcess();
+            this.artworkProcessScheduler.trigger();
         }
         return apiStatus;
     }

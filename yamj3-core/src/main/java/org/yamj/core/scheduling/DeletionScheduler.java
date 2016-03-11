@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.service.delete.DeletionService;
@@ -41,14 +40,13 @@ public class DeletionScheduler {
     
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
-    public void triggerProcess() {
+    public void trigger() {
         LOG.trace("Trigger deletion process");
         watchProcess.set(true);
     }
 
-    @Async
-    @Scheduled(initialDelay = 2000, fixedDelay = 1000)
-    public void runProcess() {
+    @Scheduled(initialDelay = 30000, fixedDelay = 1000)
+    public void run() {
         if (watchProcess.getAndSet(false)) {
             deletionService.executeAllDeletions();
         }

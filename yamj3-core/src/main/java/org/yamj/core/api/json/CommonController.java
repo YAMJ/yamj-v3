@@ -200,7 +200,7 @@ public class CommonController {
 
         ApiStatus apiStatus = jsonApiStorageService.setTrailerStatus(id, StatusType.UPDATED);
         if (apiStatus.isSuccessful()) {
-            trailerProcessScheduler.triggerProcess();
+            trailerProcessScheduler.trigger();
         }
         return apiStatus;
     }

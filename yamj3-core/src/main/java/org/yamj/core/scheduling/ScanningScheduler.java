@@ -33,9 +33,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.*;
+import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.mediainfo.MediaInfoService;
 import org.yamj.core.service.metadata.MetadataScannerService;
 import org.yamj.core.service.trailer.TrailerScannerService;
 
@@ -58,24 +59,18 @@ public class ScanningScheduler extends AbstractQueueScheduler {
     @Autowired
     private ArtworkProcessScheduler artworkProcessScheduler;
     @Autowired
-    private MediaStorageService mediaStorageService;
-    @Autowired
-    private MediaInfoService mediaInfoService;
-    @Autowired
     private TrailerScannerService trailerScannerService;
     @Autowired
     private TrailerStorageService trailerStorageService;
     @Autowired
     private TrailerProcessScheduler trailerProcessScheduler;
     
-    private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
     private boolean messageDisabledMetaData = Boolean.FALSE;     // Have we already printed the disabled message
     private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
     private boolean messageDisabledFilmography = Boolean.FALSE;  // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
     private boolean messageDisabledTrailer = Boolean.FALSE;      // Have we already printed the disabled message
 
-    private final AtomicBoolean watchScanMediaFiles = new AtomicBoolean(false);
     private final AtomicBoolean watchScanMetaData = new AtomicBoolean(false);
     private final AtomicBoolean watchScanPeopleData = new AtomicBoolean(false);
     private final AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
@@ -85,7 +80,6 @@ public class ScanningScheduler extends AbstractQueueScheduler {
     @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void triggerAllScans() {
         LOG.trace("Trigger scan for all");
-        watchScanMediaFiles.set(true);
         watchScanMetaData.set(true);
         watchScanPeopleData.set(true);
         watchScanFilmography.set(true);
@@ -93,11 +87,6 @@ public class ScanningScheduler extends AbstractQueueScheduler {
         watchScanTrailer.set(true);
     }
     
-    public void triggerScanMediaFiles() {
-        LOG.trace("Trigger scan of media files");
-        watchScanMediaFiles.set(true);
-    }
-
     public void triggerScanMetaData() {
         LOG.trace("Trigger scan of meta data");
         watchScanMetaData.set(true);
@@ -127,9 +116,6 @@ public class ScanningScheduler extends AbstractQueueScheduler {
     public void runAllScans() {
         if (SCANNING_LOCK.tryLock()) {
             try {
-                if (watchScanMediaFiles.get()) {
-                    scanMediaFiles();
-                }
                 if (watchScanMetaData.get()) {
                     scanMetaData();
                 }
@@ -150,36 +136,6 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             }
         }
     }
-    
-    private void scanMediaFiles() {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
-        if (maxThreads <= 0) {
-            if (!messageDisabledMediaFiles) {
-                messageDisabledMediaFiles = Boolean.TRUE;
-                LOG.info("Media file scanning is disabled");
-            }
-            watchScanMediaFiles.set(false);
-            return;
-        }
-        
-        if (messageDisabledMediaFiles) {
-            LOG.info("Media file scanning is enabled");
-            messageDisabledMediaFiles = Boolean.FALSE;
-        }
-
-        int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 20);
-        List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
-        if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.trace("No media files found to scan");
-            watchScanMediaFiles.set(false);
-            return;
-        }
-
-        LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
-        threadedProcessing(queueElements, maxThreads, mediaInfoService);
-
-        LOG.debug("Finished media file scanning");
-    }
 
     private void scanMetaData() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.metadatascan.maxThreads", 1);
@@ -199,7 +155,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledMetaData = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 20);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 30);
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No metadata found to scan");
@@ -305,7 +261,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledArtwork = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60);
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No artwork found to scan");
@@ -317,7 +273,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
         threadedProcessing(queueElements, maxThreads, artworkScannerService);
 
         // trigger artwork processing
-        this.artworkProcessScheduler.triggerProcess();
+        this.artworkProcessScheduler.trigger();
         
         LOG.debug("Finished artwork scanning");
     }
@@ -350,7 +306,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
         threadedProcessing(queueElements, maxThreads, trailerScannerService);
 
         // trigger trailer processing
-        this.trailerProcessScheduler.triggerProcess();
+        this.trailerProcessScheduler.trigger();
         
         LOG.debug("Finished trailer scanning");
     }

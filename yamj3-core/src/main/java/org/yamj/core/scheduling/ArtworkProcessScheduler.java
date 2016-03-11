@@ -42,7 +42,7 @@ import org.yamj.core.service.artwork.ArtworkLocatedProcessorService;
 public class ArtworkProcessScheduler extends AbstractQueueScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
-    private static final ReentrantLock ARTWORK_PROCESS_LOCK = new ReentrantLock();
+    private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
 
     @Autowired
     private ConfigService configService;
@@ -56,20 +56,20 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
     
-    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
-    public void triggerProcess() {
-        LOG.trace("Trigger process");
+    @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
+    public void trigger() {
+        LOG.trace("Trigger artwork process");
         watchProcess.set(true);
     }
 
     @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
-    public void runProcess() {
-        if (watchProcess.get() && ARTWORK_PROCESS_LOCK.tryLock()) {
+    public void run() {
+        if (watchProcess.get() && PROCESS_LOCK.tryLock()) {
             try {
                 processArtwork();
             } finally {
-                ARTWORK_PROCESS_LOCK.unlock();
+                PROCESS_LOCK.unlock();
             }
         }
     }
@@ -90,7 +90,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
             messageDisabled = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 100);
 
         // process located artwork
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);

@@ -48,7 +48,7 @@ public class FileImportServiceImpl implements FileImportService {
             library = stagingService.storeLibrary(importDTO);
             stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
             LOG.debug("Imported scanned directory: {}", importDTO.getStageDirectory().getPath());
-            importScheduler.triggerProcess();
+            importScheduler.trigger();
         } catch (Exception error) {
             LOG.error("Failed to import scanned directory: {}", importDTO.getStageDirectory().getPath(), error);
             throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath()); //NOSONAR

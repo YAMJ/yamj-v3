@@ -66,7 +66,7 @@ public class ArtworkSanityTask implements ITask {
         } while (lastId > 0);
 
         // trigger artwork processing in any case
-        this.artworkProcessScheduler.triggerProcess();
+        this.artworkProcessScheduler.trigger();
 
         LOG.debug("Finished artwork sanity task after {} ms", System.currentTimeMillis()-startTime);
     }

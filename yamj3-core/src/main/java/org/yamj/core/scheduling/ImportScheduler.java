@@ -27,7 +27,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.common.type.StatusType;
@@ -45,18 +44,19 @@ public class ImportScheduler {
     private MediaImportService mediaImportService;
     @Autowired
     private ScanningScheduler scanningScheduler;
+    @Autowired
+    private MediaFileScanScheduler mediaFileScanScheduler;
     
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
     @Scheduled(initialDelay = 1000, fixedDelay = 300000)
-    public void triggerProcess() {
-        LOG.trace("Trigger process");
+    public void trigger() {
+        LOG.trace("Trigger media import");
         watchProcess.set(true);
     }
 
-    @Async
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
-    public void runProcess() {
+    public void run() {
         if (watchProcess.get() && IMPORT_LOCK.tryLock()) {
             try {
                 processStageFiles();
@@ -82,7 +82,7 @@ public class ImportScheduler {
                     LOG.info("Processed video stage file: {}", id);
                 } else {
                     // trigger scan of media files and meta data
-                    scanningScheduler.triggerScanMediaFiles();
+                    mediaFileScanScheduler.trigger();
                     scanningScheduler.triggerScanMetaData();
                 }
             } catch (Exception error) {

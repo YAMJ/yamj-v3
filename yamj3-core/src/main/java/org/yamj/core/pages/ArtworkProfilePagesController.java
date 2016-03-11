@@ -62,7 +62,7 @@ public class ArtworkProfilePagesController extends AbstractPagesController {
     
             if (count > 0) {
                 LOG.debug("Trigger regeneration of {} images", count);
-                artworkProcessScheduler.triggerProcess();
+                artworkProcessScheduler.trigger();
                 view.addObject(SUCCESS_MESSAGE, "Triggered regeneration of "+count+" images");
             } else {
                 view.addObject(SUCCESS_MESSAGE, "No image regeneration needed");
