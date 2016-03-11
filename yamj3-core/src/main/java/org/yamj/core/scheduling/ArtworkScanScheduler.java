@@ -87,12 +87,12 @@ public class ArtworkScanScheduler extends AbstractQueueScheduler {
     
             // determine if photo scanning is enabled (local and online), cause not querying photo artwork
             // will significantly reduce the amount of artwork to scan
-            boolean photoEnabled = configService.getBooleanProperty("yamj3.artwork.scan.local.photo", Boolean.TRUE);
-            photoEnabled = photoEnabled && configService.getBooleanProperty("yamj3.artwork.scan.online.photo", Boolean.TRUE);
+            boolean scanPhoto = configService.getBooleanProperty("yamj3.artwork.scan.local.photo", Boolean.TRUE);
+            scanPhoto = scanPhoto && configService.getBooleanProperty("yamj3.artwork.scan.online.photo", Boolean.TRUE);
 
             // process located or generated artwork
             int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60));
-            List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults, photoEnabled);
+            List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults, scanPhoto);
             if (CollectionUtils.isEmpty(queueElements)) {
                 LOG.trace("No artwork found to scan");
                 watchProcess.set(false);

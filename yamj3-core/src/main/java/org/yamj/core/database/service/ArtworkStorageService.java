@@ -123,8 +123,8 @@ public class ArtworkStorageService {
     }
         
     @Transactional(readOnly = true)
-    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults, boolean photoEnabled) {
-        return artworkDao.getArtworkQueueForScanning(maxResults, photoEnabled);
+    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults, boolean scanPhoto) {
+        return artworkDao.getArtworkQueueForScanning(maxResults, scanPhoto);
     }
 
     @Transactional(readOnly = true)

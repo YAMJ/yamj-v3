@@ -84,13 +84,13 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkGenerated) criteria.uniqueResult();
     }
     
-    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean photoEnabled) {
+    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean scanPhoto) {
         final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(Artwork.QUERY_SCANNING_QUEUE)
                 .setReadOnly(true)
                 .setMaxResults(maxResults)
-                .setString("personStatus", photoEnabled?StatusType.DONE.name():"NONE")
+                .setString("personStatus", scanPhoto?StatusType.DONE.name():"NONE")
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
         {
