@@ -26,12 +26,21 @@ import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ContainerType;
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Trailer.QUERY_PROCESSING_QUEUE,
+        query = "SELECT DISTINCT t.id,(case when t.update_timestamp is null then t.create_timestamp else t.update_timestamp end) as maxdate "+
+                "FROM trailer t WHERE t.status in ('NEW','UPDATED')"
+    )
+})
 
 @Entity
 @Table(name = "trailer",
@@ -41,7 +50,8 @@ import org.yamj.core.database.model.type.ContainerType;
 public class Trailer extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -7853145730427742811L;
-
+    public static final String QUERY_PROCESSING_QUEUE = "trailer.processing.queue";
+                    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)

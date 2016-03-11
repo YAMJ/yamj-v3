@@ -30,6 +30,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 public final class QueueDTO implements Comparable<QueueDTO> {
 
     private final Long id;
+    @Deprecated
     private Date date;
     private MetaDataType metadataType;
     private ArtworkType artworkType;
@@ -44,10 +45,12 @@ public final class QueueDTO implements Comparable<QueueDTO> {
         return id;
     }
 
+    @Deprecated
     public Date getDate() {
         return date;
     }
 
+    @Deprecated
     public void setDate(Date date) {
         this.date = date;
     }
@@ -111,6 +114,7 @@ public final class QueueDTO implements Comparable<QueueDTO> {
     }
 
     @Override
+    @Deprecated
     public int compareTo(QueueDTO obj) {
         if (getDate() == null && obj.getDate() == null) {
             return 0;

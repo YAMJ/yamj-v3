@@ -155,7 +155,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledMetaData = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 30);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 30));
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No metadata found to scan");
@@ -192,7 +192,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledPeople = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50));
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No people data found to scan");
@@ -227,7 +227,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledFilmography = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50));
         List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No filmography data found to scan");
@@ -261,7 +261,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledArtwork = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60));
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No artwork found to scan");
@@ -294,7 +294,7 @@ public class ScanningScheduler extends AbstractQueueScheduler {
             messageDisabledTrailer = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30));
         List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No trailer found to scan");

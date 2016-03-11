@@ -85,8 +85,8 @@ public class MediaFileScanScheduler extends AbstractQueueScheduler {
             messageDisabled = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 50);
-        List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 50));
+        List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueue(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No media files found to scan");
             watchProcess.set(false);

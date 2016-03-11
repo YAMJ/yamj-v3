@@ -34,7 +34,7 @@ import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.model.type.ScalingType;
 
 @NamedQueries({
-    @NamedQuery(name = "artworkProfile.getAllArtworkProfiles",
+    @NamedQuery(name = ArtworkProfile.QUERY_GET_ALL,
         query = "FROM ArtworkProfile ap ORDER BY ap.profileName, ap.metaDataType, ap.artworkType"
     )
 })
@@ -46,7 +46,8 @@ import org.yamj.core.database.model.type.ScalingType;
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -5178511945599751914L;
-
+    public static final String QUERY_GET_ALL = "artworkProfile.getAllArtworkProfiles";
+    
     @NaturalId
     @Column(name = "profile_name", length = 100)
     private String profileName;

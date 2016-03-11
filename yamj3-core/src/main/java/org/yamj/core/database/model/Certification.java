@@ -29,7 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 @NamedQueries({    
-    @NamedQuery(name = "certification.getCertification",
+    @NamedQuery(name = Certification.QUERY_GET,
         query = "from Certification where lower(country_code)=:countryCode and lower(certificate)=:certificate"
     )
 })
@@ -41,7 +41,8 @@ import org.hibernate.annotations.NaturalId;
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
-
+    public static final String QUERY_GET = "certification.getCertification";
+    
     @NaturalId
     @Column(name = "country_code", length = 4, nullable = false)
     private String countryCode;

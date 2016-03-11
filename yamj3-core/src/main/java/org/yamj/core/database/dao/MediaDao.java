@@ -22,10 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.hibernate.SQLQuery;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
@@ -34,43 +31,15 @@ import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("mediaDao")
 public class MediaDao extends HibernateDao {
 
-    public MediaFile getMediaFile(Long id) {
-        return getById(MediaFile.class, id);
-    }
-
     public MediaFile getMediaFile(String fileName) {
         return currentSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
     }
 
-    public List<QueueDTO> getMediaQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setDate(convertRowElementToDate(object[2]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[1]));
-            }
-            queueElements.add(queueElement);
-        }
-
-        Collections.sort(queueElements);
-        return queueElements;
-    }
-    
     public List<ApiNameDTO> getVideoSources(ApiWrapperList<ApiNameDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 

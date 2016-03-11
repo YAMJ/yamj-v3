@@ -75,34 +75,6 @@ public class TrailerDao extends HibernateDao {
         return queueElements;
     }
 
-    public List<QueueDTO> getTrailerQueueForProcessing(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT t.id, t.create_timestamp, t.update_timestamp ");
-        sql.append("FROM trailer t ");
-        sql.append("WHERE t.status in ('NEW','UPDATED')");
-        
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-        
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setDate(convertRowElementToDate(object[2]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[1]));
-            }
-            queueElements.add(queueElement);
-        }
-
-        Collections.sort(queueElements);
-        return queueElements;
-    }
-
     public void resetDeletionStatus(Trailer trailer) {
         if (trailer.isDeleted()) {
             trailer.setStatus(trailer.getPreviousStatus());

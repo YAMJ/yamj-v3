@@ -39,6 +39,8 @@ public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
     private static final ReentrantLock IMPORT_LOCK = new ReentrantLock();
+    private static final String STAGING_ERROR = "Staging Error";
+    private static final String DATABASE_ERROR = "Database Error";
     
     @Autowired
     private MediaImportService mediaImportService;
@@ -69,6 +71,7 @@ public class ImportScheduler {
 
     private void processStageFiles() { //NOSONAR
         Long id = null;
+        int processed = 0;
 
         // PROCESS VIDEOS
         do {
@@ -80,10 +83,13 @@ public class ImportScheduler {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
-                } else {
-                    // trigger scan of media files and meta data
-                    mediaFileScanScheduler.trigger();
-                    scanningScheduler.triggerScanMetaData();
+                    processed++;
+
+                    // trigger media file scan after 20 processed videos
+                    if (processed == 20) {
+                        mediaFileScanScheduler.trigger();
+                        processed = 0;
+                    }
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -92,18 +98,24 @@ public class ImportScheduler {
                     LOG.error("Failed to get next video stage file", error);
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
-                    LOG.error("Staging error", error);
+                    LOG.error(STAGING_ERROR, error);
                     
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ex) {
                         // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
+                        LOG.trace(DATABASE_ERROR, ex);
                     }
                 }
             }
         } while (id != null);
-
+        if (processed > 0) {
+            // trigger scan of media files and meta data if video files has been processed
+            mediaFileScanScheduler.trigger();
+            scanningScheduler.triggerScanMetaData();
+            processed = 0;
+        }
+        
         // PROCESS NFOS
         do {
             id = null;
@@ -114,9 +126,7 @@ public class ImportScheduler {
                     LOG.trace("Process nfo stage file: {}", id);
                     mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
-                } else {
-                    // trigger scan of meta data
-                    scanningScheduler.triggerScanMetaData();
+                    processed++;
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -125,17 +135,22 @@ public class ImportScheduler {
                     LOG.error("Failed to get next nfo stage file", error);
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
-                    LOG.warn("Staging error", error);
+                    LOG.warn(STAGING_ERROR, error);
                     
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ex) {
                         // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
+                        LOG.trace(DATABASE_ERROR, ex);
                     }
                 }
             }
         } while (id != null);
+        if (processed > 0) {
+            // trigger scan of meta data when NFOs has been processed
+            scanningScheduler.triggerScanMetaData();
+            processed = 0;
+        }
 
         // PROCESS IMAGES
         do {
@@ -147,9 +162,13 @@ public class ImportScheduler {
                     LOG.trace("Process image stage file: {}", id);
                     mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
-                } else {
-                    // trigger scan of artwork
-                    scanningScheduler.triggerScanArtwork();
+                    processed++;
+                    
+                    // trigger artwork scan after 20 processed images
+                    if (processed == 20) {
+                        scanningScheduler.triggerScanArtwork();
+                        processed = 0;
+                    }
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -158,17 +177,22 @@ public class ImportScheduler {
                     LOG.error("Failed to get next image stage file", error);
                 } else {
                     LOG.error("Failed to process image stage file {}", id);
-                    LOG.warn("Staging error", error);
+                    LOG.warn(STAGING_ERROR, error);
                     
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ex) {
                         // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
+                        LOG.trace(DATABASE_ERROR, ex);
                     }
                 }
             }
         } while (id != null);
+        if (processed > 0) {
+            // trigger scan of artwork if images has been processed
+            scanningScheduler.triggerScanArtwork();
+            processed = 0;
+        }
 
         // PROCESS WATCHED
         do {
@@ -188,13 +212,13 @@ public class ImportScheduler {
                     LOG.error("Failed to get next watched stage file", error);
                 } else {
                     LOG.error("Failed to process watched stage file {}", id);
-                    LOG.warn("Staging error", error);
+                    LOG.warn(STAGING_ERROR, error);
                     
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ex) {
                         // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
+                        LOG.trace(DATABASE_ERROR, ex);
                     }
                 }
             }
@@ -218,13 +242,13 @@ public class ImportScheduler {
                     LOG.error("Failed to get next subtitle stage file", error);
                 } else {
                     LOG.error("Failed to process subtitle stage file {}", id);
-                    LOG.warn("Staging error", error);
+                    LOG.warn(STAGING_ERROR, error);
                     
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ex) {
                         // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
+                        LOG.trace(DATABASE_ERROR, ex);
                     }
                 }
             }

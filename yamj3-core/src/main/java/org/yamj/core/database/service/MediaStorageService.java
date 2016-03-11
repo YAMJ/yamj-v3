@@ -28,7 +28,7 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 
@@ -36,20 +36,16 @@ import org.yamj.core.database.model.dto.QueueDTO;
 public class MediaStorageService {
 
     @Autowired
-    private MediaDao mediaDao;
+    private CommonDao commonDao;
 
     @Transactional
     public void update(Object entity) {
-        this.mediaDao.updateEntity(entity);
+        this.commonDao.updateEntity(entity);
     }
 
     @Transactional(readOnly = true)
-    public List<QueueDTO> getMediaFileQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("select mf.id, mf.create_timestamp, mf.update_timestamp ");
-        sql.append("from mediafile mf ");
-        sql.append("where mf.status in ('NEW','UPDATED') ");
-        return mediaDao.getMediaQueue(sql, maxResults);
+    public List<QueueDTO> getMediaFileQueue(final int maxResults) {
+        return commonDao.getQueueIdOnly(MediaFile.QUERY_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)
@@ -61,22 +57,22 @@ public class MediaStorageService {
         sb.append("left outer join fetch mf.stageFiles ");
         sb.append("where mf.id = :id" );
 
-        List<MediaFile> objects = this.mediaDao.findById(sb, id);
+        List<MediaFile> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional
     public void errorMediaFile(Long id) {
-        MediaFile mediaFile = mediaDao.getById(MediaFile.class, id);
+        MediaFile mediaFile = commonDao.getById(MediaFile.class, id);
         if (mediaFile != null) {
             mediaFile.setStatus(StatusType.ERROR);
-            mediaDao.updateEntity(mediaFile);
+            commonDao.updateEntity(mediaFile);
         }
     }
     
     @Transactional
     public void updateMediaFile(MediaFile mediaFile) {
-        mediaDao.storeAll(mediaFile.getAudioCodecs());
-        mediaDao.updateEntity(mediaFile);
+        commonDao.storeAll(mediaFile.getAudioCodecs());
+        commonDao.updateEntity(mediaFile);
     }
 }

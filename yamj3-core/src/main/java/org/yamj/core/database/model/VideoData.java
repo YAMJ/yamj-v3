@@ -53,40 +53,39 @@ import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 @NamedQueries({    
-    @NamedQuery(name = "videoData.findVideoDatas.byLibrary",
+    @NamedQuery(name = VideoData.QUERY_FIND_BY_LIBRARY,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf JOIN sf.stageDirectory sd "+
                 "WHERE sf.fileType=:fileType AND mf.extra=:extra AND lower(sf.baseName)=:baseName AND sd.library=:library AND sf.status != :deleted"
     ),
-    @NamedQuery(name = "videoData.findVideoDatas.byStageDirectories",
+    @NamedQuery(name = VideoData.QUERY_FIND_BY_DIRECTORIES,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
                 "WHERE sf.fileType=:fileType AND mf.extra=:extra AND sf.stageDirectory in (:stageDirectories) AND sf.status != :deleted"
     ),
-    @NamedQuery(name = "videoData.findVideoDatas.byPerson",
+    @NamedQuery(name = VideoData.QUERY_FIND_BY_PERSON,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
     )
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = "videoData.trakttv.movies",
-        query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id "+
-                "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_MOVIES,
+        query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.episodes",
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_EPISODES,
         query = "SELECT concat(sid.sourcedb,'#',sid.sourcedb_id,'#',sea.season,'#',vd.episode), vd.id "+
                 "FROM series_ids sid JOIN series ser on ser.id=sid.series_id "+
                 "JOIN season sea on ser.id=sea.series_id JOIN videodata vd on vd.season_id=sea.id "
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.watched.movies",
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_WATCHED_MOVIES,
         query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, vd.watched, vd.watched_date, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
                 "FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "+
                 "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched_trakttv_last_date is null OR vd.watched_date > vd.watched_trakttv_last_date)"
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.watched.episodes",
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_WATCHED_EPISODES,
         query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, vd.watched, vd.watched_date, sea.season, vd.episode, vd.identifier, vd.watched_trakttv, vd.watched_trakttv_last_date "+
                 "FROM series_ids sid JOIN season sea on sea.series_id=sid.series_id JOIN videodata vd on vd.season_id=sea.id "+
                 "WHERE vd.watched=1 AND vd.watched_date>=:checkDate AND (vd.watched_trakttv_last_date is null OR vd.watched_date > vd.watched_trakttv_last_date)"
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.collected.movies",
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_COLLECTED_MOVIES,
         query = "SELECT vd.id, vid.sourcedb, vid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, vd.title, vd.title_original, vd.publication_year "+
                 "FROM videodata vd JOIN videodata_ids vid on vd.id=vid.videodata_id JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
                 "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
@@ -95,7 +94,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
                 "     not exists (select 1 from videodata_ids vid2 where vd.id=vid2.videodata_id and vid2.sourcedb='trakttv')) "+
                 "GROUP BY vd.id, vid.sourcedb, vid.sourcedb_id, vd.identifier, vd.title, vd.title_original, vd.publication_year"
     ),
-    @NamedNativeQuery(name = "videoData.trakttv.collected.episodes",
+    @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_COLLECTED_EPISODES,
     query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, sea.season, vd.episode, ser.title, ser.title_original, ser.start_year "+
             "FROM series ser JOIN series_ids sid on ser.id=sid.series_id JOIN season sea on ser.id=sea.series_id "+
             "JOIN videodata vd on sea.id=vd.season_id and vd.status='DONE' JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
@@ -118,7 +117,16 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
-
+    public static final String QUERY_FIND_BY_LIBRARY = "videoData.findVideoDatas.byLibrary";
+    public static final String QUERY_FIND_BY_DIRECTORIES = "videoData.findVideoDatas.byStageDirectories";
+    public static final String QUERY_FIND_BY_PERSON = "videoData.findVideoDatas.byPerson";
+    public static final String QUERY_TRAKTTV_MOVIES = "videoData.trakttv.movies";
+    public static final String QUERY_TRAKTTV_EPISODES = "videoData.trakttv.episodes";
+    public static final String QUERY_TRAKTTV_WATCHED_MOVIES = "videoData.trakttv.watched.movies";
+    public static final String QUERY_TRAKTTV_WATCHED_EPISODES = "videoData.trakttv.watched.episodes";
+    public static final String QUERY_TRAKTTV_COLLECTED_MOVIES = "videoData.trakttv.collected.movies";
+    public static final String QUERY_TRAKTTV_COLLECTED_EPISODES = "videoData.trakttv.collected.episodes";
+    
     @Column(name = "episode", nullable = false)
     private int episode = -1;
 

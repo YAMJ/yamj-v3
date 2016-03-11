@@ -85,7 +85,7 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
             messageDisabled = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxResults", 50);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.trailerprocess.maxResults", 50));
         List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForProcessing(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No trailer found to process");

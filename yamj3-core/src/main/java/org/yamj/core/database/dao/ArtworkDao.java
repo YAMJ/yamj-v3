@@ -25,9 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.*;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -42,7 +40,7 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ArtworkDao extends HibernateDao {
 
     public List<ArtworkProfile> getAllArtworkProfiles() {
-        return currentSession().getNamedQuery("artworkProfile.getAllArtworkProfiles")
+        return currentSession().getNamedQuery(ArtworkProfile.QUERY_GET_ALL)
                 .setReadOnly(true)
                 .setCacheable(true)
                 .list();
@@ -62,30 +60,6 @@ public class ArtworkDao extends HibernateDao {
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
         return criteria.list();
-    }
-
-    public List<QueueDTO> getArtworkQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setArtworkType(convertRowElementToString(object[1]));
-            queueElement.setDate(convertRowElementToDate(object[3]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[2]));
-            }
-            queueElements.add(queueElement);
-        }
-
-        Collections.sort(queueElements);
-        return queueElements;
     }
 
     public ArtworkLocated getStoredArtworkLocated(ArtworkLocated located) {
@@ -109,14 +83,39 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkGenerated) criteria.uniqueResult();
     }
     
+    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
+        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery(Artwork.QUERY_SCANNING_QUEUE)
+                .setReadOnly(true)
+                .setMaxResults(maxResults)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                
+                QueueDTO dto = new QueueDTO(convertRowElementToLong(row[0]));
+                dto.setArtworkType(convertRowElementToString(row[1]));
+                queueElements.add(dto);
+            }
+        }
+        
+        return queueElements;
+    }
+
+    @Deprecated
     public List<QueueDTO> getArtworkLocatedQueue(final int maxResults) {
         return this.getQueue("artworkLocated.processQueue", maxResults);
     }
 
+    @Deprecated
     public List<QueueDTO> getArtworkGeneratedQueue(final int maxResults) {
         return this.getQueue("artworkGenerated.processQueue", maxResults);
     }
 
+    @Deprecated
     private List<QueueDTO> getQueue(final String queryName, final int maxResults) {
         Query query = currentSession().getNamedQuery(queryName);
         query.setReadOnly(true);
@@ -184,7 +183,7 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
-        return (ArtworkGenerated)currentSession().getNamedQuery("artworkGenerated.getArtworkGenerated")
+        return (ArtworkGenerated)currentSession().getNamedQuery(ArtworkGenerated.QUERY_GET)
                 .setLong("locatedId", locatedId)
                 .setString("profileName", profileName)
                 .uniqueResult();

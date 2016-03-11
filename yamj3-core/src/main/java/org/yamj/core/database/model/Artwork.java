@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -39,8 +41,18 @@ import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @NamedQueries({    
-    @NamedQuery(name = "artwork.findPersonArtworks",
+    @NamedQuery(name = Artwork.QUERY_FIND_PERSON_ARTWORKS,
         query = "select a from Artwork a join a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+    )
+})
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Artwork.QUERY_SCANNING_QUEUE,
+        query = "SELECT DISTINCT art.id,art.artwork_type,(case when art.update_timestamp is null then art.create_timestamp else art.update_timestamp end) as maxdate "+
+                "FROM artwork art LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id LEFT OUTER JOIN season sea ON sea.id=art.season_id "+
+                "LEFT OUTER JOIN series ser ON ser.id=art.series_id WHERE art.status in ('NEW','UPDATED') "+
+                "AND (vd.status is null OR vd.status='DONE') AND (sea.status is null OR sea.status='DONE') AND (ser.status is null OR ser.status='DONE') "+
+                "ORDER BY maxdate ASC"
     )
 })
 
@@ -54,7 +66,10 @@ import org.yamj.core.database.model.type.ArtworkType;
 public class Artwork extends AbstractStateful {
 
     private static final long serialVersionUID = -981494909436217076L;
-
+    public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.findPersonArtworks";
+    public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
+    
+    
     @NaturalId(mutable = true)    
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)

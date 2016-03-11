@@ -29,7 +29,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
@@ -62,7 +61,6 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
         watchProcess.set(true);
     }
 
-    @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public void run() {
         if (watchProcess.get() && PROCESS_LOCK.tryLock()) {
@@ -90,7 +88,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
             messageDisabled = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 100);
+        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 100));
 
         // process located artwork
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);

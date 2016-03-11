@@ -22,10 +22,13 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
@@ -44,12 +47,32 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Transactional
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
+
+    public List<QueueDTO> getQueueIdOnly(final String queryName, final int maxResults) {
+        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery(queryName)
+                .setReadOnly(true)
+                .setMaxResults(maxResults)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                queueElements.add(new QueueDTO(convertRowElementToLong(row[0])));
+            }
+        }
+        
+        return queueElements;
+    }
 
     @Cacheable(value=CachingNames.DB_GENRE, key="#id", unless="#result==null")
     public Genre getGenre(Long id) {
@@ -248,7 +271,7 @@ public class CommonDao extends HibernateDao {
 
     @Cacheable(value=CachingNames.DB_CERTIFICATION, key="{#countryCode.toLowerCase(), #certificate.toLowerCase()}", unless="#result==null")
     public Certification getCertification(String countryCode, String certificate) {
-        return (Certification) currentSession().getNamedQuery("certification.getCertification")
+        return (Certification) currentSession().getNamedQuery(Certification.QUERY_GET)
                 .setString("countryCode", countryCode.toLowerCase())
                 .setString("certificate", certificate.toLowerCase())
                 .setCacheable(true)

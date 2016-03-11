@@ -30,6 +30,7 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.TrailerDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -37,6 +38,8 @@ import org.yamj.core.database.model.dto.QueueDTO;
 @Service("trailerStorageService")
 public class TrailerStorageService {
 
+    @Autowired
+    private CommonDao commonDao;
     @Autowired
     private TrailerDao trailerDao;
     
@@ -47,7 +50,7 @@ public class TrailerStorageService {
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getTrailerQueueForProcessing(final int maxResults) {
-        return trailerDao.getTrailerQueueForProcessing(maxResults);
+        return commonDao.getQueueIdOnly(Trailer.QUERY_PROCESSING_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)

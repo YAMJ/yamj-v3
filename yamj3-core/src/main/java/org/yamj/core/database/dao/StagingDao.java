@@ -155,7 +155,7 @@ public class StagingDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        return currentSession().getNamedQuery("videoData.findVideoDatas.byLibrary")
+        return currentSession().getNamedQuery(VideoData.QUERY_FIND_BY_LIBRARY)
                 .setParameter("fileType", FileType.VIDEO)
                 .setBoolean("extra", Boolean.FALSE)
                 .setString("baseName", baseName.toLowerCase())
@@ -171,7 +171,7 @@ public class StagingDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        return currentSession().getNamedQuery("videoData.findVideoDatas.byStageDirectories")
+        return currentSession().getNamedQuery(VideoData.QUERY_FIND_BY_DIRECTORIES)
                 .setParameter("fileType", FileType.VIDEO)
                 .setBoolean("extra", Boolean.FALSE)
                 .setParameterList("stageDirectories", stageDirectories)
@@ -186,7 +186,7 @@ public class StagingDao extends HibernateDao {
             return null;
         }
 
-        return (StageFile)currentSession().getNamedQuery("stageFile.findNfoFile")
+        return (StageFile)currentSession().getNamedQuery(StageFile.QUERY_FIND_NFO)
                 .setParameter("fileType", FileType.NFO)
                 .setString("searchName", searchName.toLowerCase())
                 .setParameter("stageDirectory", stageDirectory)
@@ -197,7 +197,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public List<StageFile> getValidNFOFilesForVideo(long videoDataId) {
-        return currentSession().getNamedQuery("stageFile.getValidNFOFilesForVideo")
+        return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_VIDEO)
                 .setLong("videoDataId", videoDataId)
                 .setParameter("fileType", FileType.NFO)
                 .setParameterList("statusSet", standardStatusSet)
@@ -207,7 +207,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public List<StageFile> getValidNFOFilesForSeries(long seriesId) {
-        return currentSession().getNamedQuery("stageFile.getValidNFOFilesForSeries")
+        return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_SERIES)
                 .setLong("seriesId", seriesId)
                 .setParameter("fileType", FileType.NFO)
                 .setParameterList("statusSet", standardStatusSet)
@@ -495,13 +495,13 @@ public class StagingDao extends HibernateDao {
         final String namedQuery;
         if (artwork.getSeries() != null) {
             id = artwork.getSeries().getId();
-            namedQuery = "stageFile.findVideoStageFiles.forSeries";
+            namedQuery = StageFile.QUERY_VIDEOFILES_FOR_SERIES;
         } else if (artwork.getSeason() != null) {
             id = artwork.getSeason().getId();
-            namedQuery = "stageFile.findVideoStageFiles.forSeason";
+            namedQuery = StageFile.QUERY_VIDEOFILES_FOR_SEASON;
         } else {
             id = artwork.getVideoData().getId();
-            namedQuery = "stageFile.findVideoStageFiles.forVideoData";
+            namedQuery = StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA;
         }
         
         return currentSession().getNamedQuery(namedQuery)

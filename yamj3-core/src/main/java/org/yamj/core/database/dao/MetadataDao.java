@@ -92,7 +92,7 @@ public class MetadataDao extends HibernateDao {
     @CacheEvict(value=CachingNames.DB_PERSON, key="#doubletPerson.id")
     public void duplicate(Person person, Person doubletPerson) {
         // find movies which contains the doublet
-        List<VideoData> videoDatas = currentSession().getNamedQuery("videoData.findVideoDatas.byPerson")
+        List<VideoData> videoDatas = currentSession().getNamedQuery(VideoData.QUERY_FIND_BY_PERSON)
                 .setLong("id", doubletPerson.getId())
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
@@ -199,7 +199,7 @@ public class MetadataDao extends HibernateDao {
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {
-        return currentSession().getNamedQuery("artwork.findPersonArtworks")
+        return currentSession().getNamedQuery(Artwork.QUERY_FIND_PERSON_ARTWORKS)
                 .setParameter("artworkType", ArtworkType.PHOTO)
                 .setString(IDENTIFIER, identifier.toLowerCase())
                 .setCacheable(true)

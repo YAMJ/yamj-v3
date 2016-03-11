@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.springframework.stereotype.Repository;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.hibernate.HibernateDao;
@@ -38,7 +39,7 @@ public class TraktTvDao extends HibernateDao {
     public Map<String,List<Long>> getAllMovieIds() {
         final Map<String,List<Long>> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.movies")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_MOVIES)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
@@ -64,7 +65,7 @@ public class TraktTvDao extends HibernateDao {
     public Map<String,List<Long>> getAllEpisodeIds() {
         final Map<String,List<Long>> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.episodes")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_EPISODES)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
             )
@@ -90,7 +91,7 @@ public class TraktTvDao extends HibernateDao {
     public Collection<TraktMovieDTO> getCollectedMovies(Date checkDate) {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.collected.movies")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_COLLECTED_MOVIES)
                 .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
@@ -130,7 +131,7 @@ public class TraktTvDao extends HibernateDao {
     public Collection<TraktMovieDTO> getWatchedMovies(Date checkDate) {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.movies")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_WATCHED_MOVIES)
                 .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
@@ -161,7 +162,7 @@ public class TraktTvDao extends HibernateDao {
     public Collection<TraktEpisodeDTO> getCollectedEpisodes(Date checkDate) {
         final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.collected.episodes")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_COLLECTED_EPISODES)
                 .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)
@@ -203,7 +204,7 @@ public class TraktTvDao extends HibernateDao {
     public Collection<TraktEpisodeDTO> getWatchedEpisodes(Date checkDate) {
         final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
         
-        try (ScrollableResults scroll = currentSession().getNamedQuery("videoData.trakttv.watched.episodes")
+        try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_WATCHED_EPISODES)
                 .setTimestamp("checkDate", checkDate)
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY)

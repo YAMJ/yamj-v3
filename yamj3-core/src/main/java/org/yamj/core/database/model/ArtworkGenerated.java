@@ -32,7 +32,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 
 @NamedQueries({
-    @NamedQuery(name = "artworkGenerated.getArtworkGenerated",
+    @NamedQuery(name = ArtworkGenerated.QUERY_GET,
         query = "SELECT gen FROM ArtworkGenerated gen JOIN FETCH gen.artworkProfile prof WHERE gen.artworkLocated.id=:locatedId "+
                 "AND prof.profileName=:profileName AND prof.artworkType=gen.artworkLocated.artwork.artworkType"
     )
@@ -53,7 +53,8 @@ import org.hibernate.annotations.NaturalId;
 public class ArtworkGenerated extends AbstractStateful {
 
     private static final long serialVersionUID = 2326614430648326340L;
-
+    public static final String QUERY_GET = "artworkGenerated.getArtworkGenerated";
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)

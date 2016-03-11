@@ -38,28 +38,28 @@ import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.FileType;
 
 @NamedQueries({    
-    @NamedQuery(name = "stageFile.findNfoFile",
+    @NamedQuery(name = StageFile.QUERY_FIND_NFO,
         query = "SELECT distinct sf FROM StageFile sf "+
                 "WHERE sf.fileType=:fileType AND lower(sf.baseName)=:searchName AND sf.stageDirectory=:stageDirectory AND sf.status != :deleted"
     ),
-    @NamedQuery(name = "stageFile.getValidNFOFilesForVideo",
+    @NamedQuery(name = StageFile.QUERY_VALID_NFOS_VIDEO,
         query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel JOIN nfrel.nfoRelationPK.videoData vd "+
                 "WHERE vd.id=:videoDataId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
     ),
-    @NamedQuery(name = "stageFile.getValidNFOFilesForSeries",
+    @NamedQuery(name = StageFile.QUERY_VALID_NFOS_SERIES,
         query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel "+
                 "JOIN nfrel.nfoRelationPK.videoData vd JOIN vd.season sea JOIN sea.series ser "+
                 "WHERE ser.id=:seriesId AND sf.fileType=:fileType AND sf.status in (:statusSet) ORDER BY nfrel.priority DESC"
     ),
-    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeries",
+    @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SERIES,
         query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
                 "WHERE ser.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
     ),
-    @NamedQuery(name = "stageFile.findVideoStageFiles.forSeason",
+    @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SEASON,
         query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
                 "WHERE sea.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
     ),
-    @NamedQuery(name = "stageFile.findVideoStageFiles.forVideoData",
+    @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA,
         query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
                 "WHERE vd.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
     )
@@ -75,6 +75,12 @@ import org.yamj.core.database.model.type.FileType;
 public class StageFile extends AbstractStateful {
 
     private static final long serialVersionUID = -6247352843375054146L;
+    public static final String QUERY_FIND_NFO = "stageFile.findNfoFile";
+    public static final String QUERY_VALID_NFOS_VIDEO = "stageFile.getValidNFOFilesForMovie";
+    public static final String QUERY_VALID_NFOS_SERIES = "stageFile.getValidNFOFilesForSeries";
+    public static final String QUERY_VIDEOFILES_FOR_SERIES = "stageFile.findVideoStageFiles.forSeries";
+    public static final String QUERY_VIDEOFILES_FOR_SEASON = "stageFile.findVideoStageFiles.forSeason";
+    public static final String QUERY_VIDEOFILES_FOR_VIDEODATA = "stageFile.findVideoStageFiles.forVideoData";
     
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)

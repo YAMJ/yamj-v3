@@ -124,18 +124,7 @@ public class ArtworkStorageService {
         
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
-        sql.append("FROM artwork art ");
-        sql.append("LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id ");
-        sql.append("LEFT OUTER JOIN season sea ON sea.id=art.season_id ");
-        sql.append("LEFT OUTER JOIN series ser ON ser.id=art.series_id ");
-        sql.append("WHERE art.status in ('NEW','UPDATED') ");
-        sql.append("AND (vd.status is null OR vd.status='DONE') ");
-        sql.append("AND (sea.status is null OR sea.status='DONE') ");
-        sql.append("AND (ser.status is null OR ser.status='DONE') ");
-
-        return artworkDao.getArtworkQueue(sql, maxResults);
+        return artworkDao.getArtworkQueueForScanning(maxResults);
     }
 
     @Transactional(readOnly = true)
