@@ -36,9 +36,15 @@ import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ContainerType;
 
 @NamedNativeQueries({    
+    @NamedNativeQuery(name = Trailer.QUERY_SCANNING_QUEUE,
+        query = "SELECT vd.id,'MOVIE' as metatype,(case when vd.update_timestamp is null then vd.create_timestamp else vd.update_timestamp end) as maxdate "+
+                "FROM videodata vd WHERE vd.trailer_status in ('NEW','UPDATED') and vd.status='DONE' and vd.episode<0 " +
+                "UNION SELECT ser.id,'SERIES' as metatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
+                "FROM series ser WHERE ser.trailer_status in ('NEW','UPDATED') and ser.status='DONE' ORDER BY maxdate ASC"
+    ),
     @NamedNativeQuery(name = Trailer.QUERY_PROCESSING_QUEUE,
         query = "SELECT DISTINCT t.id,(case when t.update_timestamp is null then t.create_timestamp else t.update_timestamp end) as maxdate "+
-                "FROM trailer t WHERE t.status in ('NEW','UPDATED')"
+                "FROM trailer t WHERE t.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
     )
 })
 
@@ -50,6 +56,7 @@ import org.yamj.core.database.model.type.ContainerType;
 public class Trailer extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -7853145730427742811L;
+    public static final String QUERY_SCANNING_QUEUE = "trailer.scanning.queue";
     public static final String QUERY_PROCESSING_QUEUE = "trailer.processing.queue";
                     
     @NaturalId(mutable = true)

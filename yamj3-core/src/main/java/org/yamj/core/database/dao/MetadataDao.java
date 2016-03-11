@@ -22,10 +22,13 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.CacheMode;
-import org.hibernate.SQLQuery;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -47,28 +50,26 @@ public class MetadataDao extends HibernateDao {
 
     @Autowired
     private ArtworkDao artworkDao;
-    
-    public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = currentSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-       
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setMetadataType(convertRowElementToString(object[1]));
-            queueElement.setDate(convertRowElementToDate(object[3]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[2]));
-            }
-            queueElements.add(queueElement);
-        }
 
-        Collections.sort(queueElements);
+    public List<QueueDTO> getMetadataQueue(final String queryName, final int maxResults) {
+        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery(queryName)
+                .setReadOnly(true)
+                .setMaxResults(maxResults)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                
+                QueueDTO dto = new QueueDTO(convertRowElementToLong(row[0]));
+                dto.setMetadataType(convertRowElementToString(row[1]));
+                queueElements.add(dto);
+            }
+        }
+        
         return queueElements;
     }
 

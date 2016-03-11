@@ -30,6 +30,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -39,6 +41,17 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Person.QUERY_SCANNING_QUEUE,
+        query = "SELECT p.id,'PERSON' as metatype,(case when p.update_timestamp is null then p.create_timestamp else p.update_timestamp end) as maxdate "+
+                "FROM person p WHERE p.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
+    ),
+    @NamedNativeQuery(name = Person.QUERY_FILMOGRAPHY_QUEUE,
+        query = "SELECT p.id,'FILMOGRAPHY' as metatype,(case when p.update_timestamp is null then p.create_timestamp else p.update_timestamp end) as maxdate "+
+                "FROM person p WHERE p.status='DONE' and (p.filmography_status is null or p.filmography_status in ('NEW','UPDATED'))  ORDER BY maxdate ASC"
+    )
+})
 
 @Entity
 @Table(name = "person",
@@ -52,7 +65,9 @@ import org.yamj.core.tools.PersonNameDTO;
 public class Person extends AbstractScannable {
 
     private static final long serialVersionUID = 660066902996412843L;
-
+    public static final String QUERY_SCANNING_QUEUE = "person.scanning.queue";
+    public static final String QUERY_FILMOGRAPHY_QUEUE = "person.filmography.queue";
+    
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 

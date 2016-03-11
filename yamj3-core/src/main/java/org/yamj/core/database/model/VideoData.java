@@ -95,13 +95,13 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
                 "GROUP BY vd.id, vid.sourcedb, vid.sourcedb_id, vd.identifier, vd.title, vd.title_original, vd.publication_year"
     ),
     @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_COLLECTED_EPISODES,
-    query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, sea.season, vd.episode, ser.title, ser.title_original, ser.start_year "+
-            "FROM series ser JOIN series_ids sid on ser.id=sid.series_id JOIN season sea on ser.id=sea.series_id "+
-            "JOIN videodata vd on sea.id=vd.season_id and vd.status='DONE' JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
-            "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
-            "WHERE ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
-            "       not exists (select 1 from series_ids sid2 where ser.id=sid2.series_id and sid2.sourcedb='trakttv')) "+
-            "GROUP BY vd.id, sid.sourcedb, sid.sourcedb_id, sea.season, vd.episode, vd.identifier, ser.title, ser.title_original, ser.start_year"
+        query = "SELECT vd.id, sid.sourcedb, sid.sourcedb_id, min(sf.file_date) as collect_date, vd.identifier, sea.season, vd.episode, ser.title, ser.title_original, ser.start_year "+
+                "FROM series ser JOIN series_ids sid on ser.id=sid.series_id JOIN season sea on ser.id=sea.series_id "+
+                "JOIN videodata vd on sea.id=vd.season_id and vd.status='DONE' JOIN mediafile_videodata mv on mv.videodata_id=vd.id "+
+                "JOIN mediafile mf on mf.id=mv.mediafile_id and mf.extra=0 JOIN stage_file sf on sf.mediafile_id=mf.id and sf.status!='DELETED' and sf.file_type='VIDEO' "+
+                "WHERE ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
+                "       not exists (select 1 from series_ids sid2 where ser.id=sid2.series_id and sid2.sourcedb='trakttv')) "+
+                "GROUP BY vd.id, sid.sourcedb, sid.sourcedb_id, sea.season, vd.episode, vd.identifier, ser.title, ser.title_original, ser.start_year"
     )    
 })
 

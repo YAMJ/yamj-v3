@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.TrailerDao;
+import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 
@@ -41,11 +41,11 @@ public class TrailerStorageService {
     @Autowired
     private CommonDao commonDao;
     @Autowired
-    private TrailerDao trailerDao;
+    private MetadataDao metadataDao;
     
     @Transactional(readOnly = true)
     public List<QueueDTO> getTrailerQueueForScanning(final int maxResults) {
-        return trailerDao.getTrailerQueueForScanning(maxResults);
+        return metadataDao.getMetadataQueue(Trailer.QUERY_SCANNING_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +61,7 @@ public class TrailerStorageService {
         sb.append("LEFT OUTER JOIN FETCH t.stageFile s ");
         sb.append("WHERE vd.id = :id ");
 
-        List<VideoData> objects = this.trailerDao.findById(sb, id);
+        List<VideoData> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -73,7 +73,7 @@ public class TrailerStorageService {
         sb.append("LEFT OUTER JOIN FETCH t.stageFile s ");
         sb.append("WHERE ser.id = :id ");
 
-        List<Series> objects = this.trailerDao.findById(sb, id);
+        List<Series> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
     
@@ -86,16 +86,16 @@ public class TrailerStorageService {
         sb.append("LEFT OUTER JOIN FETCH t.stageFile ");
         sb.append("WHERE t.id = :id");
 
-        List<Trailer> objects = this.trailerDao.findById(sb, id);
+        List<Trailer> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional
     public boolean errorTrailer(Long id) {
-        Trailer trailer = trailerDao.getById(Trailer.class, id);
+        Trailer trailer = commonDao.getById(Trailer.class, id);
         if (trailer != null) {
             trailer.setStatus(StatusType.ERROR);
-            trailerDao.updateEntity(trailer);
+            commonDao.updateEntity(trailer);
             return true;
         }
         return false;
@@ -103,43 +103,43 @@ public class TrailerStorageService {
 
     @Transactional
     public void errorTrailerVideoData(Long id) {
-        VideoData videoData = trailerDao.getById(VideoData.class, id);
+        VideoData videoData = commonDao.getById(VideoData.class, id);
         if (videoData != null) {
             videoData.setTrailerStatus(StatusType.ERROR);
-            trailerDao.updateEntity(videoData);
+            commonDao.updateEntity(videoData);
         }
     }
 
     @Transactional
     public void errorTrailerSeries(Long id) {
-        Series series = trailerDao.getById(Series.class, id);
+        Series series = commonDao.getById(Series.class, id);
         if (series != null) {
             series.setTrailerStatus(StatusType.ERROR);
-            trailerDao.updateEntity(series);
+            commonDao.updateEntity(series);
         }
     }
 
     @Transactional
     public void updateTrailer(Trailer trailer) {
-        this.trailerDao.updateEntity(trailer);
+        this.commonDao.updateEntity(trailer);
     }
 
     @Transactional
     public void updateTrailer(VideoData videoData, List<Trailer> trailers) {
         if (CollectionUtils.isEmpty(videoData.getTrailers())) {
             // no trailers presents; just store all
-            this.trailerDao.storeAll(trailers);
+            this.commonDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
             for (Trailer trailer : trailers) {
                 final int index = videoData.getTrailers().indexOf(trailer);
                 if (index < 0) {
                     // just store if not contained before
                     videoData.getTrailers().add(trailer);
-                    trailerDao.saveEntity(trailer);
+                    commonDao.saveEntity(trailer);
                 } else {
                     // reset deletion status
                     Trailer stored = videoData.getTrailers().get(index);
-                    trailerDao.resetDeletionStatus(stored);
+                    resetDeletionStatus(stored);
                 }
             }
         }
@@ -149,7 +149,7 @@ public class TrailerStorageService {
             StageFile stageFile = trailer.getStageFile();
             if (stageFile != null && stageFile.isNotFound()) {
                 stageFile.setStatus(StatusType.DONE);
-                this.trailerDao.updateEntity(stageFile);
+                this.commonDao.updateEntity(stageFile);
             }
         }
         
@@ -162,25 +162,25 @@ public class TrailerStorageService {
         }
 
         // update artwork in database
-        this.trailerDao.updateEntity(videoData);
+        this.commonDao.updateEntity(videoData);
     }
 
     @Transactional
     public void updateTrailer(Series series, List<Trailer> trailers) {
         if (CollectionUtils.isEmpty(series.getTrailers())) {
             // no trailers presents; just store all
-            this.trailerDao.storeAll(trailers);
+            this.commonDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
             for (Trailer trailer : trailers) {
                 final int index = series.getTrailers().indexOf(trailer);
                 if (index < 0) {
                     // just store if not contained before
                     series.getTrailers().add(trailer);
-                    trailerDao.saveEntity(trailer);
+                    commonDao.saveEntity(trailer);
                 } else {
                     // reset deletion status
                     Trailer stored = series.getTrailers().get(index);
-                    trailerDao.resetDeletionStatus(stored);
+                    resetDeletionStatus(stored);
                 }
             }
         }
@@ -190,7 +190,7 @@ public class TrailerStorageService {
             StageFile stageFile = trailer.getStageFile();
             if (stageFile != null && stageFile.isNotFound()) {
                 stageFile.setStatus(StatusType.DONE);
-                this.trailerDao.updateEntity(stageFile);
+                this.commonDao.updateEntity(stageFile);
             }
         }
         
@@ -203,7 +203,15 @@ public class TrailerStorageService {
         }
 
         // update artwork in database
-        this.trailerDao.updateEntity(series);
+        this.commonDao.updateEntity(series);
     }
+    
+    private void resetDeletionStatus(Trailer trailer) {
+        if (trailer.isDeleted()) {
+            trailer.setStatus(trailer.getPreviousStatus());
+            this.commonDao.updateEntity(trailer);
+        }
+    }
+
 }
 

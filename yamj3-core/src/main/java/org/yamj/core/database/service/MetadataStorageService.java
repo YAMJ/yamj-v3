@@ -38,7 +38,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.CommonDao;
@@ -73,50 +72,17 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getMetaDataQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("select vd.id,'");
-        sql.append(MetaDataType.MOVIE);
-        sql.append("' as metatype,vd.create_timestamp,vd.update_timestamp ");
-        sql.append("from videodata vd ");
-        sql.append("where vd.status in ('NEW','UPDATED') ");
-        sql.append("and vd.episode<0 ");
-        sql.append("union ");
-        sql.append("select ser.id,'");
-        sql.append(MetaDataType.SERIES);
-        sql.append("' as mediatype,ser.create_timestamp,ser.update_timestamp ");
-        sql.append("from series ser, season sea, videodata vd ");
-        sql.append("where ser.id=sea.series_id ");
-        sql.append("and sea.id=vd.season_id ");
-        sql.append("and (ser.status in ('NEW','UPDATED') ");
-        sql.append(" or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) ");
-        sql.append(" or  (ser.status='DONE' and vd.status in ('NEW','UPDATED'))) ");
-
-        return metadataDao.getMetadataQueue(sql, maxResults);
+        return metadataDao.getMetadataQueue(Series.QUERY_METADATA_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("select id, '");
-        sql.append(MetaDataType.PERSON);
-        sql.append("' as metatype, create_timestamp, update_timestamp ");
-        sql.append("from person ");
-        sql.append("where status in ('NEW','UPDATED') ");
-
-        return metadataDao.getMetadataQueue(sql, maxResults);
+        return metadataDao.getMetadataQueue(Person.QUERY_SCANNING_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getFilmographyQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("select id, '");
-        sql.append(MetaDataType.FILMOGRAPHY);
-        sql.append("' as metatype, create_timestamp, update_timestamp ");
-        sql.append("from person ");
-        sql.append("where status='DONE' ");
-        sql.append("and (filmography_status is null or filmography_status in ('NEW','UPDATED')) ");
-
-        return metadataDao.getMetadataQueue(sql, maxResults);
+        return metadataDao.getMetadataQueue(Person.QUERY_FILMOGRAPHY_QUEUE, maxResults);
     }
 
     @Transactional(readOnly = true)

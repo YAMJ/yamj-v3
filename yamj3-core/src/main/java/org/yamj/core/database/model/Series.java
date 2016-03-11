@@ -31,6 +31,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -45,6 +47,16 @@ import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Series.QUERY_METADATA_QUEUE,
+        query = "SELECT vd1.id,'MOVIE' as metatype,(case when vd1.update_timestamp is null then vd1.create_timestamp else vd1.update_timestamp end) as maxdate "+
+                "FROM videodata vd1 WHERE vd1.status in ('NEW','UPDATED') and vd1.episode<0 UNION "+
+                "SELECT ser.id,'SERIES' as mediatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
+                "FROM series ser, season sea, videodata vd WHERE ser.id=sea.series_id and sea.id=vd.season_id and (ser.status in ('NEW','UPDATED') "+
+                "or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) or  (ser.status='DONE' and vd.status in ('NEW','UPDATED'))) "
+    )
+})
+
 @Entity
 @Table(name = "series",
         uniqueConstraints = @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}),
@@ -56,7 +68,8 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
-
+    public static final String QUERY_METADATA_QUEUE = "metadata.queue";
+    
     @Column(name = "start_year")
     private int startYear = -1;
 
