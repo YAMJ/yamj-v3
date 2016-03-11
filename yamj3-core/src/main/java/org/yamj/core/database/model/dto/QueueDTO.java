@@ -22,18 +22,16 @@
  */
 package org.yamj.core.database.model.dto;
 
-import java.util.Date;
 import org.apache.commons.lang3.builder.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
-public final class QueueDTO implements Comparable<QueueDTO> {
+public final class QueueDTO {
 
     private final Long id;
-    @Deprecated
-    private Date date;
     private MetaDataType metadataType;
     private ArtworkType artworkType;
+    private Boolean locatedArtwork;
 
     // GETTER and SETTER
 
@@ -43,16 +41,6 @@ public final class QueueDTO implements Comparable<QueueDTO> {
 
     public Long getId() {
         return id;
-    }
-
-    @Deprecated
-    public Date getDate() {
-        return date;
-    }
-
-    @Deprecated
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public MetaDataType getMetadataType() {
@@ -87,6 +75,14 @@ public final class QueueDTO implements Comparable<QueueDTO> {
         return this.artworkType == artworkType;
     }
 
+    public Boolean getLocatedArtwork() {
+        return locatedArtwork;
+    }
+
+    public void setLocatedArtwork(Boolean locatedArtwork) {
+        this.locatedArtwork = locatedArtwork;
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -111,20 +107,5 @@ public final class QueueDTO implements Comparable<QueueDTO> {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
-    }
-
-    @Override
-    @Deprecated
-    public int compareTo(QueueDTO obj) {
-        if (getDate() == null && obj.getDate() == null) {
-            return 0;
-        }
-        if (getDate() != null && obj.getDate() == null) {
-            return 1;
-        }
-        if (getDate() == null && obj.getDate() != null) {
-            return -1;
-        }
-        return getDate().compareTo(obj.getDate());
     }
 }

@@ -128,6 +128,11 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<QueueDTO> getArtworkQueueForProcessing(final int maxResults) {
+        return artworkDao.getArtworkQueueForProcessing(maxResults);
+    }
+
+    @Transactional(readOnly = true)
     public Artwork getRequiredArtwork(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("FROM Artwork art ");
@@ -169,16 +174,6 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<QueueDTO> getArtworLocatedQueue(final int maxResults) {
-        return artworkDao.getArtworkLocatedQueue(maxResults);
-    }
-
-    @Transactional(readOnly = true)
-    public List<QueueDTO> getArtworGeneratedQueue(final int maxResults) {
-        return artworkDao.getArtworkGeneratedQueue(maxResults);
-    }
-
-    @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("FROM ArtworkLocated loc ");
@@ -209,14 +204,21 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public boolean errorArtworkLocated(Long id) {
+    public void errorArtworkLocated(Long id) {
         ArtworkLocated located = artworkDao.getById(ArtworkLocated.class, id);
         if (located != null) {
             located.setStatus(StatusType.ERROR);
             artworkDao.updateEntity(located);
-            return true;
         }
-        return false;
+    }
+
+    @Transactional
+    public void errorArtworkGenerated(Long id) {
+        ArtworkGenerated generated = artworkDao.getById(ArtworkGenerated.class, id);
+        if (generated != null) {
+            generated.setStatus(StatusType.ERROR);
+            artworkDao.updateEntity(generated);
+        }
     }
 
     @Transactional

@@ -25,6 +25,7 @@ package org.yamj.core.service.artwork;
 import static org.yamj.core.service.artwork.ArtworkTools.SOURCE_UPLOAD;
 
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.MediaType;
@@ -45,20 +47,39 @@ import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.ScalingType;
+import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
+import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
 
-@Service("artworkLocatedProcessorService")
+@Service("artworkProcessorService")
 @DependsOn("artworkInitialization")
-public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorService {
+public class ArtworkProcessorService implements IQueueProcessService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkLocatedProcessorService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
     
+    @Autowired
+    private ArtworkStorageService artworkStorageService;
+    @Autowired
+    private FileStorageService fileStorageService;
+
     @Override
     public void processQueueElement(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.getLocatedArtwork()) {
+            processLocatedArtwork(queueElement.getId());
+        } else {
+            processGeneratedArtwork(queueElement.getId());
+        }
+    }
+    
+    private void processLocatedArtwork(final Long id) {
         // get required located artwork
-        ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(queueElement.getId());
+        ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(id);
         final StorageType storageType = ArtworkTools.getStorageType(located);
         LOG.debug("Process located artwork: {}", located);
 
@@ -168,11 +189,37 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         artworkStorageService.updateArtworkLocated(located);
     }
 
+    private void processGeneratedArtwork(final Long id) {
+        // get required generated artwork
+        ArtworkGenerated generated = artworkStorageService.getRequiredArtworkGenerated(id);
+        LOG.debug("Process generated artwork: {}", generated);
+
+        try {
+            // generate image
+            createAndStoreImage(generated.getArtworkLocated(), generated.getArtworkProfile(), generated.getCacheFilename());
+
+            // mark generated image as done
+            generated.setStatus(StatusType.DONE);
+        } catch (Exception ex) {
+            LOG.error("Failed to generate image for {}", generated);
+            LOG.warn("Image generation error", ex);
+
+            // mark generated image as error
+            generated.setStatus(StatusType.ERROR);
+        }
+        
+        this.artworkStorageService.updateArtworkGenerated(generated);
+    }
+    
     @Override
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
-        LOG.error("Failed processing of located artwork "+queueElement.getId(), error);
+        LOG.error("Failed processing of "+(queueElement.getLocatedArtwork()?"located":"generated")+" artwork "+queueElement.getId(), error);
+        if (queueElement.getLocatedArtwork()) {
+            artworkStorageService.errorArtworkLocated(queueElement.getId());
+        } else {
+            artworkStorageService.errorArtworkGenerated(queueElement.getId());
+        }
        
-        artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
 
     private boolean storedAttachedArwork(StorageType storageType, ArtworkLocated located, String cacheFilename) {
@@ -281,5 +328,54 @@ public class ArtworkLocatedProcessorService extends AbstractArtworkProcessorServ
         result.setResource(this.fileStorageService.getStorageName(storageType, filename));
         result.setMediaType(MediaType.IMAGE_JPEG);
         return result;
+    }
+
+    private void createAndStoreImage(ArtworkLocated located, ArtworkProfile profile, String cacheFilename) throws Exception {
+        final StorageType storageType = ArtworkTools.getStorageType(profile);
+        
+        LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());
+        BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
+    
+        // set dimension of original image if not done before
+        if (located.getWidth() <= 0 || located.getHeight() <= 0) {
+            located.setWidth(imageGraphic.getWidth());
+            located.setHeight(imageGraphic.getHeight());
+        }
+    
+        // draw the image
+        BufferedImage image = drawImage(imageGraphic, profile);
+    
+        // store image on stage system
+        fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageType(), profile.getQuality());
+    }
+    
+    private static BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
+        BufferedImage bi = imageGraphic;
+
+        // TODO more graphic options
+        
+        int origWidth = imageGraphic.getWidth();
+        int origHeight = imageGraphic.getHeight();
+        float ratio = profile.getRatio();
+        float rcqFactor = profile.getRounderCornerQuality();
+
+        if (ScalingType.NORMALIZE == profile.getScalingType()) {
+            if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
+                // normalize image if below profile settings
+                bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * rcqFactor * ratio), (int) (origHeight * rcqFactor), bi);
+            } else {
+                // normalize image
+                bi = GraphicTools.scaleToSizeNormalized((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
+            }
+        } else if (ScalingType.STRETCH == profile.getScalingType()) {
+            // stretch image
+            bi = GraphicTools.scaleToSizeStretch((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
+        } else if ((origWidth != profile.getWidth()) || (origHeight != profile.getHeight())) {
+            // scale image to given size
+            bi = GraphicTools.scaleToSize((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
+        }
+
+        // return image
+        return bi;
     }
 }

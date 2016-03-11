@@ -302,6 +302,7 @@ public class Series extends AbstractMetadata {
         this.overrideFlags = overrideFlags;
     }
 
+    @Override
     public boolean isAllScansSkipped() {
         return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }

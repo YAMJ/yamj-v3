@@ -46,7 +46,7 @@ import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
-import org.yamj.core.service.artwork.ArtworkLocatedProcessorService;
+import org.yamj.core.service.artwork.ArtworkProcessorService;
 import org.yamj.core.service.artwork.ArtworkUploadService;
 import org.yamj.core.service.artwork.ImageDTO;
 import org.yamj.core.service.file.FileStorageService;
@@ -70,7 +70,7 @@ public class ArtworkController {
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
-    private ArtworkLocatedProcessorService artworkLocatedProcessorService;
+    private ArtworkProcessorService artworkLocatedProcessorService;
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {

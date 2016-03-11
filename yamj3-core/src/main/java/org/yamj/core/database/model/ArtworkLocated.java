@@ -29,8 +29,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -38,12 +36,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ImageType;
-
-@NamedNativeQueries({    
-    @NamedNativeQuery(name = "artworkLocated.processQueue",
-        query = "SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp FROM artwork_located loc WHERE loc.status in ('NEW','UPDATED')"
-    )
-})
 
 @Entity
 @Table(name = "artwork_located",

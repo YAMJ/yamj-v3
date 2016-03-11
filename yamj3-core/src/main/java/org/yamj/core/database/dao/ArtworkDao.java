@@ -23,9 +23,10 @@
 package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.hibernate.*;
+import org.hibernate.Criteria;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -105,37 +106,25 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
-    @Deprecated
-    public List<QueueDTO> getArtworkLocatedQueue(final int maxResults) {
-        return this.getQueue("artworkLocated.processQueue", maxResults);
-    }
-
-    @Deprecated
-    public List<QueueDTO> getArtworkGeneratedQueue(final int maxResults) {
-        return this.getQueue("artworkGenerated.processQueue", maxResults);
-    }
-
-    @Deprecated
-    private List<QueueDTO> getQueue(final String queryName, final int maxResults) {
-        Query query = currentSession().getNamedQuery(queryName);
-        query.setReadOnly(true);
-        query.setCacheable(true);
-        if (maxResults > 0) {
-            query.setMaxResults(maxResults);
-        }
-        List<Object[]> objects = query.list();
-
-        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
-        for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
-            queueElement.setDate(convertRowElementToDate(object[2]));
-            if (queueElement.getDate() == null) {
-                queueElement.setDate(convertRowElementToDate(object[1]));
+    public List<QueueDTO> getArtworkQueueForProcessing(final int maxResults) {
+        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
+        
+        try (ScrollableResults scroll = currentSession().getNamedQuery(Artwork.QUERY_PROCESSING_QUEUE)
+                .setReadOnly(true)
+                .setMaxResults(maxResults)
+                .scroll(ScrollMode.FORWARD_ONLY)
+            )
+        {
+            Object[] row;
+            while (scroll.next()) {
+                row = scroll.get();
+                
+                QueueDTO dto = new QueueDTO(convertRowElementToLong(row[0]));
+                dto.setLocatedArtwork(convertRowElementToBoolean(row[1]));
+                queueElements.add(dto);
             }
-            queueElements.add(queueElement);
         }
-
-        Collections.sort(queueElements);
+        
         return queueElements;
     }
 

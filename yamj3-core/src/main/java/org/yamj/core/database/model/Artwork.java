@@ -53,7 +53,14 @@ import org.yamj.core.database.model.type.ArtworkType;
                 "LEFT OUTER JOIN series ser ON ser.id=art.series_id WHERE art.status in ('NEW','UPDATED') "+
                 "AND (vd.status is null OR vd.status='DONE') AND (sea.status is null OR sea.status='DONE') AND (ser.status is null OR ser.status='DONE') "+
                 "ORDER BY maxdate ASC"
-    )
+    ),
+    @NamedNativeQuery(name = Artwork.QUERY_PROCESSING_QUEUE,
+        query = "SELECT DISTINCT loc1.id,1 as is_located,(case when loc1.update_timestamp is null then loc1.create_timestamp else loc1.update_timestamp end) as maxdate "+
+                "FROM artwork_located loc1 WHERE loc1.status in ('NEW','UPDATED') UNION "+
+                "SELECT DISTINCT gen.id,0 as is_located,(case when gen.update_timestamp is null then gen.create_timestamp else gen.update_timestamp end) as maxdate "+
+                "FROM artwork_generated gen JOIN artwork_located loc2 on loc2.id=gen.located_id and loc2.status='DONE' WHERE gen.status in ('NEW','UPDATED') "+
+                "ORDER BY maxdate ASC"
+   )
 })
 
 @Entity
@@ -68,7 +75,7 @@ public class Artwork extends AbstractStateful {
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.findPersonArtworks";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
-    
+    public static final String QUERY_PROCESSING_QUEUE = "artwork.processing.queue";
     
     @NaturalId(mutable = true)    
     @Type(type = "artworkType")

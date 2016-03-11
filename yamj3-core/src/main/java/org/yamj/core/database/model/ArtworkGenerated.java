@@ -38,13 +38,6 @@ import org.hibernate.annotations.NaturalId;
     )
 })
 
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "artworkGenerated.processQueue",
-        query = "SELECT DISTINCT gen.id, gen.create_timestamp, gen.update_timestamp FROM artwork_generated gen "+
-                "JOIN artwork_located loc on loc.id=gen.located_id and loc.status='DONE' WHERE gen.status in ('NEW','UPDATED')"
-    )
-})
-
 @Entity
 @Table(name = "artwork_generated",
     uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_GENERATED", columnNames = {"located_id", "profile_id"}),

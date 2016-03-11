@@ -298,6 +298,26 @@ public abstract class HibernateDao {
         }
     }
 
+    /**
+     * Convert row object to boolean.
+     *
+     * @param rowElement
+     * @return <code>BigDecimal</code>
+     */
+    protected static Boolean convertRowElementToBoolean(Object rowElement) {
+        if (rowElement == null) {
+            return Boolean.FALSE;
+        } else if (rowElement instanceof Boolean) {
+            return (Boolean) rowElement;
+        } else if ("1".equals(rowElement.toString())) {
+            return Boolean.TRUE;
+        } else if ("true".equals(rowElement.toString())) {
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     protected static void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
         if (value instanceof Collection) {
