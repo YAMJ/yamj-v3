@@ -152,27 +152,36 @@ public class MetadataDao extends HibernateDao {
             person.setPhoto(photo);
             this.saveEntity(photo);
         } else {
+            boolean changed = false;
+            
             // these values are not regarded for updating status
             if (OverrideTools.checkOverwriteFirstName(person, dto.getSource())) {
                 person.setFirstName(dto.getFirstName(), dto.getSource());
+                changed = true;
             }
             if (OverrideTools.checkOverwriteLastName(person, dto.getSource())) {
                 person.setLastName(dto.getLastName(), dto.getSource());
+                changed = true;
             }
             if (OverrideTools.checkOverwriteBirthName(person, dto.getSource())) {
                 person.setBirthName(dto.getRealName(), dto.getSource());
+                changed = true;
             }
 
             if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
+                changed = true;
             } else if (person.isDeleted()) {
                 // if previously deleted then set as updated now
                 person.setStatus(StatusType.UPDATED);
+                changed = true;
             }
 
-            // update person in database
-            this.updateEntity(person);
+            // update person in database if changed
+            if (changed) {
+                this.updateEntity(person);
+            }
         }
         
         if (CollectionUtils.isNotEmpty(dto.getPhotoDTOS())) {
