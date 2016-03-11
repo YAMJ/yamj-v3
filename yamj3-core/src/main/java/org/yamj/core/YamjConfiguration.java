@@ -27,8 +27,6 @@ import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -42,10 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
@@ -56,10 +50,8 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.LocaleService;
 
 @Configuration
-@EnableScheduling
-@EnableAsync
 @ComponentScan("org.yamj.core")
-public class YamjConfiguration extends WebMvcConfigurationSupport implements SchedulingConfigurer {
+public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Autowired
     private LocaleService localeService;
@@ -154,17 +146,5 @@ public class YamjConfiguration extends WebMvcConfigurationSupport implements Sch
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
         interceptor.setParamName("language");
         registry.addInterceptor(interceptor);
-    }
-    
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.setScheduler(scheduledExecutorService());
-    }
-
-    @Bean(destroyMethod="shutdown")
-    public ScheduledExecutorService scheduledExecutorService() {
-        // determine number of scheduler threads
-        int cores = Runtime.getRuntime().availableProcessors();
-        return Executors.newScheduledThreadPool(Math.max(2, cores * 2));
     }
 }
