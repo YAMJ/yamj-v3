@@ -56,7 +56,7 @@ public class SchedulerConfiguration implements SchedulingConfigurer {
         if (NumberUtils.toInt(maxThreads) > 0) {
             threads = Integer.parseInt(maxThreads);
         } else {
-            threads = Math.max(2, Runtime.getRuntime().availableProcessors() * 2);
+            threads = Math.max(2, Runtime.getRuntime().availableProcessors());
         }
         LOG.info("Use {} threads for scheduled processing", threads);
         return Executors.newScheduledThreadPool(threads);
