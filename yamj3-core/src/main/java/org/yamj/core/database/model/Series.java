@@ -49,9 +49,9 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Series.QUERY_METADATA_QUEUE,
-        query = "SELECT vd1.id,'MOVIE' as metatype,(case when vd1.update_timestamp is null then vd1.create_timestamp else vd1.update_timestamp end) as maxdate "+
+        query = "SELECT DISTINCT vd1.id,'MOVIE' as metatype,(case when vd1.update_timestamp is null then vd1.create_timestamp else vd1.update_timestamp end) as maxdate "+
                 "FROM videodata vd1 WHERE vd1.status in ('NEW','UPDATED') and vd1.episode<0 UNION "+
-                "SELECT ser.id,'SERIES' as mediatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
+                "SELECT DISTINCT ser.id,'SERIES' as mediatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
                 "FROM series ser, season sea, videodata vd WHERE ser.id=sea.series_id and sea.id=vd.season_id and (ser.status in ('NEW','UPDATED') "+
                 "or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) or  (ser.status='DONE' and vd.status in ('NEW','UPDATED'))) "
     )

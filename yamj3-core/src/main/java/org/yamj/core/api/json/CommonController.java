@@ -26,34 +26,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiCertificationDTO;
-import org.yamj.core.api.model.dto.ApiCountryDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.options.OptionsBoxedSet;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsMultiType;
-import org.yamj.core.api.options.OptionsRating;
-import org.yamj.core.api.options.OptionsSingleType;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.scheduling.ScanningScheduler;
-import org.yamj.core.scheduling.TrailerProcessScheduler;
+import org.yamj.core.scheduling.*;
 
 @RestController
 @RequestMapping(value = "/api", produces = "application/json; charset=utf-8")
@@ -65,7 +49,11 @@ public class CommonController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
     @Autowired 
-    private ScanningScheduler scanningScheduler;
+    private MetadataScanScheduler metadataScanScheduler;
+    @Autowired 
+    private ArtworkScanScheduler artworkScanScheduler;
+    @Autowired
+    private TrailerScanScheduler trailerScanScheduler;
     @Autowired
     private TrailerProcessScheduler trailerProcessScheduler;
 
@@ -125,7 +113,7 @@ public class CommonController {
 
         ApiStatus apiStatus = jsonApiStorageService.rescanMetaData(metaDataType, id);
         if (apiStatus.isSuccessful()) {
-            this.scanningScheduler.triggerScanMetaData();
+            this.metadataScanScheduler.trigger();
         }
         return apiStatus;
     }
@@ -143,7 +131,7 @@ public class CommonController {
 
         ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(metaDataType, id);
         if (apiStatus.isSuccessful()) {
-            this.scanningScheduler.triggerScanArtwork();
+            this.artworkScanScheduler.trigger();
         }
         return apiStatus;
     }
@@ -158,7 +146,7 @@ public class CommonController {
 
         ApiStatus apiStatus = jsonApiStorageService.rescanTrailer(metaDataType, id);
         if (apiStatus.isSuccessful()) {
-            this.scanningScheduler.triggerScanTrailer();
+            this.trailerScanScheduler.trigger();
         }
         return apiStatus;
     }
@@ -167,7 +155,7 @@ public class CommonController {
     public ApiStatus rescanAll() {
         ApiStatus apiStatus = jsonApiStorageService.rescanAll();
         if (apiStatus.isSuccessful()) {
-            this.scanningScheduler.triggerAllScans();
+            this.metadataScanScheduler.trigger();
         }
         return apiStatus;
     }

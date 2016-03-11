@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.service.CommonStorageService;
-import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.ArtworkScanScheduler;
 import org.yamj.core.service.file.FileStorageService;
 
 /**
@@ -53,7 +53,7 @@ public class DeletionService {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private ScanningScheduler scanningScheduler;
+    private ArtworkScanScheduler artworkScanScheduler;
     
     public void executeAllDeletions() {
         if (DELETION_LOCK.tryLock()) {
@@ -99,7 +99,7 @@ public class DeletionService {
             
             // trigger artwork scan
             if (updateTrigger) {
-                scanningScheduler.triggerScanArtwork();
+                artworkScanScheduler.trigger();
             }
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve located artworks to delete", ex);

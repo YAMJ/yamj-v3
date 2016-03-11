@@ -86,7 +86,10 @@ public final class QueueDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(id)
+                .append(getId())
+                .append(getMetadataType())
+                .append(getArtworkType())
+                .append(getLocatedArtwork())
                 .toHashCode();
     }
 
@@ -101,7 +104,13 @@ public final class QueueDTO {
         if (!(obj instanceof QueueDTO)) {
             return false;
         }
-        return new EqualsBuilder().append(getId(), ((QueueDTO)obj).getId()).isEquals();
+        QueueDTO other = (QueueDTO)obj;
+        return new EqualsBuilder()
+            .append(getId(), other.getId())
+            .append(getMetadataType(), other.getMetadataType())
+            .append(getArtworkType(), other.getArtworkType())
+            .append(getLocatedArtwork(), other.getLocatedArtwork())
+            .isEquals();
     }
 
     @Override

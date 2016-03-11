@@ -52,7 +52,7 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void trigger() {
         LOG.trace("Trigger trailer processing");
         watchProcess.set(true);
@@ -90,12 +90,10 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No trailer found to process");
             watchProcess.set(false);
-            return;
+        } else {
+            LOG.info("Found {} trailer objects to process; process with {} threads", queueElements.size(), maxThreads);
+            this.threadedProcessing(queueElements, maxThreads, trailerProcessorService);
+            LOG.debug("Finished trailer processing");
         }
-
-        LOG.info("Found {} trailer objects to process; process with {} threads", queueElements.size(), maxThreads);
-        this.threadedProcessing(queueElements, maxThreads, trailerProcessorService);
-        
-        LOG.debug("Finished trailer processing");
     }
 }

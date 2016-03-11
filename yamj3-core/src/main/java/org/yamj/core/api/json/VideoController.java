@@ -37,7 +37,7 @@ import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.MetadataScanScheduler;
 
 @RestController
 @RequestMapping(value = "/api/video", produces = "application/json; charset=utf-8")
@@ -49,7 +49,7 @@ public class VideoController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
     @Autowired
-    private ScanningScheduler scanningScheduler;
+    private MetadataScanScheduler metadataScanScheduler;
 
     /**
      * Get information on a video.
@@ -129,7 +129,7 @@ public class VideoController {
 
             status = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, false);
             if (status.isSuccessful()) {
-                scanningScheduler.triggerScanMetaData();
+                metadataScanScheduler.triggerScanVideo();
             }
         } else {
             status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for enabling online scan");
@@ -157,7 +157,7 @@ public class VideoController {
 
             status = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, true);
             if (status.isSuccessful()) {
-                scanningScheduler.triggerScanMetaData();
+                metadataScanScheduler.triggerScanVideo();
             }
         } else {
             status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for disabling online scan");
@@ -186,7 +186,7 @@ public class VideoController {
             
             status = this.jsonApiStorageService.updateExternalId(metaDataType, id, sourcedb, externalid);
             if (status.isSuccessful()) {
-                scanningScheduler.triggerScanMetaData();
+                metadataScanScheduler.triggerScanVideo();
             }
         } else {
             status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for updating external id");
@@ -214,7 +214,7 @@ public class VideoController {
             
             status = this.jsonApiStorageService.updateExternalId(metaDataType, id, sourcedb, null);
             if (status.isSuccessful()) {
-                scanningScheduler.triggerScanMetaData();
+                metadataScanScheduler.triggerScanVideo();
             }
         } else {
             status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for removing external id");

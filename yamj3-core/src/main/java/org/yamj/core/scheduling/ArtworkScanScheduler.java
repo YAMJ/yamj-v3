@@ -34,12 +34,12 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.ArtworkProcessorService;
+import org.yamj.core.service.artwork.ArtworkScannerService;
 
 @Component
-public class ArtworkProcessScheduler extends AbstractQueueScheduler {
+public class ArtworkScanScheduler extends AbstractQueueScheduler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkScanScheduler.class);
     private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
 
     @Autowired
@@ -47,14 +47,16 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
-    private ArtworkProcessorService artworkProcessorService;
-
+    private ArtworkScannerService artworkScannerService;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler;
+    
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
     
     @Scheduled(initialDelay = 5000, fixedDelay = 60000)
     public void trigger() {
-        LOG.trace("Trigger artwork process");
+        LOG.trace("Trigger artwork scan");
         watchProcess.set(true);
     }
 
@@ -62,39 +64,41 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
     public void run() {
         if (watchProcess.get() && PROCESS_LOCK.tryLock()) {
             try {
-                processArtwork();
+                scanArtwork();
             } finally {
                 PROCESS_LOCK.unlock();
             }
         }
     }
     
-    private void processArtwork() {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
+    private void scanArtwork() {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
                 messageDisabled = Boolean.TRUE;
-                LOG.info("Artwork processing is disabled");
+                LOG.info("Artwork scanning is disabled");
             }
             watchProcess.set(false);
-            return;
+        } else {
+            if (messageDisabled) {
+                LOG.info("Artwork processing is enabled");
+                messageDisabled = Boolean.FALSE;
+            }
+    
+            // process located or generated artwork
+            int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60));
+            List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
+            if (CollectionUtils.isEmpty(queueElements)) {
+                LOG.trace("No artwork found to scan");
+                watchProcess.set(false);
+            } else {
+                LOG.info("Found {} artwork objects to scan; process with {} threads", queueElements.size(), maxThreads);
+                this.threadedProcessing(queueElements, maxThreads, artworkScannerService);
+                LOG.debug("Finished artwork scanning");
+            }
         }
         
-        if (messageDisabled) {
-            LOG.info("Artwork processing is enabled");
-            messageDisabled = Boolean.FALSE;
-        }
-
-        // process located or generated artwork
-        int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 100));
-        List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForProcessing(maxResults);
-        if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.trace("No artwork found to process");
-            watchProcess.set(false);
-        } else {
-            LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), maxThreads);
-            this.threadedProcessing(queueElements, maxThreads, artworkProcessorService);
-            LOG.debug("Finished artwork processing");
-        }
+        // trigger artwork processing
+        artworkProcessScheduler.trigger();
     }
 }

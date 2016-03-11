@@ -45,9 +45,11 @@ public class ImportScheduler {
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
-    private ScanningScheduler scanningScheduler;
+    private MetadataScanScheduler metadataScanScheduler;
     @Autowired
     private MediaFileScanScheduler mediaFileScanScheduler;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler;
     
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
@@ -71,8 +73,8 @@ public class ImportScheduler {
 
     private void processStageFiles() { //NOSONAR
         Long id = null;
-        int processed = 0;
-
+        int counter = 0;
+        
         // PROCESS VIDEOS
         do {
             id = null;
@@ -83,12 +85,11 @@ public class ImportScheduler {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
-                    processed++;
+                    counter++;
 
                     // trigger media file scan after 20 processed videos
-                    if (processed == 20) {
+                    if ((counter % 20) == 0) { 
                         mediaFileScanScheduler.trigger();
-                        processed = 0;
                     }
                 }
             } catch (Exception error) {
@@ -109,11 +110,11 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
-        if (processed > 0) {
+        if (counter > 0) {
             // trigger scan of media files and meta data if video files has been processed
             mediaFileScanScheduler.trigger();
-            scanningScheduler.triggerScanMetaData();
-            processed = 0;
+            metadataScanScheduler.triggerScanVideo();
+            counter = 0;
         }
         
         // PROCESS NFOS
@@ -126,7 +127,7 @@ public class ImportScheduler {
                     LOG.trace("Process nfo stage file: {}", id);
                     mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
-                    processed++;
+                    counter++;
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -146,10 +147,10 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
-        if (processed > 0) {
+        if (counter > 0) {
             // trigger scan of meta data when NFOs has been processed
-            scanningScheduler.triggerScanMetaData();
-            processed = 0;
+            metadataScanScheduler.triggerScanVideo();
+            counter = 0;
         }
 
         // PROCESS IMAGES
@@ -162,12 +163,11 @@ public class ImportScheduler {
                     LOG.trace("Process image stage file: {}", id);
                     mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
-                    processed++;
+                    counter++;
                     
-                    // trigger artwork scan after 20 processed images
-                    if (processed == 20) {
-                        scanningScheduler.triggerScanArtwork();
-                        processed = 0;
+                    // trigger artwork process after 20 processed images
+                    if ((counter % 20) == 0) { 
+                        artworkProcessScheduler.trigger();
                     }
                 }
             } catch (Exception error) {
@@ -188,10 +188,10 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
-        if (processed > 0) {
-            // trigger scan of artwork if images has been processed
-            scanningScheduler.triggerScanArtwork();
-            processed = 0;
+        if (counter > 0) {
+            // trigger artwork process if images has been processed
+            artworkProcessScheduler.trigger();
+            counter = 0;
         }
 
         // PROCESS WATCHED

@@ -50,9 +50,9 @@ import org.yamj.core.database.model.type.ArtworkType;
     @NamedNativeQuery(name = Artwork.QUERY_SCANNING_QUEUE,
         query = "SELECT DISTINCT art.id,art.artwork_type,(case when art.update_timestamp is null then art.create_timestamp else art.update_timestamp end) as maxdate "+
                 "FROM artwork art LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id LEFT OUTER JOIN season sea ON sea.id=art.season_id "+
-                "LEFT OUTER JOIN series ser ON ser.id=art.series_id WHERE art.status in ('NEW','UPDATED') "+
-                "AND (vd.status is null OR vd.status='DONE') AND (sea.status is null OR sea.status='DONE') AND (ser.status is null OR ser.status='DONE') "+
-                "ORDER BY maxdate ASC"
+                "LEFT OUTER JOIN series ser ON ser.id=art.series_id LEFT OUTER JOIN person p ON p.id=art.person_id "+
+                "WHERE art.status in ('NEW','UPDATED') AND (vd.status is null OR vd.status='DONE') AND (sea.status is null OR sea.status='DONE') "+
+                "AND (ser.status is null OR ser.status='DONE') AND (p.status is null OR p.status='DONE') ORDER BY maxdate ASC"
     ),
     @NamedNativeQuery(name = Artwork.QUERY_PROCESSING_QUEUE,
         query = "SELECT DISTINCT loc1.id,1 as is_located,(case when loc1.update_timestamp is null then loc1.create_timestamp else loc1.update_timestamp end) as maxdate "+

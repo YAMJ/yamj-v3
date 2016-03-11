@@ -25,13 +25,7 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
@@ -40,7 +34,7 @@ import org.yamj.core.api.options.UpdatePerson;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.MetadataScanScheduler;
 
 @RestController
 @RequestMapping(value = "/api/person", produces = "application/json; charset=utf-8")
@@ -50,7 +44,7 @@ public class PersonController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
     @Autowired
-    private ScanningScheduler scanningScheduler;
+    private MetadataScanScheduler metadataScanScheduler;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiPersonDTO> getPerson(@ModelAttribute("options") OptionsId options) {
@@ -114,7 +108,7 @@ public class PersonController {
         LOG.info("Set {} external id '{}' for person ID {}", sourcedb, externalid, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) {
-            scanningScheduler.triggerScanPeopleData();
+            metadataScanScheduler.triggerScanPeople();
         }
         return apiStatus;
         
@@ -131,7 +125,7 @@ public class PersonController {
         LOG.info("Remove {} external id from person ID {}", sourcedb, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, null);
         if (apiStatus.isSuccessful()) {
-            scanningScheduler.triggerScanPeopleData();
+            metadataScanScheduler.triggerScanPeople();
         }
         return apiStatus;
     }
@@ -151,7 +145,7 @@ public class PersonController {
         LOG.info("Enable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
         if (apiStatus.isSuccessful()) {
-            scanningScheduler.triggerScanPeopleData();
+            metadataScanScheduler.triggerScanPeople();
         }
         return apiStatus;
     }
@@ -171,7 +165,7 @@ public class PersonController {
         LOG.info("Disable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus =  jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
         if (apiStatus.isSuccessful()) {
-            scanningScheduler.triggerScanPeopleData();
+            metadataScanScheduler.triggerScanPeople();
         }
         return apiStatus;
     }

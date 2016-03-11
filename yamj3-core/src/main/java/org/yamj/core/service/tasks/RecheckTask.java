@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.service.MetadataStorageService;
-import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.MetadataScanScheduler;
 
 /**
  * Task for checking if video, series or person is older than x days
@@ -48,7 +48,7 @@ public class RecheckTask implements ITask {
     @Autowired
     private MetadataStorageService metadataStorageService;
     @Autowired
-    private ScanningScheduler scanningScheduler;
+    private MetadataScanScheduler metadataScanScheduler;
     
     @Override
     public String getTaskName() {
@@ -81,10 +81,10 @@ public class RecheckTask implements ITask {
         boolean updatedPersons = this.metadataStorageService.recheckPerson(cal.getTime());
         
         if (updatedMovies || updatedSeries) {
-            scanningScheduler.triggerScanMetaData();
+            metadataScanScheduler.triggerScanVideo();
         }
         if (updatedPersons) {
-            scanningScheduler.triggerScanPeopleData();
+            metadataScanScheduler.triggerScanPeople();
         }
 
         LOG.debug("Finished recheck task after {} ms", System.currentTimeMillis()-startTime);

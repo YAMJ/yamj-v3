@@ -52,7 +52,7 @@ public class MediaFileScanScheduler extends AbstractQueueScheduler {
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void trigger() {
         LOG.trace("Trigger media file scan");
         watchProcess.set(true);
@@ -90,12 +90,10 @@ public class MediaFileScanScheduler extends AbstractQueueScheduler {
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No media files found to scan");
             watchProcess.set(false);
-            return;
+        } else {
+            LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
+            threadedProcessing(queueElements, maxThreads, mediaInfoService);
+            LOG.debug("Finished media file scanning");
         }
-
-        LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
-        threadedProcessing(queueElements, maxThreads, mediaInfoService);
-
-        LOG.debug("Finished media file scanning");
     }
 }
