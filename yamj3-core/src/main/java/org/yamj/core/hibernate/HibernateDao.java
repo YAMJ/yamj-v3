@@ -98,20 +98,6 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Delete all entities.
-     *
-     * @param entities the entities to delete
-     */
-    @SuppressWarnings("rawtypes")
-    public void deleteAll(final Collection entities) {
-        if (entities != null && !entities.isEmpty()) {
-            for (Object entity : entities) {
-                currentSession().delete(entity);
-            }
-        }
-    }
-
-    /**
      * Save an entity.
      *
      * @param entity the entity to save

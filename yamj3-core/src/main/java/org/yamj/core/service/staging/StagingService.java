@@ -207,7 +207,7 @@ public class StagingService {
     public boolean deleteStageFile(long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put("status", StatusType.DELETED);
         return this.stagingDao.executeUpdate("update StageFile set status=:status where id=:id", params)>0;
     }
 
