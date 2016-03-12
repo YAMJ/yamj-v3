@@ -23,9 +23,7 @@
 package org.yamj.core.service.staging;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -207,14 +205,10 @@ public class StagingService {
 
     @Transactional
     public boolean deleteStageFile(long id) {
-        StageFile stageFile = stagingDao.getStageFile(id);
-        if (stageFile == null) {
-            // stage file not found
-            return false;
-        }
-        stageFile.setStatus(StatusType.DELETED);
-        this.stagingDao.updateEntity(stageFile);
-        return true;
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        return this.stagingDao.executeUpdate("update StageFile set status=:status where id=:id", params)>0;
     }
 
     @Transactional

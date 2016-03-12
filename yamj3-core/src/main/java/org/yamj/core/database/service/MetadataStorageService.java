@@ -813,40 +813,36 @@ public class MetadataStorageService {
 
     @Transactional
     public void errorVideoData(Long id) {
-        VideoData videoData = metadataDao.getById(VideoData.class, id);
-        if (videoData != null) {
-            videoData.setStatus(StatusType.ERROR);
-            this.metadataDao.updateEntity(videoData);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update VideoData set status=:status where id=:id", params);
     }
 
     @Transactional
     public void errorSeries(Long id) {
-        Series series = metadataDao.getById(Series.class, id);
-        if (series != null) {
-            series.setStatus(StatusType.ERROR);
-            this.metadataDao.updateEntity(series);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update Series set status=:status where id=:id", params);
     }
 
     @Transactional
     @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
     public void errorPerson(Long id) {
-        Person person = metadataDao.getById(Person.class, id);
-        if (person != null) {
-            person.setStatus(StatusType.ERROR);
-            this.metadataDao.updateEntity(person);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update Person set status=:status where id=:id", params);
     }
 
     @Transactional
     @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
     public void errorFilmography(Long id) {
-        Person person = metadataDao.getById(Person.class, id);
-        if (person != null) {
-            person.setFilmographyStatus(StatusType.ERROR);
-            this.metadataDao.updateEntity(person);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update Person set filmographyStatus=:status where id=:id", params);
     }
 
     @Transactional

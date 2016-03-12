@@ -22,8 +22,7 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
@@ -91,32 +90,27 @@ public class TrailerStorageService {
     }
 
     @Transactional
-    public boolean errorTrailer(Long id) {
-        Trailer trailer = commonDao.getById(Trailer.class, id);
-        if (trailer != null) {
-            trailer.setStatus(StatusType.ERROR);
-            commonDao.updateEntity(trailer);
-            return true;
-        }
-        return false;
+    public void errorTrailer(Long id) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update Trailer set status=:status where id=:id", params);
     }
 
     @Transactional
     public void errorTrailerVideoData(Long id) {
-        VideoData videoData = commonDao.getById(VideoData.class, id);
-        if (videoData != null) {
-            videoData.setTrailerStatus(StatusType.ERROR);
-            commonDao.updateEntity(videoData);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update VideoData set trailerStatus=:status where id=:id", params);
     }
 
     @Transactional
     public void errorTrailerSeries(Long id) {
-        Series series = commonDao.getById(Series.class, id);
-        if (series != null) {
-            series.setTrailerStatus(StatusType.ERROR);
-            commonDao.updateEntity(series);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update Series set trailerStatus=:status where id=:id", params);
     }
 
     @Transactional

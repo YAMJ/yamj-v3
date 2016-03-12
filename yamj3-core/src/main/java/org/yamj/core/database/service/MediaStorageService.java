@@ -22,7 +22,9 @@
  */
 package org.yamj.core.database.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
@@ -63,12 +65,11 @@ public class MediaStorageService {
 
     @Transactional
     public void errorMediaFile(Long id) {
-        MediaFile mediaFile = commonDao.getById(MediaFile.class, id);
-        if (mediaFile != null) {
-            mediaFile.setStatus(StatusType.ERROR);
-            commonDao.updateEntity(mediaFile);
-        }
-    }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        commonDao.executeUpdate("update MediaFile set status=:status where id=:id", params);
+    } 
     
     @Transactional
     public void updateMediaFile(MediaFile mediaFile) {

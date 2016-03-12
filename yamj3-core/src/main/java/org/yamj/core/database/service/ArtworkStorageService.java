@@ -166,11 +166,10 @@ public class ArtworkStorageService {
 
     @Transactional
     public void errorArtwork(Long id) {
-        Artwork artwork = artworkDao.getById(Artwork.class, id);
-        if (artwork != null) {
-            artwork.setStatus(StatusType.ERROR);
-            artworkDao.updateEntity(artwork);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        artworkDao.executeUpdate("update Artwork set status=:status where id=:id", params);
     }
 
     @Transactional(readOnly = true)
@@ -205,20 +204,18 @@ public class ArtworkStorageService {
 
     @Transactional
     public void errorArtworkLocated(Long id) {
-        ArtworkLocated located = artworkDao.getById(ArtworkLocated.class, id);
-        if (located != null) {
-            located.setStatus(StatusType.ERROR);
-            artworkDao.updateEntity(located);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        artworkDao.executeUpdate("update ArtworkLocated set status=:status where id=:id", params);
     }
 
     @Transactional
     public void errorArtworkGenerated(Long id) {
-        ArtworkGenerated generated = artworkDao.getById(ArtworkGenerated.class, id);
-        if (generated != null) {
-            generated.setStatus(StatusType.ERROR);
-            artworkDao.updateEntity(generated);
-        }
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.ERROR);
+        artworkDao.executeUpdate("update ArtworkGenerated set status=:status where id=:id", params);
     }
 
     @Transactional

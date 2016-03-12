@@ -331,7 +331,7 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Find entries-
+     * Find entries.
      *
      * @param queryString the query string
      * @return list of entities
