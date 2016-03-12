@@ -168,9 +168,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T getByNaturalIdCaseInsensitive(Class<T> entityClass, String field, String name) {
-        Criteria criteria = currentSession().createCriteria(entityClass);
-        criteria.add(Restrictions.ilike(field, name, MatchMode.EXACT));
-        return (T)criteria.uniqueResult();
+        return (T) currentSession().createCriteria(entityClass).add(Restrictions.ilike(field, name, MatchMode.EXACT)).uniqueResult();
     }
 
     /**
@@ -324,9 +322,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public List find(CharSequence queryString) {
-        Query queryObject = currentSession().createQuery(queryString.toString());
-        queryObject.setCacheable(true);
-        return queryObject.list();
+        return currentSession().createQuery(queryString.toString()).setCacheable(true).list();
     }
 
     /**
@@ -338,10 +334,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public List findById(CharSequence queryString, Long id) {
-        Query queryObject = currentSession().createQuery(queryString.toString());
-        queryObject.setCacheable(true);
-        queryObject.setParameter("id", id);
-        return queryObject.list();
+        return currentSession().createQuery(queryString.toString()).setLong("id", id).setCacheable(true).list();
     }
 
     /**
@@ -353,8 +346,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unused")
     public <T> List<T> findByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
-        Query query = currentSession().createQuery(queryCharSequence.toString());
-        query.setCacheable(true);
+        Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
@@ -371,12 +363,34 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T findUniqueByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
-        Query query = currentSession().createQuery(queryCharSequence.toString());
-        query.setCacheable(true);
+        Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
         return (T)query.uniqueResult();
+    }
+
+    /**
+     * Find entries using a named query.
+     *
+     * @param queryName the name of the query
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List query(String queryName) {
+        return currentSession().getNamedQuery(queryName).setCacheable(true).list();
+    }
+
+    /**
+     * Find entries by id using a named query.
+     *
+     * @param queryName the name of the query
+     * @param id the id
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List queryById(String queryName, Long id) {
+        return currentSession().getNamedQuery(queryName).setLong("id", id).setCacheable(true).list();
     }
 
     /**
@@ -386,9 +400,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeUpdate(CharSequence queryCharSequence) {
-        Query query = currentSession().createQuery(queryCharSequence.toString());
-        query.setCacheable(true);
-        return query.executeUpdate();
+        return currentSession().createQuery(queryCharSequence.toString()).setCacheable(true).executeUpdate();
     }
 
     /**
@@ -399,8 +411,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
-        Query query = currentSession().createQuery(queryCharSequence.toString());
-        query.setCacheable(true);
+        Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
@@ -414,9 +425,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeSqlUpdate(CharSequence queryCharSequence) {
-        SQLQuery query = currentSession().createSQLQuery(queryCharSequence.toString());
-        query.setCacheable(true);
-        return query.executeUpdate();
+        return currentSession().createSQLQuery(queryCharSequence.toString()).setCacheable(true).executeUpdate();
     }
 
     /**
@@ -427,8 +436,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeSqlUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
-        SQLQuery query = currentSession().createSQLQuery(queryCharSequence.toString());
-        query.setCacheable(true);
+        Query query = currentSession().createSQLQuery(queryCharSequence.toString()).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
@@ -445,8 +453,7 @@ public abstract class HibernateDao {
      * @return
      */
     public List<Object[]> executeQuery(String sql, IApiWrapper wrapper) {
-        SqlScalars ss = new SqlScalars(sql);
-        return executeQueryWithTransform(Object[].class, ss, wrapper);
+        return executeQueryWithTransform(Object[].class, new SqlScalars(sql), wrapper);
     }
 
     /**
@@ -463,8 +470,7 @@ public abstract class HibernateDao {
      */
     public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars, IApiWrapper wrapper) { //NOSONAR
         SQLQuery query = sqlScalars.createSqlQuery(currentSession());
-        query.setReadOnly(true);
-        query.setCacheable(true);
+        query.setReadOnly(true).setCacheable(true);
 
         if (entityClass.equals(String.class) || entityClass.equals(Long.class) || entityClass.equals(Integer.class)) {
             // no transformer needed

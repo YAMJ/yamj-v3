@@ -56,32 +56,34 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
-        Criteria criteria = currentSession().createCriteria(ArtworkProfile.class);
-        criteria.add(Restrictions.eq("metaDataType", metaDataType));
-        criteria.add(Restrictions.eq("artworkType", artworkType));
-        criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
-        return criteria.list();
+        return currentSession().createCriteria(ArtworkProfile.class)
+                .add(Restrictions.eq("metaDataType", metaDataType))
+                .add(Restrictions.eq("artworkType", artworkType))
+                .add(Restrictions.eq("preProcess", Boolean.TRUE))
+                .list();
     }
 
     public ArtworkLocated getStoredArtworkLocated(ArtworkLocated located) {
-        Criteria criteria = currentSession().createCriteria(ArtworkLocated.class);
-        criteria.add(Restrictions.eq("artwork", located.getArtwork()));
+        Criteria criteria = currentSession().createCriteria(ArtworkLocated.class)
+                .add(Restrictions.eq("artwork", located.getArtwork()))
+                .setCacheable(true);
+                
         if (located.getStageFile() != null) {
             criteria.add(Restrictions.eq("stageFile", located.getStageFile()));
         } else {
             criteria.add(Restrictions.eq("source", located.getSource()));
             criteria.add(Restrictions.eq("url", located.getUrl()));
         }
-        criteria.setCacheable(true);
+        
         return (ArtworkLocated) criteria.uniqueResult();
     }
 
     public ArtworkGenerated getStoredArtworkGenerated(ArtworkLocated located, ArtworkProfile profile) {
-        Criteria criteria = currentSession().createCriteria(ArtworkGenerated.class);
-        criteria.add(Restrictions.eq("artworkLocated", located));
-        criteria.add(Restrictions.eq("artworkProfile", profile));
-        criteria.setCacheable(true);
-        return (ArtworkGenerated) criteria.uniqueResult();
+        return (ArtworkGenerated) currentSession().createCriteria(ArtworkGenerated.class)
+                .add(Restrictions.eq("artworkLocated", located))
+                .add(Restrictions.eq("artworkProfile", profile))
+                .setCacheable(true)
+                .uniqueResult();
     }
     
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean scanPhoto) {
@@ -130,11 +132,11 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
-        Criteria criteria = currentSession().createCriteria(Artwork.class);
-        criteria.add(Restrictions.eq("artworkType", artworkType));
-        criteria = criteria.createAlias("boxedSet", "bs");
-        criteria.add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()));
-        return criteria.list();
+        return currentSession().createCriteria(Artwork.class)
+                .add(Restrictions.eq("artworkType", artworkType))
+                .createAlias("boxedSet", "bs")
+                .add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()))
+                .list();
     }
 
     public void saveArtworkLocated(Artwork artwork, ArtworkLocated scannedLocated) {
