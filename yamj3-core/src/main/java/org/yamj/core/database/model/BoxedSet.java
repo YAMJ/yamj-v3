@@ -30,6 +30,12 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 
+@NamedQueries({    
+    @NamedQuery(name = BoxedSet.QUERY_ORPHANS,
+        query = "SELECT b.id FROM BoxedSet b WHERE not exists (select 1 from BoxedSetOrder o where o.boxedSet=b)"
+    )
+})
+
 @Entity
 @Table(name = "boxed_set",
         uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"identifier"})
@@ -38,7 +44,8 @@ import org.hibernate.annotations.NaturalId;
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
-
+    public static final String QUERY_ORPHANS = "boxedSet.orphans";
+    
     @NaturalId
     @Column(name = "identifier", length = 100, nullable = false)
     private String identifier;

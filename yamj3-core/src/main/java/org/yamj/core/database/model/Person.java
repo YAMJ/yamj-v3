@@ -32,6 +32,8 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -41,6 +43,12 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
+
+@NamedQueries({    
+    @NamedQuery(name = Person.QUERY_ORPHANS,
+        query = "SELECT p.id FROM Person p WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)"
+    )
+})
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Person.QUERY_SCANNING_QUEUE,
@@ -65,6 +73,7 @@ import org.yamj.core.tools.PersonNameDTO;
 public class Person extends AbstractScannable {
 
     private static final long serialVersionUID = 660066902996412843L;
+    public static final String QUERY_ORPHANS = "person.orphans";
     public static final String QUERY_SCANNING_QUEUE = "person.scanning.queue";
     public static final String QUERY_FILMOGRAPHY_QUEUE = "person.filmography.queue";
     

@@ -134,17 +134,7 @@ public class ArtworkStorageService {
 
     @Transactional(readOnly = true)
     public Artwork getRequiredArtwork(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM Artwork art ");
-        sb.append("LEFT OUTER JOIN FETCH art.videoData ");
-        sb.append("LEFT OUTER JOIN FETCH art.season ");
-        sb.append("LEFT OUTER JOIN FETCH art.series ");
-        sb.append("LEFT OUTER JOIN FETCH art.person ");
-        sb.append("LEFT OUTER JOIN FETCH art.boxedSet ");
-        sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
-        sb.append("WHERE art.id = :id");
-
-        List<Artwork> objects = this.artworkDao.findById(sb, id);
+        List<Artwork> objects = this.artworkDao.queryById(Artwork.QUERY_REQUIRED, id);
         Artwork artwork = DataAccessUtils.requiredUniqueResult(objects);
 
         if (artwork.getSeason() != null) {
@@ -174,31 +164,13 @@ public class ArtworkStorageService {
 
     @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM ArtworkLocated loc ");
-        sb.append("JOIN FETCH loc.artwork art ");
-        sb.append("LEFT OUTER JOIN FETCH art.videoData ");
-        sb.append("LEFT OUTER JOIN FETCH art.season ");
-        sb.append("LEFT OUTER JOIN FETCH art.series ");
-        sb.append("LEFT OUTER JOIN FETCH art.person ");
-        sb.append("LEFT OUTER JOIN FETCH art.boxedSet ");
-        sb.append("LEFT OUTER JOIN FETCH loc.stageFile ");
-        sb.append("WHERE loc.id = :id");
-
-        List<ArtworkLocated> objects = this.artworkDao.findById(sb, id);
+        List<ArtworkLocated> objects = this.artworkDao.queryById(ArtworkLocated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public ArtworkGenerated getRequiredArtworkGenerated(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM ArtworkGenerated gen ");
-        sb.append("JOIN FETCH gen.artworkLocated loc ");
-        sb.append("JOIN FETCH gen.artworkProfile profile ");
-        sb.append("JOIN FETCH loc.artwork art ");
-        sb.append("WHERE gen.id = :id");
-
-        List<ArtworkGenerated> objects = this.artworkDao.findById(sb, id);
+        List<ArtworkGenerated> objects = this.artworkDao.queryById(ArtworkGenerated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -303,7 +275,6 @@ public class ArtworkStorageService {
                 located.setStatus(StatusType.UPDATED);
                 located.setCacheDirectory(null);
                 located.setCacheFilename(null);
-                this.artworkDao.updateEntity(located);
             } else {
                 // check if one of the generated images is missing
                 for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
@@ -311,7 +282,6 @@ public class ArtworkStorageService {
                         LOG.trace("Mark generated artwork {} for UPDATE due missing generated image", generated.getId());
                         // set status of generated to UPDATED
                         generated.setStatus(StatusType.UPDATED);
-                        this.artworkDao.updateEntity(generated);
                     }
                 }
             }

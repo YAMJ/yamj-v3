@@ -41,8 +41,12 @@ import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @NamedQueries({    
+    @NamedQuery(name = Artwork.QUERY_REQUIRED,
+        query = "FROM Artwork art LEFT OUTER JOIN FETCH art.videoData LEFT OUTER JOIN FETCH art.season LEFT OUTER JOIN FETCH art.series "+
+                "LEFT OUTER JOIN FETCH art.person LEFT OUTER JOIN FETCH art.boxedSet LEFT OUTER JOIN FETCH art.artworkLocated WHERE art.id=:id"
+    ),
     @NamedQuery(name = Artwork.QUERY_FIND_PERSON_ARTWORKS,
-        query = "select a from Artwork a join a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+        query = "FROM Artwork a JOIN a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
     )
 })
 
@@ -73,6 +77,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 public class Artwork extends AbstractStateful {
 
     private static final long serialVersionUID = -981494909436217076L;
+    public static final String QUERY_REQUIRED = "artwork.required";
     public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.findPersonArtworks";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
     public static final String QUERY_PROCESSING_QUEUE = "artwork.processing.queue";

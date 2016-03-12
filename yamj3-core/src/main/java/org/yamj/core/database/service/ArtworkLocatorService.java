@@ -242,7 +242,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("fileType", FileType.IMAGE);
         
-        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
     
     private List<StageFile> findVideoFiles(VideoData videoData) {
@@ -261,7 +261,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("extra", Boolean.FALSE);
 
-        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     private List<StageFile> findVideoFiles(Season season) {
@@ -281,7 +281,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("extra", Boolean.FALSE);
         
-        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     private List<StageDirectory> findVideoDirectories(Series series) {
@@ -303,7 +303,7 @@ public class ArtworkLocatorService {
         params.put("deleted", StatusType.DELETED);
         params.put("extra", Boolean.FALSE);
         
-        return stagingDao.findByNamedParameters(StageDirectory.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
@@ -320,7 +320,7 @@ public class ArtworkLocatorService {
         params.put("artworkNames", artworkNames);
         params.put("deleted", StatusType.DELETED);
 
-        return stagingDao.findByNamedParameters(StageFile.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     public List<StageFile> getPhotos(Person person) {

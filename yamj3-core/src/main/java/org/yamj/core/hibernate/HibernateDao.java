@@ -315,23 +315,13 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Find entries.
-     *
-     * @param queryString the query string
-     * @return list of entities
-     */
-    @SuppressWarnings("rawtypes")
-    public List find(CharSequence queryString) {
-        return currentSession().createQuery(queryString.toString()).setCacheable(true).list();
-    }
-
-    /**
      * Find entries by id.
      *
      * @param queryString the query string
      * @param id the id
      * @return list of entities
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public List findById(CharSequence queryString, Long id) {
         return currentSession().createQuery(queryString.toString()).setLong("id", id).setCacheable(true).list();
@@ -344,8 +334,8 @@ public abstract class HibernateDao {
      * @param params the named parameters
      * @return list of entities
      */
-    @SuppressWarnings("unused")
-    public <T> List<T> findByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
+    @SuppressWarnings("rawtypes")
+    public List findByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
         Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -391,6 +381,22 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public List queryById(String queryName, Long id) {
         return currentSession().getNamedQuery(queryName).setLong("id", id).setCacheable(true).list();
+    }
+
+    /**
+     * Find list of entities by named parameters using a named query.
+     *
+     * @param queryName the name of the query
+     * @param params the named parameters
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List queryByNamedParameters(String queryName, Map<String, Object> params) {
+        Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
+        return query.list();
     }
 
     /**

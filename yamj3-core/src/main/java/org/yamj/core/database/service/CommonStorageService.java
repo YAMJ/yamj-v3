@@ -66,7 +66,7 @@ public class CommonStorageService {
         sb.append("WHERE f.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(Long.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     /**
@@ -337,7 +337,7 @@ public class CommonStorageService {
         sb.append("WHERE al.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(Long.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     @Transactional
@@ -366,10 +366,7 @@ public class CommonStorageService {
 
     @Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
-        final StringBuilder query = new StringBuilder();
-        query.append("SELECT p.id FROM Person p ");
-        query.append("WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)");
-        return this.stagingDao.find(query);
+        return this.stagingDao.query(Person.QUERY_ORPHANS);
     }
 
     @Transactional
@@ -390,10 +387,7 @@ public class CommonStorageService {
 
     @Transactional(readOnly = true)
     public List<Long> getOrphanBoxedSets() {
-        final StringBuilder query = new StringBuilder();
-        query.append("SELECT b.id FROM BoxedSet b ");
-        query.append("WHERE not exists (select 1 from BoxedSetOrder o where o.boxedSet=b)");
-        return this.stagingDao.find(query);
+        return this.stagingDao.query(BoxedSet.QUERY_ORPHANS);
     }
 
     @Transactional
@@ -560,7 +554,7 @@ public class CommonStorageService {
         sb.append("WHERE t.status = :delete ");
 
         Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(Long.class, sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     @Transactional

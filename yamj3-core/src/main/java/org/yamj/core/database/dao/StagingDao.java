@@ -247,7 +247,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
+        result.addAll(this.findByNamedParameters(sb, params));
 
         // for season
         sb.setLength(0);
@@ -266,7 +266,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
+        result.addAll(this.findByNamedParameters(sb, params));
 
         return result;
     }
@@ -298,7 +298,7 @@ public class StagingDao extends HibernateDao {
         } else {
             sb.append("AND (sf.stageDirectory=:stageDirectory OR sf.stageDirectory.parentDirectory=:stageDirectory) ");
         }
-        return this.findByNamedParameters(Artwork.class, sb, params);
+        return this.findByNamedParameters(sb, params);
     }
 
     public Set<Artwork> findMatchingArtworksForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
@@ -335,7 +335,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
+        result.addAll(this.findByNamedParameters(sb, params));
 
         // for season
         sb.setLength(0);
@@ -357,7 +357,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
+        result.addAll(this.findByNamedParameters(sb, params));
 
         return result;
     }
@@ -453,7 +453,7 @@ public class StagingDao extends HibernateDao {
         String dirFragment = StringEscapeUtils.escapeSql(FileTools.getPathFragment(folderName).toLowerCase());
         sb.append("AND (lower(sd.directoryName)=:folderName or lower(sd.directoryPath) like '%").append(dirFragment).append("%') ");
 
-        return this.findByNamedParameters(StageFile.class, sb, params);
+        return this.findByNamedParameters(sb, params);
     }
 
     public Date maxWatchedFileDate(StageFile videoFile, String folderName, boolean checkLibrary) {

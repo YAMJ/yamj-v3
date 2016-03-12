@@ -64,6 +64,6 @@ public class ExecutionTaskStorageService {
     public List<ExecutionTask> getTasksForExecution() {
         String query = "from ExecutionTask et where et.nextExecution <= :actualDate";
         Map<String,Object> params = Collections.singletonMap("actualDate", (Object)new Date());
-        return this.commonDao.findByNamedParameters(ExecutionTask.class, query, params);
+        return this.commonDao.findByNamedParameters(query, params);
     }
 }

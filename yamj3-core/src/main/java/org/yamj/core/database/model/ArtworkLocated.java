@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -36,6 +38,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ImageType;
+
+@NamedQueries({    
+    @NamedQuery(name = ArtworkLocated.QUERY_REQUIRED,
+        query = "FROM ArtworkLocated loc JOIN FETCH loc.artwork art LEFT OUTER JOIN FETCH art.videoData LEFT OUTER JOIN FETCH art.season "+
+                "LEFT OUTER JOIN FETCH art.series LEFT OUTER JOIN FETCH art.person LEFT OUTER JOIN FETCH art.boxedSet "+
+                "LEFT OUTER JOIN FETCH loc.stageFile WHERE loc.id=:id"
+    )
+})
 
 @Entity
 @Table(name = "artwork_located",
@@ -45,7 +55,8 @@ import org.yamj.core.database.model.type.ImageType;
 public class ArtworkLocated extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -981494909436217076L;
-
+    public static final String QUERY_REQUIRED = "artworkLocated.required";
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
