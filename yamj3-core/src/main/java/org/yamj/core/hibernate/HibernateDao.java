@@ -30,7 +30,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.builder.SqlScalars;
@@ -178,14 +180,11 @@ public abstract class HibernateDao {
      * @param name
      * @return
      */
+    @SuppressWarnings("unchecked")
     public <T> T getByNaturalIdCaseInsensitive(Class<T> entityClass, String field, String name) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("from ");
-        sb.append(entityClass.getSimpleName());
-        sb.append(" where lower(").append(field).append(") = :name) { ");
-
-        Map<String, Object> params = Collections.singletonMap("name", (Object) name.toLowerCase());
-        return this.findUniqueByNamedParameters(entityClass, sb, params);
+        Criteria criteria = currentSession().createCriteria(entityClass);
+        criteria.add(Restrictions.ilike(field, name, MatchMode.EXACT));
+        return (T)criteria.uniqueResult();
     }
 
     /**
