@@ -366,7 +366,7 @@ public class CommonStorageService {
 
     @Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
-        return this.stagingDao.query(Person.QUERY_ORPHANS);
+        return this.stagingDao.namedQuery(Person.QUERY_ORPHANS);
     }
 
     @Transactional
@@ -387,7 +387,7 @@ public class CommonStorageService {
 
     @Transactional(readOnly = true)
     public List<Long> getOrphanBoxedSets() {
-        return this.stagingDao.query(BoxedSet.QUERY_ORPHANS);
+        return this.stagingDao.namedQuery(BoxedSet.QUERY_ORPHANS);
     }
 
     @Transactional

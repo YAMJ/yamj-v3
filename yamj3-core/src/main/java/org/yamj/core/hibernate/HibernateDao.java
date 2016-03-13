@@ -367,7 +367,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List query(String queryName) {
+    public List namedQuery(String queryName) {
         return currentSession().getNamedQuery(queryName).setCacheable(true).list();
     }
 
@@ -379,7 +379,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List queryById(String queryName, Long id) {
+    public List namedQueryById(String queryName, Long id) {
         return currentSession().getNamedQuery(queryName).setLong("id", id).setCacheable(true).list();
     }
 
@@ -391,7 +391,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List queryByNamedParameters(String queryName, Map<String, Object> params) {
+    public List namedQueryByNamedParameters(String queryName, Map<String, Object> params) {
         Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -443,6 +443,31 @@ public abstract class HibernateDao {
      */
     public int executeSqlUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
         Query query = currentSession().createSQLQuery(queryCharSequence.toString()).setCacheable(true);
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
+        return query.executeUpdate();
+    }
+
+    /**
+     * Execute an update statement with a named query.
+     *
+     * @param queryName the name of the query
+     * @return number of affected rows
+     */
+    public int executeNamedQueryUpdate(String queryName) {
+        return currentSession().getNamedQuery(queryName).setCacheable(true).executeUpdate();
+    }
+
+    /**
+     * Execute an update statement.
+     *
+     * @param queryName the name of the query
+     * @param params the named parameters
+     * @return number of affected rows
+     */
+    public int executeNamedQueryUpdate(String queryName, Map<String, Object> params) {
+        Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }

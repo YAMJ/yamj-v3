@@ -52,14 +52,7 @@ public class MediaStorageService {
 
     @Transactional(readOnly = true)
     public MediaFile getRequiredMediaFile(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from MediaFile mf ");
-        sb.append("left outer join fetch mf.audioCodecs ");
-        sb.append("left outer join fetch mf.subtitles ");
-        sb.append("left outer join fetch mf.stageFiles ");
-        sb.append("where mf.id = :id" );
-
-        List<MediaFile> objects = this.commonDao.findById(sb, id);
+        List<MediaFile> objects = this.commonDao.namedQueryById(MediaFile.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -68,7 +61,7 @@ public class MediaStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeUpdate("update MediaFile set status=:status where id=:id", params);
+        commonDao.executeNamedQueryUpdate(MediaFile.UPDATE_STATUS, params);
     } 
     
     @Transactional

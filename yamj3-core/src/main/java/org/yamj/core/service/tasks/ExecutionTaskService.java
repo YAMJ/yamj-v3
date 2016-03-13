@@ -52,8 +52,8 @@ public class ExecutionTaskService {
         registeredTasks.put(task.getTaskName().toLowerCase(), task);
     }
 
-    public List<ExecutionTask> getTasksForExecution() {
-        return this.executionTaskStorageService.getTasksForExecution();
+    public List<ExecutionTask> getExecutableTasks() {
+        return this.executionTaskStorageService.getExecutableTasks();
     }
     
     public void executeTask(ExecutionTask executionTask) {

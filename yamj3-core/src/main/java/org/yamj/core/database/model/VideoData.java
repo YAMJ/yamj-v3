@@ -52,7 +52,10 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-@NamedQueries({    
+@NamedQueries({
+    @NamedQuery(name = VideoData.QUERY_REQUIRED,
+        query = "FROM VideoData vd WHERE vd.id = :id"
+    ),
     @NamedQuery(name = VideoData.QUERY_FIND_BY_LIBRARY,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf JOIN sf.stageDirectory sd "+
                 "WHERE sf.fileType=:fileType AND mf.extra=:extra AND lower(sf.baseName)=:baseName AND sd.library=:library AND sf.status != :deleted"
@@ -117,6 +120,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
+    public static final String QUERY_REQUIRED = "videoData.required";
     public static final String QUERY_FIND_BY_LIBRARY = "videoData.findVideoDatas.byLibrary";
     public static final String QUERY_FIND_BY_DIRECTORIES = "videoData.findVideoDatas.byStageDirectories";
     public static final String QUERY_FIND_BY_PERSON = "videoData.findVideoDatas.byPerson";

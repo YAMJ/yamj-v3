@@ -33,6 +33,8 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -46,6 +48,12 @@ import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
+
+@NamedQueries({
+    @NamedQuery(name = Series.QUERY_REQUIRED,
+        query = "FROM Series ser JOIN FETCH ser.seasons sea JOIN FETCH sea.videoDatas vd WHERE ser.id = :id"
+    )
+})
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Series.QUERY_METADATA_QUEUE,
@@ -68,6 +76,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
+    public static final String QUERY_REQUIRED = "series.required";
     public static final String QUERY_METADATA_QUEUE = "metadata.queue";
     
     @Column(name = "start_year")

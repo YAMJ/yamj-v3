@@ -53,15 +53,21 @@ import org.yamj.core.database.model.type.FileType;
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SERIES,
         query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE ser.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+                "WHERE ser.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SEASON,
         query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE sea.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+                "WHERE sea.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA,
         query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE vd.id=:id AND sf.fileType=:fileType AND sf.status != :deleted"
+                "WHERE vd.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
+    ),
+    @NamedQuery(name = StageFile.UPDATE_STATUS,
+        query = "UPDATE StageFile SET status=:status WHERE id=:id"
+    ),
+    @NamedQuery(name = StageFile.UPDATE_STATUS_NO_DUPLICATE,
+        query = "UPDATE StageFile SET status=:status WHERE id=:id and status != 'DELETED'"
     )
 })
     
@@ -81,6 +87,8 @@ public class StageFile extends AbstractStateful {
     public static final String QUERY_VIDEOFILES_FOR_SERIES = "stageFile.findVideoStageFiles.forSeries";
     public static final String QUERY_VIDEOFILES_FOR_SEASON = "stageFile.findVideoStageFiles.forSeason";
     public static final String QUERY_VIDEOFILES_FOR_VIDEODATA = "stageFile.findVideoStageFiles.forVideoData";
+    public static final String UPDATE_STATUS = "stageFile.updateStatus";
+    public static final String UPDATE_STATUS_NO_DUPLICATE = "stageFile.updateStatus.noDuplicate";
     
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)

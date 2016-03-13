@@ -506,9 +506,7 @@ public class StagingDao extends HibernateDao {
         
         return currentSession().getNamedQuery(namedQuery)
                 .setLong("id", id)
-                .setParameter("fileType", FileType.VIDEO)
                 .setBoolean("extra", Boolean.FALSE)
-                .setParameter("deleted", StatusType.DELETED)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .list();

@@ -134,7 +134,7 @@ public class ArtworkStorageService {
 
     @Transactional(readOnly = true)
     public Artwork getRequiredArtwork(Long id) {
-        List<Artwork> objects = this.artworkDao.queryById(Artwork.QUERY_REQUIRED, id);
+        List<Artwork> objects = this.artworkDao.namedQueryById(Artwork.QUERY_REQUIRED, id);
         Artwork artwork = DataAccessUtils.requiredUniqueResult(objects);
 
         if (artwork.getSeason() != null) {
@@ -159,18 +159,18 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeUpdate("update Artwork set status=:status where id=:id", params);
+        artworkDao.executeNamedQueryUpdate(Artwork.UPDATE_STATUS, params);
     }
 
     @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
-        List<ArtworkLocated> objects = this.artworkDao.queryById(ArtworkLocated.QUERY_REQUIRED, id);
+        List<ArtworkLocated> objects = this.artworkDao.namedQueryById(ArtworkLocated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public ArtworkGenerated getRequiredArtworkGenerated(Long id) {
-        List<ArtworkGenerated> objects = this.artworkDao.queryById(ArtworkGenerated.QUERY_REQUIRED, id);
+        List<ArtworkGenerated> objects = this.artworkDao.namedQueryById(ArtworkGenerated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -179,7 +179,7 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeUpdate("update ArtworkLocated set status=:status where id=:id", params);
+        artworkDao.executeNamedQueryUpdate(ArtworkLocated.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -187,7 +187,7 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeUpdate("update ArtworkGenerated set status=:status where id=:id", params);
+        artworkDao.executeNamedQueryUpdate(ArtworkGenerated.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -208,11 +208,16 @@ public class ArtworkStorageService {
             generated = new ArtworkGenerated();
             generated.setArtworkLocated(located);
             generated.setArtworkProfile(profile);
+            generated.setCacheDirectory(cacheDir);
+            generated.setCacheFilename(cacheFileName);
+            generated.setStatus(StatusType.DONE);
+            this.artworkDao.saveEntity(generated);
+        } else {
+            generated.setCacheDirectory(cacheDir);
+            generated.setCacheFilename(cacheFileName);
+            generated.setStatus(StatusType.DONE);
+            this.artworkDao.updateEntity(generated);
         }
-        generated.setCacheDirectory(cacheDir);
-        generated.setCacheFilename(cacheFileName);
-        generated.setStatus(StatusType.DONE);
-        this.artworkDao.storeEntity(generated);
         return generated;
     }
 

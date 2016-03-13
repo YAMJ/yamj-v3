@@ -87,24 +87,20 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
-        List<VideoData> objects = this.commonDao.findById("from VideoData vd where vd.id = :id", id);
+        List<VideoData> objects = metadataDao.namedQueryById(VideoData.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from Series ser join fetch ser.seasons sea ");
-        sb.append("join fetch sea.videoDatas vd where ser.id = :id ");
-
-        List<Series> objects = this.commonDao.findById(sb, id);
+        List<Series> objects = metadataDao.namedQueryById(Series.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     @CachePut(value=CachingNames.DB_PERSON, key="#id")
     public Person getRequiredPerson(Long id) {
-        List<Person> objects = this.commonDao.findById("from Person p where p.id = :id", id);
+        List<Person> objects = metadataDao.namedQueryById(Person.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 

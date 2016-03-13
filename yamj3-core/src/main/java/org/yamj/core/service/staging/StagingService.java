@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,10 +69,14 @@ public class StagingService {
             library = new Library();
             library.setClient(libraryDTO.getClient());
             library.setPlayerPath(libraryDTO.getPlayerPath());
+            library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+            library.setLastScanned(new Date());
+            stagingDao.saveEntity(library);
+        } else {
+            library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+            library.setLastScanned(new Date());
+            stagingDao.updateEntity(library);
         }
-        library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-        library.setLastScanned(new Date());
-        stagingDao.storeEntity(library);
         return library;
     }
 
@@ -183,10 +188,7 @@ public class StagingService {
 
     private static Date getDateWithoutMilliseconds(long millis) {
         // strip milliseconds cause mostly not stored in database
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(millis);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
+        return new DateTime(millis).withMillisOfSecond(0).toDate();
     }
 
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
@@ -208,19 +210,15 @@ public class StagingService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.DELETED);
-        return this.stagingDao.executeUpdate("update StageFile set status=:status where id=:id", params)>0;
+        return this.stagingDao.executeNamedQueryUpdate(StageFile.UPDATE_STATUS, params)>0;
     }
 
     @Transactional
     public boolean updateStageFile(long id) {
-        StageFile stageFile = stagingDao.getStageFile(id);
-        if (stageFile == null || stageFile.isDuplicate()) {
-            // stage file not found or duplicate
-            return false;
-        }
-        stageFile.setStatus(StatusType.UPDATED);
-        this.stagingDao.updateEntity(stageFile);
-        return true;
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("id", id);
+        params.put("status", StatusType.UPDATED);
+        return this.stagingDao.executeNamedQueryUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params)>0;
     }
 
     public void updateWatchedFile(MediaFile mediaFile, StageFile stageFile) {

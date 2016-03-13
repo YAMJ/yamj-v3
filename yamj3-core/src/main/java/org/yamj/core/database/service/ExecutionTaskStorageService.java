@@ -61,9 +61,8 @@ public class ExecutionTaskStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<ExecutionTask> getTasksForExecution() {
-        String query = "from ExecutionTask et where et.nextExecution <= :actualDate";
+    public List<ExecutionTask> getExecutableTasks() {
         Map<String,Object> params = Collections.singletonMap("actualDate", (Object)new Date());
-        return this.commonDao.findByNamedParameters(query, params);
+        return this.commonDao.namedQueryByNamedParameters(ExecutionTask.QUERY_EXECUTABLE_TASKS, params);
     }
 }

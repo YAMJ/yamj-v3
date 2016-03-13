@@ -34,6 +34,15 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.yamj.core.database.model.type.FileType;
 
+@NamedQueries({    
+    @NamedQuery(name = MediaFile.QUERY_REQUIRED,
+        query = "FROM MediaFile mf LEFT OUTER JOIN FETCH mf.audioCodecs LEFT OUTER JOIN FETCH mf.subtitles LEFT OUTER JOIN FETCH mf.stageFiles WHERE mf.id=:id"
+    ),
+    @NamedQuery(name = MediaFile.UPDATE_STATUS,
+        query = "UPDATE MediaFile SET status=:status WHERE id=:id"
+    )
+})
+
 @NamedNativeQueries({    
     @NamedNativeQuery(name = MediaFile.QUERY_QUEUE,
         query = "SELECT mf.id, (case when mf.update_timestamp is null then mf.create_timestamp else mf.update_timestamp end) as maxdate " +
@@ -49,7 +58,9 @@ import org.yamj.core.database.model.type.FileType;
 public class MediaFile extends AbstractStateful {
 
     private static final long serialVersionUID = 8411423609119475972L;
+    public static final String QUERY_REQUIRED = "mediaFile.required";
     public static final String QUERY_QUEUE = "mediaFile.queue";
+    public static final String UPDATE_STATUS = "mediaFile.updateStatus";
                     
     @NaturalId
     @Column(name = "file_name", nullable = false, length = 255)

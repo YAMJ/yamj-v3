@@ -47,6 +47,9 @@ import org.yamj.core.database.model.type.ArtworkType;
     ),
     @NamedQuery(name = Artwork.QUERY_FIND_PERSON_ARTWORKS,
         query = "FROM Artwork a JOIN a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+    ),
+    @NamedQuery(name = Artwork.UPDATE_STATUS,
+        query = "UPDATE Artwork SET status=:status WHERE id=:id"
     )
 })
 
@@ -81,6 +84,7 @@ public class Artwork extends AbstractStateful {
     public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.findPersonArtworks";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
     public static final String QUERY_PROCESSING_QUEUE = "artwork.processing.queue";
+    public static final String UPDATE_STATUS = "artwork.updateStatus";
     
     @NaturalId(mutable = true)    
     @Type(type = "artworkType")

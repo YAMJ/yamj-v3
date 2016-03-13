@@ -22,9 +22,7 @@
  */
 package org.yamj.core.scheduling;
 
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -43,8 +41,7 @@ public class ExecutionTaskScheduler {
     public void executeTasks() {
         if (EXECUTION_TASK_LOCK.tryLock()) {
             try {
-                List<ExecutionTask> tasks = this.executionTaskService.getTasksForExecution();
-                for (ExecutionTask task : tasks) {
+                for (ExecutionTask task : this.executionTaskService.getExecutableTasks()) {
                     executionTaskService.executeTask(task);
                 }
             } finally {

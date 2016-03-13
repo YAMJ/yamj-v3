@@ -30,12 +30,19 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.IntervalType;
 
+@NamedQueries({    
+    @NamedQuery(name = ExecutionTask.QUERY_EXECUTABLE_TASKS,
+        query = "FROM ExecutionTask et WHERE et.nextExecution <= :actualDate"
+    )
+})
+
 @Entity
 @Table(name = "execution_task")
 public class ExecutionTask implements Serializable {
 
     private static final long serialVersionUID = 5730223895964642472L;
-
+    public static final String QUERY_EXECUTABLE_TASKS = "executionTask.getExecutableTasks";
+    
     @Id
     @Column(name = "name", nullable = false, length = 50)
     private String name;

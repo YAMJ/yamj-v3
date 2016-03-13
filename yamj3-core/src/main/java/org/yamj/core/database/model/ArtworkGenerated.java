@@ -39,6 +39,9 @@ import org.hibernate.annotations.NaturalId;
     @NamedQuery(name = ArtworkGenerated.QUERY_REQUIRED,
         query = "FROM ArtworkGenerated gen JOIN FETCH gen.artworkLocated loc JOIN FETCH gen.artworkProfile profile "+
                 "JOIN FETCH loc.artwork art WHERE gen.id=:id"
+    ),
+    @NamedQuery(name = ArtworkGenerated.UPDATE_STATUS,
+        query = "UPDATE ArtworkGenerated SET status=:status WHERE id=:id"
     )
 })
 
@@ -52,7 +55,8 @@ public class ArtworkGenerated extends AbstractStateful {
     private static final long serialVersionUID = 2326614430648326340L;
     public static final String QUERY_GET = "artworkGenerated.get";
     public static final String QUERY_REQUIRED = "artworkGenerated.required";
-    
+    public static final String UPDATE_STATUS = "artworkGenerated.updateStatus";
+
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)

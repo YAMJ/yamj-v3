@@ -45,6 +45,9 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
 
 @NamedQueries({    
+    @NamedQuery(name = Person.QUERY_REQUIRED,
+        query = "FROM Person p WHERE p.id = :id"
+    ),
     @NamedQuery(name = Person.QUERY_ORPHANS,
         query = "SELECT p.id FROM Person p WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)"
     )
@@ -73,6 +76,7 @@ import org.yamj.core.tools.PersonNameDTO;
 public class Person extends AbstractScannable {
 
     private static final long serialVersionUID = 660066902996412843L;
+    public static final String QUERY_REQUIRED = "person.required";
     public static final String QUERY_ORPHANS = "person.orphans";
     public static final String QUERY_SCANNING_QUEUE = "person.scanning.queue";
     public static final String QUERY_FILMOGRAPHY_QUEUE = "person.filmography.queue";
