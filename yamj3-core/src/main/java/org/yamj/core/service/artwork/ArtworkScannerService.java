@@ -468,7 +468,26 @@ public class ArtworkScannerService implements IQueueProcessService {
         List<StageFile> videoimages = Collections.emptyList();
         
         if (artwork.getVideoData() != null) {
-            // TODO local scan for video images
+            int episodePart;
+            // due the fact that multiple episodes can be contained in one media file we first have to determine how many
+            // episodes are contained in one media file
+            List<Long> videoDataIds = this.artworkLocatorService.getVideoEpisodes(artwork.getVideoData());
+            if (videoDataIds.size() > 1) {
+                // determine the episode part using the ordered index of video datas
+                int index = videoDataIds.indexOf(artwork.getVideoData().getId());
+                if (index < 0) {
+                    episodePart = 0;
+                } else {
+                    // increase 1 cause index starts at 0
+                    episodePart = index+1;
+                }
+            } else {
+                // we just have 1 part
+                episodePart = 0;
+            }
+            
+            // scan for matching video images
+            videoimages = this.artworkLocatorService.getMatchingEpisodeImages(artwork.getVideoData(), episodePart);
         }
         
         createLocatedArtworksLocal(artwork, videoimages, locatedArtworks);

@@ -91,6 +91,11 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 })
 
 @NamedNativeQueries({    
+    @NamedNativeQuery(name = VideoData.QUERY_EPISODES_OF_MEDIAFILE,
+        query = "SELECT vd.id from mediafile_videodata mv1,videodata vd,mediafile mf "+
+                "WHERE exists (select 1 from mediafile_videodata mv2 where mv2.videodata_id=:id and mv1.mediafile_id=mv2.mediafile_id) "+
+                "AND mf.id=mv1.mediafile_id AND mv1.videodata_id=vd.id AND mf.extra=0 order by vd.episode"
+    ),
     @NamedNativeQuery(name = VideoData.QUERY_TRAKTTV_MOVIES,
         query = "SELECT concat(vid.sourcedb,'#',vid.sourcedb_id), vd.id FROM videodata_ids vid JOIN videodata vd on vd.id=videodata_id and vd.episode<0 "
     ),
@@ -151,6 +156,7 @@ public class VideoData extends AbstractMetadata {
     public static final String UPDATE_STATUS_RECHECK_MOVIE ="videoData.updateStatus.forMovieRecheck";
     public static final String UPDATE_STATUS_RECHECK_EPISODE ="videoData.updateStatus.forEpisodeRecheck";
     public static final String UPDATE_TRAILER_STATUS = "videoData.updateTrailerStatus";
+    public static final String QUERY_EPISODES_OF_MEDIAFILE = "videoData.episodesOfMediaFile";
     public static final String QUERY_TRAKTTV_MOVIES = "videoData.trakttv.movies";
     public static final String QUERY_TRAKTTV_EPISODES = "videoData.trakttv.episodes";
     public static final String QUERY_TRAKTTV_WATCHED_MOVIES = "videoData.trakttv.watchedMovies";

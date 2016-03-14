@@ -40,6 +40,7 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 
 @Service("artworkLocatorService")
+@Transactional(readOnly = true)
 public class ArtworkLocatorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkLocatorService.class);
@@ -54,7 +55,6 @@ public class ArtworkLocatorService {
     @Value("${yamj3.folder.name.photo:null}")
     private String photoFolderName;
     
-    @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
         if (videoFiles.isEmpty()) {
@@ -79,7 +79,6 @@ public class ArtworkLocatorService {
         return artworks;
     }
 
-    @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
         List<StageFile> videoFiles = findVideoFiles(season);
         if (videoFiles.isEmpty()) {
@@ -111,7 +110,6 @@ public class ArtworkLocatorService {
         return artworks;
     }
 
-    @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Series series) {
         List<StageDirectory> directories  = findVideoDirectories(series);
         if (directories.isEmpty()) {
@@ -220,7 +218,6 @@ public class ArtworkLocatorService {
         addNameWithTokens(artworkNames, name, tokens);
     }
 
-    @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
         final StringBuilder sb = new StringBuilder();
         sb.append("select distinct f from StageFile f ");
@@ -291,6 +288,36 @@ public class ArtworkLocatorService {
         }
 
         LOG.debug("Found {} local photos for person '{}'", artworks.size(), person.getName());
+        return artworks;
+    }
+    
+    public List<Long> getVideoEpisodes(VideoData videoData) {
+        return this.stagingDao.namedQueryById(VideoData.QUERY_EPISODES_OF_MEDIAFILE, videoData.getId());
+    }
+
+    public List<StageFile> getMatchingEpisodeImages(VideoData videoData, int episodePart) {
+        List<StageFile> videoFiles = findVideoFiles(videoData);
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<StageDirectory> directories = new HashSet<>();
+        final Set<String> artworkNames = new HashSet<>();
+        for (StageFile videoFile : videoFiles) {
+            directories.add(videoFile.getStageDirectory());
+            final String fileName = StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase());
+            if (episodePart == 0) {
+                artworkNames.add(fileName+".videoimage");
+                artworkNames.add(fileName+".videoimage_1"); // just to be complete
+            } else {
+                artworkNames.add(fileName+".videoimage_"+episodePart);
+            }
+        }
+        
+        // search in same directory than video files
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
+
+        LOG.debug("Found {} local videoimages for episode {}", artworks.size(), videoData.getIdentifier());
         return artworks;
     }
 }
