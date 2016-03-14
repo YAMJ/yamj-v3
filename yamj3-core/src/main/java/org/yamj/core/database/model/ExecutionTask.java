@@ -41,7 +41,7 @@ import org.yamj.core.database.model.type.IntervalType;
 public class ExecutionTask implements Serializable {
 
     private static final long serialVersionUID = 5730223895964642472L;
-    public static final String QUERY_EXECUTABLE_TASKS = "executionTask.getExecutableTasks";
+    public static final String QUERY_EXECUTABLE_TASKS = "executionTask.executableTasks";
     
     @Id
     @Column(name = "name", nullable = false, length = 50)

@@ -69,7 +69,7 @@ public class DeletionService {
         Set<String> filesToDelete = new HashSet<>();
 
         try {
-            List<Long> ids = this.commonStorageService.getStageFilesToDelete();
+            List<Long> ids = this.commonStorageService.getStageFilesForDeletion();
             // delete stage files
             for (Long id : ids) {
                 try {
@@ -83,7 +83,7 @@ public class DeletionService {
         }
 
         try {
-            List<Long> ids = this.commonStorageService.getArtworkLocatedToDelete();
+            List<Long> ids = this.commonStorageService.getArtworkLocatedForDeletion();
             boolean updateTrigger = false;
                 
             // delete stage files

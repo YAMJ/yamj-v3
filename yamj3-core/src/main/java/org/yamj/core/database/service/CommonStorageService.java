@@ -60,13 +60,8 @@ public class CommonStorageService {
     private StagingService stagingService;
 
     @Transactional(readOnly = true)
-    public List<Long> getStageFilesToDelete() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SELECT f.id FROM StageFile f ");
-        sb.append("WHERE f.status = :delete ");
-
-        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+    public List<Long> getStageFilesForDeletion() {
+        return stagingDao.namedQuery(StageFile.QUERY_FOR_DELETION);
     }
 
     /**
@@ -125,19 +120,16 @@ public class CommonStorageService {
                 for (StageFile check : mediaFile.getStageFiles()) {
                     if (check.isDuplicate()) {
                         check.setStatus(StatusType.DONE);
-                        this.stagingDao.updateEntity(check);
 
                         // update watched file marker
                         this.stagingService.updateWatchedFile(mediaFile, check);
                         
                         // media file needs an update
                         mediaFile.setStatus(StatusType.UPDATED);
-                        this.stagingDao.updateEntity(mediaFile);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
                             WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
                             videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
-                            this.stagingDao.updateEntity(videoData);
                         }
                         
                         // break the loop; so that just one duplicate is processed
@@ -171,7 +163,6 @@ public class CommonStorageService {
             // if no located artwork exists anymore then set status of artwork to NEW
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
                 artwork.setStatus(StatusType.NEW);
-                this.stagingDao.updateEntity(artwork);
             }
         }
 
@@ -331,22 +322,16 @@ public class CommonStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Long> getArtworkLocatedToDelete() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SELECT al.id FROM ArtworkLocated al ");
-        sb.append("WHERE al.status = :delete ");
-
-        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+    public List<Long> getArtworkLocatedForDeletion() {
+        return stagingDao.namedQuery(ArtworkLocated.QUERY_FOR_DELETION);
     }
 
     @Transactional
     public DeletionDTO deleteArtworkLocated(Long id) {
-        Set<String> filesToDelete = new HashSet<>();
         ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
-
         LOG.debug("Delete: {}", located);
 
+        Set<String> filesToDelete = new HashSet<>();
         boolean updateTrigger = false;
         if (located != null) {
             Artwork artwork = located.getArtwork();
@@ -356,7 +341,6 @@ public class CommonStorageService {
             // if no located artwork exists anymore then set status of artwork to NEW
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
                 artwork.setStatus(StatusType.NEW);
-                this.stagingDao.updateEntity(artwork);
                 updateTrigger = true;
             }
         }
@@ -510,51 +494,30 @@ public class CommonStorageService {
     @Transactional
     @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
     public int deleteOrphanGenres() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM genre ");
-        sb.append("WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
-        sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
-        return this.stagingDao.executeSqlUpdate(sb);
+        return this.stagingDao.executeUpdate(Genre.DELETE_ORPHANS);
     }
 
     @Transactional
     @CacheEvict(value=CachingNames.DB_STUDIO, allEntries=true)
     public int deleteOrphanStudios() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM studio ");
-        sb.append("WHERE not exists (select 1 from videodata_studios vs where vs.studio_id=id) ");
-        sb.append("AND not exists (select 1 from series_studios ss where ss.studio_id=id) ");
-        return this.stagingDao.executeSqlUpdate(sb);
+        return this.stagingDao.executeUpdate(Studio.DELETE_ORPHANS);
     }
 
     @Transactional
     @CacheEvict(value=CachingNames.DB_COUNTRY, allEntries=true)
     public int deleteOrphanCountries() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM country ");
-        sb.append("WHERE not exists (select 1 from videodata_countries vc where vc.country_id=id) ");
-        sb.append("AND not exists (select 1 from series_countries sc where sc.country_id=id) ");
-        return this.stagingDao.executeSqlUpdate(sb);
+        return this.stagingDao.executeUpdate(Country.DELETE_ORPHANS);
     }
 
     @Transactional
     @CacheEvict(value=CachingNames.DB_CERTIFICATION, allEntries=true)
     public int deleteOrphanCertifications() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM certification ");
-        sb.append("WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) ");
-        sb.append("AND not exists (select 1 from series_certifications sc where sc.cert_id=id) ");
-        return this.stagingDao.executeSqlUpdate(sb);
+        return this.stagingDao.executeUpdate(Certification.DELETE_ORPHANS);
     }
 
     @Transactional(readOnly = true)
     public List<Long> getTrailersToDelete() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SELECT t.id FROM Trailer t ");
-        sb.append("WHERE t.status = :delete ");
-
-        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.namedQuery(Trailer.QUERY_FOR_DELETION);
     }
 
     @Transactional

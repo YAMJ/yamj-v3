@@ -31,6 +31,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedQueries({    
+    @NamedQuery(name = StageDirectory.QUERY_VIDEO_DIRECTORIES_FOR_SERIES,
+        query = "SELECT distinct sd from StageDirectory sd JOIN sd.stageFiles sf JOIN sf.mediaFile mf JOIN mf.videoDatas vd JOIN vd.season sea "+
+                "JOIN sea.series ser WHERE ser.id=:id AND mf.extra=:extra AND sf.status != 'DELETED' and sf.status != 'DUPLICATE'"
+    )
+})
+
 @Entity
 @Table(name = "stage_directory",
         uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEDIRECTORY_NATURALID", columnNames = {"directory_path", "library_id"})
@@ -38,7 +45,8 @@ import org.hibernate.annotations.NaturalId;
 public class StageDirectory extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 1706389732909764283L;
-
+    public static final String QUERY_VIDEO_DIRECTORIES_FOR_SERIES = "stageDirectory.videoDirectories.forSeries";
+    
     @NaturalId
     @Column(name = "directory_path", nullable = false, length = 255)
     private String directoryPath;

@@ -54,38 +54,19 @@ public class TrailerStorageService {
 
     @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM VideoData vd ");
-        sb.append("LEFT OUTER JOIN FETCH vd.trailers t ");
-        sb.append("LEFT OUTER JOIN FETCH t.stageFile s ");
-        sb.append("WHERE vd.id = :id ");
-
-        List<VideoData> objects = this.commonDao.findById(sb, id);
+        List<VideoData> objects = this.commonDao.namedQueryById(VideoData.QUERY_REQUIRED_FOR_TRAILER, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM Series ser ");
-        sb.append("LEFT OUTER JOIN FETCH ser.trailers t ");
-        sb.append("LEFT OUTER JOIN FETCH t.stageFile s ");
-        sb.append("WHERE ser.id = :id ");
-
-        List<Series> objects = this.commonDao.findById(sb, id);
+        List<Series> objects = this.commonDao.namedQueryById(Series.QUERY_REQUIRED_FOR_TRAILER, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
     
     @Transactional(readOnly = true)
     public Trailer getRequiredTrailer(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM Trailer t ");
-        sb.append("LEFT OUTER JOIN FETCH t.videoData ");
-        sb.append("LEFT OUTER JOIN FETCH t.series ");
-        sb.append("LEFT OUTER JOIN FETCH t.stageFile ");
-        sb.append("WHERE t.id = :id");
-
-        List<Trailer> objects = this.commonDao.findById(sb, id);
+        List<Trailer> objects = this.commonDao.namedQueryById(Trailer.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -94,7 +75,7 @@ public class TrailerStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeUpdate("update Trailer set status=:status where id=:id", params);
+        commonDao.executeUpdate(Trailer.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -102,7 +83,7 @@ public class TrailerStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeUpdate("update VideoData set trailerStatus=:status where id=:id", params);
+        commonDao.executeNamedQueryUpdate(VideoData.UPDATE_TRAILER_STATUS, params);
     }
 
     @Transactional
@@ -110,7 +91,7 @@ public class TrailerStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeUpdate("update Series set trailerStatus=:status where id=:id", params);
+        commonDao.executeNamedQueryUpdate(Series.UPDATE_TRAILER_STATUS, params);
     }
 
     @Transactional

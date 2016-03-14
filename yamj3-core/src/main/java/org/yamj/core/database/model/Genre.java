@@ -28,6 +28,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Genre.DELETE_ORPHANS,
+        query = "DELETE FROM genre WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) "+
+                "AND not exists (select 1 from series_genres sg where sg.genre_id=id) "
+    )
+})
+
 @Entity
 @Table(name = "genre",
         uniqueConstraints = @UniqueConstraint(name = "UIX_GENRE_NATURALID", columnNames = {"name"})
@@ -35,7 +42,8 @@ import org.hibernate.annotations.NaturalId;
 public class Genre extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
-
+    public static final String DELETE_ORPHANS = "genre.deleteOrphans";
+    
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 50)
     private String name;

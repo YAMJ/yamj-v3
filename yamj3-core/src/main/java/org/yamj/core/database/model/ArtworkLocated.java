@@ -45,6 +45,9 @@ import org.yamj.core.database.model.type.ImageType;
                 "LEFT OUTER JOIN FETCH art.series LEFT OUTER JOIN FETCH art.person LEFT OUTER JOIN FETCH art.boxedSet "+
                 "LEFT OUTER JOIN FETCH loc.stageFile WHERE loc.id=:id"
     ),
+    @NamedQuery(name = ArtworkLocated.QUERY_FOR_DELETION,
+        query = "SELECT al.id FROM ArtworkLocated al WHERE al.status = 'DELETED'"
+    ),
     @NamedQuery(name = ArtworkLocated.UPDATE_STATUS,
         query = "UPDATE ArtworkLocated SET status=:status WHERE id=:id"
     )
@@ -59,6 +62,7 @@ public class ArtworkLocated extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_REQUIRED = "artworkLocated.required";
+    public static final String QUERY_FOR_DELETION = "artworkLocated.forDeletion";
     public static final String UPDATE_STATUS = "artworkLocated.updateStatus";
 
     @NaturalId(mutable = true)

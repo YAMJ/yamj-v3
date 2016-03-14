@@ -81,10 +81,10 @@ public class Artwork extends AbstractStateful {
 
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_REQUIRED = "artwork.required";
-    public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.findPersonArtworks";
+    public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.personArtworks";
+    public static final String UPDATE_STATUS = "artwork.updateStatus";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
     public static final String QUERY_PROCESSING_QUEUE = "artwork.processing.queue";
-    public static final String UPDATE_STATUS = "artwork.updateStatus";
     
     @NaturalId(mutable = true)    
     @Type(type = "artworkType")

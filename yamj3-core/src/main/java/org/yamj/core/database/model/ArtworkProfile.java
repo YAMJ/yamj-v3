@@ -46,7 +46,7 @@ import org.yamj.core.database.model.type.ScalingType;
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -5178511945599751914L;
-    public static final String QUERY_GET_ALL = "artworkProfile.getAllArtworkProfiles";
+    public static final String QUERY_GET_ALL = "artworkProfile.allArtworkProfiles";
     
     @NaturalId
     @Column(name = "profile_name", length = 100)

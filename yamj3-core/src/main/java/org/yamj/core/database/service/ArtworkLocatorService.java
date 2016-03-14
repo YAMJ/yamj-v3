@@ -246,81 +246,31 @@ public class ArtworkLocatorService {
     }
     
     private List<StageFile> findVideoFiles(VideoData videoData) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("select distinct f from StageFile f ");
-        sb.append("join f.mediaFile m ");
-        sb.append("join m.videoDatas v ");
-        sb.append("where v.id=:videoDataId ");
-        sb.append("and m.extra=:extra ");
-        sb.append("and f.status != :duplicate ");
-        sb.append("and f.status != :deleted ");
-
         final Map<String,Object> params = new HashMap<>();
-        params.put("videoDataId", videoData.getId());
-        params.put("duplicate", StatusType.DUPLICATE);
-        params.put("deleted", StatusType.DELETED);
+        params.put("id", videoData.getId());
         params.put("extra", Boolean.FALSE);
-
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA, params);
     }
 
     private List<StageFile> findVideoFiles(Season season) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("select distinct f from StageFile f ");
-        sb.append("join f.mediaFile m ");
-        sb.append("join m.videoDatas v ");
-        sb.append("join v.season sea ");
-        sb.append("where sea.id=:seasonId ");
-        sb.append("and m.extra=:extra ");
-        sb.append("and f.status != :duplicate ");
-        sb.append("and f.status != :deleted ");
-        
         final Map<String,Object> params = new HashMap<>();
-        params.put("seasonId", season.getId());
-        params.put("duplicate", StatusType.DUPLICATE);
-        params.put("deleted", StatusType.DELETED);
+        params.put("id", season.getId());
         params.put("extra", Boolean.FALSE);
-        
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_SEASON, params);
     }
 
     private List<StageDirectory> findVideoDirectories(Series series) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("select distinct d from StageDirectory d ");
-        sb.append("join d.stageFiles f ");
-        sb.append("join f.mediaFile m ");
-        sb.append("join m.videoDatas v ");
-        sb.append("join v.season sea ");
-        sb.append("join sea.series ser ");
-        sb.append("where ser.id=:seriesId ");
-        sb.append("and m.extra=:extra ");
-        sb.append("and f.status != :duplicate ");
-        sb.append("and f.status != :deleted ");
-        
         final Map<String,Object> params = new HashMap<>();
-        params.put("seriesId", series.getId());
-        params.put("duplicate", StatusType.DUPLICATE);
-        params.put("deleted", StatusType.DELETED);
+        params.put("id", series.getId());
         params.put("extra", Boolean.FALSE);
-        
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.namedQueryByNamedParameters(StageDirectory.QUERY_VIDEO_DIRECTORIES_FOR_SERIES, params);
     }
 
     private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("select distinct f from StageFile f ");
-        sb.append("where f.stageDirectory in (:directories) ");
-        sb.append("and f.fileType = :fileType ");
-        sb.append("and lower(f.baseName) in (:artworkNames) ");
-        sb.append("and f.status != :deleted ");
-
         final Map<String,Object> params = new HashMap<>();
         params.put("directories", directories);
-        params.put("fileType", FileType.IMAGE);
         params.put("artworkNames", artworkNames);
-        params.put("deleted", StatusType.DELETED);
-
-        return stagingDao.findByNamedParameters(sb, params);
+        return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_ARTWORK_FILES, params);
     }
 
     public List<StageFile> getPhotos(Person person) {

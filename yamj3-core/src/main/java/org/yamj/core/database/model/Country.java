@@ -28,6 +28,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Country.DELETE_ORPHANS,
+        query = "DELETE FROM country WHERE not exists (select 1 from videodata_countries vc where vc.country_id=id) "+
+                "AND not exists (select 1 from series_countries sc where sc.country_id=id)"
+    )
+})
+
 @Entity
 @Table(name = "country",
         uniqueConstraints = @UniqueConstraint(name = "UIX_COUNTRY_NATURALID", columnNames = {"country_code"})
@@ -35,7 +42,8 @@ import org.hibernate.annotations.NaturalId;
 public class Country extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 474957956935900650L;
-
+    public static final String DELETE_ORPHANS = "country.deleteOrphans";
+    
     @NaturalId(mutable = true)
     @Column(name = "country_code", nullable = false, length = 4)
     private String countryCode;

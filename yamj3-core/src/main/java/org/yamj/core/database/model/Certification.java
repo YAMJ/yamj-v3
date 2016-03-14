@@ -34,6 +34,13 @@ import org.hibernate.annotations.NaturalId;
     )
 })
 
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Certification.DELETE_ORPHANS,
+        query = "DELETE FROM certification WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) "+
+                "AND not exists (select 1 from series_certifications sc where sc.cert_id=id)"
+    )
+})
+
 @Entity
 @Table(name = "certification",
         uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country_code", "certificate"})
@@ -41,7 +48,8 @@ import org.hibernate.annotations.NaturalId;
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
-    public static final String QUERY_GET = "certification.getCertification";
+    public static final String QUERY_GET = "certification.get";
+    public static final String DELETE_ORPHANS = "certification.deleteOrphans";
     
     @NaturalId
     @Column(name = "country_code", length = 4, nullable = false)

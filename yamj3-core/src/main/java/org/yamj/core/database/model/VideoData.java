@@ -56,6 +56,9 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     @NamedQuery(name = VideoData.QUERY_REQUIRED,
         query = "FROM VideoData vd WHERE vd.id = :id"
     ),
+    @NamedQuery(name = VideoData.QUERY_REQUIRED_FOR_TRAILER,
+        query = "FROM VideoData vd LEFT OUTER JOIN FETCH vd.trailers t LEFT OUTER JOIN FETCH t.stageFile s WHERE vd.id = :id"
+    ),
     @NamedQuery(name = VideoData.QUERY_FIND_BY_LIBRARY,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf JOIN sf.stageDirectory sd "+
                 "WHERE sf.fileType=:fileType AND mf.extra=:extra AND lower(sf.baseName)=:baseName AND sd.library=:library AND sf.status != :deleted"
@@ -66,6 +69,12 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     ),
     @NamedQuery(name = VideoData.QUERY_FIND_BY_PERSON,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
+    ),
+    @NamedQuery(name = VideoData.UPDATE_STATUS,
+        query = "UPDATE VideoData SET status=:status WHERE id=:id"
+    ),
+    @NamedQuery(name = VideoData.UPDATE_TRAILER_STATUS,
+        query = "UPDATE VideoData SET trailerStatus=:status WHERE id=:id"
     )
 })
 
@@ -121,15 +130,18 @@ public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
     public static final String QUERY_REQUIRED = "videoData.required";
+    public static final String QUERY_REQUIRED_FOR_TRAILER = "videoData.required.forTrailer";
     public static final String QUERY_FIND_BY_LIBRARY = "videoData.findVideoDatas.byLibrary";
     public static final String QUERY_FIND_BY_DIRECTORIES = "videoData.findVideoDatas.byStageDirectories";
     public static final String QUERY_FIND_BY_PERSON = "videoData.findVideoDatas.byPerson";
+    public static final String UPDATE_STATUS = "videoData.updateStatus";
+    public static final String UPDATE_TRAILER_STATUS = "videoData.updateTrailerStatus";
     public static final String QUERY_TRAKTTV_MOVIES = "videoData.trakttv.movies";
     public static final String QUERY_TRAKTTV_EPISODES = "videoData.trakttv.episodes";
-    public static final String QUERY_TRAKTTV_WATCHED_MOVIES = "videoData.trakttv.watched.movies";
-    public static final String QUERY_TRAKTTV_WATCHED_EPISODES = "videoData.trakttv.watched.episodes";
-    public static final String QUERY_TRAKTTV_COLLECTED_MOVIES = "videoData.trakttv.collected.movies";
-    public static final String QUERY_TRAKTTV_COLLECTED_EPISODES = "videoData.trakttv.collected.episodes";
+    public static final String QUERY_TRAKTTV_WATCHED_MOVIES = "videoData.trakttv.watchedMovies";
+    public static final String QUERY_TRAKTTV_WATCHED_EPISODES = "videoData.trakttv.watchedEpisodes";
+    public static final String QUERY_TRAKTTV_COLLECTED_MOVIES = "videoData.trakttv.collectedMovies";
+    public static final String QUERY_TRAKTTV_COLLECTED_EPISODES = "videoData.trakttv.collectedEpisodes";
     
     @Column(name = "episode", nullable = false)
     private int episode = -1;

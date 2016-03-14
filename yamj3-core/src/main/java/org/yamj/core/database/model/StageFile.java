@@ -53,15 +53,22 @@ import org.yamj.core.database.model.type.FileType;
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SERIES,
         query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE ser.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
+                "WHERE ser.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SEASON,
         query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE sea.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
+                "WHERE sea.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA,
         query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE vd.id=:id AND sf.fileType = 'VIDEO' AND sf.status != 'DELETED'"
+                "WHERE vd.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
+    ),
+    @NamedQuery(name = StageFile.QUERY_ARTWORK_FILES,
+        query = "SELECT distinct sf FROM StageFile sf WHERE sf.stageDirectory in (:directories) and sf.fileType='IMAGE' "+
+                "AND lower(sf.baseName) in (:artworkNames) AND sf.status != 'DELETED'" 
+    ),
+    @NamedQuery(name = StageFile.QUERY_FOR_DELETION,
+        query = "SELECT sf.id FROM StageFile sf WHERE sf.status = 'DELETED'"
     ),
     @NamedQuery(name = StageFile.UPDATE_STATUS,
         query = "UPDATE StageFile SET status=:status WHERE id=:id"
@@ -82,11 +89,13 @@ public class StageFile extends AbstractStateful {
 
     private static final long serialVersionUID = -6247352843375054146L;
     public static final String QUERY_FIND_NFO = "stageFile.findNfoFile";
-    public static final String QUERY_VALID_NFOS_VIDEO = "stageFile.getValidNFOFilesForMovie";
-    public static final String QUERY_VALID_NFOS_SERIES = "stageFile.getValidNFOFilesForSeries";
-    public static final String QUERY_VIDEOFILES_FOR_SERIES = "stageFile.findVideoStageFiles.forSeries";
-    public static final String QUERY_VIDEOFILES_FOR_SEASON = "stageFile.findVideoStageFiles.forSeason";
-    public static final String QUERY_VIDEOFILES_FOR_VIDEODATA = "stageFile.findVideoStageFiles.forVideoData";
+    public static final String QUERY_VALID_NFOS_VIDEO = "stageFile.validNFOFiles.forMovie";
+    public static final String QUERY_VALID_NFOS_SERIES = "stageFile.validNFOFiles.forSeries";
+    public static final String QUERY_VIDEOFILES_FOR_SERIES = "stageFile.videoStageFiles.forSeries";
+    public static final String QUERY_VIDEOFILES_FOR_SEASON = "stageFile.videoStageFiles.forSeason";
+    public static final String QUERY_VIDEOFILES_FOR_VIDEODATA = "stageFile.videoStageFiles.forVideoData";
+    public static final String QUERY_ARTWORK_FILES = "stageFile.artworkStageFiles";
+    public static final String QUERY_FOR_DELETION = "stageFile.forDeletion";
     public static final String UPDATE_STATUS = "stageFile.updateStatus";
     public static final String UPDATE_STATUS_NO_DUPLICATE = "stageFile.updateStatus.noDuplicate";
     

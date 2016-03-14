@@ -52,6 +52,15 @@ import org.yamj.core.database.model.type.OverrideFlag;
 @NamedQueries({
     @NamedQuery(name = Series.QUERY_REQUIRED,
         query = "FROM Series ser JOIN FETCH ser.seasons sea JOIN FETCH sea.videoDatas vd WHERE ser.id = :id"
+    ),
+    @NamedQuery(name = Series.QUERY_REQUIRED_FOR_TRAILER,
+        query = "FROM Series ser LEFT OUTER JOIN FETCH ser.trailers t LEFT OUTER JOIN FETCH t.stageFile s WHERE ser.id = :id"
+    ),
+    @NamedQuery(name = Series.UPDATE_STATUS,
+        query = "UPDATE Series SET status=:status WHERE id=:id"
+    ),
+    @NamedQuery(name = Series.UPDATE_TRAILER_STATUS,
+        query = "UPDATE Series SET trailerStatus=:status WHERE id=:id"
     )
 })
 
@@ -77,8 +86,11 @@ public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
     public static final String QUERY_REQUIRED = "series.required";
+    public static final String QUERY_REQUIRED_FOR_TRAILER = "series.required.forTrailer";
+    public static final String UPDATE_STATUS = "series.updateStatus";
+    public static final String UPDATE_TRAILER_STATUS = "series.updateTrailerStatus";
     public static final String QUERY_METADATA_QUEUE = "metadata.queue";
-    
+  
     @Column(name = "start_year")
     private int startYear = -1;
 

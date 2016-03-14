@@ -22,8 +22,8 @@
  */
 package org.yamj.core.service.tasks;
 
-import java.util.Calendar;
 import javax.annotation.PostConstruct;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,24 +66,17 @@ public class RecheckTask implements ITask {
         final long startTime = System.currentTimeMillis();
 
         int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 45);
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        boolean updatedMovies = this.metadataStorageService.recheckMovie(cal.getTime());
-
-        recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 45);
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        boolean updatedSeries = this.metadataStorageService.recheckTvShow(cal.getTime());
-
-        recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        boolean updatedPersons = this.metadataStorageService.recheckPerson(cal.getTime());
-        
-        if (updatedMovies || updatedSeries) {
+        if (this.metadataStorageService.recheckMovie(new DateTime().minusDays(recheck).toDate())) {
             metadataScanScheduler.triggerScanVideo();
         }
-        if (updatedPersons) {
+
+        recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 45);
+        if (this.metadataStorageService.recheckTvShow(new DateTime().minusDays(recheck).toDate())) {
+            metadataScanScheduler.triggerScanVideo();
+        }
+
+        recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
+        if (this.metadataStorageService.recheckPerson(new DateTime().minusDays(recheck).toDate())) {
             metadataScanScheduler.triggerScanPeople();
         }
 

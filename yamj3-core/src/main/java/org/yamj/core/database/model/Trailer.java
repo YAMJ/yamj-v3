@@ -28,12 +28,26 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ContainerType;
+
+@NamedQueries({    
+    @NamedQuery(name = Trailer.QUERY_REQUIRED,
+        query = "FROM Trailer t LEFT OUTER JOIN FETCH t.videoData LEFT OUTER JOIN FETCH t.series LEFT OUTER JOIN FETCH t.stageFile WHERE t.id = :id"
+    ),
+    @NamedQuery(name = Trailer.QUERY_FOR_DELETION,
+        query = "SELECT t.id FROM Trailer t WHERE t.status = 'DELETED'"
+    ),
+    @NamedQuery(name = Trailer.UPDATE_STATUS,
+        query = "UPDATE Trailer SET status=:status WHERE id=:id"
+    )
+})
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Trailer.QUERY_SCANNING_QUEUE,
@@ -56,8 +70,11 @@ import org.yamj.core.database.model.type.ContainerType;
 public class Trailer extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -7853145730427742811L;
-    public static final String QUERY_SCANNING_QUEUE = "trailer.scanning.queue";
-    public static final String QUERY_PROCESSING_QUEUE = "trailer.processing.queue";
+    public static final String QUERY_REQUIRED = "trailer.required";
+    public static final String QUERY_FOR_DELETION = "trailer.forDeletion";
+    public static final String UPDATE_STATUS = "trailer.updateStatus";
+    public static final String QUERY_SCANNING_QUEUE = "trailer.scanningQueue";
+    public static final String QUERY_PROCESSING_QUEUE = "trailer.processingQueue";
                     
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
