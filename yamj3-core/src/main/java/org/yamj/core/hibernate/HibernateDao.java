@@ -387,33 +387,6 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Execute an update statement.
-     *
-     * @param queryCharSequence the query string
-     * @param params the named parameters
-     * @return number of affected rows
-     */
-    @Deprecated
-    public int executeUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
-        Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
-        for (Entry<String, Object> param : params.entrySet()) {
-            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
-        }
-        return query.executeUpdate();
-    }
-
-    /**
-     * Execute a SQL update statement.
-     *
-     * @param queryCharSequence the query string
-     * @return number of affected rows
-     */
-    @Deprecated
-    public int executeSqlUpdate(CharSequence queryCharSequence) {
-        return currentSession().createSQLQuery(queryCharSequence.toString()).setCacheable(true).executeUpdate();
-    }
-
-    /**
      * Execute an update statement with a named query.
      *
      * @param queryName the name of the query
@@ -430,7 +403,7 @@ public abstract class HibernateDao {
      * @param params the named parameters
      * @return number of affected rows
      */
-    public int executeNamedQueryUpdate(String queryName, Map<String, Object> params) {
+    public int executeUpdate(String queryName, Map<String, Object> params) {
         Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());

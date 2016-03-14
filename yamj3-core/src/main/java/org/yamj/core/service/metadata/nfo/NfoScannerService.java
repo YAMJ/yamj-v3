@@ -206,7 +206,6 @@ public class NfoScannerService {
                     if (videoData.isWatchedNfo()) {
                         // the date where the NFO change for watch was detected
                         videoData.setWatchedNfo(false, watchedDate);
-                        
                         videoData.setTvEpisodeNotFound();
                     }
                 }

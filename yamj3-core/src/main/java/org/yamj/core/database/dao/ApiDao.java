@@ -39,7 +39,7 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.*;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -3018,10 +3018,10 @@ public class ApiDao extends HibernateDao {
     }
     
     public void rescanAll() {
-        this.executeSqlUpdate("UPDATE person SET status='"+StatusType.UPDATED.name()+"'");
-        this.executeSqlUpdate("UPDATE videodata SET status='"+StatusType.UPDATED.name()+"'");
-        this.executeSqlUpdate("UPDATE season SET status='"+StatusType.UPDATED.name()+"'");
-        this.executeSqlUpdate("UPDATE series SET status='"+StatusType.UPDATED.name()+"'");
-        this.executeSqlUpdate("UPDATE artwork SET status='"+StatusType.UPDATED.name()+"'");
+        this.executeUpdate(Person.UPDATE_RESCAN_ALL);
+        this.executeUpdate(VideoData.UPDATE_RESCAN_ALL);
+        this.executeUpdate(Season.UPDATE_RESCAN_ALL);
+        this.executeUpdate(Series.UPDATE_RESCAN_ALL);
+        this.executeUpdate(Artwork.UPDATE_RESCAN_ALL);
     }
 }

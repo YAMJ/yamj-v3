@@ -70,12 +70,24 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
     @NamedQuery(name = VideoData.QUERY_FIND_BY_PERSON,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
     ),
+    @NamedQuery(name = VideoData.UPDATE_RESCAN_ALL,
+        query = "UPDATE VideoData SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+    ),
     @NamedQuery(name = VideoData.UPDATE_STATUS,
         query = "UPDATE VideoData SET status=:status WHERE id=:id"
     ),
+    @NamedQuery(name = VideoData.UPDATE_STATUS_RECHECK_MOVIE,
+        query = "UPDATE VideoData vd SET vd.status='UPDATED' WHERE vd.status not in ('NEW','UPDATED') "+
+                "AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode<0"
+    ),
+    @NamedQuery(name = VideoData.UPDATE_STATUS_RECHECK_EPISODE,
+        query = "UPDATE VideoData vd SET vd.status='UPDATED' WHERE vd.status not in ('NEW','UPDATED') "+
+                "AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode>=0"
+    ),
     @NamedQuery(name = VideoData.UPDATE_TRAILER_STATUS,
         query = "UPDATE VideoData SET trailerStatus=:status WHERE id=:id"
-    )
+    ),
+    
 })
 
 @NamedNativeQueries({    
@@ -134,7 +146,10 @@ public class VideoData extends AbstractMetadata {
     public static final String QUERY_FIND_BY_LIBRARY = "videoData.findVideoDatas.byLibrary";
     public static final String QUERY_FIND_BY_DIRECTORIES = "videoData.findVideoDatas.byStageDirectories";
     public static final String QUERY_FIND_BY_PERSON = "videoData.findVideoDatas.byPerson";
+    public static final String UPDATE_RESCAN_ALL = "videoData.rescanAll";
     public static final String UPDATE_STATUS = "videoData.updateStatus";
+    public static final String UPDATE_STATUS_RECHECK_MOVIE ="videoData.updateStatus.forMovieRecheck";
+    public static final String UPDATE_STATUS_RECHECK_EPISODE ="videoData.updateStatus.forEpisodeRecheck";
     public static final String UPDATE_TRAILER_STATUS = "videoData.updateTrailerStatus";
     public static final String QUERY_TRAKTTV_MOVIES = "videoData.trakttv.movies";
     public static final String QUERY_TRAKTTV_EPISODES = "videoData.trakttv.episodes";

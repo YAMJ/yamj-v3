@@ -61,7 +61,7 @@ public class MediaStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(MediaFile.UPDATE_STATUS, params);
+        commonDao.executeUpdate(MediaFile.UPDATE_STATUS, params);
     } 
     
     @Transactional

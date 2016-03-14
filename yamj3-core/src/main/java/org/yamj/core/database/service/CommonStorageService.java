@@ -468,26 +468,15 @@ public class CommonStorageService {
     @Transactional
     @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
     public void updateGenresXml(Map<String, String> subGenres) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE Genre ");
-        sb.append("SET targetXml = null ");
-        sb.append("WHERE targetXml is not null ");
-        sb.append("AND lower(name) not in (:subGenres) ");
-
         Map<String, Object> params = new HashMap<>();
         params.put("subGenres", subGenres.keySet());
-        this.stagingDao.executeUpdate(sb, params);
-
+        this.stagingDao.executeUpdate(Genre.UPDATE_TARGET_XML_CLEAN, params);
+        
         for (Entry<String, String> entry : subGenres.entrySet()) {
-            sb.setLength(0);
-            sb.append("UPDATE Genre ");
-            sb.append("SET targetXml=:targetXml ");
-            sb.append("WHERE lower(name)=:subGenre ");
-
             params.clear();
             params.put("subGenre", entry.getKey());
             params.put("targetXml", entry.getValue());
-            this.stagingDao.executeUpdate(sb, params);
+            this.stagingDao.executeUpdate(Genre.UPDATE_TARGET_XML_SET, params);
         }
     }
 

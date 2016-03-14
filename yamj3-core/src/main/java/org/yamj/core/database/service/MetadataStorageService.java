@@ -812,7 +812,7 @@ public class MetadataStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(VideoData.UPDATE_STATUS, params);
+        commonDao.executeUpdate(VideoData.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -820,7 +820,7 @@ public class MetadataStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(Series.UPDATE_STATUS, params);
+        commonDao.executeUpdate(Series.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -829,7 +829,7 @@ public class MetadataStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(Person.UPDATE_STATUS, params);
+        commonDao.executeUpdate(Person.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -838,52 +838,28 @@ public class MetadataStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(Person.UPDATE_FILMOGRAPHY_STATUS, params);
+        commonDao.executeUpdate(Person.UPDATE_FILMOGRAPHY_STATUS, params);
     }
 
     @Transactional
     public boolean recheckMovie(Date compareDate) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("update VideoData vd set vd.status='UPDATED' ");
-        sql.append("where vd.status not in ('NEW','UPDATED') ");
-        sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
-        sql.append("and vd.episode<0 ");
-
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
-        return this.commonDao.executeUpdate(sql, params) > 0;
+        return this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK_MOVIE, params)>0;
     }
 
     @Transactional
     public boolean recheckTvShow(Date compareDate) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
-        int updated = 0;
-        
-        StringBuilder sql = new StringBuilder();
-        sql.append("update Series ser set ser.status='UPDATED' ");
-        sql.append("where ser.status not in ('NEW','UPDATED') ");
-        sql.append("and (ser.lastScanned is null or ser.lastScanned<=:compareDate) ");
-        updated += this.commonDao.executeUpdate(sql, params);
-
-        sql.setLength(0);
-        sql.append("update Season sea set sea.status='UPDATED' ");
-        sql.append("where sea.status not in ('NEW','UPDATED') ");
-        sql.append("and (sea.lastScanned is null or sea.lastScanned<=:compareDate) ");
-        updated += this.commonDao.executeUpdate(sql, params);
-
-        sql.setLength(0);
-        sql.append("update VideoData vd set vd.status='UPDATED' ");
-        sql.append("where vd.status not in ('NEW','UPDATED') ");
-        sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
-        sql.append("and vd.episode>=0 ");
-        updated += this.commonDao.executeUpdate(sql, params);
-        
+        int updated = this.commonDao.executeUpdate(Series.UPDATE_STATUS_RECHECK, params);
+        updated += this.commonDao.executeUpdate(Season.UPDATE_STATUS_RECHECK, params);
+        updated += this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK_EPISODE, params);
         return updated > 0;
     }
 
     @Transactional
     public boolean recheckPerson(Date compareDate) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
-        return this.commonDao.executeNamedQueryUpdate(Person.UPDATE_STATUS_RECHECK, params)>0;
+        return this.commonDao.executeUpdate(Person.UPDATE_STATUS_RECHECK, params)>0;
     }
 
     public void handleModifiedSources(VideoData videoData) {

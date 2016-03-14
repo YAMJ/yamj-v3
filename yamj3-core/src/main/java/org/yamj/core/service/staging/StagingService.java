@@ -210,7 +210,7 @@ public class StagingService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.DELETED);
-        return this.stagingDao.executeNamedQueryUpdate(StageFile.UPDATE_STATUS, params)>0;
+        return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS, params)>0;
     }
 
     @Transactional
@@ -218,7 +218,7 @@ public class StagingService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.UPDATED);
-        return this.stagingDao.executeNamedQueryUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params)>0;
+        return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params)>0;
     }
 
     public void updateWatchedFile(MediaFile mediaFile, StageFile stageFile) {

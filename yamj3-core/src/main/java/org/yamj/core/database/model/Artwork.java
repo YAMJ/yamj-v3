@@ -48,6 +48,9 @@ import org.yamj.core.database.model.type.ArtworkType;
     @NamedQuery(name = Artwork.QUERY_FIND_PERSON_ARTWORKS,
         query = "FROM Artwork a JOIN a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
     ),
+    @NamedQuery(name = Artwork.UPDATE_RESCAN_ALL,
+        query = "UPDATE Artwork SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+    ),
     @NamedQuery(name = Artwork.UPDATE_STATUS,
         query = "UPDATE Artwork SET status=:status WHERE id=:id"
     )
@@ -82,6 +85,7 @@ public class Artwork extends AbstractStateful {
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_REQUIRED = "artwork.required";
     public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.personArtworks";
+    public static final String UPDATE_RESCAN_ALL = "artwork.rescanAll";
     public static final String UPDATE_STATUS = "artwork.updateStatus";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";
     public static final String QUERY_PROCESSING_QUEUE = "artwork.processing.queue";

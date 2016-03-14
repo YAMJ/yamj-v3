@@ -28,6 +28,15 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
+@NamedQueries({
+    @NamedQuery(name = Genre.UPDATE_TARGET_XML_CLEAN,
+        query = "UPDATE Genre SET targetXml = null WHERE targetXml is not null AND lower(name) not in (:subGenres)"
+    ),
+    @NamedQuery(name = Genre.UPDATE_TARGET_XML_SET,
+        query = "UPDATE Genre SET targetXml=:targetXml WHERE lower(name)=:subGenre"
+    )
+})
+
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Genre.DELETE_ORPHANS,
         query = "DELETE FROM genre WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) "+
@@ -42,6 +51,8 @@ import org.hibernate.annotations.NaturalId;
 public class Genre extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
+    public static final String UPDATE_TARGET_XML_CLEAN = "genre.targetXml.clean";
+    public static final String UPDATE_TARGET_XML_SET = "genre.targetXml.set";
     public static final String DELETE_ORPHANS = "genre.deleteOrphans";
     
     @NaturalId(mutable = true)

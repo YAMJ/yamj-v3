@@ -42,6 +42,10 @@ import org.hibernate.annotations.NaturalId;
     ),
     @NamedQuery(name = ArtworkGenerated.UPDATE_STATUS,
         query = "UPDATE ArtworkGenerated SET status=:status WHERE id=:id"
+    ),
+    @NamedQuery(name = ArtworkGenerated.UPDATE_STATUS_FOR_PROFILE,
+        query = "UPDATE ArtworkGenerated gen SET status='UPDATED' WHERE gen.artworkProfile.id=:id AND gen.status != 'UPDATED' "+
+                "AND ((gen.updateTimestamp is null and gen.createTimestamp<=:profileDate) OR (gen.updateTimestamp is not null and gen.updateTimestamp<=:profileDate))"
     )
 })
 
@@ -56,6 +60,7 @@ public class ArtworkGenerated extends AbstractStateful {
     public static final String QUERY_GET = "artworkGenerated.get";
     public static final String QUERY_REQUIRED = "artworkGenerated.required";
     public static final String UPDATE_STATUS = "artworkGenerated.updateStatus";
+    public static final String UPDATE_STATUS_FOR_PROFILE = "artworkGenerated.updateStatus.forProfile";
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)

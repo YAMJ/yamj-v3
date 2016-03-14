@@ -28,6 +28,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -35,6 +37,16 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
+
+@NamedQueries({
+    @NamedQuery(name = Season.UPDATE_STATUS_RECHECK,
+        query = "UPDATE Season sea SET sea.status='UPDATED' WHERE sea.status not in ('NEW','UPDATED') "+
+                "AND (sea.lastScanned is null or sea.lastScanned<=:compareDate)"
+    ),
+    @NamedQuery(name = Season.UPDATE_RESCAN_ALL,
+        query = "UPDATE Season SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+    ),
+})
 
 @Entity
 @Table(name = "season",
@@ -48,7 +60,9 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
-
+    public static final String UPDATE_STATUS_RECHECK = "season.updateStatus.forRecheck";
+    public static final String UPDATE_RESCAN_ALL = "season.rescanAll";
+    
     @Column(name = "season", nullable = false)
     private int season; //NOSONAR
 

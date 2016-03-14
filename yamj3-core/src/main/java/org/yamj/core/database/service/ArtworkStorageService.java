@@ -159,7 +159,7 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeNamedQueryUpdate(Artwork.UPDATE_STATUS, params);
+        artworkDao.executeUpdate(Artwork.UPDATE_STATUS, params);
     }
 
     @Transactional(readOnly = true)
@@ -179,7 +179,7 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeNamedQueryUpdate(ArtworkLocated.UPDATE_STATUS, params);
+        artworkDao.executeUpdate(ArtworkLocated.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -187,7 +187,7 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        artworkDao.executeNamedQueryUpdate(ArtworkGenerated.UPDATE_STATUS, params);
+        artworkDao.executeUpdate(ArtworkGenerated.UPDATE_STATUS, params);
     }
 
     @Transactional
@@ -313,18 +313,10 @@ public class ArtworkStorageService {
         if (profile.getUpdateTimestamp() != null) {
             profileDate = profile.getUpdateTimestamp();
         }
-       
-        final StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE ArtworkGenerated gen ");
-        sb.append("SET status='UPDATED' ");
-        sb.append("WHERE gen.artworkProfile.id=:id ");
-        sb.append("AND gen.status != 'UPDATED' ");
-        sb.append("AND ((gen.updateTimestamp is null and gen.createTimestamp<=:profileDate) OR ");
-        sb.append("     (gen.updateTimestamp is not null and gen.updateTimestamp<=:profileDate)) ");
 
         Map<String,Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("profileDate", profileDate);
-        return this.artworkDao.executeUpdate(sb, params);
+        return this.artworkDao.executeUpdate(ArtworkGenerated.UPDATE_STATUS_FOR_PROFILE, params);
     }
 }

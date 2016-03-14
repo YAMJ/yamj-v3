@@ -83,7 +83,7 @@ public class TrailerStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(VideoData.UPDATE_TRAILER_STATUS, params);
+        commonDao.executeUpdate(VideoData.UPDATE_TRAILER_STATUS, params);
     }
 
     @Transactional
@@ -91,7 +91,7 @@ public class TrailerStorageService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.ERROR);
-        commonDao.executeNamedQueryUpdate(Series.UPDATE_TRAILER_STATUS, params);
+        commonDao.executeUpdate(Series.UPDATE_TRAILER_STATUS, params);
     }
 
     @Transactional
