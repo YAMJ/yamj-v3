@@ -982,8 +982,16 @@ public class MediaImportService {
             int part = getVideoImagePart(fileBaseName);
             // get the base name which video files should have
             String baseName = getBaseNameFromVideoImage(fileBaseName);
+            
             // get matching episode image artwork
-            artworks = this.stagingDao.findMatchingVideoImages(baseName, part, stageFile.getStageDirectory());
+            List<Artwork> matching = this.stagingDao.findMatchingVideoImages(baseName, part, stageFile.getStageDirectory());
+            
+            if (part == matching.size()) {
+                // found artwork which matches the episode part
+                artworks = Collections.singleton(matching.get(part-1));
+            } else {
+                artworks = Collections.emptyList();
+            }
             
         } else if (generic) {
             // GENERIC IMAGES
@@ -1120,7 +1128,7 @@ public class MediaImportService {
             // assume that video image is for first part
             return 1;
         }
-        return NumberUtils.toInt(name.substring(lastIndex+1), 1);
+        return Math.max(1, NumberUtils.toInt(name.substring(lastIndex+1)));
     }
 
     private static final String getBaseNameFromVideoImage(final String name) {

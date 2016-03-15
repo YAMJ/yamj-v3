@@ -23,7 +23,6 @@
 package org.yamj.core.database.dao;
 
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
@@ -46,16 +45,6 @@ import org.yamj.core.service.file.FileTools;
 @Repository("stagingDao")
 public class StagingDao extends HibernateDao {
 
-    private Set<StatusType> standardStatusSet;
-
-    @PostConstruct
-    public void init() {
-        standardStatusSet = new HashSet<>();
-        standardStatusSet.add(StatusType.NEW);
-        standardStatusSet.add(StatusType.UPDATED);
-        standardStatusSet.add(StatusType.DONE);
-    }
-    
     public Library getLibrary(String client, String playerPath) {
         return (Library) currentSession().createCriteria(Library.class)
                 .add(Restrictions.eq("client", client))
@@ -175,10 +164,8 @@ public class StagingDao extends HibernateDao {
         }
 
         return (StageFile)currentSession().getNamedQuery(StageFile.QUERY_FIND_NFO)
-                .setParameter("fileType", FileType.NFO)
                 .setString("searchName", searchName.toLowerCase())
                 .setParameter("stageDirectory", stageDirectory)
-                .setParameter("deleted", StatusType.DELETED)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .uniqueResult();
@@ -187,8 +174,6 @@ public class StagingDao extends HibernateDao {
     public List<StageFile> getValidNFOFilesForVideo(long videoDataId) {
         return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_VIDEO)
                 .setLong("videoDataId", videoDataId)
-                .setParameter("fileType", FileType.NFO)
-                .setParameterList("statusSet", standardStatusSet)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .list();
@@ -197,8 +182,6 @@ public class StagingDao extends HibernateDao {
     public List<StageFile> getValidNFOFilesForSeries(long seriesId) {
         return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_SERIES)
                 .setLong("seriesId", seriesId)
-                .setParameter("fileType", FileType.NFO)
-                .setParameterList("statusSet", standardStatusSet)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .list();
@@ -211,12 +194,10 @@ public class StagingDao extends HibernateDao {
 
         Map<String, Object> params = new HashMap<>();
         params.put("artworkType", artworkType);
-        params.put("fileType", FileType.VIDEO);
         params.put("extra", Boolean.FALSE);
         if (baseName != null) {
             params.put("baseName", baseName);
         }
-        params.put("statusSet", standardStatusSet);
         params.put("stageDirectory", stageDirectory);
 
         // for movies
@@ -227,8 +208,8 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND sf.fileType=:fileType ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.fileType='VIDEO' ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode < 0 ");
         if (baseName != null) {
@@ -246,10 +227,9 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND sf.fileType=:fileType ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.fileType='VIDEO' ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
-        sb.append("AND vd.episode >= 0 ");
         if (baseName != null) {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
@@ -263,7 +243,6 @@ public class StagingDao extends HibernateDao {
         Map<String, Object> params = new HashMap<>();
         params.put("artworkType", artworkType);
         params.put("extra", Boolean.FALSE);
-        params.put("statusSet", standardStatusSet);
         params.put("stageDirectory", stageDirectory);
 
         // for series
@@ -277,7 +256,7 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND sf.fileType='VIDEO' ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode >= 0 ");
         if (videosOnlyInSubDirs) {
@@ -297,7 +276,6 @@ public class StagingDao extends HibernateDao {
         params.put("artworkType", artworkType);
         params.put("extra", Boolean.FALSE);
         params.put("baseName", baseName);
-        params.put("statusSet", standardStatusSet);
         if (library != null) {
             params.put("library", library);
         }
@@ -314,7 +292,7 @@ public class StagingDao extends HibernateDao {
         }
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND sf.fileType='VIDEO' ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode < 0 ");
         sb.append("AND lower(sf.baseName)=:baseName ");
@@ -336,9 +314,8 @@ public class StagingDao extends HibernateDao {
         }
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND sf.fileType='VIDEO' ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
-        sb.append("AND vd.episode >= 0 ");
         sb.append("AND lower(sf.baseName)=:baseName ");
         if (library != null) {
             sb.append("AND sd.library=:library ");
@@ -348,13 +325,11 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    public Set<Artwork> findMatchingVideoImages(String baseName, int part, StageDirectory stageDirectory) {
+    public List<Artwork> findMatchingVideoImages(String baseName, int part, StageDirectory stageDirectory) {
         Map<String, Object> params = new HashMap<>();
         params.put("artworkType", ArtworkType.VIDEOIMAGE);
-        params.put("fileType", FileType.VIDEO);
         params.put("extra", Boolean.FALSE);
         params.put("baseName", baseName);
-        params.put("statusSet", standardStatusSet);
 
         // for movies
         StringBuilder sb = new StringBuilder();
@@ -364,14 +339,13 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND sf.fileType=:fileType ");
-        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND sf.fileType='VIDEO' ");
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode >=0 ");
         sb.append("AND lower(sf.baseName)=:baseName ");
-
-
-        return Collections.emptySet();
+        sb.append("ORDER by vd.episode");
+        return this.findByNamedParameters(sb, params);
     }
 
     public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, StageDirectory stageDirectory) {
