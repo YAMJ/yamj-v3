@@ -44,7 +44,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
                 "AND (sea.lastScanned is null or sea.lastScanned<=:compareDate)"
     ),
     @NamedQuery(name = Season.UPDATE_RESCAN_ALL,
-        query = "UPDATE Season SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+        query = "UPDATE Season SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
 })
 

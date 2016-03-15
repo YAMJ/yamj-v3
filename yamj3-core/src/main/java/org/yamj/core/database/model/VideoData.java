@@ -79,7 +79,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
     ),
     @NamedQuery(name = VideoData.UPDATE_RESCAN_ALL,
-        query = "UPDATE VideoData SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+        query = "UPDATE VideoData SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
     @NamedQuery(name = VideoData.UPDATE_STATUS,
         query = "UPDATE VideoData SET status=:status WHERE id=:id"

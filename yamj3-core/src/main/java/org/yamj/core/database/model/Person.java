@@ -52,7 +52,7 @@ import org.yamj.core.tools.PersonNameDTO;
         query = "SELECT p.id FROM Person p WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)"
     ),
     @NamedQuery(name = Person.UPDATE_RESCAN_ALL,
-        query = "UPDATE Person SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+        query = "UPDATE Person SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
     @NamedQuery(name = Person.UPDATE_STATUS,
         query = "UPDATE Person SET status=:status WHERE id=:id"

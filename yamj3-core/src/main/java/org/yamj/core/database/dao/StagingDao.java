@@ -187,7 +187,7 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public Set<Artwork> findMatchingArtworksForMovieOrSeason(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
+    public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
         Set<Artwork> result = new HashSet<>();
@@ -239,7 +239,7 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    public List<Artwork> findMatchingArtworksForSeries(ArtworkType artworkType, StageDirectory stageDirectory, boolean videosOnlyInSubDirs) {
+    public List<Artwork> findMatchingArtworkForSeries(ArtworkType artworkType, StageDirectory stageDirectory, boolean videosOnlyInSubDirs) {
         Map<String, Object> params = new HashMap<>();
         params.put("artworkType", artworkType);
         params.put("extra", Boolean.FALSE);
@@ -267,7 +267,7 @@ public class StagingDao extends HibernateDao {
         return this.findByNamedParameters(sb, params);
     }
 
-    public Set<Artwork> findMatchingArtworksForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
+    public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
         Set<Artwork> result = new HashSet<>();
@@ -325,27 +325,14 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    public List<Artwork> findMatchingVideoImages(String baseName, int part, StageDirectory stageDirectory) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("artworkType", ArtworkType.VIDEOIMAGE);
-        params.put("extra", Boolean.FALSE);
-        params.put("baseName", baseName);
-
-        // for movies
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT a ");
-        sb.append("FROM Artwork a ");
-        sb.append("JOIN a.videoData vd ");
-        sb.append("JOIN vd.mediaFiles mf ");
-        sb.append("JOIN mf.stageFiles sf ");
-        sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND sf.fileType='VIDEO' ");
-        sb.append("AND sf.status!='DELETED' ");
-        sb.append("AND mf.extra=:extra ");
-        sb.append("AND vd.episode >=0 ");
-        sb.append("AND lower(sf.baseName)=:baseName ");
-        sb.append("ORDER by vd.episode");
-        return this.findByNamedParameters(sb, params);
+    public List<Artwork> findMatchingVideoImages(String baseName, StageDirectory stageDirectory) {
+        return currentSession().getNamedQuery(Artwork.QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY)
+                .setString("baseName", baseName)
+                .setParameter("stageDirectory", stageDirectory)
+                .setBoolean("extra", Boolean.FALSE)
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
     }
 
     public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, StageDirectory stageDirectory) {
@@ -358,8 +345,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.extension)=:searchExtension ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        sb.append("AND sf.status != :duplicate ");
-        sb.append("AND sf.status != :deleted ");
+        sb.append("AND sf.status not in ('DUPLICATE','DELETED') ");
 
         Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", fileType);
@@ -368,8 +354,6 @@ public class StagingDao extends HibernateDao {
             query.setString("searchExtension", searchExtension.toLowerCase());
         }
         query.setParameter("stageDirectory", stageDirectory);
-        query.setParameter("duplicate", StatusType.DUPLICATE);
-        query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return query.list();

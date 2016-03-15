@@ -984,7 +984,7 @@ public class MediaImportService {
             String baseName = getBaseNameFromVideoImage(fileBaseName);
             
             // get matching episode image artwork
-            List<Artwork> matching = this.stagingDao.findMatchingVideoImages(baseName, part, stageFile.getStageDirectory());
+            List<Artwork> matching = this.stagingDao.findMatchingVideoImages(baseName, stageFile.getStageDirectory());
             
             if (part == matching.size()) {
                 // found artwork which matches the episode part
@@ -998,17 +998,17 @@ public class MediaImportService {
             
             if (metaDataTypes.contains(MetaDataType.MOVIE) || metaDataTypes.contains(MetaDataType.SEASON)) {
                 // generic select without base name which forces just to obey the directory
-                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, StringUtils.EMPTY, stageFile.getStageDirectory());
+                artworks = this.stagingDao.findMatchingArtworkForMovieOrSeason(artworkType, null, stageFile.getStageDirectory());
                 
                 if (metaDataTypes.contains(MetaDataType.SERIES)) {
                     // additional for series:
                     // search artwork where image files are in sub directories
-                    artworks.addAll(this.stagingDao.findMatchingArtworksForSeries(artworkType, stageFile.getStageDirectory(), true));
+                    artworks.addAll(this.stagingDao.findMatchingArtworkForSeries(artworkType, stageFile.getStageDirectory(), true));
                 }
             } else {
                 // just series possible:
                 // search in same directory as image where video files are in same or sub directories
-                artworks = this.stagingDao.findMatchingArtworksForSeries(artworkType, stageFile.getStageDirectory(), false);
+                artworks = this.stagingDao.findMatchingArtworkForSeries(artworkType, stageFile.getStageDirectory(), false);
             }
             
         } else {
@@ -1038,10 +1038,10 @@ public class MediaImportService {
                 priority = 2;
 
                 // find matching artwork
-                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, stripped, library);
+                artworks = this.stagingDao.findMatchingArtworkForMovieOrSeason(artworkType, stripped, library);
             } else {
                 // find matching artwork in same directory
-                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, stripped, stageFile.getStageDirectory());
+                artworks = this.stagingDao.findMatchingArtworkForMovieOrSeason(artworkType, stripped, stageFile.getStageDirectory());
             }
         }
         

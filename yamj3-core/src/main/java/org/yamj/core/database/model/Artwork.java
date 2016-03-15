@@ -42,14 +42,19 @@ import org.yamj.core.database.model.type.ArtworkType;
 
 @NamedQueries({    
     @NamedQuery(name = Artwork.QUERY_REQUIRED,
-        query = "FROM Artwork art LEFT OUTER JOIN FETCH art.videoData LEFT OUTER JOIN FETCH art.season LEFT OUTER JOIN FETCH art.series "+
+        query = "SELECT art FROM Artwork art LEFT OUTER JOIN FETCH art.videoData LEFT OUTER JOIN FETCH art.season LEFT OUTER JOIN FETCH art.series "+
                 "LEFT OUTER JOIN FETCH art.person LEFT OUTER JOIN FETCH art.boxedSet LEFT OUTER JOIN FETCH art.artworkLocated WHERE art.id=:id"
     ),
     @NamedQuery(name = Artwork.QUERY_FIND_PERSON_ARTWORKS,
-        query = "FROM Artwork a JOIN a.person p WHERE a.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+        query = "SELECT art FROM Artwork art JOIN art.person p WHERE art.artworkType=:artworkType AND lower(p.identifier)=:identifier"
+    ),
+    @NamedQuery(name = Artwork.QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY,
+        query = "SELECT art FROM Artwork art JOIN art.videoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf WHERE art.artworkType='VIDEOIMAGE' "+
+                "AND sf.fileType='VIDEO' AND sf.status!='DELETED' AND sf.stageDirectory=:stageDirectory AND mf.extra=:extra "+
+                "AND vd.episode >=0 AND lower(sf.baseName)=:baseName ORDER by vd.episode"
     ),
     @NamedQuery(name = Artwork.UPDATE_RESCAN_ALL,
-        query = "UPDATE Artwork SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+        query = "UPDATE Artwork SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
     @NamedQuery(name = Artwork.UPDATE_STATUS,
         query = "UPDATE Artwork SET status=:status WHERE id=:id"
@@ -85,6 +90,7 @@ public class Artwork extends AbstractStateful {
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_REQUIRED = "artwork.required";
     public static final String QUERY_FIND_PERSON_ARTWORKS = "artwork.personArtworks";
+    public static final String QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY = "artwork.findMatchingVideoImages.byNameAndDirectory";
     public static final String UPDATE_RESCAN_ALL = "artwork.rescanAll";
     public static final String UPDATE_STATUS = "artwork.updateStatus";
     public static final String QUERY_SCANNING_QUEUE = "artwork.scanning.queue";

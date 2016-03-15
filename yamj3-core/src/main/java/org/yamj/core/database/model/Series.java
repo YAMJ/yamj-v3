@@ -57,7 +57,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
         query = "FROM Series ser LEFT OUTER JOIN FETCH ser.trailers t LEFT OUTER JOIN FETCH t.stageFile s WHERE ser.id = :id"
     ),
     @NamedQuery(name = Series.UPDATE_RESCAN_ALL,
-        query = "UPDATE Series SET status='UPDATED' WHERE status != 'NEW' and status != 'UPDATED'"
+        query = "UPDATE Series SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
     @NamedQuery(name = Series.UPDATE_STATUS,
         query = "UPDATE Series SET status=:status WHERE id=:id"
