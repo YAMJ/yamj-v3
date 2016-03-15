@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -678,7 +679,7 @@ public class MediaImportService {
                 library = stageFile.getStageDirectory().getLibrary();
             }
 
-            videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), library);
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getBaseName(), library);
             attachVideoDataToNFO(videoFiles, videoDatas, 2);
 
         } else if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
@@ -689,7 +690,7 @@ public class MediaImportService {
             }
 
             // case 10: apply to all video data in stage directory
-            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
             attachVideoDataToNFO(videoFiles, videoDatas, 10);
 
             // get child directories
@@ -710,7 +711,7 @@ public class MediaImportService {
             // case 1: BluRay/DVD handling
             if (CollectionUtils.isNotEmpty(blurayOrDvdFolders)) {
                 for (StageDirectory folder : blurayOrDvdFolders) {
-                    videoDatas = this.stagingDao.findVideoDatas(folder);
+                    videoDatas = this.stagingDao.findVideoDatasForNFO(folder);
                     attachVideoDataToNFO(videoFiles, videoDatas, 1);
                 }
             }
@@ -727,18 +728,18 @@ public class MediaImportService {
         } else if (TVSHOW_NFO_NAME.equals(stageFile.getBaseName())) {
 
             // case 3: tvshow.nfo in same directory as video
-            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
             attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
 
             // case 4: tvshow.nfo in parent directory (so search in child directories)
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
-            videoDatas = this.stagingDao.findVideoDatas(childDirectories);
+            videoDatas = this.stagingDao.findVideoDatasForNFO(childDirectories);
             attachVideoDataToNFO(videoFiles, videoDatas, 4, true);
 
         } else {
 
             // case 1: video file has same base name in same directory
-            videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getBaseName(), stageFile.getStageDirectory());
             attachVideoDataToNFO(videoFiles, videoDatas, 1);
         }
 
@@ -977,15 +978,19 @@ public class MediaImportService {
         } else if (metaDataTypes.contains(MetaDataType.EPISODE)) {
             // EPISODE IMAGE
             
-            // TODO get matching episode images
-            artworks = Collections.emptyList();
+            // get the episode part in case of files containing multiple episodes
+            int part = getVideoImagePart(fileBaseName);
+            // get the base name which video files should have
+            String baseName = getBaseNameFromVideoImage(fileBaseName);
+            // get matching episode image artwork
+            artworks = this.stagingDao.findMatchingVideoImages(baseName, part, stageFile.getStageDirectory());
             
         } else if (generic) {
             // GENERIC IMAGES
             
             if (metaDataTypes.contains(MetaDataType.MOVIE) || metaDataTypes.contains(MetaDataType.SEASON)) {
                 // generic select without base name which forces just to obey the directory
-                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, null, stageFile.getStageDirectory());
+                artworks = this.stagingDao.findMatchingArtworksForMovieOrSeason(artworkType, StringUtils.EMPTY, stageFile.getStageDirectory());
                 
                 if (metaDataTypes.contains(MetaDataType.SERIES)) {
                     // additional for series:
@@ -1069,7 +1074,7 @@ public class MediaImportService {
         return true;
     }
 
-    private static boolean endsWithToken(String name, List<String> tokens) {
+    private static boolean endsWithToken(final String name, final List<String> tokens) {
         for (String token : tokens) {
             if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
                 return true;
@@ -1078,7 +1083,7 @@ public class MediaImportService {
         return false;
     }
 
-    private static boolean isSpecialImage(String name, String special, List<String> tokens) {
+    private static boolean isSpecialImage(final String name, final String special, final List<String> tokens) {
         for (String token : tokens) {
             if (name.equals(special.concat(".").concat(token)) || name.equals(special.concat("-").concat(token))) {
                 return true;
@@ -1087,7 +1092,7 @@ public class MediaImportService {
         return false;
     }
         
-    private static String stripToken(String name, List<String> tokens) {
+    private static String stripToken(final String name, final List<String> tokens) {
         for (String token : tokens) {
             if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
                 return name.substring(0, name.length() - token.length() -1);
@@ -1105,6 +1110,23 @@ public class MediaImportService {
         return boxedSetName;
     }
 
+    private static final int getVideoImagePart(final String name) {
+        if (name.endsWith(".videoimage")) {
+            // no number so video image is for first episode
+            return 1;
+        }
+        int lastIndex = name.lastIndexOf("_");
+        if (lastIndex < 0) {
+            // assume that video image is for first part
+            return 1;
+        }
+        return NumberUtils.toInt(name.substring(lastIndex+1), 1);
+    }
+
+    private static final String getBaseNameFromVideoImage(final String name) {
+        return name.substring(0, name.indexOf(".videoimage"));
+    }
+    
     @Transactional
     public void processWatched(long id) {
         StageFile watchedFile = stagingDao.getStageFile(id);
