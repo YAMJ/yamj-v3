@@ -986,7 +986,7 @@ public class MediaImportService {
             // get matching episode image artwork
             List<Artwork> matching = this.stagingDao.findMatchingVideoImages(baseName, stageFile.getStageDirectory());
             
-            if (part == matching.size()) {
+            if (part <= matching.size()) {
                 // found artwork which matches the episode part
                 artworks = Collections.singleton(matching.get(part-1));
             } else {
