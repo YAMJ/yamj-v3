@@ -129,7 +129,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
             sb.append(" ORDER BY ");
             sb.append(sortBy);
             
-            if (!StringUtils.containsIgnoreCase(sortBy, "ASC") && !StringUtils.containsIgnoreCase(sortBy, "DESC")) {  
+            if (!StringUtils.containsIgnoreCase(sortBy, " ASC") && !StringUtils.containsIgnoreCase(sortBy, " DESC")) {  
                 if ("DESC".equalsIgnoreCase(sortdir)) {
                     sb.append(" DESC");
                 } else {
