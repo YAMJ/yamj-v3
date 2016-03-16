@@ -290,7 +290,6 @@ public class CommonDao extends HibernateDao {
 
     public List<ApiAwardDTO> getAwards(ApiWrapperList<ApiAwardDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
-        String sortBy = options.getSortby();
 
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT aw.id, aw.event, aw.category, aw.sourcedb as source ");
@@ -303,7 +302,7 @@ public class CommonDao extends HibernateDao {
             }
         }
         sqlScalars.addToSql(options.getSearchString(true));
-        sqlScalars.addToSql(options.getSortString(sortBy));
+        sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("event", StringType.INSTANCE);
@@ -501,33 +500,6 @@ public class CommonDao extends HibernateDao {
         this.saveEntity(award);
         return award;
     }
-
-    public List<Long> getSeasonVideoIds(Long id) {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT vid.id ");
-        sqlScalars.addToSql("FROM season sea, videodata vid ");
-        sqlScalars.addToSql("WHERE vid.season_id=sea.id ");
-        sqlScalars.addToSql("AND sea.id=:id ");
-
-        sqlScalars.addParameter("id", id);
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        return executeQueryWithTransform(Long.class, sqlScalars, null);
-    }
-
-    public List<Long> getSeriesVideoIds(Long id) {
-        SqlScalars sqlScalars = new SqlScalars();
-
-        sqlScalars.addToSql("SELECT DISTINCT vid.id ");
-        sqlScalars.addToSql("FROM videodata vid, series ser, season sea ");
-        sqlScalars.addToSql("WHERE vid.season_id=sea.id ");
-        sqlScalars.addToSql("and sea.series_id=ser.id ");
-        sqlScalars.addToSql("AND sea.id=:id ");
-
-        sqlScalars.addParameter("id", id);
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        return executeQueryWithTransform(Long.class, sqlScalars, null);
-    }
-
 
     public void markAsDeleted(List<Artwork> artworks, Set<String> sources) {
         for (Artwork artwork : artworks) {

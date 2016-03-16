@@ -608,14 +608,6 @@ public class JsonApiStorageService {
         return results;
     }
 
-    public List<Long> getSeasonVideoIds(Long id) {
-        return commonDao.getSeasonVideoIds(id);
-    }
-
-    public List<Long> getSeriesVideoIds(Long id) {
-        return commonDao.getSeriesVideoIds(id);
-    }
-
     //<editor-fold defaultstate="collapsed" desc="Watched methods">
     /**
      * Update a single videodata record

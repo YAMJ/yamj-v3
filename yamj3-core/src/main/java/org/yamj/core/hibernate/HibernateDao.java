@@ -301,8 +301,14 @@ public abstract class HibernateDao {
         }
     }
 
+    private static void applyNamedParameters(Query queryObject, Map<String, Object> params) throws HibernateException {
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(queryObject, param.getKey(), param.getValue());
+        }
+    }
+
     @SuppressWarnings("rawtypes")
-    protected static void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
+    private static void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
         if (value instanceof Collection) {
             queryObject.setParameterList(paramName, (Collection) value);
         } else if (value instanceof Object[]) {
@@ -324,9 +330,7 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public List findByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
         Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
-        for (Entry<String, Object> param : params.entrySet()) {
-            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
-        }
+        applyNamedParameters(query, params);
         return query.list();
     }
 
@@ -341,9 +345,7 @@ public abstract class HibernateDao {
     @SuppressWarnings("unchecked")
     public <T> T findUniqueByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
         Query query = currentSession().createQuery(queryCharSequence.toString()).setCacheable(true);
-        for (Entry<String, Object> param : params.entrySet()) {
-            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
-        }
+        applyNamedParameters(query, params);
         return (T)query.uniqueResult();
     }
 
@@ -380,9 +382,7 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public List namedQueryByNamedParameters(String queryName, Map<String, Object> params) {
         Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
-        for (Entry<String, Object> param : params.entrySet()) {
-            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
-        }
+        applyNamedParameters(query, params);
         return query.list();
     }
 
@@ -405,23 +405,8 @@ public abstract class HibernateDao {
      */
     public int executeUpdate(String queryName, Map<String, Object> params) {
         Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
-        for (Entry<String, Object> param : params.entrySet()) {
-            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
-        }
+        applyNamedParameters(query, params);
         return query.executeUpdate();
-    }
-
-    /**
-     * Execute a query return the results.
-     *
-     * Puts the total count returned from the query into the wrapper
-     *
-     * @param sql
-     * @param wrapper
-     * @return
-     */
-    public List<Object[]> executeQuery(String sql, IApiWrapper wrapper) {
-        return executeQueryWithTransform(Object[].class, new SqlScalars(sql), wrapper);
     }
 
     /**

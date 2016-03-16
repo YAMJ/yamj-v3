@@ -218,7 +218,22 @@ public class CommonController {
             genre = jsonApiStorageService.getGenre(name);
         }
 
-        wrapper.setResult(genre == null ? null : new ApiGenreDTO(genre));
+
+        ApiGenreDTO result = null;
+        if (genre != null) {
+            result = new ApiGenreDTO();
+            result.setId(genre.getId());
+            result.setName(genre.getName());
+            if (genre.getTargetApi() != null) {
+                result.setTarget(genre.getTargetApi());
+            } else if (genre.getTargetXml() != null) {
+                result.setTarget(genre.getTargetXml());
+            } else {
+                result.setTarget(genre.getName());
+            }
+        }
+        
+        wrapper.setResult(result);
         return wrapper;
     }
 
