@@ -33,10 +33,14 @@ public interface IOptionsSort {
 
     void setSortdir(String sortdir);
 
+    void setArtworksortdir(String artworksortdir);
+
     String getSortby();
 
     String getSortdir();
 
+    String getArtworksortdir();
+    
     String getSortString();
 
     String getSortString(String sortby);

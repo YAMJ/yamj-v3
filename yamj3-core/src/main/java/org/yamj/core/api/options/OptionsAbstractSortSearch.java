@@ -46,6 +46,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     private String sortby;
     private String sortdir;
+    private String artworksortdir;
     private String field;
     private String search;
     // TODO: Change this to MatchMode
@@ -102,6 +103,26 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     @Override
     public void setSortdir(String sortdir) {
         this.sortdir = sortdir;
+    }
+
+    /**
+     * Get the sort direction for artwork
+     *
+     * @return
+     */
+    @Override
+    public String getArtworksortdir() {
+        return artworksortdir;
+    }
+
+    /**
+     * Set the sort direction for artwork
+     *
+     * @param artworksortdir
+     */
+    @Override
+    public void setArtworksortdir(String artworksortdir) {
+        this.artworksortdir = artworksortdir;
     }
 
     /**

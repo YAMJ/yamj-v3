@@ -1112,7 +1112,7 @@ public class ApiDao extends HibernateDao {
             LOG.trace("Adding photos");
             // Get the artwork associated with the IDs in the results
             Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired);
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired, options.getArtworksortdir());
             for (ApiPersonDTO p : results) {
                 if (artworkList.containsKey(p.getId())) {
                     p.setArtwork(artworkList.get(p.getId()));
@@ -1141,7 +1141,7 @@ public class ApiDao extends HibernateDao {
                 LOG.info("Adding photo for '{}'", person.getName());
                 // Add the artwork
                 Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, person.getId(), artworkRequired);
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, person.getId(), artworkRequired, options.getArtworksortdir());
                 if (artworkList.containsKey(options.getId())) {
                     LOG.info("Found {} artworks", artworkList.get(options.getId()).size());
                     person.setArtwork(artworkList.get(options.getId()));
@@ -1315,7 +1315,7 @@ public class ApiDao extends HibernateDao {
             LOG.info("Looking for person artwork for {} with ID {}", metaDataType, options.getId());
 
             Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired);
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired, options.getArtworksortdir());
             for (ApiPersonDTO person : results) {
                 if (artworkList.containsKey(person.getId())) {
                     person.setArtwork(artworkList.get(person.getId()));
@@ -1823,9 +1823,9 @@ public class ApiDao extends HibernateDao {
             LOG.trace("Adding artwork for ID {}", options.getId());
             Map<Long, List<ApiArtworkDTO>> artworkList;
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes());
+                artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes(), options.getArtworksortdir());
             } else {
-                artworkList = getArtworkForId(type, options.getId());
+                artworkList = getArtworkForId(type, options.getId(), options.getArtworksortdir());
             }
 
             if (artworkList.containsKey(options.getId())) {
@@ -2312,7 +2312,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    private Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id) {
+    private Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id, String artworkSortDir) {
         Set<String> artworkRequired = new HashSet<>();
         for (ArtworkType at : ArtworkType.values()) {
             artworkRequired.add(at.toString());
@@ -2320,7 +2320,7 @@ public class ApiDao extends HibernateDao {
         // Remove the unknown type
         artworkRequired.remove(ArtworkType.UNKNOWN.toString());
 
-        return getArtworkForId(type, id, artworkRequired);
+        return getArtworkForId(type, id, artworkRequired, artworkSortDir);
     }
 
     /**
@@ -2331,7 +2331,7 @@ public class ApiDao extends HibernateDao {
      * @param artworkRequired
      * @return
      */
-    public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, Set<String> artworkRequired) {
+    public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, Set<String> artworkRequired, String artworkSortDir) {
         LOG.trace("Artwork required for {} ID {} is {}", type, id, artworkRequired);
 
         StringBuilder sbSQL = new StringBuilder();
@@ -2367,8 +2367,12 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(" AND al.id is not null");
         sbSQL.append(" AND v.id IN (:id)");
         sbSQL.append(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
-        sbSQL.append(" ORDER BY al.create_timestamp");
-
+        if ("DESC".equalsIgnoreCase(artworkSortDir)) {
+            sbSQL.append(" ORDER BY al.create_timestamp DESC");
+        } else {
+            sbSQL.append(" ORDER BY al.create_timestamp ASC");
+        }
+        
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.trace("Artwork SQL: {}", sqlScalars.getSql());
 
@@ -2443,7 +2447,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (options.hasDataItem(DataItem.ARTWORK)) {
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id, options.getArtworkTypes());
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id, options.getArtworkTypes(), options.getArtworksortdir());
                 if (artworkList == null || !artworkList.containsKey(id) || CollectionUtils.isEmpty(artworkList.get(id))) {
                     LOG.debug("No artwork found for seriesId {}", id);
                 } else {
@@ -2488,7 +2492,7 @@ public class ApiDao extends HibernateDao {
 
         if (options.hasDataItem(DataItem.ARTWORK)) {
             for (ApiSeasonInfoDTO season : seasonResults) {
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, season.getSeasonId(), options.getArtworkTypes());
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, season.getSeasonId(), options.getArtworkTypes(), options.getArtworksortdir());
                 if (artworkList == null || !artworkList.containsKey(season.getSeasonId()) || CollectionUtils.isEmpty(artworkList.get(season.getSeasonId()))) {
                     LOG.debug("No artwork found for series ID {} and season {}", id, season.getSeason());
                 } else {
@@ -2736,9 +2740,9 @@ public class ApiDao extends HibernateDao {
             for (ApiBoxedSetDTO boxedSet : boxedSets) {
                 Map<Long, List<ApiArtworkDTO>> artworkList;
                 if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId(), options.getArtworkTypes());
+                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId(), options.getArtworkTypes(), options.getArtworksortdir());
                 } else {
-                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId());
+                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId(), options.getArtworksortdir());
                 }
                 boxedSet.addArtwork(artworkList.get(boxedSet.getId()));
             }
@@ -2795,9 +2799,9 @@ public class ApiDao extends HibernateDao {
                 for (ApiBoxedSetMemberDTO member : members) {
                     Map<Long, List<ApiArtworkDTO>> artworkList;
                     if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                        artworkList = getArtworkForId(member.getVideoType(), member.getId(), options.getArtworkTypes());
+                        artworkList = getArtworkForId(member.getVideoType(), member.getId(), options.getArtworkTypes(), options.getArtworksortdir());
                     } else {
-                        artworkList = getArtworkForId(member.getVideoType(), member.getId());
+                        artworkList = getArtworkForId(member.getVideoType(), member.getId(), options.getArtworksortdir());
                     }
                     member.addArtwork(artworkList.get(member.getId()));
                 }
@@ -2808,9 +2812,9 @@ public class ApiDao extends HibernateDao {
             LOG.trace("Adding artwork for ID {}", options.getId());
             Map<Long, List<ApiArtworkDTO>> artworkList;
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId(), options.getArtworkTypes());
+                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId(), options.getArtworkTypes(), options.getArtworksortdir());
             } else {
-                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId());
+                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId(), options.getArtworksortdir());
             }
             boxedSet.addArtwork(artworkList.get(options.getId()));
         }
