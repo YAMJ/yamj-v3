@@ -22,7 +22,9 @@
  */
 package org.yamj.core.tools;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -81,5 +83,13 @@ public final class CommonTools {
             }
         }
         return null;
-   }
+    }
+    
+    public static <T extends Object> List<List<T>> split(List<T> list, int targetSize) {
+        List<List<T>> lists = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += targetSize) {
+            lists.add(list.subList(i, Math.min(i + targetSize, list.size())));
+        }
+        return lists;
+    }
 }

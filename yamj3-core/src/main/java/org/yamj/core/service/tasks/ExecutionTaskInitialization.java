@@ -50,7 +50,8 @@ public class ExecutionTaskInitialization {
         LOG.debug("Initialize execution tasks");
         storeExecutionTask("recheck", "recheck", IntervalType.DAILY, -1, new LocalDateTime(2016,1,1,3,0));
         storeExecutionTask("delete", "delete", IntervalType.HOURS, 2, new LocalDateTime(2016,1,1,0,0));
-        storeExecutionTask("artworksanity", "artworksanity", IntervalType.MONTHLY, -1, new LocalDateTime(2016,1,1,2,0));
+        storeExecutionTask("stagingsanity", "stagingsanity", IntervalType.DAYS, 7, new LocalDateTime(2016,1,1,2,30));
+        storeExecutionTask("artworksanity", "artworksanity", IntervalType.MONTHLY, -1, new LocalDateTime(2016,1,1,3,30));
         storeExecutionTask("trakttv", "trakttv", IntervalType.DAILY, -1, new LocalDateTime(2016,1,1,4,0));
     }
     

@@ -43,6 +43,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
+import org.yamj.core.tools.CommonTools;
 
 @Transactional(readOnly = true)
 @Service("stagingService")
@@ -292,5 +293,67 @@ public class StagingService {
     
     public List<StageFile> findVideoStageFiles(Artwork artwork) {
         return this.stagingDao.findVideoStageFiles(artwork);
+    }
+    
+    public List<Long> findNotExistingStageFiles() {
+        List<Long> stageFileIds = new ArrayList<>();
+        
+        // start from root directories
+        for (StageDirectory rootDir : stagingDao.getRootDirectories()) {
+            if (isRootExisting(rootDir)) {
+                checkDirectory(rootDir, stageFileIds);
+            }
+        }
+        
+        return stageFileIds;
+    }
+    
+    private void checkDirectory(StageDirectory directory, List<Long> stageFileIds) {
+        File dirFile = new File(directory.getDirectoryPath());
+        if (dirFile.isDirectory()) {
+            if (dirFile.exists()) {
+                // find not existing stage files
+                for (StageFile stageFile : directory.getStageFiles()) {
+                    if (!new File(stageFile.getFullPath()).exists()) {
+                        LOG.debug("Stage file '{}' does not exist", stageFile.getFullPath());
+                        stageFileIds.add(stageFile.getId());
+                    }
+                }
+            } else {
+                LOG.debug("Stage directory '{}' does not exist", directory.getDirectoryPath());
+                // add all stage files for deletion
+                for (StageFile stageFile : directory.getStageFiles()) {
+                    stageFileIds.add(stageFile.getId());
+                }
+            }
+        }
+        
+        for (StageDirectory child : stagingDao.getChildDirectories(directory)) {
+            this.checkDirectory(child, stageFileIds);
+        }
+    }
+    
+    private static boolean isRootExisting(StageDirectory rootDir) {
+        try {
+            File rootFile = new File(rootDir.getDirectoryPath());
+            if (rootFile.isDirectory() && rootFile.exists() && rootFile.canRead() && rootFile.canExecute()) {
+                return true;
+            }
+        } catch (Exception ex) {
+            // ignore any error
+        }
+        return false;
+    }
+    
+    @Transactional
+    public void markStageFilesAsDeleted(List<Long> stageFileIds) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("status", StatusType.DELETED);
+        
+        for (List<Long> subList : CommonTools.split(stageFileIds, 500)) {
+            params.put("idList", subList);
+            int updated = this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_BULK, params);
+            LOG.trace("Marked {} stage files as deleted", updated);
+        }
     }
 }
