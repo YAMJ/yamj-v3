@@ -26,13 +26,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.service.ExecutionTaskStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.metadata.MetadataScannerService;
 
@@ -52,11 +55,14 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
     private ArtworkScanScheduler artworkScanScheduler;
     @Autowired 
     private TrailerScanScheduler trailerScanScheduler;
+    @Autowired
+    private ExecutionTaskStorageService executionTaskStorageService;
     
-    private boolean messageDisabledVideo = Boolean.FALSE;     // Have we already printed the disabled message
-    private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
-    private boolean messageDisabledFilmography = Boolean.FALSE;  // Have we already printed the disabled message
-
+    private boolean messageDisabledVideo = false;       // Have we already printed the disabled message
+    private boolean messageDisabledPeople = false;       // Have we already printed the disabled message
+    private boolean messageDisabledFilmography = false;  // Have we already printed the disabled message
+    private boolean videosHasBeenScanned = false;
+    
     private final AtomicBoolean watchScanVideo = new AtomicBoolean(false);
     private final AtomicBoolean watchScanPeople = new AtomicBoolean(false);
     private final AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
@@ -111,6 +117,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
                 LOG.info("Metadata scanning is disabled");
             }
             watchScanVideo.set(false);
+            videosHasBeenScanned = false;
         } else {
             
             if (messageDisabledVideo) {
@@ -123,10 +130,29 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
             if (CollectionUtils.isEmpty(queueElements)) {
                 LOG.trace("No metadata found to scan");
                 watchScanVideo.set(false);
+                
+                if (videosHasBeenScanned) {
+                    // this indicated that in previous runs videos has been scanned
+                    // so force run of Trakt.TV task
+                    try {
+                        ExecutionTask task = executionTaskStorageService.getExecutionTask("trakttv");
+                        if (task != null) {
+                            task.setNextExecution(LocalDateTime.fromDateFields(task.getNextExecution()).minusYears(2).toDate());
+                            this.executionTaskStorageService.updateEntity(task);                            
+                        }
+                    } catch (Exception ignore) {
+                        // ignore any exception
+                    }
+                    
+                    // now all vidoes has been scanned again
+                    videosHasBeenScanned = false;
+                }
+                
             } else {
                 LOG.info("Found {} metadata objects to process; scan with {} threads", queueElements.size(), maxThreads);
                 threadedProcessing(queueElements, maxThreads, metadataScannerService);
                 LOG.debug("Finished metadata scanning");
+                videosHasBeenScanned = true;
             }
         }
         

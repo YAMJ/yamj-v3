@@ -56,9 +56,10 @@ public class MetadataDao extends HibernateDao {
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(queryName)
                 .setReadOnly(true)
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
                 .setMaxResults(maxResults)
-                .scroll(ScrollMode.FORWARD_ONLY)
-            )
+                .scroll(ScrollMode.FORWARD_ONLY))
         {
             Object[] row;
             while (scroll.next()) {

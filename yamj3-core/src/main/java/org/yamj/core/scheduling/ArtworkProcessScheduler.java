@@ -49,7 +49,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
     @Autowired
     private ArtworkProcessorService artworkProcessorService;
 
-    private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
+    private boolean messageDisabled = false; // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
     
     @Scheduled(initialDelay = 5000, fixedDelay = 60000)
