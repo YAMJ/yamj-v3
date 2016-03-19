@@ -40,6 +40,7 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     private MetaDataType videoType;
     private String sortTitle;
     private Integer videoYear = -1;
+    private Date releaseDate;
     private String quote;
     private String tagline;
     private Integer topRank = -1;
@@ -73,6 +74,10 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
 
     public Integer getVideoYear() {
         return videoYear;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
     }
 
     public Map<JobType, List<ApiPersonDTO>> getCast() {
@@ -211,6 +216,10 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
 
     public void setVideoYear(Integer videoYear) {
         this.videoYear = videoYear;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     public void setFirstAired(String firstAired) {
