@@ -22,9 +22,8 @@
  */
 package org.yamj.core.api.model;
 
-import org.apache.http.HttpStatus;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.http.HttpStatus;
 
 public class ApiStatus {
 
@@ -75,5 +74,9 @@ public class ApiStatus {
 
     public static ApiStatus internalError(String message) {
         return new ApiStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, message);
+    }
+
+    public static ApiStatus locked() {
+        return new ApiStatus(HttpStatus.SC_LOCKED, "Object has been locked");
     }
 }
