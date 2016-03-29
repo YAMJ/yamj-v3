@@ -1168,7 +1168,7 @@ public class ApiDao extends HibernateDao {
         return person;
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, OptionsId options) {
+    private List<ApiFilmographyDTO> getPersonFilmographyInside(Long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.MOVIE.name());
@@ -1231,7 +1231,7 @@ public class ApiDao extends HibernateDao {
         return retrieveFilmography(id, sqlScalars);
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, OptionsId options) {
+    private List<ApiFilmographyDTO> getPersonFilmographyScanned(Long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT p.participation_type as type, p.job as job, p.role as role, p.voice_role as voiceRole, ");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
@@ -1285,7 +1285,7 @@ public class ApiDao extends HibernateDao {
         return retrieveFilmography(id, sqlScalars);
     }
 
-    public List<ApiFilmographyDTO> retrieveFilmography(long id, SqlScalars sqlScalars) {
+    public List<ApiFilmographyDTO> retrieveFilmography(Long id, SqlScalars sqlScalars) {
         sqlScalars.addScalar(TYPE, StringType.INSTANCE);
         sqlScalars.addScalar(JOB, StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
