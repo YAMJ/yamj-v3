@@ -225,20 +225,20 @@ public class FilenameScanner {
         imageExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.image.extensions", "jpg,jpeg,gif,bmp,png"), ",;|");
 
         // other properties
-        languageDetection = PropertyTools.getBooleanProperty("filename.scanner.language.detection", Boolean.TRUE);
-        skipEpisodeTitle = PropertyTools.getBooleanProperty("filename.scanner.skip.episodeTitle", Boolean.FALSE);
+        languageDetection = PropertyTools.getBooleanProperty("filename.scanner.language.detection", true);
+        skipEpisodeTitle = PropertyTools.getBooleanProperty("filename.scanner.skip.episodeTitle", false);
 
         // parent patterns
-        useParentRegex = PropertyTools.getBooleanProperty("filename.scanner.useParentRegex", Boolean.FALSE);
+        useParentRegex = PropertyTools.getBooleanProperty("filename.scanner.useParentRegex", false);
         String patternString = PropertyTools.getProperty("filename.scanner.parentRegex", "");
         if (StringUtils.isNotBlank(patternString)) {
             useParentPattern = PatternUtils.ipatt(patternString);
         } else {
-            useParentRegex = Boolean.FALSE;
+            useParentRegex = false;
         }
 
         // build the skip patterns
-        boolean caseSensitive = PropertyTools.getBooleanProperty("filename.scanner.skip.caseSensitive", Boolean.TRUE);
+        boolean caseSensitive = PropertyTools.getBooleanProperty("filename.scanner.skip.caseSensitive", true);
         for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.skip.keywords", ""), ",;| ")) {
             if (caseSensitive) {
                 skipPatterns.add(PatternUtils.wpatt(Pattern.quote(token)));
@@ -246,7 +246,7 @@ public class FilenameScanner {
                 skipPatterns.add(PatternUtils.iwpatt(Pattern.quote(token)));
             }
         }
-        caseSensitive = PropertyTools.getBooleanProperty("filename.scanner.skip.caseSensitive.regex", Boolean.TRUE);
+        caseSensitive = PropertyTools.getBooleanProperty("filename.scanner.skip.caseSensitive.regex", true);
         for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.skip.keywords.regex", ""), ",;| ")) {
             if (caseSensitive) {
                 skipPatterns.add(PatternUtils.patt(token));
@@ -363,7 +363,7 @@ public class FilenameScanner {
         for (Pattern pattern : extraPatterns) {
             Matcher matcher = pattern.matcher(dto.getRest());
             if (matcher.find()) {
-                dto.setExtra(Boolean.TRUE);
+                dto.setExtra(true);
                 dto.setPartTitle(matcher.group(1));
                 dto.setRest(cutMatch(dto.getRest(), matcher, "./EXTRA/."));
                 break;
@@ -407,7 +407,7 @@ public class FilenameScanner {
 
             final Matcher ematcher = EPISODE_PATTERN.matcher(matcher.group(0));
             while (ematcher.find()) {
-                dto.getEpisodes().add(Integer.parseInt(ematcher.group(1)));
+                dto.getEpisodes().add(Integer.valueOf(ematcher.group(1)));
             }
         }
     }

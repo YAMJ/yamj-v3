@@ -332,24 +332,24 @@ public final class DOMHelper {
         int posTvShow = fileString.indexOf("<" + TYPE_TVSHOW);
         int posEpisode = fileString.indexOf("<" + TYPE_EPISODE);
 
-        boolean posValid = Boolean.FALSE;
+        boolean posValid = false;
 
         if (posMovie == -1) {
             posMovie = fileString.length();
         } else {
-            posValid = Boolean.TRUE;
+            posValid = true;
         }
 
         if (posTvShow == -1) {
             posTvShow = fileString.length();
         } else {
-            posValid = Boolean.TRUE;
+            posValid = true;
         }
 
         if (posEpisode == -1) {
             posEpisode = fileString.length();
         } else {
-            posValid = Boolean.TRUE;
+            posValid = true;
         }
 
         if (posValid) {

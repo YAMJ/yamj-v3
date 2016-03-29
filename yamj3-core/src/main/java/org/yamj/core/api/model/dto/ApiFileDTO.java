@@ -38,18 +38,18 @@ import org.yamj.core.tools.MetadataTools;
 public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     private Boolean extra;
-    private Integer part = -1;
+    private Integer part = Integer.valueOf(-1);
     private String partTitle;
     private String version;
     private String container;
     private String codec;
     private String codecFormat;
     private String codecProfile;
-    private Integer bitrate = -1;
-    private Integer overallBitrate = -1;
-    private Float fps = -1F;
-    private Integer width = -1;
-    private Integer height = -1;
+    private Integer bitrate = Integer.valueOf(-1);
+    private Integer overallBitrate = Integer.valueOf(-1);
+    private Float fps = Float.valueOf(-1);
+    private Integer width = Integer.valueOf(-1);
+    private Integer height = Integer.valueOf(-1);
     private String aspectRatio;
     private String runtime;
     private String videoSource;
@@ -180,7 +180,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setRuntime(Integer runtime) {
         if (runtime != null) {
-            this.runtime = MetadataTools.formatRuntime(runtime);
+            this.runtime = MetadataTools.formatRuntime(runtime.intValue());
         }
     }
 
@@ -222,7 +222,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setFileSize(Long fileSize) {
         if (fileSize != null) {
-            this.fileSize = MetadataTools.formatFileSize(fileSize);
+            this.fileSize = MetadataTools.formatFileSize(fileSize.longValue());
         }
     }
 

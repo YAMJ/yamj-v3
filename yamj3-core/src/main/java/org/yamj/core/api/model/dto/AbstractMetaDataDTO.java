@@ -33,7 +33,7 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
 
     private String title;
     private String originalTitle;
-    private Integer year = -1;
+    private Integer year = Integer.valueOf(-1);
     private String plot;
     private String outline;
     private Boolean watched;

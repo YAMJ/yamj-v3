@@ -62,7 +62,7 @@ public class StagingDao extends HibernateDao {
     }
 
     @Cacheable(value=CachingNames.DB_STAGEFILE, key="#id", unless="#result==null")
-    public StageFile getStageFile(long id) {
+    public StageFile getStageFile(Long id) {
         return getById(StageFile.class, id);
     }
 
@@ -110,7 +110,7 @@ public class StagingDao extends HibernateDao {
         }
         
         return currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_NFO_BY_DIRECTORY)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setParameter("stageDirectory", stageDirectory)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
@@ -123,7 +123,7 @@ public class StagingDao extends HibernateDao {
         }
         
         return currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_NFO_BY_NAME_AND_DIRECTORY)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setString("baseName", baseName.toLowerCase())
                 .setParameter("stageDirectory", stageDirectory)
                 .setCacheable(true)
@@ -137,7 +137,7 @@ public class StagingDao extends HibernateDao {
         }
 
         return currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_NFO_BY_NAME_AND_LIBRARY)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setString("baseName", baseName.toLowerCase())
                 .setParameter("library", library)
                 .setCacheable(true)
@@ -151,7 +151,7 @@ public class StagingDao extends HibernateDao {
         }
 
         return currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_NFO_BY_DIRECTORIES)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setParameterList("stageDirectories", stageDirectories)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
@@ -329,7 +329,7 @@ public class StagingDao extends HibernateDao {
         return currentSession().getNamedQuery(Artwork.QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY)
                 .setString("baseName", baseName)
                 .setParameter("stageDirectory", stageDirectory)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .list();
@@ -476,7 +476,7 @@ public class StagingDao extends HibernateDao {
         
         return currentSession().getNamedQuery(namedQuery)
                 .setLong("id", id)
-                .setBoolean("extra", Boolean.FALSE)
+                .setBoolean("extra", false)
                 .setCacheable(true)
                 .setCacheMode(CacheMode.NORMAL)
                 .list();

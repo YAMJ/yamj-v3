@@ -104,7 +104,7 @@ public class YamjInfo {
         // IP Address
         final String coreUrl = PropertyTools.getProperty("yamj3.core.url", "");
         if (StringUtils.isBlank(coreUrl)) {
-            this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
+            this.coreIp = SystemTools.getIpAddress(true);
         } else {
             this.coreIp = coreUrl;
         }

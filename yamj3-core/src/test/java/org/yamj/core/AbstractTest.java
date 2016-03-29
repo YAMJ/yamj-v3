@@ -64,7 +64,7 @@ public abstract class AbstractTest extends AbstractJUnit4SpringContextTests {
         Logger LOG = LoggerFactory.getLogger(scannerClass);
         LOG.info("VideoData {}: {} awards", videoData.getTitle(), videoData.getAwardDTOS().size());
         for (AwardDTO award : videoData.getAwardDTOS()) {
-            LOG.info("{} - {}: {} (won: {})", award.getEvent(), award.getCategory(),award.getYear(), award.isWon());
+            LOG.info("{} - {}: {} (won: {})", award.getEvent(), award.getCategory(), award.getYear(), award.isWon());
         }
     }
 

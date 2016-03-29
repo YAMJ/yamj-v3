@@ -25,10 +25,7 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
@@ -52,7 +49,7 @@ public class FileController {
      */
     @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.DELETE})
     public ApiStatus deleteFile(@PathVariable("id") Long id) {
-        if (id <= 0L) {
+        if (id.longValue() <= 0L) {
             return ApiStatus.INVALID_ID;
         }
         
@@ -75,7 +72,7 @@ public class FileController {
      */
     @RequestMapping(value = "/update/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus updateFile(@PathVariable("id") Long id) {
-        if (id <= 0L) {
+        if (id.longValue() <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 
@@ -98,7 +95,7 @@ public class FileController {
      */
     @RequestMapping(value = "/watched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus watchedFile(@PathVariable("id") Long id) {
-        if (id <= 0L) {
+        if (id.longValue() <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 

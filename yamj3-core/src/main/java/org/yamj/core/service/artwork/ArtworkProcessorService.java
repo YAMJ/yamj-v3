@@ -264,7 +264,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                     Dimension dimension = GraphicTools.getDimension(located.getUrl());
                     if (dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
                         LOG.warn("No valid image dimension determined: {}", located);
-                        return Boolean.FALSE;
+                        return false;
                     }
 
                     // set values for later usage
@@ -273,7 +273,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                 } catch (IOException ex) {
                     LOG.warn("Could not determine image dimension cause invalid image: {}", located);
                     LOG.trace("Invalid image error", ex);
-                    return Boolean.FALSE;
+                    return false;
                 }
             }
 
@@ -283,7 +283,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             LOG.trace("Located URL was blank for {}", located);
         }
 
-        return Boolean.TRUE;
+        return true;
     }
     
     public ImageDTO getImage(Long id, String profileName) throws Exception {

@@ -93,7 +93,7 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
 
     public String getFilename() {
         if (StringUtils.isBlank(this.filename)) {
-            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), true);
         }
         return filename;
     }

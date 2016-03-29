@@ -74,7 +74,7 @@ public class ScannerManagementImpl implements ScannerManagement {
      */
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
     // The default watched status
-    private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
+    private static final boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", false);
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
@@ -101,7 +101,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     static {
         // Set up the break scanning list. A "null" for the list means all files.
         // Ensure all filenames and extensions are lowercase
-        boolean nmjCompliant = PropertyTools.getBooleanProperty("filescanner.nmjCompliant", Boolean.FALSE);
+        boolean nmjCompliant = PropertyTools.getBooleanProperty("filescanner.nmjCompliant", false);
         KeywordMap fsIgnore = PropertyTools.getKeywordMap("filescanner.ignore", "");
 
         DIR_EXCLUSIONS.put(FILE_MJBIGNORE, null);
@@ -208,7 +208,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             library.getStatistics().setTime(TimeType.START);
             status = scan(library);
             library.getStatistics().setTime(TimeType.END);
-            library.setScanningComplete(Boolean.TRUE);
+            library.setScanningComplete(true);
             LOG.info("Scanning completed.");
         }
 
@@ -238,7 +238,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             LOG.info("Library statistics:");
             for (Library library : libraryCollection.getLibraries()) {
                 LOG.info("Description: '{}'", library.getDescription());
-                LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
+                LOG.info("{}", library.getStatistics().generateStatistics(true));
             }
         }
         
@@ -252,14 +252,13 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
 
             if (wd != null) {
-                Boolean directoriesToWatch = Boolean.TRUE;
-
+                boolean directoriesToWatch = false;
                 for (Library library : libraryCollection.getLibraries()) {
                     String dirToWatch = library.getImportDTO().getBaseDirectory();
                     if (library.isWatch()) {
                         LOG.info("Watching directory '{}' for changes...", dirToWatch);
                         wd.addDirectory(dirToWatch);
-                        directoriesToWatch = Boolean.TRUE;
+                        directoriesToWatch = true;
                     } else {
                         LOG.info("Watching skipped for directory '{}'", dirToWatch);
                     }
@@ -403,7 +402,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                     if (matcher.matches()) {
                         // Found the file pattern, so skip the file
                         LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
-                        excluded = Boolean.TRUE;
+                        excluded = true;
                         break;
                     }
                 }

@@ -83,9 +83,9 @@ public class LibrarySendScheduler {
     @Scheduled(initialDelay = 10000, fixedDelay = 15000)
     public void sendLibraries() { //NOSONAR
         if (retryCount.get() > RETRY_MAX) {
-            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", RETRY_MAX);
+            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", Integer.valueOf(RETRY_MAX));
             for (Library library : libraryCollection.getLibraries()) {
-                library.setSendingComplete(Boolean.TRUE);
+                library.setSendingComplete(true);
             }
             return;
         }
@@ -113,7 +113,7 @@ public class LibrarySendScheduler {
                         }
                     } else {
                         // Make sure this is set to false
-                        library.setSendingComplete(Boolean.FALSE);
+                        library.setSendingComplete(false);
                         LOG.warn("Failed to send a file, this was failed attempt #{}. Waiting until next run...", retryCount.incrementAndGet());
                         return;
                     }
@@ -123,7 +123,7 @@ public class LibrarySendScheduler {
                 if (library.isScanningComplete() && runningCount.get() <= 0) {
                     // When we reach this point we should have completed the library sending
                     LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
-                    library.setSendingComplete(Boolean.TRUE);
+                    library.setSendingComplete(true);
                     library.getStatistics().setTime(TimeType.SENDING_END);
                 } else {
                     LOG.info("  {}: Scanning and/or sending ({} left) is not complete. Waiting for more files to send.", library.getImportDTO().getBaseDirectory(), runningCount.get());
@@ -154,15 +154,15 @@ public class LibrarySendScheduler {
                 sendStatus = sendToCore(library, directory);
             } else if (processingStatus == StatusType.DONE) {
                 LOG.info("    Completed: '{}'", directory);
-                sendStatus = Boolean.TRUE;
+                sendStatus = true;
             } else {
                 LOG.warn("    Unknown processing status {} for {}", processingStatus, directory);
                 // Assume this is correct, so we don't get stuck
-                sendStatus = Boolean.TRUE;
+                sendStatus = true;
             }
         } else {
             LOG.warn("    Still being procesed {}", directory);
-            sendStatus = Boolean.FALSE;
+            sendStatus = false;
         }
         return sendStatus;
     }
@@ -177,13 +177,13 @@ public class LibrarySendScheduler {
      */
     private boolean sendToCore(Library library, String sendDir) {
         StageDirectoryDTO stageDto = library.getDirectory(sendDir);
-        boolean sentOk = Boolean.FALSE;
+        boolean sentOk = false;
 
         if (stageDto == null) {
             LOG.warn("StageDirectoryDTO for '{}' is null!", sendDir);
             // We do not want to send this again.
             library.addDirectoryStatus(sendDir, ConcurrentUtils.constantFuture(StatusType.INVALID));
-            return Boolean.TRUE;
+            return true;
         }
 
         LOG.info("Sending #{}: {}", runningCount.incrementAndGet(), sendDir);
@@ -197,12 +197,13 @@ public class LibrarySendScheduler {
         try {
             yamjExecutor.submit(task);
             library.addDirectoryStatus(stageDto.getPath(), task);
-            sentOk = Boolean.TRUE;
+            sentOk = true;
         } catch (TaskRejectedException ex) {
             LOG.warn("Send queue full. '{}' will be sent later.", stageDto.getPath());
             LOG.trace("Exception: ", ex);
             library.addDirectoryStatus(stageDto.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
         }
+        
         return sentOk;
     }
 }

@@ -73,7 +73,7 @@ public class MediaFileScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
-                messageDisabled = Boolean.TRUE;
+                messageDisabled = true;
                 LOG.info("Media file scanning is disabled");
             }
             watchProcess.set(false);
@@ -82,7 +82,7 @@ public class MediaFileScanScheduler extends AbstractQueueScheduler {
         
         if (messageDisabled) {
             LOG.info("Media file scanning is enabled");
-            messageDisabled = Boolean.FALSE;
+            messageDisabled = false;
         }
 
         int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 50));

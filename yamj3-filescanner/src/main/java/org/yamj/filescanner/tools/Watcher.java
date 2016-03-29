@@ -39,11 +39,11 @@ public class Watcher {
     private static final Logger LOG = LoggerFactory.getLogger(Watcher.class);
     private final WatchService watcherService;
     private final Map<WatchKey, Path> keys = new HashMap<>();
-    private boolean trace = Boolean.FALSE;
+    private boolean trace = false;
     @SuppressWarnings("rawtypes")
     private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
     // keep watching the directories
-    private boolean watchEnabled = Boolean.TRUE;
+    private boolean watchEnabled = true;
 
     /**
      * Creates a WatchService
@@ -97,7 +97,7 @@ public class Watcher {
         register(dir);
 
         // enable trace after initial registration
-        this.trace = Boolean.TRUE;
+        this.trace = true;
     }
 
     /**
@@ -135,7 +135,7 @@ public class Watcher {
     public void processEvents() {
         while (watchEnabled) {
 
-            // wait for key to be signalled
+            // wait for key to be signaled
             WatchKey key;
             try {
                 key = watcherService.take();
@@ -144,7 +144,7 @@ public class Watcher {
             } catch (ClosedWatchServiceException ex) {
                 LOG.info("Watch service closed, terminating.");
                 LOG.trace("Exception:", ex);
-                watchEnabled = Boolean.FALSE;
+                watchEnabled = false;
                 break;
             }
 
@@ -188,11 +188,11 @@ public class Watcher {
     }
 
     public void stopWatching() {
-        setWatching(Boolean.FALSE);
+        setWatching(false);
     }
 
     public void startWatching() {
-        setWatching(Boolean.TRUE);
+        setWatching(true);
     }
 
     public void setWatching(boolean watchFlag) {

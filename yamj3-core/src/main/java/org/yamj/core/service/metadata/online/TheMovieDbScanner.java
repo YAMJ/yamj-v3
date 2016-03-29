@@ -293,7 +293,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // CAST
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
+            boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", true);
             
             for (MediaCreditCast person : movieInfo.getCast()) {
                 // skip person without credit
@@ -319,10 +319,10 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         // store collection as boxed set
-        if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", Boolean.FALSE)) {
+        if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", false)) {
             Collection collection = movieInfo.getBelongsToCollection();
             if (collection != null && collection.getName() != null) {
-                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, Integer.toString(collection.getId()));
+                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), Integer.valueOf(-1), Integer.toString(collection.getId()));
             }
         }
         
@@ -759,7 +759,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
 
         LOG.trace("Scanning NFO for TheMovieDb ID");
@@ -771,13 +771,13 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 String sourceId = st.nextToken();
                 LOG.debug("TheMovieDb ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
 
         LOG.debug("No TheMovieDb ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }

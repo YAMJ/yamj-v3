@@ -62,8 +62,6 @@ public class ArtworkController {
     @Autowired
     private CommonStorageService commonStorageService;
     @Autowired
-    private FileStorageService fileStorageService;
-    @Autowired
     private ArtworkProcessScheduler artworkProcessScheduler; 
     @Autowired
     private ArtworkUploadService artworkUploadService;
@@ -98,16 +96,16 @@ public class ArtworkController {
         List<ApiArtworkProfileDTO> results = new ArrayList<>();
         for (ArtworkProfile profile : artworkStorageService.getAllArtworkProfiles()) {
             ApiArtworkProfileDTO dto = new ApiArtworkProfileDTO();
-            dto.setId(profile.getId());
+            dto.setId(Long.valueOf(profile.getId()));
             dto.setName(profile.getProfileName());
             dto.setArtworkType(profile.getArtworkType());
             dto.setMetaDataType(profile.getMetaDataType());
             dto.setWidth(profile.getWidth());
             dto.setHeight(profile.getHeight());
             dto.setScalingType(profile.getScalingType());
-            dto.setPreProcess(profile.isPreProcess());
-            dto.setReflection(profile.isReflection());
-            dto.setRoundedCorners(profile.isRoundedCorners());
+            dto.setPreProcess(Boolean.valueOf(profile.isPreProcess()));
+            dto.setReflection(Boolean.valueOf(profile.isReflection()));
+            dto.setRoundedCorners(Boolean.valueOf(profile.isRoundedCorners()));
             results.add(dto);
         }
         
@@ -138,7 +136,7 @@ public class ArtworkController {
      */
     @RequestMapping(value = "/located/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus ignoreLocatedArtwork(@PathVariable("id") Long id) {
-        if (id <= 0L) {
+        if (id.longValue() <= 0L) {
             return ApiStatus.INVALID_ID;
         }
         
@@ -147,7 +145,7 @@ public class ArtworkController {
         ApiStatus status;
         Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);
         if (filesToDelete != null) {
-            this.fileStorageService.deleteStorageFiles(filesToDelete);
+           FileStorageService.deleteStorageFiles(filesToDelete);
             status = ApiStatus.ok("Successfully marked located artwork " + id + " as ignored");
         } else {
             status = ApiStatus.notFound("Located artwork not found " + id);
@@ -157,7 +155,7 @@ public class ArtworkController {
 
     @RequestMapping(value = "/add/{artwork}/{type}/{id}", method=RequestMethod.POST)
     public ApiStatus addImage(@PathVariable("artwork") String artwork, @PathVariable("type") String type, @PathVariable("id") Long id, @RequestParam MultipartFile image) {
-        if (id <= 0L) {
+        if (id.longValue() <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 

@@ -220,14 +220,14 @@ public class ApiDao extends HibernateDao {
                 ids.get(video.getVideoType()).add(video.getId());
             }
 
-            boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
+            boolean foundArtworkIds = false;    // Check to see that we have artwork to find
             // Remove any blank entries
             for (MetaDataType mdt : MetaDataType.values()) {
                 if (CollectionUtils.isEmpty(ids.get(mdt))) {
                     ids.remove(mdt);
                 } else {
                     // We've found an artwork, so we can continue
-                    foundArtworkIds = Boolean.TRUE;
+                    foundArtworkIds = true;
                 }
             }
 
@@ -816,7 +816,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(" FROM season sea");
 
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
-        if (params.getId() > 0L) {
+        if (params.getId().longValue() > 0L) {
             sbSQL.append(" AND sea.id=").append(params.getId());
         }
 
@@ -1379,7 +1379,7 @@ public class ApiDao extends HibernateDao {
         }
 
         // Add the search string
-        sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
+        sqlScalars.addToSql(options.getSearchString(false));
         // This will default to blank if there's no  required
         sqlScalars.addToSql(options.getSortString());
 
@@ -1440,7 +1440,7 @@ public class ApiDao extends HibernateDao {
             }
 
             // Add the search string
-            sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
+            sqlScalars.addToSql(options.getSearchString(false));
             // This will default to blank if there's no sort required
             sqlScalars.addToSql(options.getSortString());
         }
@@ -1507,11 +1507,11 @@ public class ApiDao extends HibernateDao {
 
             if (CollectionUtils.isNotEmpty(options.getVideo())) {
                 StringBuilder sb = new StringBuilder("AND (");
-                boolean first = Boolean.TRUE;
+                boolean first = true;
                 for (String type : options.getVideo()) {
                     MetaDataType mdt = MetaDataType.fromString(type);
                     if (first) {
-                        first = Boolean.FALSE;
+                        first = false;
                     } else {
                         sb.append(" OR");
                     }

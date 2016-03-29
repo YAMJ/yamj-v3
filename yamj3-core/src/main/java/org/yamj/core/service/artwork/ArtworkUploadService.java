@@ -57,7 +57,7 @@ public class ArtworkUploadService {
     @Autowired
     private FilenameScanner filenameScanner;
     
-    public ApiStatus uploadArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id, MultipartFile image) {
+    public ApiStatus uploadArtwork(ArtworkType artworkType, MetaDataType metaDataType, Long id, MultipartFile image) {
         String filename = image.getOriginalFilename();
         if (StringUtils.isBlank(filename)) {
             filename = image.getName();

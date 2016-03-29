@@ -133,7 +133,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
-    public Artwork getRequiredArtwork(Long id) {
+    public Artwork getRequiredArtwork(long id) {
         List<Artwork> objects = this.artworkDao.namedQueryById(Artwork.QUERY_REQUIRED, id);
         Artwork artwork = DataAccessUtils.requiredUniqueResult(objects);
 
@@ -163,13 +163,13 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
-    public ArtworkLocated getRequiredArtworkLocated(Long id) {
+    public ArtworkLocated getRequiredArtworkLocated(long id) {
         List<ArtworkLocated> objects = this.artworkDao.namedQueryById(ArtworkLocated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
-    public ArtworkGenerated getRequiredArtworkGenerated(Long id) {
+    public ArtworkGenerated getRequiredArtworkGenerated(long id) {
         List<ArtworkGenerated> objects = this.artworkDao.namedQueryById(ArtworkGenerated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
@@ -232,7 +232,7 @@ public class ArtworkStorageService {
     }
     
     @Transactional(readOnly=true)
-    public Artwork getArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id) {
+    public Artwork getArtwork(ArtworkType artworkType, MetaDataType metaDataType, Long id) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT a FROM Artwork a ");
         switch (metaDataType) {
@@ -302,7 +302,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public int generateImagesForProfile(long id) {
+    public int generateImagesForProfile(Long id) {
         ArtworkProfile profile = artworkDao.getById(ArtworkProfile.class, id);
         if (profile == null) {
             // nothing to do if no profile found

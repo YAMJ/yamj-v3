@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("boxing")
 public final class HTMLTools {
 
     private static final Map<Character, String> AGGRESSIVE_HTML_ENCODE_MAP = new HashMap<>();

@@ -59,7 +59,7 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
             "-tcpDaemon");
         h2Server.start();
         
-        LOG.info("Started H2 tcp server on port {}", h2Server.getPort());
+        LOG.info("Started H2 tcp server on port {}", Integer.valueOf(h2Server.getPort()));
         return h2Server;
     }
     
@@ -85,16 +85,16 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
     protected Properties hibernateProperties() {
         Properties props = new Properties();
         props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        props.put("hibernate.show_sql", showSql);
-        props.put("hibernate.generate_statistics", generateStatistics);
+        props.put("hibernate.show_sql", Boolean.valueOf(showSql));
+        props.put("hibernate.generate_statistics", Boolean.valueOf(generateStatistics));
         props.put("hibernate.hbm2ddl.auto", "update");
-        props.put("hibernate.connection.isolation", TRANSACTION_READ_COMMITTED);
-        props.put("hibernate.use_sql_comments", false);
-        props.put("hibernate.cache.use_query_cache", false);
-        props.put("hibernate.cache.use_second_level_cache", false);
+        props.put("hibernate.connection.isolation", Integer.valueOf(TRANSACTION_READ_COMMITTED));
+        props.put("hibernate.use_sql_comments", Boolean.FALSE);
+        props.put("hibernate.cache.use_query_cache", Boolean.FALSE);
+        props.put("hibernate.cache.use_second_level_cache", Boolean.FALSE);
         props.put("hibernate.connection.CharSet", "utf8");
         props.put("hibernate.connection.characterEncoding", "utf8");
-        props.put("hibernate.connection.useUnicode", false);
+        props.put("hibernate.connection.useUnicode", Boolean.FALSE);
         return props;
     }    
 }

@@ -33,21 +33,21 @@ public enum ResolutionType {
     UHD2(3841, 7680, "UHD2", "8K"),
     ALL(-1, Integer.MAX_VALUE, "All");
 
-    private final int minWidth;
-    private final int maxWidth;
+    private final Integer minWidth;
+    private final Integer maxWidth;
     private final String[] synonym;
     
     private ResolutionType(int minWidth, int maxWidth, String... synonym) {
-        this.minWidth = minWidth;
-        this.maxWidth = maxWidth;
+        this.minWidth = Integer.valueOf(minWidth);
+        this.maxWidth = Integer.valueOf(maxWidth);
         this.synonym = synonym;
     }
 
-    public int getMinWidth() {
+    public Integer getMinWidth() {
         return minWidth;
     }
 
-    public int getMaxWidth() {
+    public Integer getMaxWidth() {
         return maxWidth;
     }
 

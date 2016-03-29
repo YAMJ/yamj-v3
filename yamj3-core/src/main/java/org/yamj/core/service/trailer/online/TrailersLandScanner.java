@@ -47,7 +47,7 @@ import org.yamj.core.service.trailer.TrailerScannerService;
 @Service("trailersLandScanner")
 public class TrailersLandScanner implements IMovieTrailerScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrailersLandScanner.class);
+    static final Logger LOG = LoggerFactory.getLogger(TrailersLandScanner.class);
     private static final String SCANNER_ID = "trailersland";
     private static final String TL_BASE_URL = "http://www.trailersland.com/";
     private static final String TL_SEARCH_URL = "cerca?ricerca=";

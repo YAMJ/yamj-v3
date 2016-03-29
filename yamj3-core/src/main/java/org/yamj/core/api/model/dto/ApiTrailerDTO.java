@@ -93,7 +93,7 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
     
     public String getFilename() {
         if (filename == null && StringUtils.isNotBlank(this.cacheFilename)) {
-            filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+            filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), true);
         }
         return filename;
     }

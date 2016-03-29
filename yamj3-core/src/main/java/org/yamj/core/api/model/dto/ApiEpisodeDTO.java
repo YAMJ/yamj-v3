@@ -188,7 +188,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
 
     public String getVideoimage() {
         if (StringUtils.isBlank(videoimage) && (StringUtils.isNotBlank(cacheDir) && StringUtils.isNotBlank(cacheFilename))) {
-            this.videoimage = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+            this.videoimage = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), true);
         }
         return videoimage;
     }

@@ -457,7 +457,7 @@ public class MediaImportService {
         Set<String> searchNames = Collections.singleton(searchName.toLowerCase());
 
         Library library = null;
-        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", Boolean.TRUE)) {
+        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", true)) {
             library = stageFile.getStageDirectory().getLibrary();
         }
 
@@ -551,7 +551,7 @@ public class MediaImportService {
 
     private void attachSubtilesToMediaFile(MediaFile mediaFile, StageFile videoFile) {
         Library library = null;
-        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
+        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.subtitle", true)) {
             library = videoFile.getStageDirectory().getLibrary();
         }
 
@@ -591,7 +591,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public void processNfo(long id) {
+    public void processNfo(Long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -675,7 +675,7 @@ public class MediaImportService {
 
             // case 2: video file has same base name in library
             Library library = null;
-            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", Boolean.TRUE)) {
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", true)) {
                 library = stageFile.getStageDirectory().getLibrary();
             }
 
@@ -763,7 +763,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public void processImage(long id) {
+    public void processImage(Long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process image {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -1031,7 +1031,7 @@ public class MediaImportService {
             if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
                 // artwork inside located artwork directory
                 Library library = null;
-                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", true)) {
                     library = stageFile.getStageDirectory().getLibrary();
                 }
                 // priority = 2 when inside artwork folder
@@ -1151,7 +1151,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public void processSubtitle(long id) {
+    public void processSubtitle(Long id) {
         StageFile subtitleFile = stagingDao.getStageFile(id);
         LOG.info("Process subtitle {}-'{}'", subtitleFile.getId(), subtitleFile.getFileName());
 

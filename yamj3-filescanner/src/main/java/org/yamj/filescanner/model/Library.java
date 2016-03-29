@@ -36,7 +36,6 @@ import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.type.StatusType;
 
 /**
- *
  * @author Stuart
  */
 public class Library implements Serializable {
@@ -56,14 +55,14 @@ public class Library implements Serializable {
      * Create a library
      */
     public Library() {
-        this.watch = Boolean.FALSE;
+        this.watch = false;
         this.description = "";
         this.statistics = new Statistics();
         this.directories = new HashMap<>(1);
         this.directoryStatus = new LinkedHashMap<>(1);
         importDTO = new ImportDTO();
-        this.scanningComplete = new AtomicBoolean(Boolean.FALSE);
-        this.sendingComplete = new AtomicBoolean(Boolean.FALSE);
+        this.scanningComplete = new AtomicBoolean(false);
+        this.sendingComplete = new AtomicBoolean(false);
     }
 
     /**

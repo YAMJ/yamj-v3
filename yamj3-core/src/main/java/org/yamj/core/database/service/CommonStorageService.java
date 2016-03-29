@@ -415,7 +415,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    public boolean toogleWatchedStatus(long id, boolean watched, boolean apiCall) {
+    public boolean toogleWatchedStatus(Long id, boolean watched, boolean apiCall) {
         StageFile stageFile = this.stagingDao.getStageFile(id);
         return this.toogleWatchedStatus(stageFile, watched, apiCall);
     }

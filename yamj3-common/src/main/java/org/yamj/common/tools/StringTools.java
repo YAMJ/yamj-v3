@@ -84,7 +84,7 @@ public final class StringTools {
      * @return
      */
     public static String trimToLength(String sourceString, int requiredLength) {
-        return trimToLength(sourceString, requiredLength, Boolean.TRUE, "...");
+        return trimToLength(sourceString, requiredLength, true, "...");
     }
 
     /**

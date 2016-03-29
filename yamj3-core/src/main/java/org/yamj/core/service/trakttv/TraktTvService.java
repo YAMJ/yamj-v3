@@ -727,10 +727,10 @@ public class TraktTvService {
         // update watched status for filtered episodes
         boolean noError = true;
         for (WatchedEpisode episode : watchedEpisodes) {
-            final Set<Long> updateable = getUpdateableEpisodes(episode.ids, episode.season, episode.episode, allEpisodeIds);
+            final Set<Long> updateable = getUpdateableEpisodes(episode.getIds(), episode.getSeason(), episode.getEpisode(), allEpisodeIds);
             if (updateable.size() > 0) {
                 try {
-                    this.traktTvStorageService.updateWatched(episode.lastWatched, updateable);
+                    this.traktTvStorageService.updateWatched(episode.getLastWatched(), updateable);
                 } catch (Exception ex) {
                     LOG.error("Failed to updated watched episode: {}", episode);
                     LOG.warn(TRAKTTV_ERROR, ex);
@@ -1001,6 +1001,22 @@ public class TraktTvService {
             this.season = season;
             this.episode = episode;
             this.lastWatched = lastWatched;
+        }
+
+        public Ids getIds() {
+            return ids;
+        }
+
+        public int getSeason() {
+            return season;
+        }
+
+        public int getEpisode() {
+            return episode;
+        }
+
+        public Date getLastWatched() {
+            return lastWatched;
         }
 
         @Override

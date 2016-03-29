@@ -368,7 +368,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List namedQueryById(String queryName, Long id) {
+    public List namedQueryById(String queryName, long id) {
         return currentSession().getNamedQuery(queryName).setLong("id", id).setCacheable(true).list();
     }
 

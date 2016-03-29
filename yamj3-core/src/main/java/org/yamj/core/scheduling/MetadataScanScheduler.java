@@ -113,7 +113,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.metadatascan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledVideo) {
-                messageDisabledVideo = Boolean.TRUE;
+                messageDisabledVideo = true;
                 LOG.info("Metadata scanning is disabled");
             }
             watchScanVideo.set(false);
@@ -122,7 +122,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
             
             if (messageDisabledVideo) {
                 LOG.info("Metadata scanning is enabled");
-                messageDisabledVideo = Boolean.FALSE;
+                messageDisabledVideo = false;
             }
     
             int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 30));
@@ -168,7 +168,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledPeople) {
-                messageDisabledPeople = Boolean.TRUE;
+                messageDisabledPeople = true;
                 LOG.info("People scanning is disabled");
             }
             watchScanPeople.set(false);
@@ -176,7 +176,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
             
             if (messageDisabledPeople) {
                 LOG.info("People scanning is enabled");
-                messageDisabledPeople = Boolean.FALSE;
+                messageDisabledPeople = false;
             }
     
             int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50));
@@ -202,7 +202,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
         if (maxThreads <= 0) { 
             if (!messageDisabledFilmography) {
-                messageDisabledFilmography = Boolean.TRUE;
+                messageDisabledFilmography = true;
                 LOG.info("Filmography scanning is disabled");
             }
             watchScanFilmography.set(false);
@@ -211,7 +211,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
         
         if (messageDisabledFilmography) {
             LOG.info("Filmography scanning is enabled");
-            messageDisabledFilmography = Boolean.FALSE;
+            messageDisabledFilmography = false;
         }
 
         int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50));

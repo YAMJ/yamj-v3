@@ -143,7 +143,7 @@ public class GitHubServiceImpl implements GitHubService {
 
         if (StringUtils.isBlank(ghDate) || buildDate == null) {
             LOG.debug("Invalid (blank) date, check skipped");
-            return Boolean.TRUE;
+            return true;
         }
 
         DateTime dt1 = DateTimeTools.parseDate(ghDate, DateTimeTools.ISO8601_FORMAT);
@@ -152,12 +152,12 @@ public class GitHubServiceImpl implements GitHubService {
         LOG.debug("Difference : {}", diff, DateTimeTools.formatDurationColon(diff));
         if (diff > (maxAgeDays * MILLISECONDS_PER_DAY)) {
             LOG.warn("Your installation is older than () days! Please update it", maxAgeDays);
-            return Boolean.FALSE;
+            return false;
         } else if (diff > 0) {
             LOG.debug("Your installation is only {} old.", DateTimeTools.formatDurationText(diff));
         } else {
             LOG.debug("Your installation is up to date");
         }
-        return Boolean.TRUE;
+        return true;
     }
 }

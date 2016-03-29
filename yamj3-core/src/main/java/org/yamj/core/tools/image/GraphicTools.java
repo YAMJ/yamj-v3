@@ -54,7 +54,7 @@ public final class GraphicTools {
             if (readers.hasNext()) {
                 ImageReader reader = readers.next();
                 try {
-                    reader.setInput(iis, Boolean.TRUE);
+                    reader.setInput(iis, true);
                     return new Dimension(reader.getWidth(0), reader.getHeight(0));
                 } finally {
                     try {

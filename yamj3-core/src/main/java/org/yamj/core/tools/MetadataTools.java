@@ -74,7 +74,7 @@ public final class MetadataTools {
     }
 
     static {
-        IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", Boolean.FALSE);
+        IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", false);
 
         // Populate the charReplacementMap
         String temp = PropertyTools.getProperty("indexing.character.replacement", "");

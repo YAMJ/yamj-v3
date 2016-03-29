@@ -119,9 +119,9 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             search.setKey(youtubeApiKey);
             search.setQ(query.toString());
             search.setType("video");
-            search.setMaxResults(configService.getLongProperty("yamj3.trailer.scanner.movie.maxResults", 5));
+            search.setMaxResults(Long.valueOf(configService.getLongProperty("yamj3.trailer.scanner.movie.maxResults", 5)));
             
-            if (configService.getBooleanProperty("youtube.trailer.hdwanted", Boolean.TRUE)) {
+            if (configService.getBooleanProperty("youtube.trailer.hdwanted", true)) {
                 search.setVideoDefinition("high");
             }
             

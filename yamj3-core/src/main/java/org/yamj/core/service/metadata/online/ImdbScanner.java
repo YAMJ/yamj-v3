@@ -212,7 +212,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         parseReleasedTitles(videoData, imdbId, imdbLocale);
 
         // AWARDS
-        if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
+        if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", false)) {
             videoData.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
         }
         
@@ -353,7 +353,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         parseReleasedTitles(series, imdbId, imdbLocale);
 
         // AWARDS
-        if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
+        if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", false)) {
             series.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
         }
 
@@ -483,7 +483,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // TITLE for preferred country from AKAS
-        boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
+        boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", false);
         if (!akaScrapeTitle || !OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
             return;
         }
@@ -534,7 +534,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         String releaseInfoXML = imdbApiWrapper.getReleasInfoXML(imdbId);
         if (releaseInfoXML != null) {
             // Just extract the AKA section from the page
-            List<String> akaList = HTMLTools.extractTags(releaseInfoXML, "<a id=\"akas\" name=\"akas\">", HTML_TABLE_END, "<td>", HTML_TD_END, Boolean.FALSE);
+            List<String> akaList = HTMLTools.extractTags(releaseInfoXML, "<a id=\"akas\" name=\"akas\">", HTML_TABLE_END, "<td>", HTML_TD_END, false);
             return buildAkaMap(akaList);
         }
         return null;
@@ -590,8 +590,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // build jobs map
         EnumMap<JobType,List<ImdbCast>> jobs = getJobs(fullCast);
         // get configuration parameters
-        boolean skipFaceless = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.faceless", Boolean.FALSE);
-        boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
+        boolean skipFaceless = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.faceless", false);
+        boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", true);
         
         // add credits
         addCredits(videoData, JobType.DIRECTOR, jobs, skipUncredited, skipFaceless);
@@ -734,7 +734,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     public static boolean scanImdbID(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
 
         LOG.trace("Scanning NFO for IMDb ID");
@@ -746,7 +746,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 String sourceId = st.nextToken();
                 LOG.debug("IMDb ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
@@ -759,14 +759,14 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 String sourceId = "tt" + st.nextToken();
                 LOG.debug("IMDb ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
 
         LOG.debug("No IMDb ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 
     @Override

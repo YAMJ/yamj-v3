@@ -75,14 +75,14 @@ public class TrailerScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerscan.maxThreads", 0);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
-                messageDisabled = Boolean.TRUE;
+                messageDisabled = true;
                 LOG.info("Trailer scanning is disabled");
             }
             watchProcess.set(false);
         } else {
             if (messageDisabled) {
                 LOG.info("Trailer scanning is enabled");
-                messageDisabled = Boolean.FALSE;
+                messageDisabled = false;
             }
     
             // process located or generated artwork

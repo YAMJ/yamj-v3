@@ -439,7 +439,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
                     season.setOutline(plot, SCANNER_ID);
                 }
     
-                // TODO start year from season XML for Italia
+                // TODO start year from season XML for Italy
                 
                 // mark season as done
                 season.setTvSeasonDone();
@@ -541,7 +541,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         return episodes;
     }
     
-    private static class EpisodeDTO {
+    static class EpisodeDTO {
         
         private int episode;
         private String title;
@@ -893,7 +893,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
 
         // scan for IMDb ID
@@ -908,13 +908,13 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
                 String sourceId = st.nextToken();
                 LOG.debug("ComingSoon ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
 
         LOG.debug("No ComingSoon ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }

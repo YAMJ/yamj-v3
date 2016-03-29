@@ -110,20 +110,20 @@ public final class SystemInfoCore {
      */
     private boolean pingCore() {
         lastCheck = new DateTime();
-        Boolean status;
+        boolean status;
         try {
             String pingResponse = pingService.ping();
             LOG.info("Ping response: {}", pingResponse);
-            status = Boolean.TRUE;
+            status = true;
         } catch (RemoteConnectFailureException ex) {
             LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             LOG.trace("Exception:", ex);
-            status = Boolean.FALSE;
+            status = false;
         } catch (Exception ex) {
             // Hate catching general exceptions, but should determine how this is thrown
             LOG.error("General failure to connect to the core server: {}", ex.getMessage());
             LOG.trace("Exception:", ex);
-            status = Boolean.FALSE;
+            status = false;
         }
         connected = status;
         return status;

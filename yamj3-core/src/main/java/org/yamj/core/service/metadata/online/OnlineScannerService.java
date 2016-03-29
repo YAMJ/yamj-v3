@@ -92,8 +92,8 @@ public class OnlineScannerService {
             return;
         }
         
-        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
-        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", false);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         ScanResult scanResult = null;
         
     	loop: for (String scanner : MOVIE_SCANNER) {
@@ -178,8 +178,8 @@ public class OnlineScannerService {
             return;
         }
         
-        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
-        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", false);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
 		ScanResult scanResult = null;
 
     	loop: for (String scanner : SERIES_SCANNER) {
@@ -277,8 +277,8 @@ public class OnlineScannerService {
             return;
         }
         
-        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
-        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
+        final boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", false);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
     	ScanResult scanResult = null;
         
     	loop: for (String scanner : PERSON_SCANNER) {
@@ -366,7 +366,7 @@ public class OnlineScannerService {
             return;
         }
 
-        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", Boolean.TRUE);
+        final boolean throwTempError = configService.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         ScanResult scanResult = null;
 
         for (String scanner : FILMOGRAPHY_SCANNER) {
@@ -450,8 +450,8 @@ public class OnlineScannerService {
             if (iter.hasNext()) nfoScanner = this.registeredMovieScanner.get(iter.next());
         }
 
-        boolean autodetect = this.configService.getBooleanProperty("nfo.autodetect.scanner", Boolean.FALSE);
-        boolean ignorePresentId = this.configService.getBooleanProperty("nfo.ignore.present.id", Boolean.FALSE);
+        boolean autodetect = this.configService.getBooleanProperty("nfo.autodetect.scanner", false);
+        boolean ignorePresentId = this.configService.getBooleanProperty("nfo.ignore.present.id", false);
 
         boolean foundInfo = false;
         if (nfoScanner != null) {

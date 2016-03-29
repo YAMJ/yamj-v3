@@ -273,7 +273,7 @@ public class TVRageScanner implements ISeriesScanner {
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNumeric(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
 
         // There are two formats for the URL. The first is a vanity URL with the show name in it,
@@ -292,7 +292,7 @@ public class TVRageScanner implements ISeriesScanner {
                 String id = st.nextToken().substring("id-".length());
                 LOG.debug("TVRage ID found in NFO: {}", id);
                 dto.addId(SCANNER_ID, id);
-                return Boolean.TRUE;
+                return true;
             }
 
             text = "tvrage.com/";
@@ -302,13 +302,13 @@ public class TVRageScanner implements ISeriesScanner {
                 String id = st.nextToken();
                 LOG.debug("TVRage vanity ID found in NFO: {}", id);
                 dto.addId(SCANNER_ID, id);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
 
         LOG.debug("No TVRage ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }

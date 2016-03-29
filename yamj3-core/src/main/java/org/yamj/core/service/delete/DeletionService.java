@@ -51,8 +51,6 @@ public class DeletionService {
     @Autowired
     private ConfigService configService;
     @Autowired
-    private FileStorageService fileStorageService;
-    @Autowired
     private ArtworkScanScheduler artworkScanScheduler;
     
     public void executeAllDeletions() {
@@ -124,7 +122,7 @@ public class DeletionService {
         }
 
         // delete orphan persons if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.person", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.person", true)) {
             try {
                 List<Long> ids = this.commonStorageService.getOrphanPersons();
                 for (Long id : ids) {
@@ -140,7 +138,7 @@ public class DeletionService {
         }
 
         // delete orphan genres if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.genre", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.genre", true)) {
             try {
                 this.commonStorageService.deleteOrphanGenres();
             } catch (Exception ex) {
@@ -149,7 +147,7 @@ public class DeletionService {
         }
 
         // delete orphan studios if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.studio", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.studio", true)) {
             try {
                 this.commonStorageService.deleteOrphanStudios();
             } catch (Exception ex) {
@@ -158,7 +156,7 @@ public class DeletionService {
         }
 
         // delete orphan countries if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.country", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.country", true)) {
             try {
                 this.commonStorageService.deleteOrphanCountries();
             } catch (Exception ex) {
@@ -167,7 +165,7 @@ public class DeletionService {
         }
 
         // delete orphan certifications if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.certification", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.certification", true)) {
             try {
                 this.commonStorageService.deleteOrphanCertifications();
             } catch (Exception ex) {
@@ -176,7 +174,7 @@ public class DeletionService {
         }
 
         // delete orphan boxed sets if allowed
-        if (this.configService.getBooleanProperty("yamj3.delete.orphan.boxedset", Boolean.TRUE)) {
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.boxedset", true)) {
             try {
                 List<Long> ids = this.commonStorageService.getOrphanBoxedSets();
                 for (Long id : ids) {
@@ -192,6 +190,6 @@ public class DeletionService {
         }
 
         // delete storage files
-        this.fileStorageService.deleteStorageFiles(filesToDelete);
+        FileStorageService.deleteStorageFiles(filesToDelete);
     }
 }

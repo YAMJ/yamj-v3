@@ -55,7 +55,7 @@ public class FilterServletOutputStream extends ServletOutputStream {
     @Override
     public boolean isReady() {
         // Not sure if this is correct
-        return Boolean.TRUE;
+        return true;
     }
 
     @Override

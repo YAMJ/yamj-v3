@@ -25,7 +25,6 @@ package org.yamj.core.api.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FilenameUtils;
@@ -50,7 +49,7 @@ public class Skin {
     private String version = "";
     private String skinDate = "";
     private String supportUrl="";
-    private Long fileDate = 0L;
+    private Long fileDate = Long.valueOf(0);
     private String skinDir = "";
 
     public String getSourceUrl() {
@@ -77,7 +76,7 @@ public class Skin {
     }
 
     public void setPath(String path) {
-        this.path = FilenameUtils.normalize(path, Boolean.TRUE);
+        this.path = FilenameUtils.normalize(path, true);
     }
 
     public List<String> getDescription() {

@@ -280,7 +280,7 @@ public class TheTVDbScanner implements ISeriesScanner {
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
     
         // scan for IMDb ID
@@ -321,7 +321,7 @@ public class TheTVDbScanner implements ISeriesScanner {
                         dto.addId(SCANNER_ID, sourceId);
                         LOG.debug("TheTVDB ID found in NFO: {}", sourceId);
                         dto.addId(SCANNER_ID, sourceId);
-                        return Boolean.TRUE;
+                        return true;
                     }
                 }
             }
@@ -330,6 +330,6 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
         
         LOG.debug("No TheTVDB ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }

@@ -175,7 +175,7 @@ public class Statistics {
      * @return
      */
     public String getProcessingTime() {
-        return getProcessingTime(TimeType.START, TimeType.END, Boolean.TRUE);
+        return getProcessingTime(TimeType.START, TimeType.END, true);
     }
 
     /**
@@ -217,7 +217,7 @@ public class Statistics {
      * @param skipZero Skip zero values from the output
      * @return
      */
-    public String generateStatistics(Boolean skipZero) {
+    public String generateStatistics(boolean skipZero) {
         final String lineFeed = String.format("%n");
         final StringBuilder statOutput = new StringBuilder("Jukebox Statistics:");
         
@@ -240,7 +240,7 @@ public class Statistics {
             statOutput.append("Scanning Time = ");
             statOutput.append(processTime);
         }
-        processTime = getProcessingTime(TimeType.SENDING_START, TimeType.SENDING_END, Boolean.TRUE);
+        processTime = getProcessingTime(TimeType.SENDING_START, TimeType.SENDING_END, true);
         if (StringUtils.isNotBlank(processTime)) {
             statOutput.append(lineFeed);
             statOutput.append("Sending Time = ");

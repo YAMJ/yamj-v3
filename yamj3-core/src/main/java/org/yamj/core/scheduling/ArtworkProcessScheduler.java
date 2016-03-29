@@ -73,7 +73,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
-                messageDisabled = Boolean.TRUE;
+                messageDisabled = true;
                 LOG.info("Artwork processing is disabled");
             }
             watchProcess.set(false);
@@ -82,7 +82,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
         
         if (messageDisabled) {
             LOG.info("Artwork processing is enabled");
-            messageDisabled = Boolean.FALSE;
+            messageDisabled = false;
         }
 
         // process located or generated artwork

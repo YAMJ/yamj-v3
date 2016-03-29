@@ -65,7 +65,7 @@ public class ConfigServiceWrapper {
         sb.append("yamj3.artwork.scan.local.");
         addScanArtworkType(artwork, sb);
 
-        return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
+        return this.configService.getBooleanProperty(sb.toString(), true);
     }
 
     public boolean isAttachedArtworkScanEnabled(Artwork artwork) {
@@ -73,7 +73,7 @@ public class ConfigServiceWrapper {
         sb.append("yamj3.artwork.scan.attached.");
         addScanArtworkType(artwork, sb);
 
-        return this.configService.getBooleanProperty(sb.toString(), Boolean.FALSE);
+        return this.configService.getBooleanProperty(sb.toString(), false);
     }
 
     public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtwork) { //NOSONAR
@@ -174,7 +174,7 @@ public class ConfigServiceWrapper {
     
     public boolean isCastScanEnabled(final JobType jobType) {
         String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
-        boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);
+        boolean value = this.configService.getBooleanProperty(key, false);
         LOG.trace("CastCrew scanning for job '{}' is {}", jobType, value?"enabled":"disabled");
         return value;
     }

@@ -73,7 +73,7 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxThreads", 0);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
-                messageDisabled = Boolean.TRUE;
+                messageDisabled = true;
                 LOG.info("Trailer processing is disabled");
             }
             watchProcess.set(false);
@@ -82,7 +82,7 @@ public class TrailerProcessScheduler extends AbstractQueueScheduler {
         
         if (messageDisabled) {
             LOG.info("Trailer processing is enabled");
-            messageDisabled = Boolean.FALSE;
+            messageDisabled = false;
         }
 
         int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.trailerprocess.maxResults", 50));

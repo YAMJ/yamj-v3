@@ -56,7 +56,7 @@ public class JpegReader {
     public static final int COLOR_TYPE_CMYK = 2;
     public static final int COLOR_TYPE_YCCK = 3;
     private int colorType = COLOR_TYPE_RGB;
-    private boolean hasAdobeMarker = Boolean.FALSE;
+    private boolean hasAdobeMarker = false;
 
     /**
      * Used to read a JPEG image to a BufferedImage and able to cope with a CYMK colour space image
@@ -67,7 +67,7 @@ public class JpegReader {
      */
     public BufferedImage readImage(File file) throws IOException {
         colorType = COLOR_TYPE_RGB;
-        hasAdobeMarker = Boolean.FALSE;
+        hasAdobeMarker = false;
 
         if (!file.exists()) {
             LOG.debug("Error reading file, does not exist: {}", file.getName());
@@ -145,7 +145,7 @@ public class JpegReader {
             UnknownSegment app14Segment = (UnknownSegment) segments.get(0);
             byte[] data = app14Segment.bytes;
             if (data.length >= 12 && data[0] == 'A' && data[1] == 'd' && data[2] == 'o' && data[3] == 'b' && data[4] == 'e') {
-                hasAdobeMarker = Boolean.TRUE;
+                this.hasAdobeMarker = true;
                 int transform = app14Segment.bytes[11] & 0xff;
                 if (transform == 2) {
                     colorType = COLOR_TYPE_YCCK;

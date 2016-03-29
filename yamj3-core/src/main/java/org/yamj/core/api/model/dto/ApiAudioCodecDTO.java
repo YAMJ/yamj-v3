@@ -35,8 +35,8 @@ public class ApiAudioCodecDTO extends AbstractApiDTO {
 
     private String codec;
     private String codecFormat;
-    private Integer bitrate = -1;
-    private Integer channels = -1;
+    private Integer bitrate = Integer.valueOf(-1);
+    private Integer channels = Integer.valueOf(-1);
     private String languageCode;
     private String language;
 

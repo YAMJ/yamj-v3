@@ -323,7 +323,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         // add awards
-        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE) &&
+        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", false) &&
             CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards()))
         {
             for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
@@ -393,7 +393,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         series.addRating(SCANNER_ID, tvSeriesInfos.getUserRating());
 
         // add awards
-        if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE) &&
+        if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", false) &&
             CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) 
         {
             for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
@@ -682,7 +682,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
         
         // scan for IMDb ID
@@ -701,7 +701,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                         String sourceId = nfoContent.substring(beginIdIndex + 1, endIdIndex);
                         LOG.debug("Allocine ID found in NFO: {}", sourceId);
                         dto.addId(SCANNER_ID, sourceId);
-                        return Boolean.TRUE;
+                        return true;
                     }
                 }
             }
@@ -710,7 +710,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         LOG.debug("No Allocine ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }
 

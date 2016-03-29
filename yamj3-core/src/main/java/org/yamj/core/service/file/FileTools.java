@@ -81,7 +81,7 @@ public final class FileTools {
      * @return
      */
     public static boolean copyFile(File src, File dst, boolean deleteSource) {
-        boolean returnValue = Boolean.FALSE;
+        boolean returnValue = false;
 
         if (!src.exists()) {
             LOG.error("The file '{}' does not exist", src);
@@ -110,11 +110,11 @@ public final class FileTools {
                     }
                 }
                 
-                return Boolean.TRUE;
+                returnValue = true;
             } catch (IOException error) {
                 LOG.error("Failed copying file '{}' to '{}'", src, dst);
                 LOG.error("File copying error", error);
-                returnValue = Boolean.FALSE;
+                returnValue = false;
             }
         }
 
@@ -172,7 +172,7 @@ public final class FileTools {
         }
 
         if (targetDirectory.exists()) {
-            return Boolean.TRUE;
+            return true;
         }
         LOG.debug("Creating directories for {} ", targetDirectory.getAbsolutePath());
 
@@ -185,9 +185,9 @@ public final class FileTools {
             }
             if (status && looper > 10) {
                 LOG.error("Failed creating the directory '{}'. Ensure this directory is read/write!", targetDirectory.getAbsolutePath());
-                return Boolean.FALSE;
+                return false;
             }
-            return Boolean.TRUE;
+            return true;
         } finally {
             MKDIRS_LOCK.unlock();
         }

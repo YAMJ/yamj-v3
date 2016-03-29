@@ -75,20 +75,20 @@ public class ArtworkScanScheduler extends AbstractQueueScheduler {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
-                messageDisabled = Boolean.TRUE;
+                messageDisabled = true;
                 LOG.info("Artwork scanning is disabled");
             }
             watchProcess.set(false);
         } else {
             if (messageDisabled) {
                 LOG.info("Artwork processing is enabled");
-                messageDisabled = Boolean.FALSE;
+                messageDisabled = false;
             }
     
             // determine if photo scanning is enabled (local and online), cause not querying photo artwork
             // will significantly reduce the amount of artwork to scan
-            boolean scanPhoto = configService.getBooleanProperty("yamj3.artwork.scan.local.photo", Boolean.TRUE);
-            scanPhoto = scanPhoto && configService.getBooleanProperty("yamj3.artwork.scan.online.photo", Boolean.TRUE);
+            boolean scanPhoto = configService.getBooleanProperty("yamj3.artwork.scan.local.photo", true);
+            scanPhoto = scanPhoto && configService.getBooleanProperty("yamj3.artwork.scan.online.photo", true);
 
             // process located or generated artwork
             int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 60));

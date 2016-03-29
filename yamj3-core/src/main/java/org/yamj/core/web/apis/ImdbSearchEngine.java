@@ -199,7 +199,7 @@ public class ImdbSearchEngine {
      */
     private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType, boolean throwTempError) {
         String searchMatch = configService.getProperty("imdb.id.search.match", "regular");
-        boolean searchVariable = configService.getBooleanProperty("imdb.id.search.variable", Boolean.TRUE);
+        boolean searchVariable = configService.getBooleanProperty("imdb.id.search.variable", true);
 
         StringBuilder sb = new StringBuilder("http://www.imdb.com/");
         sb.append("find?q=");

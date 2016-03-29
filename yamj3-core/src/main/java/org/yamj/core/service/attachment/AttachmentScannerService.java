@@ -59,7 +59,7 @@ public class AttachmentScannerService {
     private static final String MT_EXTRACT_FILENAME_WINDOWS = "mkvextract.exe";
     private static final String MT_EXTRACT_FILENAME_LINUX = "mkvextract";
     // flag to indicate if scanner is activated
-    private boolean isActivated = Boolean.FALSE;
+    private boolean isActivated = false;
     // valid MIME types
     private Set<String> validMimeTypesText;
     private Map<String, ImageType> validMimeTypesImage;
@@ -90,12 +90,12 @@ public class AttachmentScannerService {
         
         if (!mkvInfoFile.canExecute()) {
             LOG.info( "Couldn't find MKV toolnix executable tool 'mkvinfo'");
-            isActivated = Boolean.FALSE;
+            isActivated = false;
         } else if (!mkvExtractFile.canExecute()) {
             LOG.info( "Couldn't find MKV toolnix executable tool 'mkvextract'");
-            isActivated = Boolean.FALSE;
+            isActivated = false;
         } else {
-            isActivated = Boolean.TRUE;
+            isActivated = true;
             
             // activate tools
             if (isWindows) {

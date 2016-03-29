@@ -81,7 +81,7 @@ public class FilenameScannerTest extends AbstractTest {
         LOG.info("testFilenameExtra: {}", dto);
         assertEquals("Skrek 2", dto.getTitle());
         assertEquals("EXTRA Shrek 2 3D", dto.getPartTitle());
-        assertEquals(true, dto.isExtra());
+        assertEquals(Boolean.TRUE, dto.isExtra());
         assertEquals("BluRay", dto.getVideoSource());
     }
 
@@ -93,7 +93,7 @@ public class FilenameScannerTest extends AbstractTest {
         LOG.info("testFilenameTrailer: {}", dto);
         assertEquals("Skrek 2", dto.getTitle());
         assertEquals("TRAILER Shrek 2", dto.getPartTitle());
-        assertEquals(true, dto.isExtra());
+        assertEquals(Boolean.TRUE, dto.isExtra());
         assertEquals("BluRay", dto.getVideoSource());
     }
 

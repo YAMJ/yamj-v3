@@ -56,7 +56,7 @@ public class TheMovieDbApiWrapper {
     private TheMovieDbApi tmdbApi;
     
     public String getMovieId(String title, int year, Locale locale, boolean throwTempError) { //NOSONAR
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.include.adult", Boolean.FALSE);
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.include.adult", false);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
         MovieInfo movie = null;
@@ -96,7 +96,7 @@ public class TheMovieDbApiWrapper {
         String id = null;
         TVBasic closestTV = null;
         int closestMatch = Integer.MAX_VALUE;
-        boolean foundTV = Boolean.FALSE;
+        boolean foundTV = false;
 
         try {
             // Search using movie name
@@ -106,7 +106,7 @@ public class TheMovieDbApiWrapper {
             for (TVBasic tv : seriesList.getResults()) {
                 if (title.equalsIgnoreCase(tv.getName())) {
                     id = String.valueOf(tv.getId());
-                    foundTV = Boolean.TRUE;
+                    foundTV = true;
                     break;
                 }
                 
@@ -138,12 +138,12 @@ public class TheMovieDbApiWrapper {
     }
     
     public String getPersonId(String name, boolean throwTempError) { //NOSONAR
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", false);
 
         String id = null;
         PersonFind closestPerson = null;
         int closestMatch = Integer.MAX_VALUE;
-        boolean foundPerson = Boolean.FALSE;
+        boolean foundPerson = false;
 
         try {
             ResultList<PersonFind> results = tmdbApi.searchPeople(name, 0, includeAdult, SearchType.PHRASE);
@@ -151,7 +151,7 @@ public class TheMovieDbApiWrapper {
             for (PersonFind person : results.getResults()) {
                 if (name.equalsIgnoreCase(person.getName())) {
                     id = String.valueOf(person.getId());
-                    foundPerson = Boolean.TRUE;
+                    foundPerson = true;
                     break;
                 }
                 

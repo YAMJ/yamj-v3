@@ -184,7 +184,7 @@ public class MovieMeterScanner implements IMovieScanner {
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
         if (!ignorePresentId && StringUtils.isNumeric(dto.getId(SCANNER_ID))) {
-            return Boolean.TRUE;
+            return true;
         }
 
         LOG.trace("Scanning NFO for MovieMeter ID");
@@ -196,13 +196,13 @@ public class MovieMeterScanner implements IMovieScanner {
                 String sourceId = st.nextToken();
                 LOG.debug("MovieMeter ID found in NFO: {}", sourceId);
                 dto.addId(SCANNER_ID, sourceId);
-                return Boolean.TRUE;
+                return true;
             }
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
 
         LOG.debug("No MovieMeter ID found in NFO");
-        return Boolean.FALSE;
+        return false;
     }
 }

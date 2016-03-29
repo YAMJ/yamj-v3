@@ -113,7 +113,7 @@ public class TrailerScannerService implements IQueueProcessService {
 
     @SuppressWarnings("unused")
     private void scanTrailerLocal(VideoData videoData, List<Trailer> trailers) {
-        if (!configService.getBooleanProperty("yamj3.trailer.scan.local.movie", Boolean.TRUE)) {
+        if (!configService.getBooleanProperty("yamj3.trailer.scan.local.movie", true)) {
             LOG.trace("Local movie trailer scan disabled");
             return;
         }
@@ -124,7 +124,7 @@ public class TrailerScannerService implements IQueueProcessService {
     }
 
     private void scanTrailerOnline(VideoData videoData, List<Trailer> trailers) {
-        if (!configService.getBooleanProperty("yamj3.trailer.scan.online.movie", Boolean.TRUE)) {
+        if (!configService.getBooleanProperty("yamj3.trailer.scan.online.movie", true)) {
             LOG.trace("Online movie trailer scan disabled");
             return;
         }
@@ -159,7 +159,7 @@ public class TrailerScannerService implements IQueueProcessService {
         }
 
         // create trailers
-        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE);
+        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", false);
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setVideoData(videoData);
@@ -175,7 +175,7 @@ public class TrailerScannerService implements IQueueProcessService {
 
     @SuppressWarnings("unused")
     private void scanTrailerLocal(Series series, List<Trailer> trailers) {
-        if (!configService.getBooleanProperty("yamj3.trailer.scan.local.series", Boolean.TRUE)) {
+        if (!configService.getBooleanProperty("yamj3.trailer.scan.local.series", true)) {
             LOG.trace("Local series trailer scan disabled");
             return;
         }
@@ -186,7 +186,7 @@ public class TrailerScannerService implements IQueueProcessService {
     }
 
     private void scanTrailerOnline(Series series, List<Trailer> trailers) {
-        if (!configService.getBooleanProperty("yamj3.trailer.scan.online.series", Boolean.TRUE)) {
+        if (!configService.getBooleanProperty("yamj3.trailer.scan.online.series", true)) {
             LOG.trace("Online series trailer scan disabled");
             return;
         }
@@ -221,7 +221,7 @@ public class TrailerScannerService implements IQueueProcessService {
         }
 
         // create trailers
-        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE);
+        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", false);
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setSeries(series);

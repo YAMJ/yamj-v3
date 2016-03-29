@@ -58,7 +58,7 @@ public final class Start {
     private static String yamjHome = ".";
     private static int yamjPort = 8888;
     private static int yamjShutdownTimeout = 5000;
-    private static boolean yamjStopAtShutdown = Boolean.TRUE;
+    private static boolean yamjStopAtShutdown = true;
     private static final String RESOURCES_DIR = "./resources/";
     private static final String SKINS_DIR = "skins/";
     private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
@@ -149,7 +149,7 @@ public final class Start {
             ResourceHandler resourceDirHandler = new ResourceHandler();
             resourceDirHandler.setResourceBase(RESOURCES_DIR);
             resourceDirHandler.setWelcomeFiles(DEFAULT_WELCOME_PAGES);
-            resourceDirHandler.setDirectoriesListed(Boolean.TRUE);
+            resourceDirHandler.setDirectoriesListed(true);
             LOG.info("Resource base: {}", resourceDirHandler.getResourceBase());
 
             // Ensure the 'SKIN_DIR' directory is created

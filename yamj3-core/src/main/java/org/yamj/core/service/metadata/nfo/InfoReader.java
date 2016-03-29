@@ -103,13 +103,13 @@ public final class InfoReader {
             LOG.warn("NFO file '{}' is not readable; try stage file content", nfoFilename);
         }
         
-        boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
-        boolean hasXml = Boolean.FALSE;
+        boolean parsedNfo = false;   // was the NFO XML parsed correctly or at all
+        boolean hasXml = false;
 
         if (StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_MOVIE)
                 || StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_TVSHOW)
                 || StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_EPISODE)) {
-            hasXml = Boolean.TRUE;
+            hasXml = true;
         }
 
         // If the file has XML tags in it, try reading it as a pure XML file
@@ -201,11 +201,11 @@ public final class InfoReader {
             } else {
                 LOG.error("Failed parsing NFO file: " + nfoFilename, ex);
             }
-            return Boolean.FALSE;
+            return false;
         }
 
         parseXML(xmlDoc, dto, nfoFilename, nfoFileDate);
-        return Boolean.TRUE;
+        return true;
     }
 
     /**
@@ -545,7 +545,7 @@ public final class InfoReader {
             Element eId = (Element) nElements;
             String setOrder = eId.getAttribute("order");
             if (StringUtils.isNumeric(setOrder)) {
-                dto.addSetInfo(eId.getTextContent(), Integer.parseInt(setOrder));
+                dto.addSetInfo(eId.getTextContent(), Integer.valueOf(setOrder));
             } else {
                 dto.addSetInfo(eId.getTextContent());
             }
@@ -621,7 +621,7 @@ public final class InfoReader {
             String aName = null;
             String aRole = null;
             String aThumb = null;
-            Boolean firstActor = Boolean.TRUE;
+            boolean firstActor = true;
 
             if (nlCast.getLength() > 1) {
                 for (int looper = 0; looper < nlCast.getLength(); looper++) {
@@ -633,7 +633,7 @@ public final class InfoReader {
                     Element eCast = (Element) nElement;
                     if (eCast.getNodeName().equalsIgnoreCase("name")) {
                         if (firstActor) {
-                            firstActor = Boolean.FALSE;
+                            firstActor = false;
                         } else {
                             dto.addActor(aName, aRole, aThumb);
                         }
@@ -649,7 +649,7 @@ public final class InfoReader {
                     // There's a case where there might be a different node here that isn't name, role or thumb, but that will be ignored
                 }
             } else {
-                // This looks like a Mede8er node in the "<actor>Actor Name</actor>" format, so just get the text element
+                // this looks like a Mede8er node in the "<actor>Actor Name</actor>" format, so just get the text element
                 aName = nActors.getTextContent();
             }
 
@@ -778,7 +778,7 @@ public final class InfoReader {
                             LOG.debug("Poster URL found in NFO: {} ", foundUrl);
                             dto.addPosterURL(foundUrl);
                             urlStartIndex = -1;
-                            foundInfo = Boolean.TRUE;
+                            foundInfo = true;
                         }
                     } else {
                         LOG.debug("Poster URL ignored in NFO because it's a fanart URL");

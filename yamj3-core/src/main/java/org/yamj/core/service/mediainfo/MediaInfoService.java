@@ -63,8 +63,8 @@ public class MediaInfoService implements IQueueProcessService {
     // media info settings
     private static final File MEDIAINFO_PATH = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
     private final List<String> execMediaInfo = new ArrayList<>();
-    private boolean isMediaInfoRar = Boolean.FALSE;
-    private boolean isActivated = Boolean.TRUE;
+    private boolean isMediaInfoRar = false;
+    private boolean isActivated = true;
     private static final List<String> RAR_DISK_IMAGES = new ArrayList<>();
 
     @Autowired
@@ -92,7 +92,7 @@ public class MediaInfoService implements IQueueProcessService {
                 mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_WINDOWS);
             } else {
                 // enable the extra mediainfo-rar features
-                isMediaInfoRar = Boolean.TRUE;
+                isMediaInfoRar = true;
             }
         } else {
             mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_LINUX);
@@ -101,13 +101,13 @@ public class MediaInfoService implements IQueueProcessService {
                 mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_LINUX);
             } else {
                 // enable the extra mediainfo-rar features
-                isMediaInfoRar = Boolean.TRUE;
+                isMediaInfoRar = true;
             }
         }
 
         if (!mediaInfoFile.canExecute()) {
             LOG.info("Couldn't find CLI mediaInfo executable tool: Media file data won't be extracted");
-            isActivated = Boolean.FALSE;
+            isActivated = false;
         } else {
             if (osName.contains("Windows")) {
                 execMediaInfo.add("cmd.exe");
@@ -125,7 +125,7 @@ public class MediaInfoService implements IQueueProcessService {
             } else {
                 LOG.info("MediaInfo tool will be used to extract video data. But not RAR and ISO formats");
             }
-            isActivated = Boolean.TRUE;
+            isActivated = true;
         }
 
         // Add a list of supported extensions
@@ -395,11 +395,11 @@ public class MediaInfoService implements IQueueProcessService {
 
             subtitle.setDefaultFlag("yes".equalsIgnoreCase(infosText.get("Default")));
             subtitle.setForcedFlag("yes".equalsIgnoreCase(infosText.get("Forced")));
-            return Boolean.TRUE;
+            return true;
         }
 
         LOG.debug("Subtitle format skipped: {}", infoFormat);
-        return Boolean.FALSE;
+        return false;
     }
 
     private static String getRuntime(Map<String, String> infosGeneral, List<Map<String, String>> infosVideo) {

@@ -207,7 +207,7 @@ public class StagingService {
     }
 
     @Transactional
-    public boolean deleteStageFile(long id) {
+    public boolean deleteStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.DELETED);
@@ -215,7 +215,7 @@ public class StagingService {
     }
 
     @Transactional
-    public boolean updateStageFile(long id) {
+    public boolean updateStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
         params.put("status", StatusType.UPDATED);
@@ -235,7 +235,7 @@ public class StagingService {
     }
     
     public Date maxWatchedFileDate(StageFile videoFile) {
-        boolean checkLibrary = this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE);
+        boolean checkLibrary = this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", true);
         return this.stagingDao.maxWatchedFileDate(videoFile, watchedFolderName, checkLibrary);
     }
 
@@ -252,7 +252,7 @@ public class StagingService {
         if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {
 
             Library library = null;
-            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE)) {
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", true)) {
                 library = watchedFile.getStageDirectory().getLibrary();
             }
 
@@ -277,7 +277,7 @@ public class StagingService {
         if (FileTools.isWithinSpecialFolder(subtitleFile, subtitleFolderName)) {
 
             Library library = null;
-            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.subtitle", true)) {
                 library = subtitleFile.getStageDirectory().getLibrary();
             }
 

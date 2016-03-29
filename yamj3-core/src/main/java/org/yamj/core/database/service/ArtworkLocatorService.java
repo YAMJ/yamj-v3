@@ -152,7 +152,7 @@ public class ArtworkLocatorService {
     private List<StageFile> searchInArtworkFolder(ArtworkType artworkType, List<StageFile> videoFiles, List<String> tokens) {
         if (StringUtils.isNotBlank(artworkFolderName)) {
             Library library = null;
-            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.artwork", true)) {
                 library = videoFiles.get(0).getStageDirectory().getLibrary();
             }
 

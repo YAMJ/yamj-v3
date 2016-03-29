@@ -331,7 +331,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         String altLanguage = configService.getProperty("thetvdb.language.alternate", language);
-        final boolean seasonBannerOnlySeries = configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE);
+        final boolean seasonBannerOnlySeries = configService.getBooleanProperty("thetvdb.season.banner.onlySeries", false);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -381,7 +381,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         LOG.debug("season {}-{}: Found {} blank banners", id, season, blankDTOs.size());
 
         final List<ArtworkDetailDTO> returnDTOs;
-        if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE) && !blankDTOs.isEmpty()) {
+        if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", false) && !blankDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using blanks banners", id, season);
             returnDTOs = blankDTOs;
         } else if (!seasonLangDTOs.isEmpty()) {

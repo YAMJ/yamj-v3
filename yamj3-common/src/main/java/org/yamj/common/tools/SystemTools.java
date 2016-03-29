@@ -67,7 +67,7 @@ public final class SystemTools {
      * @return
      */
     public static String getIpAddress() {
-        return getIpAddress(Boolean.TRUE);
+        return getIpAddress(true);
     }
 
     /**

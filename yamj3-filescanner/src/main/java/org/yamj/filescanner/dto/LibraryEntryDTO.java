@@ -55,8 +55,8 @@ public class LibraryEntryDTO implements Serializable {
         this.description = "";
         this.include = "";
         this.exclude = "";
-        this.scrape = Boolean.TRUE;
-        this.watch = Boolean.TRUE;
+        this.scrape = true;
+        this.watch = true;
     }
 
     //<editor-fold defaultstate="collapsed" desc="Getter and Setter Methods">

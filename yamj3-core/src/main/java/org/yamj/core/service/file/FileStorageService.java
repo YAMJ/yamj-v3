@@ -128,14 +128,14 @@ public class FileStorageService {
         HttpEntity entity = httpClient.requestResource(url);
         if (entity == null) {
             LOG.error("Failed to get content from source url: {}", url);
-            return Boolean.FALSE;
+            return false;
         }
         
         try (OutputStream outputStream = new FileOutputStream(storageFileName)) {
             entity.writeTo(outputStream);
         }
 
-        return Boolean.TRUE;
+        return true;
     }
 
     public boolean store(StorageType type, String filename, byte[] bytes) throws IOException {
@@ -146,7 +146,7 @@ public class FileStorageService {
             FileUtils.copyInputStreamToFile(is, new File(storageFileName));
         }
 
-        return Boolean.TRUE;
+        return true;
     }
 
     public boolean store(StorageType type, String filename, StageFile stageFile) {
@@ -374,7 +374,7 @@ public class FileStorageService {
         return false;
     }
     
-    public void deleteStorageFiles(Set<String> filesToDelete) {
+    public static void deleteStorageFiles(Set<String> filesToDelete) {
         if (filesToDelete.isEmpty()) {
             LOG.trace("No files to delete in storage");
             return;
