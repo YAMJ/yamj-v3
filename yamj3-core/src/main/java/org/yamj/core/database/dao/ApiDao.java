@@ -57,6 +57,7 @@ public class ApiDao extends HibernateDao {
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
     private static final String VIDEO_YEAR = "videoYear";
+    private static final String RELEASE_DATE = "releaseDate";
     private static final String ORIGINAL_TITLE = "originalTitle";
     private static final String SORT_TITLE = "sortTitle";
     private static final String CACHE_FILENAME = "cacheFilename";
@@ -109,6 +110,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(SORT_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar(RELEASE_DATE, DateType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
@@ -308,7 +310,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.EPISODE).append(SQL_AS_VIDEO_TYPE);
         }
         sbSQL.append(", vd.title, vd.title_original AS originalTitle, vd.title_sort AS sortTitle");
-        sbSQL.append(", vd.publication_year AS videoYear");
+        sbSQL.append(", vd.publication_year AS videoYear, vd.release_date as releaseDate");
         sbSQL.append(", null AS seriesId, vd.season_id AS seasonId, null AS season, vd.episode AS episode ");
         sbSQL.append(", vd.watched AS watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "vd"));
@@ -564,7 +566,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("SELECT ser.id");
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", ser.title, ser.title_original AS originalTitle, ser.title_sort AS sortTitle");
-        sbSQL.append(", ser.start_year AS videoYear");
+        sbSQL.append(", ser.start_year AS videoYear, null as releaseDate");
         sbSQL.append(", ser.id AS seriesId, null AS seasonId, null AS season, -1 AS episode");
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
@@ -787,7 +789,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("SELECT sea.id");
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", sea.title, sea.title_original AS originalTitle, sea.title_sort AS sortTitle");
-        sbSQL.append(", sea.publication_year as videoYear");
+        sbSQL.append(", sea.publication_year as videoYear, null as releaseDate");
         sbSQL.append(", sea.series_id AS seriesId, sea.id AS seasonId, sea.season AS season, -1 AS episode");
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
@@ -1742,6 +1744,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(SORT_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar(RELEASE_DATE, DateType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
@@ -2788,7 +2791,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addScalar(TITLE, StringType.INSTANCE);
             sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
             sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
-            sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
+            sqlScalars.addScalar(RELEASE_DATE, DateType.INSTANCE);
             sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
             DataItemTools.addDataItemScalars(sqlScalars, options.splitDataItems());
 
