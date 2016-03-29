@@ -22,12 +22,13 @@
  */
 package org.yamj.core.tools;
 
+import javax.persistence.LockTimeoutException;
 import javax.persistence.OptimisticLockException;
-import org.hibernate.StaleObjectStateException;
+import javax.persistence.PessimisticLockException;
 import org.hibernate.StaleStateException;
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
+import org.hibernate.dialect.lock.LockingStrategyException;
 import org.hibernate.exception.LockAcquisitionException;
-import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.ConcurrencyFailureException;
 
 /**
  * Exception tools
@@ -43,19 +44,11 @@ public final class ExceptionTools {
             return false;
         }
 
-        if (e instanceof org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException) {
+        if (e instanceof ConcurrencyFailureException) {
             return true;
         }
 
-        if (e instanceof org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException) {
-            return true;
-        }
-
-        if (e instanceof OptimisticEntityLockException) {
-            return true;
-        }
-
-        if (e instanceof StaleObjectStateException) {
+        if (e instanceof LockingStrategyException) {
             return true;
         }
 
@@ -67,10 +60,14 @@ public final class ExceptionTools {
             return true;
         }
 
-        if (e instanceof CannotAcquireLockException) {
+        if (e instanceof PessimisticLockException) {
             return true;
         }
 
+        if (e instanceof LockTimeoutException) {
+            return true;
+        }
+        
         if (e instanceof LockAcquisitionException) {
             return true;
         }
