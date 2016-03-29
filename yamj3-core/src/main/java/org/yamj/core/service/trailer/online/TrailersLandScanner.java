@@ -325,9 +325,9 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
 
             LOG.trace("Evaluating candidate URL {}", fileUrl);
             String ext = FilenameUtils.getExtension(fileUrl);
-            for (ContainerType type : ContainerType.values()) {
-                if (type.name().equalsIgnoreCase(ext)) {
-                    this.containerType = type;
+            for (ContainerType cType : ContainerType.values()) {
+                if (cType.name().equalsIgnoreCase(ext)) {
+                    this.containerType = cType;
                     break;
                 }
             }
@@ -337,28 +337,28 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
 
             String params = url.substring(0, startIndex - 1);
 
-            String resolution;
+            final String res;
             if (params.contains("sd_file")) {
-                resolution = RESOLUTION_SD;
+                res = RESOLUTION_SD;
             } else if (params.contains("480")) {
-                resolution = RESOLUTION_SD;
+                res = RESOLUTION_SD;
             } else if (params.contains("720")) {
-                resolution = RESOLUTION_720P;
+                res = RESOLUTION_720P;
             } else if (params.contains("1080")) {
-                resolution = RESOLUTION_1080P;
+                res = RESOLUTION_1080P;
             } else {
                 LOG.info("Cannot guess trailer resolution for params '{}'", params);
                 return false;
             }
 
-            LOG.trace("Resolution is {}", resolution);
-            if (!this.isBetterResolution(resolution)) {
+            LOG.trace("Resolution is {}", res);
+            if (!this.isBetterResolution(res)) {
                 LOG.trace("Discarding '{}' as it's not better than actual resolution", fileUrl);
                 return false;
             }
 
             this.url = fileUrl;
-            this.resolution = resolution;
+            this.resolution = res;
             return true;
         }
 
