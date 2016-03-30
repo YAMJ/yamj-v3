@@ -27,10 +27,10 @@
         <ehcache.version>2.6.11</ehcache.version>
         <datetime.version>3.0.2</datetime.version>
         <!-- api versions -->
-        <themoviedbapi.version>4.1-SNAPSHOT</themoviedbapi.version>
-        <thetvdbapi.version>1.8-SNAPSHOT</thetvdbapi.version>
-        <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
-        <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
+        <themoviedbapi.version>4.2</themoviedbapi.version>
+        <thetvdbapi.version>1.8</thetvdbapi.version>
+        <fanarttvapi.version>3.3-SNAPSHOT</fanarttvapi.version>
+        <allocineapi.version>1.5</allocineapi.version>
         <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <moviemeterapi.version>1.1-SNAPSHOT</moviemeterapi.version>
