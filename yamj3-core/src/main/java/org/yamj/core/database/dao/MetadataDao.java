@@ -87,7 +87,7 @@ public class MetadataDao extends HibernateDao {
     }
 
     @Cacheable(value=CachingNames.DB_PERSON, key="#id", unless="#result==null")
-    public Person getPerson(Long id) {
+    public Person getCacheablePerson(Long id) {
         return getById(Person.class, id);
     }
 

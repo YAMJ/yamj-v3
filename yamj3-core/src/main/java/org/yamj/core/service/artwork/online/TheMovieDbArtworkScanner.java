@@ -59,6 +59,7 @@ public class TheMovieDbArtworkScanner implements
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_SIZE = "original";
     private static final String NO_LANGUAGE = StringUtils.EMPTY;
+    private static final String API_ERROR = "TheMovieDb error";
     
     @Autowired
     private LocaleService localeService;
@@ -197,8 +198,9 @@ public class TheMovieDbArtworkScanner implements
             }
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving collection for boxed set: {}", boxedSet.getName());
-            LOG.warn("TheMovieDb error", ex);
+            LOG.warn(API_ERROR, ex);
         }
+        
         return null; //NOSONAR
     }
 
@@ -303,12 +305,14 @@ public class TheMovieDbArtworkScanner implements
                         }
                     }
                 }
+                
                 LOG.debug("Found {} {} artworks for TMDb id {} and language '{}'", dtos.size(), artworkType, tmdbId, language);
             }
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
-            LOG.warn("TheMovieDb error", ex);
+            LOG.warn(API_ERROR, ex);
         }
+        
         return dtos;
     }
     

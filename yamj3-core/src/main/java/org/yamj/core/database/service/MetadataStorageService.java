@@ -737,7 +737,7 @@ public class MetadataStorageService {
                 if (dto.getPersonId() == null) {
                     person = metadataDao.getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
                 } else {
-                    person = metadataDao.getPerson(dto.getPersonId());
+                    person = metadataDao.getCacheablePerson(dto.getPersonId());
                 }
 
                 if (person == null) {

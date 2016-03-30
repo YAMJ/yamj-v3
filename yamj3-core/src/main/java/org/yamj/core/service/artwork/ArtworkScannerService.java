@@ -118,7 +118,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         Artwork artwork = artworkStorageService.getRequiredArtwork(queueElement.getId());
 
         // holds the located artwork
-        List<ArtworkLocated> locatedArtworks = new LinkedList<>();
+        List<ArtworkLocated> locatedArtworks = new ArrayList<>();
 
         if (ArtworkType.POSTER == artwork.getArtworkType()) {
             // poster only for movie, season, series and boxed sets
@@ -609,7 +609,10 @@ public class ArtworkScannerService implements IQueueProcessService {
             located.setRating(dto.getRating());
             located.setStatus(StatusType.NEW);
             located.setPriority(10);
-            locatedArtworks.add(located);
+            
+            if (!locatedArtworks.contains(located)) {
+                locatedArtworks.add(located);
+            }
         }
     }
 
@@ -629,7 +632,9 @@ public class ArtworkScannerService implements IQueueProcessService {
                 located.setStatus(StatusType.INVALID);
             }
             
-            locatedArtworks.add(located);
+            if (!locatedArtworks.contains(located)) {
+                locatedArtworks.add(located);
+            }
         }
     }
 
@@ -649,7 +654,9 @@ public class ArtworkScannerService implements IQueueProcessService {
                 located.setStatus(StatusType.INVALID);
             }
             
-            locatedArtworks.add(located);
+            if (!locatedArtworks.contains(located)) {
+                locatedArtworks.add(located);
+            }
         }
     }
 

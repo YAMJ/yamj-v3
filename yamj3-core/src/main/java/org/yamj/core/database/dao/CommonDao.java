@@ -508,7 +508,10 @@ public class CommonDao extends HibernateDao {
     }
 
     public void markAsDeleted(Artwork artwork, Set<String> sources) {
-        markAsUpdated(artwork);
+        if (artwork.isNotUpdated()) {
+            artwork.setStatus(StatusType.UPDATED);
+            this.updateEntity(artwork);
+        }
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
             if (located.getUrl() != null  && sources.contains(located.getSource()) && !located.isDeleted()) {
                 located.setStatus(StatusType.DELETED);
@@ -519,81 +522,10 @@ public class CommonDao extends HibernateDao {
 
     public void markAsDeleted(List<Trailer> trailers) {
         for (Trailer trailer : trailers) {
-            markAsDeleted(trailer);
-       }
-    }
-
-    public void markAsDeleted(Trailer trailer) {
-        if (!trailer.isDeleted()) {
-            trailer.setStatus(StatusType.DELETED);
-            this.updateEntity(trailer);
-        }
-    }
-    
-    public void markAsUpdated(List<Artwork> artworks) {
-        for (Artwork artwork : artworks) {
-            this.markAsUpdated(artwork);
-        }
-    }
-
-    public void markAsUpdated(Artwork artwork) {
-        if (artwork.isNotUpdated()) {
-            artwork.setStatus(StatusType.UPDATED);
-            this.updateEntity(artwork);
-        }
-    }
-
-    public void markAsUpdated(Person person) {
-        if (person.isNotUpdated()) {
-            person.setStatus(StatusType.UPDATED);
-            person.setFilmographyStatus(StatusType.UPDATED);
-            this.updateEntity(person);
-        }
-    }
-
-    public void markAsUpdatedForFilmography(Person person) {
-        if (!StatusType.NEW.equals(person.getFilmographyStatus()) && !StatusType.UPDATED.equals(person.getFilmographyStatus())) {
-            person.setFilmographyStatus(StatusType.UPDATED);
-            this.updateEntity(person);
-        }
-    }
-
-    public void markAsUpdated(VideoData videoData) {
-        if (videoData.isNotUpdated()) {
-            videoData.setStatus(StatusType.UPDATED);
-            if (videoData.isMovie()) {
-                videoData.setTrailerStatus(StatusType.UPDATED);
+            if (!trailer.isDeleted()) {
+                trailer.setStatus(StatusType.DELETED);
+                this.updateEntity(trailer);
             }
-            this.updateEntity(videoData);
-        }
-    }
-
-    public void markAsUpdatedForTrailers(VideoData videoData) {
-        if (!StatusType.NEW.equals(videoData.getTrailerStatus()) && !StatusType.UPDATED.equals(videoData.getTrailerStatus())) {
-            videoData.setTrailerStatus(StatusType.UPDATED);
-            this.updateEntity(videoData);
-        }
-    }
-
-    public void markAsUpdated(Season season) {
-        if (season.isNotUpdated()) {
-            season.setStatus(StatusType.UPDATED);
-            this.updateEntity(season);
-        }
-    }
-
-    public void markAsUpdated(Series series) {
-        if (series.isNotUpdated()) {
-            series.setStatus(StatusType.UPDATED);
-            series.setTrailerStatus(StatusType.UPDATED);
-            this.updateEntity(series);
-        }
-    }
-
-    public void markAsUpdatedForTrailers(Series series) {
-        if (!StatusType.NEW.equals(series.getTrailerStatus()) && !StatusType.UPDATED.equals(series.getTrailerStatus())) {
-            series.setTrailerStatus(StatusType.UPDATED);
-            this.updateEntity(series);
-        }
+       }
     }
 }

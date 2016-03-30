@@ -125,7 +125,7 @@ public class JsonApiStorageService {
     
     @Transactional
     public ApiStatus updatePerson(Long id, UpdatePerson update) {
-        Person person = metadataDao.getPerson(id);
+        Person person = metadataDao.getById(Person.class, id);
         if (person == null) {
             return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
         }
@@ -157,20 +157,18 @@ public class JsonApiStorageService {
         if (OverrideTools.checkOverwriteBiography(person, API_SOURCE)) {
             person.setBiography(update.getBiography(), API_SOURCE);
         }
-        
+
         person.setLastScanned(new Date());
-        metadataDao.updateEntity(person);
-        
         return ApiStatus.ok("Updated person with ID "+id);
     }
     
     @Transactional
     public ApiStatus duplicatePerson(Long id, Long doubletId) {
-        Person person = metadataDao.getPerson(id);
+        Person person = metadataDao.getById(Person.class, id);
         if (person == null || person.isDeleted()) {
             return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
         }
-        Person doubletPerson = metadataDao.getPerson(doubletId);
+        Person doubletPerson = metadataDao.getById(Person.class, doubletId);
         if (doubletPerson == null || doubletPerson.isDeleted()) {
             return ApiStatus.notFound("ID " + doubletId + " does not determine a valid person entry");
         }
@@ -693,32 +691,36 @@ public class JsonApiStorageService {
         
         switch (type) {
             case PERSON:
-                Person person = metadataDao.getPerson(id);
+                Person person = metadataDao.getById(Person.class, id);
                 if (person != null) {
-                    commonDao.markAsUpdated(person.getPhoto());
-                    commonDao.markAsUpdated(person);
                     rescan = true;
+                    markAsUpdated(person);
+                    markAsUpdated(person.getPhoto());
                 }
                 break;
             case FILMOGRAPHY:
-                person = metadataDao.getPerson(id);
+                person = metadataDao.getById(Person.class, id);
                 if (person != null) {
-                    commonDao.markAsUpdatedForFilmography(person);
                     rescan = true;
+                    if (!StatusType.NEW.equals(person.getFilmographyStatus()) && !StatusType.UPDATED.equals(person.getFilmographyStatus())) {
+                        person.setFilmographyStatus(StatusType.UPDATED);
+                    }
                 }
                 break;
             case SERIES:
                 Series series = commonDao.getById(Series.class, id);
                 if (series != null) {
-                    commonDao.markAsUpdated(series.getArtworks());
-                    commonDao.markAsUpdated(series);
                     rescan = true;
+                    markAsUpdated(series);
+                    markAsUpdated(series.getArtworks());
+                    
                     for (Season season : series.getSeasons()) {
-                        commonDao.markAsUpdated(season.getArtworks());
-                        commonDao.markAsUpdated(season);
+                        markAsUpdated(season);
+                        markAsUpdated(season.getArtworks());
+                        
                         for (VideoData episode : season.getVideoDatas()) {
-                            commonDao.markAsUpdated(episode.getArtworks());
-                            commonDao.markAsUpdated(episode);
+                            markAsUpdated(episode);
+                            markAsUpdated(episode.getArtworks());
                         }
                     }
                 }
@@ -726,22 +728,23 @@ public class JsonApiStorageService {
             case SEASON:
                 Season season = commonDao.getById(Season.class, id);
                 if (season != null) {
-                    commonDao.markAsUpdated(season.getArtworks());
-                    commonDao.markAsUpdated(season);
-                    for (VideoData episode : season.getVideoDatas()) {
-                        commonDao.markAsUpdated(episode.getArtworks());
-                        commonDao.markAsUpdated(episode);
-                    }
                     rescan = true;
+                    markAsUpdated(season);
+                    markAsUpdated(season.getArtworks());
+                    
+                    for (VideoData episode : season.getVideoDatas()) {
+                        markAsUpdated(episode);
+                        markAsUpdated(episode.getArtworks());
+                    }
                 }
                 break;
             case MOVIE:
             case EPISODE:
                 VideoData videoData = commonDao.getById(VideoData.class, id);
                 if (videoData != null) {
-                    commonDao.markAsUpdated(videoData.getArtworks());
-                    commonDao.markAsUpdated(videoData);
                     rescan = true;
+                    markAsUpdated(videoData);
+                    markAsUpdated(videoData.getArtworks());
                 }
                 break;
             default:
@@ -750,18 +753,39 @@ public class JsonApiStorageService {
         }
         
         if (rescan) {
-            StringBuilder sb = new StringBuilder("Rescan ");
-            sb.append(type.name().toLowerCase());
-            sb.append(" for ID: ");
-            sb.append(id);
-            return ApiStatus.ok(sb.toString());
+            return ApiStatus.ok("Rescan " + type.name().toLowerCase() + " for ID: " + id);
         }
         
-        StringBuilder sb = new StringBuilder("No ");
-        sb.append(type.name().toLowerCase());
-        sb.append(" found for rescanning ID: ");
-        sb.append(id);
-        return ApiStatus.notFound(sb.toString());
+        return ApiStatus.notFound("No " + type.name().toLowerCase() + " found for rescanning ID: " + id);
+    }
+
+    private static void markAsUpdated(Person person) {
+        if (person.isNotUpdated()) {
+            person.setStatus(StatusType.UPDATED);
+            person.setFilmographyStatus(StatusType.UPDATED);
+        }
+    }
+
+    private static void markAsUpdated(VideoData videoData) {
+        if (videoData.isNotUpdated()) {
+            videoData.setStatus(StatusType.UPDATED);
+            if (videoData.isMovie()) {
+                videoData.setTrailerStatus(StatusType.UPDATED);
+            }
+        }
+    }
+    
+    private static void markAsUpdated(Season season) {
+        if (season.isNotUpdated()) {
+            season.setStatus(StatusType.UPDATED);
+        }
+    }
+
+    private static void markAsUpdated(Series series) {
+        if (series.isNotUpdated()) {
+            series.setStatus(StatusType.UPDATED);
+            series.setTrailerStatus(StatusType.UPDATED);
+        }
     }
 
     /**
@@ -777,39 +801,39 @@ public class JsonApiStorageService {
         
         switch (type) {
             case PERSON:
-                Person person = metadataDao.getPerson(id);
+                Person person = metadataDao.getById(Person.class, id);
                 if (person != null) {
-                    this.commonDao.markAsUpdated(person.getPhoto());
                     rescan = true;
+                    markAsUpdated(person.getPhoto());
                 }
                 break;
             case SERIES:
                 Series series = commonDao.getById(Series.class, id);
                 if (series != null) {
-                    this.commonDao.markAsUpdated(series.getArtworks());
                     rescan = true;
+                    markAsUpdated(series.getArtworks());
                 }
                 break;
             case SEASON:
                 Season season = commonDao.getById(Season.class, id);
                 if (season != null) {
-                    this.commonDao.markAsUpdated(season.getArtworks());
                     rescan = true;
+                    markAsUpdated(season.getArtworks());
                 }
                 break;
             case BOXSET:
                 BoxedSet boxedSet = commonDao.getBoxedSet(id);
                 if (boxedSet != null) {
-                    this.commonDao.markAsUpdated(boxedSet.getArtworks());
                     rescan = true;
+                    markAsUpdated(boxedSet.getArtworks());
                 }
                 break;
             case MOVIE:
             case EPISODE:
                 VideoData videoData = commonDao.getById(VideoData.class, id);
                 if (videoData != null) {
-                    this.commonDao.markAsUpdated(videoData.getArtworks());
                     rescan = true;
+                    markAsUpdated(videoData.getArtworks());
                 }
                 break;
             default:
@@ -818,20 +842,24 @@ public class JsonApiStorageService {
         }
         
         if (rescan) {
-            StringBuilder sb = new StringBuilder("Rescan ");
-            sb.append(type.name().toLowerCase());
-            sb.append(" artwork for ID: ");
-            sb.append(id);
-            return ApiStatus.ok(sb.toString());
+            return ApiStatus.ok("Rescan " + type.name().toLowerCase() + " artwork for ID: " + id);
         }
-        
-        StringBuilder sb = new StringBuilder("No ");
-        sb.append(type.name().toLowerCase());
-        sb.append(" found for artwork rescanning ID: ");
-        sb.append(id);
-        return ApiStatus.notFound(sb.toString());
+        return ApiStatus.notFound("No " + type.name().toLowerCase() + " found for artwork rescanning ID: " + id);
     }
     
+    
+    private static void markAsUpdated(List<Artwork> artworks) {
+        for (Artwork artwork : artworks) {
+            markAsUpdated(artwork);
+        }
+    }
+
+    private static void markAsUpdated(Artwork artwork) {
+        if (artwork.isNotUpdated()) {
+            artwork.setStatus(StatusType.UPDATED);
+        }
+    }
+
     /**
      * Set status of artwork to UPDATED.
      *
@@ -848,15 +876,19 @@ public class JsonApiStorageService {
                 case SERIES:
                     Series series = commonDao.getById(Series.class, id);
                     if (series != null) {
-                        commonDao.markAsUpdatedForTrailers(series);
                         rescan = true;
+                        if (!StatusType.NEW.equals(series.getTrailerStatus()) && !StatusType.UPDATED.equals(series.getTrailerStatus())) {
+                            series.setTrailerStatus(StatusType.UPDATED);
+                        }
                     }
                     break;
                 case MOVIE:
                     VideoData videoData = commonDao.getById(VideoData.class, id);
                     if (videoData != null) {
-                        commonDao.markAsUpdatedForTrailers(videoData);
                         rescan = true;
+                        if (!StatusType.NEW.equals(videoData.getTrailerStatus()) && !StatusType.UPDATED.equals(videoData.getTrailerStatus())) {
+                            videoData.setTrailerStatus(StatusType.UPDATED);
+                        }
                     }
                     break;
                 default:
@@ -865,23 +897,14 @@ public class JsonApiStorageService {
             }
             
             if (rescan) {
-                StringBuilder sb = new StringBuilder("Rescan ");
-                sb.append(type.name().toLowerCase());
-                sb.append(" artwork for ID: ");
-                sb.append(id);
-                return ApiStatus.ok(sb.toString());
+                return ApiStatus.ok("Rescan " + type.name().toLowerCase() + " trailer for ID: " + id);
             }
-            
-            StringBuilder sb = new StringBuilder("No ");
-            sb.append(type.name().toLowerCase());
-            sb.append(" found for artwork rescanning ID: ");
-            sb.append(id);
-            return ApiStatus.notFound(sb.toString());
+            return ApiStatus.notFound("No " + type.name().toLowerCase() + " found for trailer rescanning ID: " + id);
         }
 
         return ApiStatus.badRequest("No valid " + type.name().toLowerCase() + " ID provided");
     }
-    
+
     @Transactional
     public ApiStatus rescanAll() {
         this.apiDao.rescanAll();
@@ -903,7 +926,7 @@ public class JsonApiStorageService {
         }
 
         if (MetaDataType.PERSON == type) {
-            Person person = metadataDao.getPerson(id);
+            Person person = metadataDao.getById(Person.class, id);
             if (person == null) {
                 return ApiStatus.notFound("Person for ID " + id + " not found");
             }
