@@ -48,6 +48,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.tools.CommonTools;
+import org.yamj.core.tools.ExceptionTools;
 import org.yamj.core.tools.MetadataTools;
 
 @Service("tmdbArtworkScanner")
@@ -310,7 +311,9 @@ public class TheMovieDbArtworkScanner implements
             }
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
-            LOG.warn(API_ERROR, ex);
+            if (!ExceptionTools.is404(ex)) {
+                LOG.warn(API_ERROR, ex);
+            }
         }
         
         return dtos;

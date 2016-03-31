@@ -29,6 +29,8 @@ import org.hibernate.StaleStateException;
 import org.hibernate.dialect.lock.LockingStrategyException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.ConcurrencyFailureException;
+import org.yamj.api.common.exception.ApiException;
+import org.yamj.api.common.exception.ApiExceptionType;
 
 /**
  * Exception tools
@@ -73,5 +75,9 @@ public final class ExceptionTools {
         }
 
         return false;
+    }
+    
+    public static boolean is404(ApiException ex) {
+        return ApiExceptionType.HTTP_404_ERROR.equals(ex.getExceptionType());
     }
 }
