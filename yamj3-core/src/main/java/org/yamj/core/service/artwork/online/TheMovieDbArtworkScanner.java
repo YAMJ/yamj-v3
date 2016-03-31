@@ -291,15 +291,16 @@ public class TheMovieDbArtworkScanner implements
                 
                 for (Artwork artwork : artworkList) {
                     if (artwork.getArtworkType() == artworkType
-                        && (StringUtils.isBlank(artwork.getLanguage())
-                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
+                        && (StringUtils.isBlank(artwork.getLanguage()) // no language
+                            || "xx".equalsIgnoreCase(artwork.getLanguage()) // another marker for no language
+                            || artwork.getLanguage().equalsIgnoreCase(language))) // defined language
                     {
                         this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
                     }
                 }
                 
                 if (dtos.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(language)) {
-                    // retrieve by english language
+                    // retrieve by English
                     for (Artwork artwork : artworkList) {
                         if (artwork.getArtworkType() == artworkType && StringUtils.equalsIgnoreCase(artwork.getLanguage(), LANGUAGE_EN)) {
                             this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
