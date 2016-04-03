@@ -81,6 +81,8 @@ public class ApiDao extends HibernateDao {
     private static final String GENERATED_ID = "generatedId";
     private static final String COUNTRY_CODE = "countryCode";
     private static final String MULTIPLE = "Multiple";
+    private static final String CREATE_TIMESTAMP = "createTimestamp";
+    private static final String UPDATE_TIMESTAMP = "updateTimestamp";
     
     // SQL
     private static final String SQL_UNION = " UNION ";
@@ -312,7 +314,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title, vd.title_original AS originalTitle, vd.title_sort AS sortTitle");
         sbSQL.append(", vd.publication_year AS videoYear, vd.release_date as releaseDate");
         sbSQL.append(", null AS seriesId, vd.season_id AS seasonId, null AS season, vd.episode AS episode ");
-        sbSQL.append(", vd.watched AS watched ");
+        sbSQL.append(", vd.watched AS watched, vd.create_timestamp as createTimestamp ");
+        
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "vd"));
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -568,7 +571,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title, ser.title_original AS originalTitle, ser.title_sort AS sortTitle");
         sbSQL.append(", ser.start_year AS videoYear, null as releaseDate");
         sbSQL.append(", ser.id AS seriesId, null AS seasonId, null AS season, -1 AS episode");
-        sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
+        sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
+        sbSQL.append(", ser.create_timestamp as createTimestamp ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -791,7 +795,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.title, sea.title_original AS originalTitle, sea.title_sort AS sortTitle");
         sbSQL.append(", sea.publication_year as videoYear, null as releaseDate");
         sbSQL.append(", sea.series_id AS seriesId, sea.id AS seasonId, sea.season AS season, -1 AS episode");
-        sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched ");
+        sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched");
+        sbSQL.append(", sea.create_timestamp as createTimestamp ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -1750,7 +1755,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
-
+        
         // add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
         // add additional parameters
@@ -2535,8 +2540,8 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar(TYPE, StringType.INSTANCE);
         sqlScalars.addScalar("counter", LongType.INSTANCE);
-        sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
-        sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
+        sqlScalars.addScalar(CREATE_TIMESTAMP, TimestampType.INSTANCE);
+        sqlScalars.addScalar(UPDATE_TIMESTAMP, TimestampType.INSTANCE);
         sqlScalars.addScalar("lastId", LongType.INSTANCE);
 
         List<CountTimestamp> results = executeQueryWithTransform(CountTimestamp.class, sqlScalars, null);
