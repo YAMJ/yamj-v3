@@ -24,6 +24,8 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.core.tools.Constants.UTF8;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -44,7 +46,6 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;

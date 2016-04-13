@@ -22,12 +22,13 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.plugin.api.type.JobType;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
 
 /**

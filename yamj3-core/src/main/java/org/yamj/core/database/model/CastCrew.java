@@ -22,11 +22,12 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.yamj.core.database.model.type.JobType;
 
 @Entity
 @Table(name = "cast_crew")

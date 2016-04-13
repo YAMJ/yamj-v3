@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;

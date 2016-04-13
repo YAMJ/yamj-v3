@@ -24,6 +24,8 @@ package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.core.tools.Constants.UTF8;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +42,6 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;

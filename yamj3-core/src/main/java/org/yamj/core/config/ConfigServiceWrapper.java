@@ -24,7 +24,10 @@ package org.yamj.core.config;
 
 import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,32 +37,69 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.JobType;
+import org.yamj.plugin.api.PluginConfigService;
 
 @Service("configServiceWrapper")
-public class ConfigServiceWrapper {
+public class ConfigServiceWrapper implements PluginConfigService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigServiceWrapper.class);
 
     @Autowired
     private ConfigService configService;
 
+    @Override
+    public String getProperty(String key) {
+        return this.configService.getProperty(key);
+    }
+
+    @Override
     public String getProperty(String key, String defaultValue) {
         return this.configService.getProperty(key, defaultValue);
     }
 
-    public boolean getBooleanProperty(String key, boolean defaultValue) {
-        return this.configService.getBooleanProperty(key, defaultValue);
-    }
-
-    public int getIntProperty(String key, int defaultValue) {
-        return this.configService.getIntProperty(key, defaultValue);
-    }
-
+    @Override
     public List<String> getPropertyAsList(String key, String defaultValue) {
         return this.configService.getPropertyAsList(key, defaultValue);
     }
 
+    @Override
+    public List<String> getPropertyAsList(String key, String defaultValue, String splitter) {
+        return this.configService.getPropertyAsList(key, defaultValue, splitter);
+    }
+
+    @Override
+    public boolean getBooleanProperty(String key, boolean defaultValue) {
+        return this.configService.getBooleanProperty(key, defaultValue);
+    }
+
+    @Override
+    public int getIntProperty(String key, int defaultValue) {
+        return this.configService.getIntProperty(key, defaultValue);
+    }
+
+    @Override
+    public long getLongProperty(String key, long defaultValue) {
+        return this.configService.getLongProperty(key, defaultValue);
+    }
+
+    @Override
+    public float getFloatProperty(String key, float defaultValue) {
+        return this.configService.getFloatProperty(key, defaultValue);
+    }
+
+    @Override
+    public Date getDateProperty(String key) {
+        return this.configService.getDateProperty(key);
+    }
+
+    @Override
+    public boolean isCastScanEnabled(final JobType jobType) {
+        String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
+        boolean value = this.configService.getBooleanProperty(key, false);
+        LOG.trace("CastCrew scanning for job '{}' is {}", jobType, value?"enabled":"disabled");
+        return value;
+    }
+    
     public boolean isLocalArtworkScanEnabled(Artwork artwork) {
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.local.");
@@ -172,13 +212,6 @@ public class ConfigServiceWrapper {
         return Arrays.asList(this.configService.getProperty(configKey, defaultValue).toLowerCase().split(DEFAULT_SPLITTER));
     }
     
-    public boolean isCastScanEnabled(final JobType jobType) {
-        String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
-        boolean value = this.configService.getBooleanProperty(key, false);
-        LOG.trace("CastCrew scanning for job '{}' is {}", jobType, value?"enabled":"disabled");
-        return value;
-    }
-
     public List<String> getSortStripPrefixes() {
         return this.configService.getPropertyAsList(
                         "yamj3.sort.strip.prefixes",

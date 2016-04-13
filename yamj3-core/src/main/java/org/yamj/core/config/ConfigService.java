@@ -88,7 +88,7 @@ public class ConfigService {
         return this.getPropertyAsList(key, defaultValue, DEFAULT_SPLITTER);
     }
 
-    public List<String> getPropertyAsList(String key, String defaultValue, String splitter) {
+    public List<String> getPropertyAsList(final String key, final String defaultValue, final String splitter) {
         final String props = this.getProperty(key, defaultValue);
         return Arrays.asList(props.split(splitter));
     }
@@ -111,7 +111,7 @@ public class ConfigService {
         return NumberUtils.toLong(value, defaultValue);
     }
 
-    public float getFloatProperty(String key, float defaultValue) {
+    public float getFloatProperty(final String key, final float defaultValue) {
         String value = cachedProperties.get(key);
         return NumberUtils.toFloat(value, defaultValue);
     }
@@ -124,7 +124,6 @@ public class ConfigService {
         return new Date(ms);
     }
     
-
     public void setProperty(String key, String value) {
         // first store in database ...
         configDao.storeConfig(key, value, true);

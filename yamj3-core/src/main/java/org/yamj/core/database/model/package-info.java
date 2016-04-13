@@ -25,12 +25,12 @@
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.MetaDataType")}),
     @TypeDef(name = "statusType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")}),
+        @TypeDef(name = "jobType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.type.JobType")}),
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
     @TypeDef(name = "overrideFlag", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.OverrideFlag")}),
-    @TypeDef(name = "jobType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.JobType")}),
     @TypeDef(name = "fileType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")}),
     @TypeDef(name = "participationType", typeClass = EnumStringUserType.class,
@@ -44,10 +44,9 @@
     @TypeDef(name = "scalingType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ScalingType")})
 })
-package org.yamj.core.database.model;
-
-import org.hibernate.annotations.Parameter;
+package org.yamj.core.database.model;import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
+;
 

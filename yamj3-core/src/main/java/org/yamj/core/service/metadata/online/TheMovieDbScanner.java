@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.plugin.api.type.JobType;
+
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -43,7 +45,6 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;

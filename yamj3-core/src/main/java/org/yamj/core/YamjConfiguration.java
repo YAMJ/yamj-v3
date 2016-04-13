@@ -24,7 +24,6 @@ package org.yamj.core;
 
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -49,8 +48,6 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.LocaleService;
-import ro.fortsoft.pf4j.DefaultPluginManager;
-import ro.fortsoft.pf4j.PluginManager;
 
 @Configuration
 @ComponentScan("org.yamj.core")
@@ -149,16 +146,5 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
         interceptor.setParamName("language");
         registry.addInterceptor(interceptor);
-    }
-    
-    @Bean(destroyMethod="stopPlugins")
-    public PluginManager pluginManager() {
-        final String yamjHome = System.getProperty("yamj3.home", ".");
-        File pluginsDir = new File (yamjHome + "/plugins");
-        
-        PluginManager pluginManager = new DefaultPluginManager(pluginsDir);
-        pluginManager.loadPlugins();
-        pluginManager.startPlugins();
-        return pluginManager;
     }
 }

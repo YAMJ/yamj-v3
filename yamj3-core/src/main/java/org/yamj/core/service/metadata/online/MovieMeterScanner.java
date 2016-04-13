@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.plugin.api.type.JobType;
+
 import com.omertron.moviemeter.model.Actor;
 import com.omertron.moviemeter.model.FilmInfo;
 import java.util.HashSet;
@@ -37,7 +39,6 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.MovieMeterApiWrapper;

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model.dto;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +31,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
