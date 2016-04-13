@@ -55,6 +55,7 @@
         <module>yamj3-jetty</module>
         <module>yamj3-filescanner</module>
         <module>yamj3-distribution</module>
+        <module>yamj3-plugin-api</module>
     </modules>
 
     <properties>
@@ -125,6 +126,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>yamj3-filescanner</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yamj3-plugin-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!--  SPRING -->
