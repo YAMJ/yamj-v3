@@ -20,10 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.scanner;
+package org.yamj.plugin.api;
 
 import org.yamj.api.common.http.PoolingHttpClient;
-import org.yamj.plugin.api.YamjPlugin;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 public abstract class YamjOnlinePlugin extends YamjPlugin {

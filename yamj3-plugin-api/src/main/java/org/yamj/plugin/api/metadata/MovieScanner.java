@@ -20,15 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.scanner.metadata;
+package org.yamj.plugin.api.metadata;
 
-public enum ScanResult {
+import java.util.Locale;
+import java.util.Map;
+import ro.fortsoft.pf4j.ExtensionPoint;
 
-    MISSING_ID,  // ID is missing
-    TYPE_CHANGE, // different type: movie versus TV show
-    ERROR,       // scanning error
-    SKIPPED,     // skipped scan
-    RETRY,       // scan should be retried
-    NO_RESULT,   // scan without results
-    OK;          // scan successful
+public interface MovieScanner extends ExtensionPoint {
+
+    String getScannerName();
+    
+    String getMovieId(String title, String originalTitle, int year, Map<String,String> ids);
+
+    ScanResult scanMovie(Movie movie, Locale locale);
 }

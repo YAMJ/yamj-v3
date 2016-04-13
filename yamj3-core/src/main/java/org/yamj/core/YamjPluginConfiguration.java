@@ -22,6 +22,8 @@
  */
 package org.yamj.core;
 
+import org.yamj.plugin.api.YamjOnlinePlugin;
+
 import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +32,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.plugin.api.YamjPlugin;
-import org.yamj.plugin.api.scanner.YamjOnlinePlugin;
 import ro.fortsoft.pf4j.*;
 
 @Configuration
