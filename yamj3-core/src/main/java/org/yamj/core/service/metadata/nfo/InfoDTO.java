@@ -38,6 +38,7 @@ public final class InfoDTO {
     private Map<String, String> certificationInfos = new HashMap<>(1);
     private Set<CreditDTO> credits = new LinkedHashSet<>(10);
     private Set<String> genres = new LinkedHashSet<>(5);
+    private Set<String> countryCodes = new LinkedHashSet<>(2);
     private Set<InfoEpisodeDTO> episodes = new HashSet<>();
     private Set<String> posterURLs = new HashSet<>(0);
     private Set<String> fanartURLs = new HashSet<>(0);
@@ -170,7 +171,7 @@ public final class InfoDTO {
 
     public void setYear(String year) {
         int testYear = MetadataTools.extractYearAsInt(year);
-        if (testYear > 0 && testYear < this.year)  {
+        if (testYear > 0 && (this.year <= 0 || testYear < this.year))  {
             // use first year given in any NFO
             this.year = testYear;
             this.changed = true;
@@ -281,9 +282,20 @@ public final class InfoDTO {
         return genres;
     }
 
-    public void adGenre(String genre) {
+    public void addGenre(String genre) {
         if (StringUtils.isNotBlank(genre)) {
             this.genres.add(genre.trim());
+            this.changed = true;
+        }
+    }
+    
+    public Set<String> getCountryCodes() {
+        return countryCodes;
+    }
+
+    public void addCountryCode(String countryCode) {
+        if (StringUtils.isNotBlank(countryCode)) {
+            this.countryCodes.add(countryCode);
             this.changed = true;
         }
     }

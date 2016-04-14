@@ -55,7 +55,7 @@ public final class InfoReader {
     private static final Logger LOG = LoggerFactory.getLogger(InfoReader.class);
     private static final String XML_START = "<";
     private static final String XML_END = "</";
-    private static final String SPLIT_GENRE = "(?<!-)/|,|\\|";  // caters for the case where "-/" is not wanted as part of the split
+    private static final String SPLITTER = "(?<!-)/|,|\\|";  // caters for the case where "-/" is not wanted as part of the split
     
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
@@ -297,10 +297,13 @@ public final class InfoReader {
             // parse company (may be studio)
             value = DOMHelper.getValueFromElement(eCommon, "studio", "company");
             dto.setCompany(value);
-    
+
             // parse genres
             parseGenres(eCommon.getElementsByTagName("genre"), dto);
-    
+
+            // parse countries
+            parseCountries(eCommon.getElementsByTagName("country"), dto);
+
             // premiered / release date
             movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
     
@@ -507,8 +510,35 @@ public final class InfoReader {
             if ((nlNames != null) && (nlNames.getLength() > 0)) {
                 parseGenres(nlNames, dto);
             } else if (eGenre.getTextContent() != null) {
-                for (String genre : eGenre.getTextContent().split(SPLIT_GENRE)) {
-                    dto.adGenre(genre);
+                for (String genre : eGenre.getTextContent().split(SPLITTER)) {
+                    dto.addGenre(genre);
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse countries from the XML NFO file
+     * Caters for multiple countries on the same line and multiple lines.
+     *
+     * @param nlElements
+     * @param dto
+    */
+    private void parseCountries(NodeList nlElements, InfoDTO dto) {
+        Node nElements;
+        for (int looper = 0; looper < nlElements.getLength(); looper++) {
+            nElements = nlElements.item(looper);
+            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            
+            Element eCountry = (Element) nElements;
+            NodeList nlNames = eCountry.getElementsByTagName("name");
+            if ((nlNames != null) && (nlNames.getLength() > 0)) {
+                parseCountries(nlNames, dto);
+            } else if (eCountry.getTextContent() != null) {
+                for (String country : eCountry.getTextContent().split(SPLITTER)) {
+                    dto.addCountryCode(localeService.findCountryCode(country));
                 }
             }
         }

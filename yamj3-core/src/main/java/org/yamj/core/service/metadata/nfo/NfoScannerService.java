@@ -145,7 +145,11 @@ public class NfoScannerService {
             if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
                 videoData.setGenreNames(infoDTO.getGenres(), SCANNER_ID);
             }
-            
+
+            if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+                videoData.setCountryCodes(infoDTO.getCountryCodes(), SCANNER_ID);
+            }
+
             if (StringUtils.isNotBlank(infoDTO.getCompany())) {
                 if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
                     Set<String> studioNames = Collections.singleton(infoDTO.getCompany());
