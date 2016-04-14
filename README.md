@@ -23,6 +23,9 @@ This is a real webapp; can be started with a jetty server or deployed to an exis
 ### yamj3-plugin-api:
 > The plugin api which holds tools and extension points for building own YAMJ v3 plugins.
 
+### yamj3-distribution:
+> The distribution package to build and pack YAMJ v3 into a single zip archive.
+
 Running YAMJv3
 --------------
 Please see [this wiki page](https://github.com/YAMJ/yamj-v3/wiki/Getting-Started-with-the-Alpha-Test) for instructions on how to run YAMJv3

@@ -29,5 +29,5 @@ public interface MovieScanner extends MetadataScanner, NfoIdScanner, ExtensionPo
     
     String getMovieId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
 
-    Movie scanMovie(String movieId, boolean throwTempError);
+    boolean scanMovie(Movie movie, boolean throwTempError);
 }
