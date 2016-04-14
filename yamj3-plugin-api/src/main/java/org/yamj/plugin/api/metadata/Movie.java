@@ -46,139 +46,159 @@ public class Movie {
         return ids;
     }
 
-    public void setIds(Map<String, String> ids) {
+    public Movie setIds(Map<String, String> ids) {
         this.ids = ids;
+        return this;
     }
 
-    public void addId(String source, String id) {
+    public Movie addId(String source, String id) {
         this.ids.put(source, id);
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Movie setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public String getOriginalTitle() {
         return originalTitle;
     }
 
-    public void setOriginalTitle(String originalTitle) {
+    public Movie setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
+        return this;
     }
 
     public int getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public Movie setYear(int year) {
         this.year = year;
+        return this;
     }
 
     public String getPlot() {
         return plot;
     }
 
-    public void setPlot(String plot) {
+    public Movie setPlot(String plot) {
         this.plot = plot;
+        return this;
     }
 
     public String getOutline() {
         return outline;
     }
 
-    public void setOutline(String outline) {
+    public Movie setOutline(String outline) {
         this.outline = outline;
+        return this;
     }
 
     public String getTagline() {
         return tagline;
     }
 
-    public void setTagline(String tagline) {
+    public Movie setTagline(String tagline) {
         this.tagline = tagline;
+        return this;
     }
 
     public String getQuote() {
         return quote;
     }
 
-    public void setQuote(String quote) {
+    public Movie setQuote(String quote) {
         this.quote = quote;
+        return this;
     }
 
     public String getReleaseCountry() {
         return releaseCountry;
     }
 
-    public void setReleaseCountry(String releaseCountry) {
+    public Movie setReleaseCountry(String releaseCountry) {
         this.releaseCountry = releaseCountry;
+        return this;
     }
 
     public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public Movie setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
+        return this;
     }
 
     public int getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public Movie setRating(int rating) {
         this.rating = rating;
+        return this;
     }
 
     public Collection<String> getStudios() {
         return studios;
     }
 
-    public void setStudios(Collection<String> studios) {
+    public Movie setStudios(Collection<String> studios) {
         this.studios = studios;
+        return this;
     }
 
-    public void addStudios(String studio) {
+    public Movie addStudio(String studio) {
         this.studios.add(studio);
+        return this;
     }
 
     public Collection<String> getGenres() {
         return genres;
     }
 
-    public void setGenres(Collection<String> genres) {
+    public Movie setGenres(Collection<String> genres) {
         this.genres = genres;
+        return this;
     }
     
-    public void addGenre(String genre) {
+    public Movie addGenre(String genre) {
         this.genres.add(genre);
+        return this;
     }
 
     public Collection<String> getCountries() {
         return countries;
     }
 
-    public void setCountries(Collection<String> countries) {
+    public Movie setCountries(Collection<String> countries) {
         this.countries = countries;
+        return this;
     }
 
-    public void addCountry(String country) {
+    public Movie addCountry(String country) {
         this.countries.add(country);
+        return this;
     }
 
     public List<Credit> getCredits() {
         return credits;
     }
 
-    public void setCredits(List<Credit> credits) {
+    public Movie setCredits(List<Credit> credits) {
         this.credits = credits;
+        return this;
     }
     
-    public void addCredit(Credit credit) {
+    public Movie addCredit(Credit credit) {
         this.credits.add(credit);
+        return this;
     }    
 }

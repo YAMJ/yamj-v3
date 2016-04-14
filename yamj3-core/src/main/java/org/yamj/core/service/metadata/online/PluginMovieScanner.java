@@ -75,8 +75,7 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.MISSING_ID;
         }
         
-        Movie movie = new Movie();
-        movie.addId(getScannerName(), movieId);
+        final Movie movie = new Movie().addId(getScannerName(), movieId);
         final boolean scanned = movieScanner.scanMovie(movie, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for movie '{}'", getScannerName(), videoData.getIdentifier());
