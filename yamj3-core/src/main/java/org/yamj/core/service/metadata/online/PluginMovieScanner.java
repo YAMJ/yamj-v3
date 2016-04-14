@@ -81,9 +81,11 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.NO_RESULT;
         }
         
-        // set possible scanned movie IDs   
+        // set possible scanned movie IDs only if not set before   
         for (Entry<String,String> entry : movie.getIds().entrySet()) {
-            videoData.setSourceDbId(entry.getKey(), entry.getValue());
+            if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
+                videoData.setSourceDbId(entry.getKey(), entry.getValue());
+            }
         }
 
         if (OverrideTools.checkOverwriteTitle(videoData, getScannerName())) {
