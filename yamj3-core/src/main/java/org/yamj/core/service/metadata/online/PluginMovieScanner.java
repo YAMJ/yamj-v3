@@ -156,7 +156,7 @@ public class PluginMovieScanner implements IMovieScanner {
 
         LOG.trace("Scanning NFO for {} ID", getScannerName());
         try {
-            String id = movieScanner.scanForIdInNFO(nfoContent);
+            String id = movieScanner.scanNFO(nfoContent);
             if (StringUtils.isNotBlank(id)) {
                 LOG.debug("{} ID found in NFO: {}", getScannerName(), id);
                 dto.addId(getScannerName(), id);
