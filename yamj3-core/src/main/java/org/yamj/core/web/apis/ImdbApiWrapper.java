@@ -43,7 +43,6 @@ import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.plugin.api.metadata.MetadataScannerException;
 import org.yamj.plugin.api.tools.MetadataTools;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
@@ -102,7 +101,7 @@ public class ImdbApiWrapper {
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new MetadataScannerException("IMDb request failed", ex);
+            throw new RuntimeException("IMDb request failed", ex);
         }
 
         checkTempError(throwTempError, response);
@@ -225,7 +224,7 @@ public class ImdbApiWrapper {
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new MetadataScannerException("IMDb request failed", ex);
+            throw new RuntimeException("IMDb request failed", ex);
         }
 
         checkTempError(throwTempError, response);
@@ -376,11 +375,11 @@ public class ImdbApiWrapper {
         return awards;
     }
 
-    private static void checkTempError(boolean throwTempError, DigestedResponse response) throws MetadataScannerException {
+    private static void checkTempError(boolean throwTempError, DigestedResponse response) {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new MetadataScannerException("IMDb request failed: " + response.getStatusCode());
+            throw new RuntimeException("IMDb request failed: " + response.getStatusCode());
         }
     }
 

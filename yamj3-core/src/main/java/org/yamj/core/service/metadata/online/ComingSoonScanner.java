@@ -47,7 +47,6 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.MetadataScannerException;
 import org.yamj.plugin.api.tools.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
@@ -168,7 +167,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new MetadataScannerException("ComingSoon request failed: " + response.getStatusCode());
+            throw new RuntimeException("ComingSoon request failed: " + response.getStatusCode());
         }
         String xml = response.getContent();
 
@@ -341,7 +340,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new MetadataScannerException("ComingSoon request failed: " + response.getStatusCode());
+            throw new RuntimeException("ComingSoon request failed: " + response.getStatusCode());
         }
         String xml = response.getContent();
         
