@@ -34,11 +34,13 @@ public class Movie {
     private String outline;
     private String tagline;
     private String quote;
-    private String releaseCountryCode;
+    private String releaseCountry;
     private Date releaseDate;
-    private int topRank = -1;
     private int rating = -1;
+    private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
+    private Collection<String> countries = new HashSet<>();
+    private List<Credit> credits = new ArrayList<>();
 
     public Map<String, String> getIds() {
         return ids;
@@ -46,6 +48,10 @@ public class Movie {
 
     public void setIds(Map<String, String> ids) {
         this.ids = ids;
+    }
+
+    public void addId(String source, String id) {
+        this.ids.put(source, id);
     }
 
     public String getTitle() {
@@ -104,12 +110,12 @@ public class Movie {
         this.quote = quote;
     }
 
-    public String getReleaseCountryCode() {
-        return releaseCountryCode;
+    public String getReleaseCountry() {
+        return releaseCountry;
     }
 
-    public void setReleaseCountryCode(String releaseCountryCode) {
-        this.releaseCountryCode = releaseCountryCode;
+    public void setReleaseCountry(String releaseCountry) {
+        this.releaseCountry = releaseCountry;
     }
 
     public Date getReleaseDate() {
@@ -118,14 +124,6 @@ public class Movie {
 
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
-    }
-
-    public int getTopRank() {
-        return topRank;
-    }
-
-    public void setTopRank(int topRank) {
-        this.topRank = topRank;
     }
 
     public int getRating() {
@@ -143,4 +141,44 @@ public class Movie {
     public void setStudios(Collection<String> studios) {
         this.studios = studios;
     }
+
+    public void addStudios(String studio) {
+        this.studios.add(studio);
+    }
+
+    public Collection<String> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Collection<String> genres) {
+        this.genres = genres;
+    }
+    
+    public void addGenre(String genre) {
+        this.genres.add(genre);
+    }
+
+    public Collection<String> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(Collection<String> countries) {
+        this.countries = countries;
+    }
+
+    public void addCountry(String country) {
+        this.countries.add(country);
+    }
+
+    public List<Credit> getCredits() {
+        return credits;
+    }
+
+    public void setCredits(List<Credit> credits) {
+        this.credits = credits;
+    }
+    
+    public void addCredit(Credit credit) {
+        this.credits.add(credit);
+    }    
 }

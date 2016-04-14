@@ -72,7 +72,7 @@ public class YamjPluginConfiguration {
         // add movie scanner to online scanner service
         for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
             movieScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
-            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner);
+            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService);
             this.onlineScannerService.registerMetadataScanner(scanner);
         }
         // TODO also for series, person and filmography scanner

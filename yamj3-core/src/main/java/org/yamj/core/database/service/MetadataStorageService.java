@@ -49,8 +49,8 @@ import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.core.tools.GenreXmlTools;
+import org.yamj.core.tools.YamjTools;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -725,7 +725,7 @@ public class MetadataStorageService {
             // find matching cast/crew
             CastCrew castCrew = null;
             for (CastCrew stored : videoData.getCredits()) {
-                if (dto.isMatchingCredit(stored)) {
+                if (isMatchingCredit(dto, stored)) {
                     castCrew = stored;
                     break;
                 }
@@ -772,6 +772,22 @@ public class MetadataStorageService {
         
         // delete orphans
         videoData.getCredits().removeAll(orphanCredits);
+    }
+
+    public boolean isMatchingCredit(CreditDTO dto, CastCrew credit) {
+        if (credit.getCastCrewPK().getJobType() != dto.getJobType()) {
+            return false;
+        }
+        
+        if (dto.getPersonId() != null && dto.getPersonId().longValue() == credit.getCastCrewPK().getPerson().getId()) {
+            return true;
+        }
+        
+        if (dto.getIdentifier().equalsIgnoreCase(credit.getCastCrewPK().getPerson().getIdentifier())) {
+            return true;
+        }
+        
+        return false;
     }
 
     private void updateLocatedArtwork(VideoData videoData) {

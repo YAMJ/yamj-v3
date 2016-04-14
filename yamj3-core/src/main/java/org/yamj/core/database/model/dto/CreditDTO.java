@@ -28,11 +28,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.core.database.model.CastCrew;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.metadata.Credit;
 import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.tools.PersonNameDTO;
 import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
@@ -71,8 +71,28 @@ public final class CreditDTO {
         this.identifier = YamjTools.cleanIdentifier(name);
         setFirstName(dto.getFirstName());
         setLastName(dto.getLastName());
-        setRole(MetadataTools.cleanRole(role));
+        setRole(role);
         setVoice(MetadataTools.isVoiceRole(role));
+    }
+
+    public CreditDTO(String source, Credit credit) {
+        this.source = source;
+        this.sourceId = credit.getId();
+        this.jobType = credit.getJobType();
+        this.name = credit.getName();
+        this.identifier = YamjTools.cleanIdentifier(credit.getName());
+        
+        this.firstName = credit.getFirstName();
+        this.lastName = credit.getLastName();
+        this.role = credit.getRole();
+        this.voice = credit.isVoice();
+        this.realName = credit.getRealName();
+        
+        if (credit.getPhotos() != null) {
+            for (String photo : credit.getPhotos()) {
+                this.addPhoto(source, photo);
+            }
+        }
     }
 
     public String getSource() {
@@ -124,7 +144,7 @@ public final class CreditDTO {
     }
 
     public void setRole(String role) {
-        this.role = role;
+        this.role = MetadataTools.cleanRole(role);
     }
     
     public boolean isVoice() {
@@ -156,21 +176,6 @@ public final class CreditDTO {
         }
     }
 
-    public boolean isMatchingCredit(CastCrew credit) {
-        if (credit.getCastCrewPK().getJobType() != this.jobType) {
-            return false;
-        }
-        
-        if (this.personId != null && this.personId.longValue() == credit.getCastCrewPK().getPerson().getId()) {
-            return true;
-        }
-        
-        if (this.identifier.equalsIgnoreCase(credit.getCastCrewPK().getPerson().getIdentifier())) {
-            return true;
-        }
-        
-        return false;
-    }
 
     @Override
     public int hashCode() {

@@ -43,8 +43,8 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-import org.yamj.plugin.api.tools.PersonNameDTO;
 import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.tools.PersonNameDTO;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
@@ -720,7 +720,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
             
             CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());
-            creditDTO.setRole(MetadataTools.cleanRole(cast.getCharacter()));
+            creditDTO.setRole(cast.getCharacter());
             creditDTO.setVoice(MetadataTools.isVoiceRole(cast.getAttr()));
             videoData.addCreditDTO(creditDTO);
         }

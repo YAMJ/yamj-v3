@@ -22,13 +22,18 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.metadata.Credit;
 import org.yamj.plugin.api.metadata.Movie;
 import org.yamj.plugin.api.metadata.MovieScanner;
 
@@ -36,9 +41,11 @@ public class PluginMovieScanner implements IMovieScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginMovieScanner.class);
     private final MovieScanner movieScanner;
+    private final LocaleService localeService;
     
-    public PluginMovieScanner(MovieScanner movieScanner) {
+    public PluginMovieScanner(MovieScanner movieScanner, LocaleService localeService) {
         this.movieScanner = movieScanner;
+        this.localeService = localeService;
     }
     
     @Override
@@ -87,6 +94,10 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setTitleOriginal(movie.getOriginalTitle(), getScannerName());
         }
 
+        if (OverrideTools.checkOverwriteYear(videoData, getScannerName())) {
+            videoData.setPublicationYear(movie.getYear(), getScannerName());
+        }
+
         if (OverrideTools.checkOverwritePlot(videoData, getScannerName())) {
             videoData.setPlot(movie.getPlot(), getScannerName());
         }
@@ -99,17 +110,37 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setTagline(movie.getTagline(), getScannerName());
         }
 
-        if (OverrideTools.checkOverwriteYear(videoData, getScannerName())) {
-            videoData.setPublicationYear(movie.getYear(), getScannerName());
+        if (OverrideTools.checkOverwriteQuote(videoData, getScannerName())) {
+            videoData.setTagline(movie.getQuote(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, getScannerName())) {
-            videoData.setRelease(movie.getReleaseCountryCode(), movie.getReleaseDate(), getScannerName());
+            final String countryCode = localeService.findCountryCode(movie.getReleaseCountry());
+            videoData.setRelease(countryCode, movie.getReleaseDate(), getScannerName());
         }
 
         videoData.addRating(getScannerName(), movie.getRating());
 
-        // TODO more values
+        if (OverrideTools.checkOverwriteGenres(videoData, getScannerName())) {
+            videoData.setGenreNames(movie.getGenres(), getScannerName());
+        }
+
+        if (OverrideTools.checkOverwriteStudios(videoData, getScannerName())) {
+            videoData.setGenreNames(movie.getStudios(), getScannerName());
+        }
+
+        if (OverrideTools.checkOverwriteCountries(videoData, getScannerName())) {
+            Set<String> countryCodes = new HashSet<>(movie.getCountries().size());
+            for (String country : movie.getCountries()) {
+                final String countryCode = localeService.findCountryCode(country);
+                if (countryCode != null) countryCodes.add(countryCode);
+            }
+            videoData.setCountryCodes(countryCodes, getScannerName());
+        }
+
+        for (Credit credit : movie.getCredits()) {
+            videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
+        }
         
         return ScanResult.OK;
     }

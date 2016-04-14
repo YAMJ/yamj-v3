@@ -531,7 +531,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                     } else {
                         credit = createCredit(member, JobType.GUEST_STAR);
                     }
-                    credit.setRole(MetadataTools.cleanRole(member.getRole()));
+                    credit.setRole(member.getRole());
                     credit.setVoice(MetadataTools.isVoiceRole(member.getRole()));
                     videoData.addCreditDTO(credit);
                 } else if (member.isDirector() && configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
