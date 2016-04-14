@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import org.yamj.plugin.api.web.HTMLTools;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -35,7 +37,6 @@ import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.web.HTMLTools;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner implements IMoviePosterScanner {

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.trakttv;
 
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
@@ -46,7 +48,6 @@ import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
 import org.yamj.core.service.metadata.online.*;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {

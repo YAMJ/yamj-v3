@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.plugin.api.tools;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,24 +28,22 @@ import static org.junit.Assert.assertTrue;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.yamj.api.common.http.PoolingHttpClient;
-import org.yamj.core.AbstractTest;
-import org.yamj.core.web.apis.SearchEngineTools;
+import org.yamj.api.common.http.CommonHttpClient;
+import org.yamj.api.common.http.HttpClientWrapper;
+import org.yamj.api.common.http.SimpleHttpClientBuilder;
+import org.yamj.plugin.api.web.SearchEngineTools;
 
-public class SearchEngineToolsTest extends AbstractTest {
+@SuppressWarnings("resource")
+public class SearchEngineToolsTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchEngineToolsTest.class);
 
-    @Autowired
-    private PoolingHttpClient httpClient;
-    
     @Ignore
     public void roundTripIMDB() {
         LOG.info("roundTripIMDB");
+        CommonHttpClient httpClient = new HttpClientWrapper(new SimpleHttpClientBuilder().build());
         SearchEngineTools search = new SearchEngineTools(httpClient);
 
         // movie
@@ -67,9 +65,10 @@ public class SearchEngineToolsTest extends AbstractTest {
         }
     }
 
-    @Test
+    @Ignore
     public void roundTripOFDB() {
         LOG.info("roundTripOFDB");
+        CommonHttpClient httpClient = new HttpClientWrapper(new SimpleHttpClientBuilder().build());
         SearchEngineTools search = new SearchEngineTools(httpClient, Locale.GERMANY);
         search.setSearchSites("google");
         
@@ -93,6 +92,7 @@ public class SearchEngineToolsTest extends AbstractTest {
     @Ignore
     public void roundTripAllocine() {
         LOG.info("roundTripAllocine");
+        CommonHttpClient httpClient = new HttpClientWrapper(new SimpleHttpClientBuilder().build());
         SearchEngineTools search = new SearchEngineTools(httpClient, Locale.FRANCE);
 
         // movie, must set search suffix

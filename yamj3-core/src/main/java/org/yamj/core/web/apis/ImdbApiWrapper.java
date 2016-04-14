@@ -24,6 +24,9 @@ package org.yamj.core.web.apis;
 
 import static org.yamj.core.tools.Constants.UTF8;
 
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.ImdbException;
 import com.omertron.imdbapi.model.*;
@@ -45,8 +48,6 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.service.metadata.online.OnlineScannerException;
 import org.yamj.core.tools.MetadataTools;
-import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class ImdbApiWrapper {

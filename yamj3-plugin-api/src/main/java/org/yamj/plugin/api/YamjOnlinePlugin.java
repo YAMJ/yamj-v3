@@ -22,19 +22,19 @@
  */
 package org.yamj.plugin.api;
 
-import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.http.CommonHttpClient;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 public abstract class YamjOnlinePlugin extends YamjPlugin {
 
-    protected PoolingHttpClient poolingHttpClient;
+    protected CommonHttpClient httpClient;
     
     public YamjOnlinePlugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
-    public void setPoolingHttpClient(PoolingHttpClient poolingHttpClient) {
-        this.poolingHttpClient = poolingHttpClient;
+    public void setHttpClient(CommonHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
 }

@@ -24,8 +24,11 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.core.tools.Constants.UTF8;
 
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
+import org.yamj.plugin.api.web.SearchEngineTools;
+import org.yamj.plugin.api.type.JobType;
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -50,9 +53,6 @@ import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.TemporaryUnavailableException;
-import org.yamj.core.web.apis.SearchEngineTools;
 
 @Service("comingSoonScanner")
 public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {

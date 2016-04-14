@@ -22,6 +22,9 @@
  */
 package org.yamj.core.web.apis;
 
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import com.omertron.tvrageapi.TVRageApi;
 import com.omertron.tvrageapi.TVRageException;
 import com.omertron.tvrageapi.model.EpisodeList;
@@ -34,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class TVRageApiWrapper {

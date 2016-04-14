@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,6 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service("onlineScannerService")
 public class OnlineScannerService {

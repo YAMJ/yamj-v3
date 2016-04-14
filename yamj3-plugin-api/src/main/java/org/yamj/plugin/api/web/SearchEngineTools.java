@@ -20,10 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.web.apis;
-
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-import static org.yamj.core.tools.Constants.UTF8;
+package org.yamj.plugin.api.web;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -38,9 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 public class SearchEngineTools {
 
@@ -69,7 +63,7 @@ public class SearchEngineTools {
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
-        this(httpClient, locale, UTF8);
+        this(httpClient, locale, Charset.forName("UTF-8"));
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
@@ -78,7 +72,7 @@ public class SearchEngineTools {
         
         // sites to search for URLs
         searchSites = new LinkedList<>();
-        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(DEFAULT_SPLITTER)));
+        setSearchSites("google,yahoo,bing,blekko");
         
         // country specific presets
         if (Locale.GERMANY.getCountry().equalsIgnoreCase(locale.getCountry())) {
@@ -127,7 +121,7 @@ public class SearchEngineTools {
 
     public void setSearchSites(String searchSites) {
         this.searchSites.clear();
-        this.searchSites.addAll(Arrays.asList(searchSites.split(DEFAULT_SPLITTER)));
+        this.searchSites.addAll(Arrays.asList(searchSites.split(",")));
     }
 
     public void setSearchSuffix(String searchSuffix) {

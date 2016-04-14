@@ -22,6 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import com.moviejukebox.allocine.AllocineApi;
 import com.moviejukebox.allocine.AllocineException;
 import com.moviejukebox.allocine.model.Search;
@@ -32,7 +34,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class AllocineApiSearch {

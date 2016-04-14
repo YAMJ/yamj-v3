@@ -22,8 +22,6 @@
  */
 package org.yamj.core;
 
-import org.yamj.plugin.api.YamjOnlinePlugin;
-
 import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.plugin.api.YamjOnlinePlugin;
 import org.yamj.plugin.api.YamjPlugin;
 import ro.fortsoft.pf4j.*;
 
@@ -58,7 +57,7 @@ public class YamjPluginConfiguration {
                 ((YamjPlugin)plugin).setConfigService(configServiceWrapper);
             }
             if (plugin instanceof YamjOnlinePlugin) {
-                ((YamjOnlinePlugin)plugin).setPoolingHttpClient(poolingHttpClient);
+                ((YamjOnlinePlugin)plugin).setHttpClient(poolingHttpClient);
             }
         }
         return pluginManager;

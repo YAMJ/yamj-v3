@@ -22,6 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.*;
@@ -37,7 +39,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class TheTVDbApiWrapper {

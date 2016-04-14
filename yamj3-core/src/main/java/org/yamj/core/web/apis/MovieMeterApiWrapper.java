@@ -22,6 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
+
 import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.moviemeter.MovieMeterException;
 import com.omertron.moviemeter.model.FilmInfo;
@@ -34,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.core.web.TemporaryUnavailableException;
 
 @Service
 public class MovieMeterApiWrapper {
