@@ -49,9 +49,9 @@ import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.tools.Constants;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.WatchedDTO;
+import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.tools.Constants;
 
 /**
  * The media import service is a spring-managed service. This will be used by
@@ -215,7 +215,7 @@ public class MediaImportService {
                 }
 
                 // set sort title
-                MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+                YamjTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
 
                 LOG.debug("Store new movie: '{}' - {}", videoData.getTitle(), videoData.getPublicationYear());
                 metadataDao.saveEntity(videoData);
@@ -239,7 +239,7 @@ public class MediaImportService {
                 videoData.addMediaFile(mediaFile);
 
                 // set watched status
-                WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
                 videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 
                 // update video data
@@ -287,7 +287,7 @@ public class MediaImportService {
                             series.setTrailerStatus(StatusType.NEW);
 
                             // set sort title
-                            MetadataTools.setSortTitle(series, prefixes);
+                            YamjTools.setSortTitle(series, prefixes);
 
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
@@ -336,7 +336,7 @@ public class MediaImportService {
                         season.setStatus(StatusType.NEW);
 
                         // set sort title
-                        MetadataTools.setSortTitle(season, prefixes);
+                        YamjTools.setSortTitle(season, prefixes);
 
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
@@ -379,7 +379,7 @@ public class MediaImportService {
                     videoData.setTrailerStatus(StatusType.NEW);
 
                     // set sort title
-                    MetadataTools.setSortTitle(videoData, prefixes);
+                    YamjTools.setSortTitle(videoData, prefixes);
 
                     LOG.debug("Store new episode: '{}' - Season {} - Episode {}", season.getTitle(), season.getSeason(), videoData.getEpisode());
                     metadataDao.saveEntity(videoData);
@@ -567,7 +567,7 @@ public class MediaImportService {
             subtitle.setCounter(0);
             subtitle.setStageFile(subtitleFile);
             subtitle.setMediaFile(mediaFile);
-            subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
+            subtitle.setFormat(YamjTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
             // TODO search stage files with language
             subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
             subtitle.setDefaultFlag(true);
@@ -967,7 +967,7 @@ public class MediaImportService {
             final String stripped = stripToken(fileBaseName, tokensPhoto);
 
             // find person artwork
-            String identifier = MetadataTools.cleanIdentifier(stripped);
+            String identifier = YamjTools.cleanIdentifier(stripped);
             artworks = this.metadataDao.findPersonArtworks(identifier);
             
         } else if (metaDataTypes.contains(MetaDataType.BOXSET)) {
@@ -1167,7 +1167,7 @@ public class MediaImportService {
                 subtitle.setMediaFile(videoFile.getMediaFile());
 
                 if (!subtitleFile.getSubtitles().contains(subtitle)) {
-                    subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
+                    subtitle.setFormat(YamjTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
 
                     if (StringUtils.isBlank(languageCode)) {
                         subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);

@@ -29,7 +29,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.YamjTools;
 
 /**
  * Container of parsed data from movie file name. Contains only information which could be possibly extracted from file name.
@@ -238,7 +238,7 @@ public class FilenameDTO {
 
     public String buildIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(MetadataTools.cleanIdentifier(getTitle()));
+        sb.append(YamjTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         return sb.toString();
@@ -246,7 +246,7 @@ public class FilenameDTO {
 
     public String buildEpisodeIdentifier(int episode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(MetadataTools.cleanIdentifier(getTitle()));
+        sb.append(YamjTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
@@ -258,7 +258,7 @@ public class FilenameDTO {
 
     public String buildSeasonIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(MetadataTools.cleanIdentifier(getTitle()));
+        sb.append(YamjTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");

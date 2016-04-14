@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import static org.yamj.core.tools.Constants.LANGUAGE_EN;
+import static org.yamj.plugin.api.tools.Constants.LANGUAGE_EN;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -47,9 +47,8 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.tools.CommonTools;
 import org.yamj.core.tools.ExceptionTools;
-import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.YamjTools;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -187,8 +186,8 @@ public class TheMovieDbArtworkScanner implements
                 }
 
                 // 1. check name
-                String boxedSetName = MetadataTools.cleanIdentifier(boxedSet.getName());
-                String collectionName = MetadataTools.cleanIdentifier(collection.getTitle());
+                String boxedSetName = YamjTools.cleanIdentifier(boxedSet.getName());
+                String collectionName = YamjTools.cleanIdentifier(collection.getTitle());
                 if (StringUtils.equalsIgnoreCase(boxedSetName, collectionName)) {
                     // found matching collection
                     return collection;
@@ -326,7 +325,7 @@ public class TheMovieDbArtworkScanner implements
             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
         } else {
             String url = artworkURL.toString();
-            dtos.add(new ArtworkDetailDTO(getScannerName(), url, CommonTools.getPartialHashCode(url)));
+            dtos.add(new ArtworkDetailDTO(getScannerName(), url, YamjTools.getPartialHashCode(url)));
         }
     }
 

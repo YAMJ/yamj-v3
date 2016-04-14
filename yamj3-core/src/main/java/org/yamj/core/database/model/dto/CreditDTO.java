@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model.dto;
 
-import org.yamj.plugin.api.type.JobType;
-
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +30,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.CastCrew;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.tools.MetadataTools;
-import org.yamj.core.tools.PersonNameDTO;
+import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
 
@@ -68,7 +68,7 @@ public final class CreditDTO {
         this.jobType = jobType;
         PersonNameDTO dto = MetadataTools.splitFullName(name.trim());
         this.name = dto.getName();
-        this.identifier = MetadataTools.cleanIdentifier(name);
+        this.identifier = YamjTools.cleanIdentifier(name);
         setFirstName(dto.getFirstName());
         setLastName(dto.getLastName());
         setRole(MetadataTools.cleanRole(role));

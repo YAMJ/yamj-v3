@@ -41,7 +41,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
-import org.yamj.core.tools.CommonTools;
+import org.yamj.core.tools.YamjTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
 
 @Service("tvdbArtworkScanner")
@@ -134,7 +134,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Season {}-{}: Using default series poster", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), CommonTools.getPartialHashCode(tvdbSeries.getPoster()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), YamjTools.getPartialHashCode(tvdbSeries.getPoster()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -197,7 +197,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series poster", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), CommonTools.getPartialHashCode(tvdbSeries.getPoster()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), YamjTools.getPartialHashCode(tvdbSeries.getPoster()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -252,7 +252,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.debug("Season {}-{}: Using default series fanart", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), CommonTools.getPartialHashCode(tvdbSeries.getFanart()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), YamjTools.getPartialHashCode(tvdbSeries.getFanart()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -304,7 +304,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series fanart", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), CommonTools.getPartialHashCode(tvdbSeries.getFanart()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), YamjTools.getPartialHashCode(tvdbSeries.getFanart()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -411,7 +411,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Season {}-{}: Using default series banner", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), CommonTools.getPartialHashCode(tvdbSeries.getBanner()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), YamjTools.getPartialHashCode(tvdbSeries.getBanner()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -481,7 +481,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series banner", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), CommonTools.getPartialHashCode(tvdbSeries.getBanner()));
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), YamjTools.getPartialHashCode(tvdbSeries.getBanner()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -491,7 +491,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
     private ArtworkDetailDTO createArtworDetail(Banner banner) {
         String url = banner.getUrl();
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), url, CommonTools.getPartialHashCode(url));
+        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), url, YamjTools.getPartialHashCode(url));
 
         // set language
         if (StringUtils.isNotBlank(banner.getLanguage())) {
@@ -524,7 +524,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         final String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         Episode episode = tvdbApiWrapper.getEpisode(id, videoData.getSeason().getSeason(), videoData.getEpisode(), language);
         if (episode != null && StringUtils.isNotBlank(episode.getFilename())) {
-            ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), CommonTools.getPartialHashCode(episode.getFilename()));
+            ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), YamjTools.getPartialHashCode(episode.getFilename()));
             return Collections.singletonList(detailDTO);
         }
         

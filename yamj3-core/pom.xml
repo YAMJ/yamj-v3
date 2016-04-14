@@ -25,7 +25,6 @@
         <h2.version>1.4.191</h2.version>
         <!-- other stuff -->
         <ehcache.version>2.6.11</ehcache.version>
-        <datetime.version>3.0.2</datetime.version>
         <!-- api versions -->
         <themoviedbapi.version>4.2</themoviedbapi.version>
         <thetvdbapi.version>1.8</thetvdbapi.version>
@@ -102,11 +101,6 @@
             <groupId>org.apache.sanselan</groupId>
             <artifactId>sanselan</artifactId>
             <version>0.97-incubator</version>
-        </dependency>
-        <dependency>
-            <groupId>org.pojava</groupId>
-            <artifactId>datetime</artifactId>
-            <version>${datetime.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.tools.MetadataTools;
+import org.yamj.plugin.api.tools.MetadataTools;
 
 /**
  * @author modmax

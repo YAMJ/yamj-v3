@@ -44,8 +44,8 @@ import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.WatchedDTO;
+import org.yamj.core.tools.YamjTools;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -128,7 +128,7 @@ public class CommonStorageService {
                         mediaFile.setStatus(StatusType.UPDATED);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
-                            WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                            WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
                             videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                         }
                         
@@ -228,7 +228,7 @@ public class CommonStorageService {
                 // reset watched flag on video data
                 videoData.getMediaFiles().remove(mediaFile);
                 
-                WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
                 videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 this.stagingDao.updateEntity(videoData);
             }
@@ -458,7 +458,7 @@ public class CommonStorageService {
 
         // determine watch status for each video data
         for (VideoData videoData : mediaFile.getVideoDatas()) {
-            WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+            WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
             videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
             this.stagingDao.updateEntity(videoData);
         }

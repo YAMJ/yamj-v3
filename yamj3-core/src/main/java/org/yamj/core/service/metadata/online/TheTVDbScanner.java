@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.type.JobType;
-
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -41,9 +39,10 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {

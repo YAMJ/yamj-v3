@@ -22,11 +22,9 @@
  */
 package org.yamj.core.api.options;
 
-import static org.yamj.core.tools.Constants.ALL;
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-
+import static org.yamj.plugin.api.tools.Constants.ALL;
+import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
 import org.yamj.plugin.api.type.JobType;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

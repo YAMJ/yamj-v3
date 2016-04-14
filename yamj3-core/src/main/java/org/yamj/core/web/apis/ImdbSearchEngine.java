@@ -22,11 +22,9 @@
  */
 package org.yamj.core.web.apis;
 
-import static org.yamj.core.tools.Constants.ALL;
-
+import static org.yamj.plugin.api.tools.Constants.ALL;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
-
 import org.yamj.plugin.api.web.SearchEngineTools;
 import java.io.IOException;
 import java.util.Locale;

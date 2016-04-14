@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.web.HTMLTools;
-
-import org.yamj.plugin.api.type.JobType;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
@@ -42,12 +39,14 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.tools.PersonNameDTO;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {

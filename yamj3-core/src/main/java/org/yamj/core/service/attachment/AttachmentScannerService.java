@@ -22,8 +22,7 @@
  */
 package org.yamj.core.service.attachment;
 
-import static org.yamj.core.tools.Constants.LANGUAGE_EN;
-
+import static org.yamj.plugin.api.tools.Constants.LANGUAGE_EN;
 import java.io.*;
 import java.util.*;
 import javax.annotation.PostConstruct;

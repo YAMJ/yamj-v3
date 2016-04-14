@@ -20,15 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools;
+package org.yamj.plugin.api.tools;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MetadataToolsTest {
+public class ScannerToolsTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataToolsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScannerToolsTest.class);
 
     @Test
     public void testSplitFullName() {

@@ -22,8 +22,7 @@
  */
 package org.yamj.core.tools;
 
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-
+import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

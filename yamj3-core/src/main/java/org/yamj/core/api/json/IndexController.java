@@ -22,13 +22,11 @@
  */
 package org.yamj.core.api.json;
 
-import static org.yamj.core.tools.Constants.ALL;
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-
+import static org.yamj.plugin.api.tools.Constants.ALL;
+import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -22,10 +22,7 @@
  */
 package org.yamj.core.web.apis;
 
-import static org.yamj.core.tools.Constants.UTF8;
-
-import org.yamj.plugin.api.web.HTMLTools;
-import org.yamj.plugin.api.web.TemporaryUnavailableException;
+import static org.yamj.plugin.api.tools.Constants.UTF8;
 
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.ImdbException;
@@ -46,8 +43,10 @@ import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.core.service.metadata.online.OnlineScannerException;
-import org.yamj.core.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataScannerException;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service
 public class ImdbApiWrapper {
@@ -103,7 +102,7 @@ public class ImdbApiWrapper {
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new OnlineScannerException("IMDb request failed", ex);
+            throw new MetadataScannerException("IMDb request failed", ex);
         }
 
         checkTempError(throwTempError, response);
@@ -226,7 +225,7 @@ public class ImdbApiWrapper {
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new OnlineScannerException("IMDb request failed", ex);
+            throw new MetadataScannerException("IMDb request failed", ex);
         }
 
         checkTempError(throwTempError, response);
@@ -377,11 +376,11 @@ public class ImdbApiWrapper {
         return awards;
     }
 
-    private static void checkTempError(boolean throwTempError, DigestedResponse response) throws OnlineScannerException {
+    private static void checkTempError(boolean throwTempError, DigestedResponse response) throws MetadataScannerException {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
+            throw new MetadataScannerException("IMDb request failed: " + response.getStatusCode());
         }
     }
 

@@ -22,10 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.web.HTMLTools;
-
-import org.yamj.plugin.api.web.SearchEngineTools;
-import org.yamj.plugin.api.type.JobType;
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -46,10 +42,13 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.SearchEngineTools;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {

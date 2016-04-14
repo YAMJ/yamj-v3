@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.YamjTools;
 
 public final class BoxedSetDTO {
 
@@ -40,7 +40,7 @@ public final class BoxedSetDTO {
     public BoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         this.source = source;
         this.name = StringUtils.trimToNull(name);
-        this.identifier = MetadataTools.cleanIdentifier(name);
+        this.identifier = YamjTools.cleanIdentifier(name);
         this.ordering = ordering;
         this.sourceId = StringUtils.trimToNull(sourceId);
     }

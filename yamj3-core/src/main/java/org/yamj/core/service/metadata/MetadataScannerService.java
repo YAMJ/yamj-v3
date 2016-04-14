@@ -35,8 +35,8 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.tools.YamjTools;
 import org.yamj.core.tools.ExceptionTools;
-import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataScannerService")
 public class MetadataScannerService implements IQueueProcessService {
@@ -90,7 +90,7 @@ public class MetadataScannerService implements IQueueProcessService {
         this.extraScannerService.scanMovie(videoData);
 
         // reset sort title
-        MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+        YamjTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
 
         try {
             // store associated entities
@@ -139,11 +139,11 @@ public class MetadataScannerService implements IQueueProcessService {
 
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
-        MetadataTools.setSortTitle(series, prefixes);
+        YamjTools.setSortTitle(series, prefixes);
         for (Season season : series.getSeasons()) {
-            MetadataTools.setSortTitle(season, prefixes);
+            YamjTools.setSortTitle(season, prefixes);
             for (VideoData videoData : season.getVideoDatas()) {
-                MetadataTools.setSortTitle(videoData, prefixes);
+                YamjTools.setSortTitle(videoData, prefixes);
             }
         }
 

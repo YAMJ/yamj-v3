@@ -43,7 +43,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
-import org.yamj.core.tools.CommonTools;
+import org.yamj.core.tools.YamjTools;
 
 @Transactional(readOnly = true)
 @Service("stagingService")
@@ -350,7 +350,7 @@ public class StagingService {
         Map<String, Object> params = new HashMap<>(2);
         params.put("status", StatusType.DELETED);
         
-        for (List<Long> subList : CommonTools.split(stageFileIds, 500)) {
+        for (List<Long> subList : YamjTools.split(stageFileIds, 500)) {
             params.put("idList", subList);
             int updated = this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_BULK, params);
             LOG.trace("Marked {} stage files as deleted", updated);

@@ -22,10 +22,8 @@
  */
 package org.yamj.core.config;
 
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-
+import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
 import org.yamj.plugin.api.type.JobType;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

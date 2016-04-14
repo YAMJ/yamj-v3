@@ -22,13 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.core.tools.Constants.UTF8;
+import static org.yamj.plugin.api.tools.Constants.UTF8;
 
-import org.yamj.plugin.api.web.HTMLTools;
-import org.yamj.plugin.api.web.TemporaryUnavailableException;
-
-import org.yamj.plugin.api.web.SearchEngineTools;
-import org.yamj.plugin.api.type.JobType;
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -46,9 +41,13 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.metadata.MetadataScannerException;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.SearchEngineTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner {
@@ -66,8 +65,6 @@ public class OfdbScanner implements IMovieScanner {
     private PoolingHttpClient httpClient;
     @Autowired
     private OnlineScannerService onlineScannerService;
-    @Autowired
-    private ImdbSearchEngine imdbSearchEngine;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
@@ -102,22 +99,6 @@ public class OfdbScanner implements IMovieScanner {
         
         // get and check IMDb id
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
-        if (StringUtils.isBlank(imdbId)) {
-            // search IMDb id if not present (don't throw error if temporary not available)
-                
-            // search by title
-            imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false, false);
-            if (StringUtils.isBlank(imdbId) && videoData.isTitleOriginalScannable()) {
-                // search by original title if not found by title
-                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
-            }
-            
-            if (StringUtils.isNotBlank(imdbId)) {
-                LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitle());
-                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
-            }
-        }
-
         if (StringUtils.isNotBlank(imdbId)) {
             // if IMDb id is present then use this
             ofdbUrl = getOfdbIdByImdbId(imdbId, throwTempError);
@@ -245,7 +226,7 @@ public class OfdbScanner implements IMovieScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("OFDb service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("OFDb request failed: " + response.getStatusCode());
+            throw new MetadataScannerException("OFDb request failed: " + response.getStatusCode());
         }
         
         String xml = response.getContent();
@@ -279,7 +260,7 @@ public class OfdbScanner implements IMovieScanner {
             if (throwTempError && ResponseTools.isTemporaryError(response)) {
                 throw new TemporaryUnavailableException("OFDb service failed to get plot: " + response.getStatusCode());
             } else if (ResponseTools.isNotOK(response)) {
-                throw new OnlineScannerException("OFDb plot request failed: " + response.getStatusCode());
+                throw new MetadataScannerException("OFDb plot request failed: " + response.getStatusCode());
             }
             
             int firstindex = response.getContent().indexOf("gelesen</b></b><br><br>") + 23;
@@ -310,7 +291,7 @@ public class OfdbScanner implements IMovieScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("OFDb service failed to get details: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("OFDb details request failed: " + response.getStatusCode());
+            throw new MetadataScannerException("OFDb details request failed: " + response.getStatusCode());
         }
         // get detail XML
         xml = response.getContent();
@@ -408,9 +389,6 @@ public class OfdbScanner implements IMovieScanner {
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
             return true;
         }
-
-        // scan for IMDb ID
-        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
 
         LOG.trace("Scanning NFO for OFDb url");
 

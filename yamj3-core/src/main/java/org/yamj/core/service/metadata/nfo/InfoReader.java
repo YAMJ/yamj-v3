@@ -22,9 +22,7 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import static org.yamj.core.tools.Constants.UTF8;
-
-import org.yamj.plugin.api.type.JobType;
+import static org.yamj.plugin.api.tools.Constants.UTF8;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,8 +42,9 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 /**
  * Service to read the NFO files

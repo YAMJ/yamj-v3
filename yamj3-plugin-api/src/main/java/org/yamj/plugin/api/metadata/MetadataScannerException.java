@@ -20,25 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools;
+package org.yamj.plugin.api.metadata;
 
-import java.nio.charset.Charset;
+import java.io.IOException;
 
-public final class Constants {
+public class MetadataScannerException extends IOException {
 
-    public static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final long serialVersionUID = 8612946804316033116L;
 
-    public static final String SPACE_SLASH_SPACE = " / ";
-    public static final String DEFAULT_SPLITTER = ",";
+    public MetadataScannerException(String message) {
+        super(message);
+    }
 
-    public static final String UNDEFINED = "Undefined";
-    public static final String ALL = "all";
-    public static final String UNKNOWN = "unknown";
-    
-    public static final String LANGUAGE_EN = "en";
-    public static final String LANGUAGE_UNTERTERMINED = "und";
-
-    private Constants() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    public MetadataScannerException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

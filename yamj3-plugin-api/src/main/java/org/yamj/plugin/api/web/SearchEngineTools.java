@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.tools.ResponseTools;
+import org.yamj.plugin.api.tools.Constants;
 
 public class SearchEngineTools {
 
@@ -46,9 +47,9 @@ public class SearchEngineTools {
     private static final String PAREN_RIGHT = "%29";
     private static final String PAREN_LEFT = "+%28";
 
+    private final LinkedList<String> searchSites = new LinkedList<>();
     private final CommonHttpClient httpClient;
     private final Charset charset;
-    private final LinkedList<String> searchSites;
     private final String country;
     private final String language;
 
@@ -63,7 +64,7 @@ public class SearchEngineTools {
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
-        this(httpClient, locale, Charset.forName("UTF-8"));
+        this(httpClient, locale, Constants.UTF8);
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
@@ -71,7 +72,6 @@ public class SearchEngineTools {
         this.charset = charset;
         
         // sites to search for URLs
-        searchSites = new LinkedList<>();
         setSearchSites("google,yahoo,bing,blekko");
         
         // country specific presets

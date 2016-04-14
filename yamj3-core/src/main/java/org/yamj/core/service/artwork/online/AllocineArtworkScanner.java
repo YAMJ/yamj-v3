@@ -38,7 +38,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
-import org.yamj.core.tools.CommonTools;
+import org.yamj.core.tools.YamjTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 
 @Service("allocineArtworkScanner")
@@ -113,7 +113,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
         for (Entry<String,Long> entry : artworks.entrySet()) {
             final String hashCode;
             if (entry.getValue() == null || entry.getValue().longValue() == 0) {
-                hashCode = CommonTools.getSimpleHashCode(entry.getKey());
+                hashCode = YamjTools.getSimpleHashCode(entry.getKey());
             } else {
                 hashCode = entry.getValue().toString();
             }

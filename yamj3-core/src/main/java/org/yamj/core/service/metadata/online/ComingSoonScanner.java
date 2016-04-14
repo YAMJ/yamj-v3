@@ -22,13 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.core.tools.Constants.UTF8;
+import static org.yamj.plugin.api.tools.Constants.UTF8;
 
-import org.yamj.plugin.api.web.HTMLTools;
-import org.yamj.plugin.api.web.TemporaryUnavailableException;
-
-import org.yamj.plugin.api.web.SearchEngineTools;
-import org.yamj.plugin.api.type.JobType;
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -51,8 +46,13 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.metadata.MetadataScannerException;
+import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.SearchEngineTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service("comingSoonScanner")
 public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
@@ -168,7 +168,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("ComingSoon request failed: " + response.getStatusCode());
+            throw new MetadataScannerException("ComingSoon request failed: " + response.getStatusCode());
         }
         String xml = response.getContent();
 
@@ -341,7 +341,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("ComingSoon request failed: " + response.getStatusCode());
+            throw new MetadataScannerException("ComingSoon request failed: " + response.getStatusCode());
         }
         String xml = response.getContent();
         

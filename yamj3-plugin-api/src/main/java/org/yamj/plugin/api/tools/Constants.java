@@ -20,19 +20,25 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.plugin.api.tools;
 
-import java.io.IOException;
+import java.nio.charset.Charset;
 
-public class OnlineScannerException extends IOException {
+public final class Constants {
 
-    private static final long serialVersionUID = 8612946804316033116L;
+    public static final Charset UTF8 = Charset.forName("UTF-8");
 
-    public OnlineScannerException(String message) {
-        super(message);
-    }
+    public static final String SPACE_SLASH_SPACE = " / ";
+    public static final String DEFAULT_SPLITTER = ",";
 
-    public OnlineScannerException(String message, Throwable cause) {
-        super(message, cause);
+    public static final String UNDEFINED = "Undefined";
+    public static final String ALL = "all";
+    public static final String UNKNOWN = "unknown";
+    
+    public static final String LANGUAGE_EN = "en";
+    public static final String LANGUAGE_UNTERTERMINED = "und";
+
+    private Constants() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 }
