@@ -20,21 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api;
+package org.yamj.plugin.api.metadata;
 
+import java.util.Locale;
 import org.yamj.api.common.http.CommonHttpClient;
-import ro.fortsoft.pf4j.PluginWrapper;
+import org.yamj.plugin.api.PluginConfigService;
 
-public abstract class YamjOnlinePlugin extends YamjPlugin {
+public interface MetadataScanner {
 
-    protected CommonHttpClient httpClient;
-    
-    public YamjOnlinePlugin(PluginWrapper wrapper) {
-        super(wrapper);
-    }
+    String getScannerName();
 
-    public void setHttpClient(CommonHttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
+    void init(PluginConfigService configService, CommonHttpClient httpClient, Locale locale);
 }

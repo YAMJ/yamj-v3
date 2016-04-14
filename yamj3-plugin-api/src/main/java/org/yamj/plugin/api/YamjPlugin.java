@@ -27,7 +27,7 @@ import ro.fortsoft.pf4j.PluginWrapper;
 
 public abstract class YamjPlugin extends Plugin {
 
-    protected PluginConfigService configService;
+    public PluginConfigService configService;
     
     public YamjPlugin(PluginWrapper wrapper) {
         super(wrapper);

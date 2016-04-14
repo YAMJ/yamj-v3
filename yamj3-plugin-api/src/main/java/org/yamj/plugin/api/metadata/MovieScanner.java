@@ -22,15 +22,14 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import java.util.Locale;
 import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
-public interface MovieScanner extends ExtensionPoint {
-
-    String getScannerName();
+public interface MovieScanner extends MetadataScanner, ExtensionPoint {
     
-    String getMovieId(String title, String originalTitle, int year, Map<String,String> ids);
+    String getMovieId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
 
-    ScanResult scanMovie(Movie movie, Locale locale);
+    Movie scanMovie(String movieId, boolean throwTempError);
+    
+    String scanForIdInNFO(String nfoContent);
 }

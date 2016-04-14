@@ -29,8 +29,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.plugin.api.YamjOnlinePlugin;
+import org.yamj.core.config.LocaleService;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.service.metadata.online.PluginMovieScanner;
 import org.yamj.plugin.api.YamjPlugin;
+import org.yamj.plugin.api.metadata.MovieScanner;
 import ro.fortsoft.pf4j.*;
 
 @Configuration
@@ -39,27 +42,41 @@ public class YamjPluginConfiguration {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
+    private LocaleService localeService;
+    @Autowired
     private PoolingHttpClient poolingHttpClient;
+    @Autowired
+    private OnlineScannerService onlineScannerService;
     
     @Bean(destroyMethod="stopPlugins")
-    @DependsOn({"configServiceWrapper", "poolingHttpClient"})
+    @DependsOn({"configServiceWrapper", "localeService", "onlineScannerService", "poolingHttpClient"})
     public PluginManager pluginManager() {
         final String yamjHome = System.getProperty("yamj3.home", ".");
         File pluginsDir = new File (yamjHome + "/plugins");
         
+        // load PlugIns
         PluginManager pluginManager = new DefaultPluginManager(pluginsDir);
         pluginManager.loadPlugins();
-        pluginManager.startPlugins();
         
-        for (PluginWrapper wrapper : pluginManager.getPlugins(PluginState.STARTED)) {
+        // set service within PlugIns
+        for (PluginWrapper wrapper : pluginManager.getPlugins()) {
             Plugin plugin = wrapper.getPlugin();
             if (plugin instanceof YamjPlugin) {
                 ((YamjPlugin)plugin).setConfigService(configServiceWrapper);
             }
-            if (plugin instanceof YamjOnlinePlugin) {
-                ((YamjOnlinePlugin)plugin).setHttpClient(poolingHttpClient);
-            }
         }
+
+        // start PlugIns
+        pluginManager.startPlugins();
+
+        // add movie scanner to online scanner service
+        for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
+            movieScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
+            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner);
+            this.onlineScannerService.registerMetadataScanner(scanner);
+        }
+        // TODO also for series, person and filmography scanner
+        
         return pluginManager;
     }
 }
