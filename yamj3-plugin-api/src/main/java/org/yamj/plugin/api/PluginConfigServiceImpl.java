@@ -31,7 +31,11 @@ import org.yamj.plugin.api.type.JobType;
 public class PluginConfigServiceImpl implements PluginConfigService {
 
     private final Properties properties;
-    
+
+    public PluginConfigServiceImpl() {
+        this.properties = new Properties();
+    }
+
     public PluginConfigServiceImpl(Properties properties) {
         this.properties = properties;
     }
