@@ -44,9 +44,10 @@
     @TypeDef(name = "scalingType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ScalingType")})
 })
-package org.yamj.core.database.model;import org.hibernate.annotations.Parameter;
+package org.yamj.core.database.model;
+
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-;
 
