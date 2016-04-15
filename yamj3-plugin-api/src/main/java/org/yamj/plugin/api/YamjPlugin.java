@@ -22,18 +22,24 @@
  */
 package org.yamj.plugin.api;
 
+import org.yamj.api.common.http.CommonHttpClient;
 import ro.fortsoft.pf4j.Plugin;
 import ro.fortsoft.pf4j.PluginWrapper;
 
 public abstract class YamjPlugin extends Plugin {
 
-    public PluginConfigService configService;
+    protected PluginConfigService configService;
+    protected CommonHttpClient httpClient;
     
     public YamjPlugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
-    public void setConfigService(PluginConfigService configService) {
+    public final void setConfigService(PluginConfigService configService) {
         this.configService = configService;
+    }
+
+    public final void setHttpClient(CommonHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 }

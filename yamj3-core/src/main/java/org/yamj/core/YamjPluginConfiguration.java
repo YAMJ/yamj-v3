@@ -62,7 +62,9 @@ public class YamjPluginConfiguration {
         for (PluginWrapper wrapper : pluginManager.getPlugins()) {
             Plugin plugin = wrapper.getPlugin();
             if (plugin instanceof YamjPlugin) {
-                ((YamjPlugin)plugin).setConfigService(configServiceWrapper);
+                YamjPlugin yamjPlugin = (YamjPlugin)plugin;
+                yamjPlugin.setConfigService(configServiceWrapper);
+                yamjPlugin.setHttpClient(poolingHttpClient);
             }
         }
 

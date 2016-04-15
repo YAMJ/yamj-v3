@@ -81,52 +81,58 @@ public final class Credit {
         return firstName;
     }
 
-    public final void setFirstName(String firstName) {
+    public final Credit setFirstName(String firstName) {
         this.firstName = StringUtils.trimToNull(firstName);
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public final void setLastName(String lastName) {
+    public final Credit setLastName(String lastName) {
         this.lastName = StringUtils.trimToNull(lastName);
+        return this;
     }
 
     public String getRealName() {
         return realName;
     }
 
-    public void setRealName(String realName) {
+    public Credit setRealName(String realName) {
         this.realName = StringUtils.trimToNull(realName);
+        return this;
     }
 
     public String getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public Credit setRole(String role) {
         this.role = MetadataTools.cleanRole(role);
+        return this;
     }
     
     public boolean isVoice() {
         return voice;
     }
 
-    public void setVoice(boolean voice) {
+    public Credit setVoice(boolean voice) {
         this.voice = voice;
+        return this;
     }
 
     public Collection<String> getPhotos() {
         return photos;
     }
 
-    public void addPhoto(String photoURL) {
+    public Credit addPhoto(String photoURL) {
         if (StringUtils.isNotBlank(photoURL)) {
             if (this.photos == null) {
                 this.photos = new HashSet<>(); 
             }
             this.photos.add(photoURL);
         }
+        return this;
     }
 }

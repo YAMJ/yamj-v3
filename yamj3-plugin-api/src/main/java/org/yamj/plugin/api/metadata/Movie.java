@@ -52,7 +52,9 @@ public class Movie {
     }
 
     public Movie addId(String source, String id) {
-        this.ids.put(source, id);
+        if (id != null && id.length() > 0) {
+            this.ids.put(source, id);
+        }
         return this;
     }
 
