@@ -32,7 +32,6 @@
         <allocineapi.version>1.5</allocineapi.version>
         <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
-        <moviemeterapi.version>1.1-SNAPSHOT</moviemeterapi.version>
         <tvrageapi.version>1.6-SNAPSHOT</tvrageapi.version>
         <rottentomatoesapi.version>1.6-SNAPSHOT</rottentomatoesapi.version>
         <httpclient.version>4.5.1</httpclient.version>
@@ -200,11 +199,6 @@
             <groupId>com.moviejukebox</groupId>
             <artifactId>api-imdb</artifactId>
             <version>${imdbapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.omertron</groupId>
-            <artifactId>api-moviemeter</artifactId>
-            <version>${moviemeterapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.omertron</groupId>

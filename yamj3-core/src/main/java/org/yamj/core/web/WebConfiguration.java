@@ -25,7 +25,6 @@ package org.yamj.core.web;
 import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
-import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
@@ -234,12 +233,6 @@ public class WebConfiguration  {
     public ImdbApi imdbApi() {
         LOG.trace("Initialize ImdbApi");
         return new ImdbApi(poolingHttpClient());
-    }
-
-    @Bean
-    public MovieMeterApi movieMeterApi() throws Exception {
-        LOG.trace("Initialize MovieMeterApi");
-        return new MovieMeterApi(movieMeterApiKey, poolingHttpClient());
     }
 
     @Bean
