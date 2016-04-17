@@ -33,8 +33,6 @@ public class Series {
     private int endYear;
     private String plot;
     private String outline;
-    private String tagline;
-    private String quote;
     private int rating = -1;
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
@@ -108,24 +106,6 @@ public class Series {
 
     public Series setOutline(String outline) {
         this.outline = outline;
-        return this;
-    }
-
-    public String getTagline() {
-        return tagline;
-    }
-
-    public Series setTagline(String tagline) {
-        this.tagline = tagline;
-        return this;
-    }
-
-    public String getQuote() {
-        return quote;
-    }
-
-    public Series setQuote(String quote) {
-        this.quote = quote;
         return this;
     }
 

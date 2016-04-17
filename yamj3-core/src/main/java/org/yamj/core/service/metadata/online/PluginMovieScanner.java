@@ -61,7 +61,7 @@ public class PluginMovieScanner implements IMovieScanner {
     private String getMovieId(VideoData videoData, boolean throwTempError) {
         String movieId = videoData.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(movieId)) {
-            movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getYear(), videoData.getSourceDbIdMap(), throwTempError);
+            movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getSourceDbIdMap(), throwTempError);
             videoData.setSourceDbId(getScannerName(), movieId);
         }
         return movieId;
@@ -129,7 +129,7 @@ public class PluginMovieScanner implements IMovieScanner {
         }
 
         if (OverrideTools.checkOverwriteStudios(videoData, getScannerName())) {
-            videoData.setGenreNames(movie.getStudios(), getScannerName());
+            videoData.setStudioNames(movie.getStudios(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteCountries(videoData, getScannerName())) {
