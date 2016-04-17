@@ -24,8 +24,6 @@ package org.yamj.core.service.mediainfo;
 
 import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
 
-import org.yamj.plugin.api.tools.Constants;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,6 +45,8 @@ import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
+import org.yamj.core.tools.ExceptionTools;
+import org.yamj.plugin.api.tools.Constants;
 
 @Service("mediaInfoService")
 public class MediaInfoService implements IQueueProcessService {
@@ -188,14 +188,19 @@ public class MediaInfoService implements IQueueProcessService {
             mediaFile.setStatus(StatusType.ERROR);
         }
 
+        // update media file in one transaction
         mediaStorageService.updateMediaFile(mediaFile);
     }
 
     @Override
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
-        LOG.error("Failed MediaInfo scan for media file "+queueElement.getId(), error);
-        
-        mediaStorageService.errorMediaFile(queueElement.getId());
+        if (ExceptionTools.isLockingError(error)) {
+            // NOTE: status will not be changed
+            LOG.warn("Locking error while media file scan {}", queueElement.getId());
+        } else {
+            LOG.error("Failed MediaInfo scan for media file "+queueElement.getId(), error);
+            mediaStorageService.errorMediaFile(queueElement.getId());
+        }
     }
 
     private void updateMediaFile(MediaFile mediaFile, Map<String, String> infosGeneral, List<Map<String, String>> infosVideo,
