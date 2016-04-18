@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.trailer.online;
 
+import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+
 import com.omertron.imdbapi.model.ImdbEncodingFormat;
 import com.omertron.imdbapi.model.ImdbMovieDetails;
 import java.util.Collections;
@@ -125,7 +127,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
             return Collections.emptyList();
         }
         
-        TrailerDTO dto = new TrailerDTO(ImdbScanner.SCANNER_ID, ContainerType.MP4, url, movieDetails.getTrailer().getTitle(), imdbId); 
+        TrailerDTO dto = new TrailerDTO(SOURCE_IMDB, ContainerType.MP4, url, movieDetails.getTrailer().getTitle(), imdbId); 
         return Collections.singletonList(dto);
     }
 }

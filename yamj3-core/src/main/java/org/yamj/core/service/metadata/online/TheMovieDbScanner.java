@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import static org.yamj.plugin.api.tools.Constants.*;
+
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -47,16 +49,15 @@ import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
-import org.yamj.plugin.api.tools.PersonNameDTO;
 import org.yamj.plugin.api.tools.MetadataTools;
+import org.yamj.plugin.api.tools.PersonNameDTO;
 import org.yamj.plugin.api.type.JobType;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
 
-    public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-                    
+    
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
@@ -68,7 +69,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     
     @Override
     public String getScannerName() {
-        return SCANNER_ID;
+        return SOURCE_TMDB;
     }
 
     @PostConstruct
@@ -88,12 +89,12 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     private String getMovieId(VideoData videoData, Locale tmdbLocale, boolean throwTempError) {
-        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
+        String tmdbId = videoData.getSourceDbId(SOURCE_TMDB);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
         }
 
-        String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+        String imdbId = videoData.getSourceDbId(SOURCE_IMDB);
         if (StringUtils.isNotBlank(imdbId)) {
             // Search based on IMDb ID
             LOG.debug("Using IMDb id {} for '{}'", imdbId, videoData.getTitle());
@@ -114,7 +115,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (StringUtils.isNumeric(tmdbId)) {
-            videoData.setSourceDbId(SCANNER_ID, tmdbId);
+            videoData.setSourceDbId(SOURCE_TMDB, tmdbId);
             return tmdbId;
         }
 
@@ -128,7 +129,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     private String getSeriesId(Series series, Locale tmdbLocale, boolean throwTempError) {
-        String tmdbId = series.getSourceDbId(SCANNER_ID);
+        String tmdbId = series.getSourceDbId(SOURCE_TMDB);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
         }
@@ -142,7 +143,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (StringUtils.isNumeric(tmdbId)) {
-            series.setSourceDbId(SCANNER_ID, tmdbId);
+            series.setSourceDbId(SOURCE_TMDB, tmdbId);
             return tmdbId;
         }
 
@@ -155,14 +156,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     private String getPersonId(Person person, boolean throwTempError) {
-        String tmdbId = person.getSourceDbId(SCANNER_ID);
+        String tmdbId = person.getSourceDbId(SOURCE_TMDB);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
         }
 
         if (StringUtils.isNotBlank(person.getName())) {
             tmdbId = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
-            person.setSourceDbId(SCANNER_ID, tmdbId);
+            person.setSourceDbId(SOURCE_TMDB, tmdbId);
         }
 
         return tmdbId;
@@ -187,29 +188,29 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
                         
         // set IMDb id if not set before
-        String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+        String imdbId = videoData.getSourceDbId(SOURCE_IMDB);
         if (StringUtils.isBlank(imdbId)) {
             imdbId = StringUtils.trim(movieInfo.getImdbID());
-            videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+            videoData.setSourceDbId(SOURCE_IMDB, imdbId);
         }
 
-        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(movieInfo.getTitle(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteTitle(videoData, SOURCE_TMDB)) {
+            videoData.setTitle(movieInfo.getTitle(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(movieInfo.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwritePlot(videoData, SOURCE_TMDB)) {
+            videoData.setPlot(movieInfo.getOverview(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(movieInfo.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteOutline(videoData, SOURCE_TMDB)) {
+            videoData.setOutline(movieInfo.getOverview(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
-            videoData.setTagline(movieInfo.getTagline(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteTagline(videoData, SOURCE_TMDB)) {
+            videoData.setTagline(movieInfo.getTagline(), SOURCE_TMDB);
         }
         
-        videoData.addRating(SCANNER_ID, MetadataTools.parseRating(movieInfo.getVoteAverage()));
+        videoData.addRating(SOURCE_TMDB, MetadataTools.parseRating(movieInfo.getVoteAverage()));
 
         // RELEASE DATE
         Date releaseDate = null;
@@ -240,12 +241,12 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         if (releaseDate == null) {
             releaseDate = parseTMDbDate(movieInfo.getReleaseDate());
         }
-        if (releaseDate != null && OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
+        if (releaseDate != null && OverrideTools.checkOverwriteReleaseDate(videoData, SOURCE_TMDB)) {
+            videoData.setRelease(releaseCountryCode, releaseDate, SOURCE_TMDB);
         }
         
-        if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
-            videoData.setPublicationYear(MetadataTools.extractYearAsInt(movieInfo.getReleaseDate()), SCANNER_ID);
+        if (OverrideTools.checkOverwriteYear(videoData, SOURCE_TMDB)) {
+            videoData.setPublicationYear(MetadataTools.extractYearAsInt(movieInfo.getReleaseDate()), SOURCE_TMDB);
         }
 
         // CERTIFICATIONS
@@ -261,34 +262,34 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
         
         // COUNTRIES
-        if (CollectionUtils.isNotEmpty(movieInfo.getProductionCountries()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(movieInfo.getProductionCountries()) && OverrideTools.checkOverwriteCountries(videoData, SOURCE_TMDB)) {
             final Set<String> countryCodes = new HashSet<>(movieInfo.getProductionCountries().size());
             for (ProductionCountry country : movieInfo.getProductionCountries()) {
                 countryCodes.add(country.getCountry());
             }
-            videoData.setCountryCodes(countryCodes, SCANNER_ID);
+            videoData.setCountryCodes(countryCodes, SOURCE_TMDB);
         }
 
         // GENRES
-        if (CollectionUtils.isNotEmpty(movieInfo.getGenres()) && OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(movieInfo.getGenres()) && OverrideTools.checkOverwriteGenres(videoData, SOURCE_TMDB)) {
             final Set<String> genreNames = new HashSet<>(movieInfo.getGenres().size());
             for (com.omertron.themoviedbapi.model.Genre genre : movieInfo.getGenres()) {
                 if (StringUtils.isNotBlank(genre.getName())) {
                     genreNames.add(StringUtils.trim(genre.getName()));
                 }
             }
-            videoData.setGenreNames(genreNames, SCANNER_ID);
+            videoData.setGenreNames(genreNames, SOURCE_TMDB);
         }
 
         // COMPANIES
-        if (CollectionUtils.isNotEmpty(movieInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(movieInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(videoData, SOURCE_TMDB)) {
             final Set<String> studioNames = new HashSet<>(movieInfo.getProductionCompanies().size());
             for (ProductionCompany company : movieInfo.getProductionCompanies()) {
                 if (StringUtils.isNotBlank(company.getName())) {
                     studioNames.add(StringUtils.trim(company.getName()));
                 }
             }
-            videoData.setStudioNames(studioNames, SCANNER_ID);
+            videoData.setStudioNames(studioNames, SOURCE_TMDB);
         }
 
         // CAST
@@ -301,7 +302,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                     continue;
                 }
                 
-                CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                 videoData.addCreditDTO(credit);
             }
         }
@@ -314,7 +315,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 continue;
             }
 
-            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+            CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
             videoData.addCreditDTO(credit);
         }
 
@@ -322,7 +323,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", false)) {
             Collection collection = movieInfo.getBelongsToCollection();
             if (collection != null && collection.getName() != null) {
-                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), Integer.valueOf(-1), Integer.toString(collection.getId()));
+                videoData.addBoxedSetDTO(SOURCE_TMDB, collection.getName(), Integer.valueOf(-1), Integer.toString(collection.getId()));
             }
         }
         
@@ -349,38 +350,38 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // set external IDS if not set before
         if (tvInfo.getExternalIDs() != null) {
-            if (StringUtils.isBlank(series.getSourceDbId(ImdbScanner.SCANNER_ID))) {
-                series.setSourceDbId(ImdbScanner.SCANNER_ID, tvInfo.getExternalIDs().getImdbId());
+            if (StringUtils.isBlank(series.getSourceDbId(SOURCE_IMDB))) {
+                series.setSourceDbId(SOURCE_IMDB, tvInfo.getExternalIDs().getImdbId());
             }
-            if (StringUtils.isBlank(series.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
-                series.setSourceDbId(TheTVDbScanner.SCANNER_ID, tvInfo.getExternalIDs().getTvdbId());
+            if (StringUtils.isBlank(series.getSourceDbId(SOURCE_TVDB))) {
+                series.setSourceDbId(SOURCE_TVDB, tvInfo.getExternalIDs().getTvdbId());
             }
-            if (StringUtils.isBlank(series.getSourceDbId(TVRageScanner.SCANNER_ID))) {
-                series.setSourceDbId(TVRageScanner.SCANNER_ID, tvInfo.getExternalIDs().getTvrageId());
+            if (StringUtils.isBlank(series.getSourceDbId(SOURCE_TVRAGE))) {
+                series.setSourceDbId(SOURCE_TVRAGE, tvInfo.getExternalIDs().getTvrageId());
             }
         }
         
-        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
-            series.setTitleOriginal(tvInfo.getName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteTitle(series, SOURCE_TMDB)) {
+            series.setTitleOriginal(tvInfo.getName(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
-            series.setTitleOriginal(tvInfo.getOriginalName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteOriginalTitle(series, SOURCE_TMDB)) {
+            series.setTitleOriginal(tvInfo.getOriginalName(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-            series.setPlot(tvInfo.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwritePlot(series, SOURCE_TMDB)) {
+            series.setPlot(tvInfo.getOverview(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
-            series.setOutline(tvInfo.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteOutline(series, SOURCE_TMDB)) {
+            series.setOutline(tvInfo.getOverview(), SOURCE_TMDB);
         }
 
         if (tvInfo.getVoteAverage() > 0) {
-            series.addRating(SCANNER_ID, MetadataTools.parseRating(tvInfo.getVoteAverage()));
+            series.addRating(SOURCE_TMDB, MetadataTools.parseRating(tvInfo.getVoteAverage()));
         }
 
-        if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SOURCE_TMDB)) {
             Set<String> countryCodes = new HashSet<>();
             for (String country : tvInfo.getOriginCountry()) {
                 final String countryCode = localeService.findCountryCode(country);
@@ -388,32 +389,32 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                     countryCodes.add(country);
                 }
             }
-            series.setCountryCodes(countryCodes, SCANNER_ID);
+            series.setCountryCodes(countryCodes, SOURCE_TMDB);
         }
 
-        if (CollectionUtils.isNotEmpty(tvInfo.getGenres()) && OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(tvInfo.getGenres()) && OverrideTools.checkOverwriteGenres(series, SOURCE_TMDB)) {
             final Set<String> genreNames = new HashSet<>(tvInfo.getGenres().size());
             for (com.omertron.themoviedbapi.model.Genre genre :  tvInfo.getGenres()) {
                 genreNames.add(genre.getName());
             }
-            series.setGenreNames(genreNames, SCANNER_ID);
+            series.setGenreNames(genreNames, SOURCE_TMDB);
         }
         
-        if (CollectionUtils.isNotEmpty(tvInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+        if (CollectionUtils.isNotEmpty(tvInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(series, SOURCE_TMDB)) {
             final Set<String> studioNames = new HashSet<>(tvInfo.getProductionCompanies().size());
             for (ProductionCompany company : tvInfo.getProductionCompanies()) {
                 studioNames.add(company.getName());
             }
-            series.setStudioNames(studioNames, SCANNER_ID);
+            series.setStudioNames(studioNames, SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteYear(series, SOURCE_TMDB)) {
             // first air date
             Date date = parseTMDbDate(tvInfo.getFirstAirDate());
-            series.setStartYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+            series.setStartYear(MetadataTools.extractYearAsInt(date), SOURCE_TMDB);
             // last air date
             date = parseTMDbDate(tvInfo.getLastAirDate());
-            series.setEndYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+            series.setEndYear(MetadataTools.extractYearAsInt(date), SOURCE_TMDB);
         }
 
         // SCAN SEASONS
@@ -426,35 +427,35 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         
         for (Season season : series.getSeasons()) {
             
-            if (!season.isTvSeasonDone(SCANNER_ID)) {
-                final String seriesId = series.getSourceDbId(SCANNER_ID);
+            if (!season.isTvSeasonDone(SOURCE_TMDB)) {
+                final String seriesId = series.getSourceDbId(SOURCE_TMDB);
                 TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(seriesId, season.getSeason(), tmdbLocale);
                 
                 if (seasonInfo == null || seasonInfo.getId() <= 0) {
                     // mark season as not found
-                    season.removeOverrideSource(SCANNER_ID);
-                    season.removeSourceDbId(SCANNER_ID);
+                    season.removeOverrideSource(SOURCE_TMDB);
+                    season.removeSourceDbId(SOURCE_TMDB);
                     season.setTvSeasonNotFound();
                 } else {
                     // set source id
-                    season.setSourceDbId(SCANNER_ID, String.valueOf(seasonInfo.getId()));
+                    season.setSourceDbId(SOURCE_TMDB, String.valueOf(seasonInfo.getId()));
                     
-                    if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                        season.setTitle(seasonInfo.getName(), SCANNER_ID);
+                    if (OverrideTools.checkOverwriteTitle(season, SOURCE_TMDB)) {
+                        season.setTitle(seasonInfo.getName(), SOURCE_TMDB);
                     }
-                    if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-                        season.setTitle(tvInfo.getOriginalName(), SCANNER_ID);
+                    if (OverrideTools.checkOverwriteOriginalTitle(season, SOURCE_TMDB)) {
+                        season.setTitle(tvInfo.getOriginalName(), SOURCE_TMDB);
                     }
-                    if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                        season.setPlot(seasonInfo.getOverview(), SCANNER_ID);
+                    if (OverrideTools.checkOverwritePlot(season, SOURCE_TMDB)) {
+                        season.setPlot(seasonInfo.getOverview(), SOURCE_TMDB);
                     }
-                    if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                        season.setOutline(seasonInfo.getOverview(), SCANNER_ID);
+                    if (OverrideTools.checkOverwriteOutline(season, SOURCE_TMDB)) {
+                        season.setOutline(seasonInfo.getOverview(), SOURCE_TMDB);
                     }
         
-                    if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    if (OverrideTools.checkOverwriteYear(season, SOURCE_TMDB)) {
                         final Date date = parseTMDbDate(seasonInfo.getAirDate());
-                        season.setPublicationYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+                        season.setPublicationYear(MetadataTools.extractYearAsInt(date), SOURCE_TMDB);
                     }
         
                     // mark season as done
@@ -470,56 +471,56 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     private void scanEpisodes(Season season, Locale tmdbLocale) {
         for (VideoData videoData : season.getVideoDatas()) {
             
-            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+            if (videoData.isTvEpisodeDone(SOURCE_TMDB)) {
                 // nothing to do if already done
                 continue;
             }
 
             // get the episode
-            String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
+            String seriesId = videoData.getSeason().getSeries().getSourceDbId(SOURCE_TMDB);
             TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(seriesId, season.getSeason(), videoData.getEpisode(), tmdbLocale);
             if (episodeInfo == null || episodeInfo.getId() <= 0) {
                 // mark episode as not found
-                videoData.removeOverrideSource(SCANNER_ID);
-                videoData.removeSourceDbId(SCANNER_ID);
+                videoData.removeOverrideSource(SOURCE_TMDB);
+                videoData.removeSourceDbId(SOURCE_TMDB);
                 videoData.setTvEpisodeNotFound();
                 continue;
             }
             
             // set source id
-            videoData.setSourceDbId(SCANNER_ID, String.valueOf(episodeInfo.getId()));
+            videoData.setSourceDbId(SOURCE_TMDB, String.valueOf(episodeInfo.getId()));
 
             // set external IDS if not set before
             if (episodeInfo.getExternalIDs() != null) {
-                if (StringUtils.isBlank(videoData.getSourceDbId(ImdbScanner.SCANNER_ID))) {
-                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, episodeInfo.getExternalIDs().getImdbId());
+                if (StringUtils.isBlank(videoData.getSourceDbId(SOURCE_IMDB))) {
+                    videoData.setSourceDbId(SOURCE_IMDB, episodeInfo.getExternalIDs().getImdbId());
                 }
-                if (StringUtils.isBlank(videoData.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
-                    videoData.setSourceDbId(TheTVDbScanner.SCANNER_ID, episodeInfo.getExternalIDs().getTvdbId());
+                if (StringUtils.isBlank(videoData.getSourceDbId(SOURCE_TVDB))) {
+                    videoData.setSourceDbId(SOURCE_TVDB, episodeInfo.getExternalIDs().getTvdbId());
                 }
-                if (StringUtils.isBlank(videoData.getSourceDbId(TVRageScanner.SCANNER_ID))) {
-                    videoData.setSourceDbId(TVRageScanner.SCANNER_ID, episodeInfo.getExternalIDs().getTvrageId());
+                if (StringUtils.isBlank(videoData.getSourceDbId(SOURCE_TVRAGE))) {
+                    videoData.setSourceDbId(SOURCE_TVRAGE, episodeInfo.getExternalIDs().getTvrageId());
                 }
             }
 
-            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                videoData.setTitle(episodeInfo.getName(), SCANNER_ID);
+            if (OverrideTools.checkOverwriteTitle(videoData, SOURCE_TMDB)) {
+                videoData.setTitle(episodeInfo.getName(), SOURCE_TMDB);
             }
 
-            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                videoData.setPlot(episodeInfo.getOverview(), SCANNER_ID);
+            if (OverrideTools.checkOverwritePlot(videoData, SOURCE_TMDB)) {
+                videoData.setPlot(episodeInfo.getOverview(), SOURCE_TMDB);
             }
 
-            if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                videoData.setOutline(episodeInfo.getOverview(), SCANNER_ID);
+            if (OverrideTools.checkOverwriteOutline(videoData, SOURCE_TMDB)) {
+                videoData.setOutline(episodeInfo.getOverview(), SOURCE_TMDB);
             }
             
-            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SOURCE_TMDB)) {
                 Date releaseDate = parseTMDbDate(episodeInfo.getAirDate());
-                videoData.setRelease(releaseDate, SCANNER_ID);
+                videoData.setRelease(releaseDate, SOURCE_TMDB);
             }
 
-            videoData.addRating(SCANNER_ID, MetadataTools.parseRating(episodeInfo.getVoteAverage()));
+            videoData.addRating(SOURCE_TMDB, MetadataTools.parseRating(episodeInfo.getVoteAverage()));
             
             // CAST & CREW
             MediaCreditList credits = episodeInfo.getCredits();
@@ -527,7 +528,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
                 if (CollectionUtils.isNotEmpty(credits.getCast()) && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
                     for (MediaCreditCast person : credits.getCast()) {
-                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                         videoData.addCreditDTO(credit);
                     }
                 }
@@ -535,7 +536,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 // GUEST STARS
                 if (CollectionUtils.isNotEmpty(credits.getGuestStars()) && this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
                     for (MediaCreditCast person : credits.getGuestStars()) {
-                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
+                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
                         videoData.addCreditDTO(credit);
                     }
                 }
@@ -548,7 +549,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                             // scan not enabled for that job
                             continue;
                         }
-                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
                         videoData.addCreditDTO(credit);
                     }
                 }
@@ -576,43 +577,43 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         // fill in data
-        person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+        person.setSourceDbId(SOURCE_IMDB, StringUtils.trim(tmdbPerson.getImdbId()));
 
         // split person names
         PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
-        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-            person.setName(nameDTO.getName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteName(person, SOURCE_TMDB)) {
+            person.setName(nameDTO.getName(), SOURCE_TMDB);
         }
-        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
-            person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteFirstName(person, SOURCE_TMDB)) {
+            person.setFirstName(nameDTO.getFirstName(), SOURCE_TMDB);
         }
-        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
-            person.setLastName(nameDTO.getLastName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteLastName(person, SOURCE_TMDB)) {
+            person.setLastName(nameDTO.getLastName(), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteBirthDay(person, SOURCE_TMDB)) {
             Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getBirthday());
-            person.setBirthDay(parsedDate, SCANNER_ID);
+            person.setBirthDay(parsedDate, SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
-            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getPlaceOfBirth()), SCANNER_ID);
+        if (OverrideTools.checkOverwriteBirthPlace(person, SOURCE_TMDB)) {
+            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getPlaceOfBirth()), SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteBirthName(person, SOURCE_TMDB)) {
             if (CollectionUtils.isNotEmpty(tmdbPerson.getAlsoKnownAs())) {
                 String birthName = tmdbPerson.getAlsoKnownAs().get(0);
-                person.setBirthName(birthName, SCANNER_ID);
+                person.setBirthName(birthName, SOURCE_TMDB);
             }
         }
 
-        if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteDeathDay(person, SOURCE_TMDB)) {
             Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getDeathday());
-            person.setDeathDay(parsedDate, SCANNER_ID);
+            person.setDeathDay(parsedDate, SOURCE_TMDB);
         }
 
-        if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
-            person.setBiography(MetadataTools.cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
+        if (OverrideTools.checkOverwriteBiography(person, SOURCE_TMDB)) {
+            person.setBiography(MetadataTools.cleanBiography(tmdbPerson.getBiography()), SOURCE_TMDB);
         }
 
         return ScanResult.OK;
@@ -698,7 +699,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         FilmParticipation filmo = new FilmParticipation();
         filmo.setParticipationType(ParticipationType.MOVIE);
-        filmo.setSourceDb(SCANNER_ID);
+        filmo.setSourceDb(SOURCE_TMDB);
         filmo.setSourceDbId(String.valueOf(credit.getId()));
         filmo.setPerson(person);
         filmo.setJobType(jobType);
@@ -758,7 +759,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SOURCE_TMDB))) {
             return true;
         }
 
@@ -770,7 +771,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&é\"'(--è_çà)=$");
                 String sourceId = st.nextToken();
                 LOG.debug("TheMovieDb ID found in NFO: {}", sourceId);
-                dto.addId(SCANNER_ID, sourceId);
+                dto.addId(SOURCE_TMDB, sourceId);
                 return true;
             }
         } catch (Exception ex) {

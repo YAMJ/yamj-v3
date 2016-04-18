@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.trakttv;
 
-import org.yamj.plugin.api.web.TemporaryUnavailableException;
+import static org.yamj.plugin.api.tools.Constants.*;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,7 +47,8 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
-import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.TraktTvScanner;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service("traktTvService")
 public class TraktTvService {
@@ -669,11 +670,11 @@ public class TraktTvService {
             if (i != null) updateable.addAll(i);
         }
         if (movieIds.imdb() != null) {
-            List<Long> i = updatedMovies.get(ImdbScanner.SCANNER_ID+"#"+movieIds.imdb());
+            List<Long> i = updatedMovies.get(SOURCE_IMDB+"#"+movieIds.imdb());
             if (i != null) updateable.addAll(i);
         }
         if (movieIds.tmdb() != null) {
-            List<Long> i = updatedMovies.get(TheMovieDbScanner.SCANNER_ID+"#"+movieIds.tmdb());
+            List<Long> i = updatedMovies.get(SOURCE_TMDB+"#"+movieIds.tmdb());
             if (i != null) updateable.addAll(i);
         }
         return updateable;
@@ -754,19 +755,19 @@ public class TraktTvService {
             if (i != null) updateable.addAll(i);
         }
         if (showIds.tvdb() != null) {
-            List<Long> i = updatedEpisodes.get(TheTVDbScanner.SCANNER_ID+"#"+showIds.tvdb()+"#"+season+"#"+episode);
+            List<Long> i = updatedEpisodes.get(SOURCE_TVDB+"#"+showIds.tvdb()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
         if (showIds.tvRage() != null) {
-            List<Long> i = updatedEpisodes.get(TVRageScanner.SCANNER_ID+"#"+showIds.tvRage()+"#"+season+"#"+episode);
+            List<Long> i = updatedEpisodes.get(SOURCE_TVRAGE+"#"+showIds.tvRage()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
         if (showIds.imdb() != null) {
-            List<Long> i = updatedEpisodes.get(ImdbScanner.SCANNER_ID+"#"+showIds.imdb()+"#"+season+"#"+episode);
+            List<Long> i = updatedEpisodes.get(SOURCE_IMDB+"#"+showIds.imdb()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
         if (showIds.tmdb() != null) {
-            List<Long> i = updatedEpisodes.get(TheMovieDbScanner.SCANNER_ID+"#"+showIds.tmdb()+"#"+season+"#"+episode);
+            List<Long> i = updatedEpisodes.get(SOURCE_TMDB+"#"+showIds.tmdb()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
         return updateable;

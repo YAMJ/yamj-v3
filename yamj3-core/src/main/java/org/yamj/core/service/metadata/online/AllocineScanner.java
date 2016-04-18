@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -120,7 +122,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         // we also get IMDb id for extra infos
-        String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+        String imdbId = videoData.getSourceDbId(SOURCE_IMDB);
         if (StringUtils.isBlank(imdbId) && 
             StringUtils.isNotBlank(videoData.getTitleOriginal()) &&
             configServiceWrapper.getBooleanProperty("allocine.search.imdb", false))
@@ -128,7 +130,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
             if (StringUtils.isNotBlank(imdbId)) {
                 LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
-                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                videoData.setSourceDbId(SOURCE_IMDB, imdbId);
             }
         }
 
@@ -168,14 +170,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         // we also get IMDb id for extra infos
-        String imdbId = series.getSourceDbId(ImdbScanner.SCANNER_ID);
+        String imdbId = series.getSourceDbId(SOURCE_IMDB);
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
                 imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getStartYear(), true, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitleOriginal());
-                    series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                    series.setSourceDbId(SOURCE_IMDB, imdbId);
                 }
             }
         }

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.tools.Constants.SOURCE_TVDB;
+
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -47,7 +50,6 @@ import org.yamj.plugin.api.type.JobType;
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
 
-    public static final String SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
 
     @Autowired
@@ -61,7 +63,7 @@ public class TheTVDbScanner implements ISeriesScanner {
     
     @Override
     public String getScannerName() {
-        return SCANNER_ID;
+        return SOURCE_TVDB;
     }
 
     @PostConstruct
@@ -79,16 +81,16 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
 
     private String getSeriesId(Series series, Locale tvdbLocale, boolean throwTempError) {
-        String tvdbId = series.getSourceDbId(SCANNER_ID);
+        String tvdbId = series.getSourceDbId(SOURCE_TVDB);
         // search by title
         if (StringUtils.isBlank(tvdbId)) {
             tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), tvdbLocale.getLanguage(), throwTempError);
-            series.setSourceDbId(SCANNER_ID, tvdbId);
+            series.setSourceDbId(SOURCE_TVDB, tvdbId);
         }
         // search by original title
         if (StringUtils.isBlank(tvdbId) && series.isTitleOriginalScannable()) {
             tvdbId = tvdbApiWrapper.getSeriesId(series.getTitleOriginal(), series.getStartYear(), tvdbLocale.getLanguage(), throwTempError);
-            series.setSourceDbId(SCANNER_ID, tvdbId);
+            series.setSourceDbId(SOURCE_TVDB, tvdbId);
         }
         return tvdbId;
     }
@@ -112,45 +114,45 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
         
         // set IMDb id if not set before
-        String imdbId = series.getSourceDbId(ImdbScanner.SCANNER_ID);
+        String imdbId = series.getSourceDbId(SOURCE_IMDB);
         if (StringUtils.isBlank(imdbId)) {
-            series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
+            series.setSourceDbId(SOURCE_IMDB, tvdbSeries.getImdbId());
         }
 
-        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
-            series.setTitle(tvdbSeries.getSeriesName(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteTitle(series, SOURCE_TVDB)) {
+            series.setTitle(tvdbSeries.getSeriesName(), SOURCE_TVDB);
         }
 
-        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-            series.setPlot(tvdbSeries.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwritePlot(series, SOURCE_TVDB)) {
+            series.setPlot(tvdbSeries.getOverview(), SOURCE_TVDB);
         }
 
-        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
-            series.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteOutline(series, SOURCE_TVDB)) {
+            series.setOutline(tvdbSeries.getOverview(), SOURCE_TVDB);
         }
 
-        series.addRating(SCANNER_ID, MetadataTools.parseRating(tvdbSeries.getRating()));
+        series.addRating(SOURCE_TVDB, MetadataTools.parseRating(tvdbSeries.getRating()));
 
-        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteYear(series, SOURCE_TVDB)) {
             String faDate = tvdbSeries.getFirstAired();
             if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
                 try {
-                    series.setStartYear(Integer.parseInt(faDate.substring(0, 4)), SCANNER_ID);
+                    series.setStartYear(Integer.parseInt(faDate.substring(0, 4)), SOURCE_TVDB);
                 } catch (Exception ignore) {
                     // ignore error if year is invalid
                 }
             }
         }
 
-        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
-            series.setGenreNames(new LinkedHashSet<>(tvdbSeries.getGenres()), SCANNER_ID);
+        if (OverrideTools.checkOverwriteGenres(series, SOURCE_TVDB)) {
+            series.setGenreNames(new LinkedHashSet<>(tvdbSeries.getGenres()), SOURCE_TVDB);
         }
 
-        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteStudios(series, SOURCE_TVDB)) {
             String studioName = StringUtils.trimToNull(tvdbSeries.getNetwork());
             if (studioName != null) {
                 Set<String> studioNames = Collections.singleton(studioName);
-                series.setStudioNames(studioNames, SCANNER_ID);
+                series.setStudioNames(studioNames, SOURCE_TVDB);
             }
         }
 
@@ -162,7 +164,7 @@ public class TheTVDbScanner implements ISeriesScanner {
                 actors = new LinkedHashSet<>(tvdbActors.size());
                 for (Actor actor : tvdbActors) {
                     if (StringUtils.isNotBlank(actor.getName())) {
-                        actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+                        actors.add(new CreditDTO(SOURCE_TVDB, JobType.ACTOR, actor.getName(), actor.getRole()));
                     }
                 }
             }
@@ -178,26 +180,26 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         for (Season season : series.getSeasons()) {
 
-            if (!season.isTvSeasonDone(SCANNER_ID)) {
+            if (!season.isTvSeasonDone(SOURCE_TVDB)) {
                 // same as series id
                 final String tvdbId = tvdbSeries.getId();
-                season.setSourceDbId(SCANNER_ID, tvdbId);
+                season.setSourceDbId(SOURCE_TVDB, tvdbId);
                 
                 // use values from series
-                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                    season.setTitle(tvdbSeries.getSeriesName(), SCANNER_ID);
+                if (OverrideTools.checkOverwriteTitle(season, SOURCE_TVDB)) {
+                    season.setTitle(tvdbSeries.getSeriesName(), SOURCE_TVDB);
                 }
-                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                    season.setPlot(tvdbSeries.getOverview(), SCANNER_ID);
+                if (OverrideTools.checkOverwritePlot(season, SOURCE_TVDB)) {
+                    season.setPlot(tvdbSeries.getOverview(), SOURCE_TVDB);
                 }
-                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                    season.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
+                if (OverrideTools.checkOverwriteOutline(season, SOURCE_TVDB)) {
+                    season.setOutline(tvdbSeries.getOverview(), SOURCE_TVDB);
                 }
     
-                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                if (OverrideTools.checkOverwriteYear(season, SOURCE_TVDB)) {
                     // get season year from minimal first aired of episodes
                     String year = tvdbApiWrapper.getSeasonYear(tvdbId, season.getSeason(), tvdbLocale.getLanguage());
-                    season.setPublicationYear(MetadataTools.extractYearAsInt(year), SCANNER_ID);
+                    season.setPublicationYear(MetadataTools.extractYearAsInt(year), SOURCE_TVDB);
                 }
     
                 // mark season as done
@@ -210,10 +212,10 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
 
     private void scanEpisodes(Season season, Set<CreditDTO> actors, Locale tvdbLocale) {
-        final String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+        final String seriesId = season.getSeries().getSourceDbId(SOURCE_TVDB);
         
         for (VideoData videoData : season.getVideoDatas()) {
-            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+            if (videoData.isTvEpisodeDone(SOURCE_TVDB)) {
                 // nothing to do if already done
                 continue;
             }
@@ -221,35 +223,35 @@ public class TheTVDbScanner implements ISeriesScanner {
             Episode tvdbEpisode = tvdbApiWrapper.getEpisode(seriesId, season.getSeason(), videoData.getEpisode(), tvdbLocale.getLanguage());
             if (tvdbEpisode == null || StringUtils.isBlank(tvdbEpisode.getId())) {
                 // mark episode as not found
-                videoData.removeOverrideSource(SCANNER_ID);
-                videoData.removeSourceDbId(SCANNER_ID);
+                videoData.removeOverrideSource(SOURCE_TVDB);
+                videoData.removeSourceDbId(SOURCE_TVDB);
                 videoData.setTvEpisodeNotFound();
                 continue;
             }
             
             // set episode ID
-            videoData.setSourceDbId(SCANNER_ID, tvdbEpisode.getId());
+            videoData.setSourceDbId(SOURCE_TVDB, tvdbEpisode.getId());
             // set IMDb id if not set before
-            String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+            String imdbId = videoData.getSourceDbId(SOURCE_IMDB);
             if (StringUtils.isBlank(imdbId)) {
-                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbEpisode.getImdbId());
+                videoData.setSourceDbId(SOURCE_IMDB, tvdbEpisode.getImdbId());
             }
 
-            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                videoData.setTitle(tvdbEpisode.getEpisodeName(), SCANNER_ID);
+            if (OverrideTools.checkOverwriteTitle(videoData, SOURCE_TVDB)) {
+                videoData.setTitle(tvdbEpisode.getEpisodeName(), SOURCE_TVDB);
             }
             
-            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                videoData.setPlot(tvdbEpisode.getOverview(), SCANNER_ID);
+            if (OverrideTools.checkOverwritePlot(videoData, SOURCE_TVDB)) {
+                videoData.setPlot(tvdbEpisode.getOverview(), SOURCE_TVDB);
             }
             
-            if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                videoData.setOutline(tvdbEpisode.getOverview(), SCANNER_ID);
+            if (OverrideTools.checkOverwriteOutline(videoData, SOURCE_TVDB)) {
+                videoData.setOutline(tvdbEpisode.getOverview(), SOURCE_TVDB);
             }
 
-            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SOURCE_TVDB)) {
                 Date releaseDate = MetadataTools.parseToDate(tvdbEpisode.getFirstAired());
-                videoData.setRelease(releaseDate, SCANNER_ID);
+                videoData.setRelease(releaseDate, SOURCE_TVDB);
             }
 
             // directors
@@ -270,7 +272,7 @@ public class TheTVDbScanner implements ISeriesScanner {
         if (persons != null && this.configServiceWrapper.isCastScanEnabled(jobType)) {
             for (String person : persons) {
                 if (StringUtils.isNotBlank(person)) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, jobType, person));
+                    videoData.addCreditDTO(new CreditDTO(SOURCE_TVDB, jobType, person));
                 }
             }
         }
@@ -279,7 +281,7 @@ public class TheTVDbScanner implements ISeriesScanner {
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SOURCE_TVDB))) {
             return true;
         }
     
@@ -318,9 +320,8 @@ public class TheTVDbScanner implements ISeriesScanner {
 
                     if (StringUtils.isNotBlank(id)) {
                         String sourceId = id.trim();
-                        dto.addId(SCANNER_ID, sourceId);
+                        dto.addId(SOURCE_TVDB, sourceId);
                         LOG.debug("TheTVDB ID found in NFO: {}", sourceId);
-                        dto.addId(SCANNER_ID, sourceId);
                         return true;
                     }
                 }

@@ -61,11 +61,8 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
 
     private String getSeriesId(Series series, boolean throwTempError) {
-        String seriesId = series.getSourceDbId(getScannerName());
-        if (StringUtils.isBlank(seriesId)) {
-            seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getSourceDbIdMap(), throwTempError);
-            series.setSourceDbId(getScannerName(), seriesId);
-        }
+        String seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getSourceDbIdMap(), throwTempError);
+        series.setSourceDbId(getScannerName(), seriesId);
         return seriesId;
     }
 
@@ -86,7 +83,9 @@ public class PluginSeriesScanner implements ISeriesScanner {
         
         // set possible scanned series IDs only if not set before   
         for (Entry<String,String> entry : tvSeries.getIds().entrySet()) {
-            if (StringUtils.isBlank(series.getSourceDbId(entry.getKey()))) {
+            if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                series.setSourceDbId(entry.getKey(), entry.getValue());
+            } else if (StringUtils.isBlank(series.getSourceDbId(entry.getKey()))) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
             }
         }
@@ -147,10 +146,13 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     season.removeSourceDbId(getScannerName());
                     season.setTvSeasonNotFound();
                 } else {
+
                     // set possible scanned season IDs only if not set before   
                     for (Entry<String,String> entry : tvSeason.getIds().entrySet()) {
-                        if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
-                            series.setSourceDbId(entry.getKey(), entry.getValue());
+                        if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                            season.setSourceDbId(entry.getKey(), entry.getValue());
+                        } else if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
+                            season.setSourceDbId(entry.getKey(), entry.getValue());
                         }
                     }
 
@@ -200,7 +202,9 @@ public class PluginSeriesScanner implements ISeriesScanner {
                 
             // set possible scanned episode IDs only if not set before   
             for (Entry<String,String> entry : episode.getIds().entrySet()) {
-                if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
+                if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                    videoData.setSourceDbId(entry.getKey(), entry.getValue());
+                } else if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
                     videoData.setSourceDbId(entry.getKey(), entry.getValue());
                 }
             }

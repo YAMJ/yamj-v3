@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import static org.yamj.plugin.api.tools.Constants.*;
+
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
@@ -32,7 +34,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.TraktTvScanner;
 
 @Repository("traktTvDao")
 public class TraktTvDao extends HibernateDao {
@@ -233,9 +235,9 @@ public class TraktTvDao extends HibernateDao {
         final String source = convertRowElementToString(row[1]);
         if (TraktTvScanner.SCANNER_ID.equals(source)) {
             dto.setTrakt(convertRowElementToInteger(row[2]));
-        } else if (ImdbScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_IMDB.equals(source)) {
             dto.setImdb(convertRowElementToString(row[2]));
-        } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_TMDB.equals(source)) {
             dto.setTmdb(convertRowElementToInteger(row[2]));
         }
     }
@@ -244,13 +246,13 @@ public class TraktTvDao extends HibernateDao {
         final String source = convertRowElementToString(row[1]);
         if (TraktTvScanner.SCANNER_ID.equals(source)) {
             dto.setTrakt(convertRowElementToInteger(row[2]));
-        } else if (ImdbScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_IMDB.equals(source)) {
             dto.setImdb(convertRowElementToString(row[2]));
-        } else if (TheMovieDbScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_TMDB.equals(source)) {
             dto.setTmdb(convertRowElementToInteger(row[2]));
-        } else if (TheTVDbScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_TVDB.equals(source)) {
             dto.setTvdb(convertRowElementToInteger(row[2]));
-        } else if (TVRageScanner.SCANNER_ID.equals(source)) {
+        } else if (SOURCE_TVRAGE.equals(source)) {
             dto.setTvRage(convertRowElementToString(row[2]));
         }
     }

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import static org.yamj.plugin.api.tools.Constants.SOURCE_TVDB;
+
 import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +65,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
     
     @Override
     public String getScannerName() {
-        return TheTVDbScanner.SCANNER_ID;
+        return SOURCE_TVDB;
     }
 
     @PostConstruct

@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import static org.yamj.plugin.api.tools.Constants.UTF8;
+import static org.yamj.plugin.api.tools.Constants.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
 import org.yamj.plugin.api.tools.MetadataTools;
@@ -257,7 +257,7 @@ public final class InfoReader {
                 // specific TVDB id
                 value = DOMHelper.getValueFromElement(eCommon, "tvdbid");
                 if (StringUtils.isNotBlank(value)) {
-                    dto.addId(TheTVDbScanner.SCANNER_ID, value);
+                    dto.addId(SOURCE_TVDB, value);
                 }
                 
                 // TODO series watched status
@@ -415,9 +415,9 @@ public final class InfoReader {
                     } else {
                         // choose default scanner id
                         if (isTV) {
-                            movieDb = TheTVDbScanner.SCANNER_ID;
+                            movieDb = SOURCE_TVDB;
                         } else {
-                            movieDb = ImdbScanner.SCANNER_ID;
+                            movieDb = SOURCE_IMDB;
                         }
                         dto.addId(movieDb, movieId);
                         LOG.debug("Found {} ID: {}", movieDb, movieId);
@@ -432,7 +432,7 @@ public final class InfoReader {
             movieId = eId.getAttribute("TMDB");
             if (StringUtils.isNotBlank(movieId)) {
                 LOG.debug("Found TheMovieDb ID: {}", movieId);
-                dto.addId(TheMovieDbScanner.SCANNER_ID, movieId);
+                dto.addId(SOURCE_TMDB, movieId);
             }
         }
     }

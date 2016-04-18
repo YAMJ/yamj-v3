@@ -38,6 +38,11 @@ public final class Constants {
     public static final String LANGUAGE_EN = "en";
     public static final String LANGUAGE_UNTERTERMINED = "und";
 
+    public static final String SOURCE_IMDB = "imdb";
+    public static final String SOURCE_TMDB = "tmdb";
+    public static final String SOURCE_TVDB = "tvdb";
+    public static final String SOURCE_TVRAGE = "tvrage";
+    
     private Constants() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }

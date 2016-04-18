@@ -59,11 +59,8 @@ public class PluginMovieScanner implements IMovieScanner {
     }
 
     private String getMovieId(VideoData videoData, boolean throwTempError) {
-        String movieId = videoData.getSourceDbId(getScannerName());
-        if (StringUtils.isBlank(movieId)) {
-            movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getSourceDbIdMap(), throwTempError);
-            videoData.setSourceDbId(getScannerName(), movieId);
-        }
+        String movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getSourceDbIdMap(), throwTempError);
+        videoData.setSourceDbId(getScannerName(), movieId);
         return movieId;
     }
     
@@ -84,7 +81,9 @@ public class PluginMovieScanner implements IMovieScanner {
         
         // set possible scanned movie IDs only if not set before   
         for (Entry<String,String> entry : movie.getIds().entrySet()) {
-            if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
+            if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                videoData.setSourceDbId(entry.getKey(), entry.getValue());
+            } else if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
             }
         }

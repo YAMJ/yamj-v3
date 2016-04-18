@@ -176,7 +176,7 @@ public class Series {
     
     public Season getSeason(int seasonNumber) {
         for (Season season : this.seasons) {
-            if (season.getSeasonNumber() == seasonNumber) {
+            if (season.getSeasonNumber() == seasonNumber && season.isFound()) {
                 return season;
             }
         }

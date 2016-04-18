@@ -23,6 +23,7 @@
 package org.yamj.core.service.artwork.online;
 
 import static org.yamj.plugin.api.tools.Constants.LANGUAGE_EN;
+import static org.yamj.plugin.api.tools.Constants.SOURCE_TMDB;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -78,7 +79,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public String getScannerName() {
-        return TheMovieDbScanner.SCANNER_ID;
+        return SOURCE_TMDB;
     }
 
     @PostConstruct

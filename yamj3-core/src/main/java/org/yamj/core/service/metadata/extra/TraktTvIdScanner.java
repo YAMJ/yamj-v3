@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.extra;
 
+import static org.yamj.plugin.api.tools.Constants.*;
+
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -31,7 +33,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.ExtraScannerService;
-import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.TraktTvScanner;
 import org.yamj.core.service.trakttv.TraktTvService;
 
 @Service("traktTvIdScanner")
@@ -79,7 +81,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         LOG.trace("Search for Trakt.TV movie ID: {}", videoData.getIdentifier());
         
         // try IMDB id
-        Integer found = traktTvService.searchMovieIdByIMDB(videoData.getSourceDbId(ImdbScanner.SCANNER_ID));
+        Integer found = traktTvService.searchMovieIdByIMDB(videoData.getSourceDbId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
             videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
@@ -87,7 +89,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // try TheMovieDB id
-        found = traktTvService.searchMovieIdByTMDB(videoData.getSourceDbId(TheMovieDbScanner.SCANNER_ID));
+        found = traktTvService.searchMovieIdByTMDB(videoData.getSourceDbId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
             videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
@@ -127,7 +129,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         LOG.trace("Search for Trakt.TV series ID: {}", series.getIdentifier());
 
         // try TheTVDb id
-        Integer found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(TheTVDbScanner.SCANNER_ID));
+        Integer found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVDB));
         if (found != null && found.intValue() > NO_ID) {
             series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
@@ -135,7 +137,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // try TVRage id
-        found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(TVRageScanner.SCANNER_ID));
+        found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVRAGE));
         if (found != null && found.intValue() > NO_ID) {
             series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
@@ -143,7 +145,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // try IMDB id
-        found = traktTvService.searchShowIdByIMDB(series.getSourceDbId(ImdbScanner.SCANNER_ID));
+        found = traktTvService.searchShowIdByIMDB(series.getSourceDbId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
             series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
@@ -151,7 +153,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         }
 
         // try TheMovieDB id
-        found = traktTvService.searchShowIdByTMDB(series.getSourceDbId(TheMovieDbScanner.SCANNER_ID));
+        found = traktTvService.searchShowIdByTMDB(series.getSourceDbId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
             series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found

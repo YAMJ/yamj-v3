@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+
 import com.omertron.imdbapi.model.ImdbImage;
 import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.*;
@@ -55,7 +57,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
 
     @Override
     public String getScannerName() {
-        return ImdbScanner.SCANNER_ID;
+        return SOURCE_IMDB;
     }
 
     @PostConstruct

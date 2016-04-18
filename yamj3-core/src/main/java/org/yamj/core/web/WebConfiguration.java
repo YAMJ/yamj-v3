@@ -28,7 +28,6 @@ import com.omertron.imdbapi.ImdbApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
-import com.omertron.tvrageapi.TVRageApi;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -110,9 +109,6 @@ public class WebConfiguration  {
 
     @Value("${APIKEY.allocine.secretKey}")
     private String allocineApiSecretKey;
-    
-    @Value("${APIKEY.tvrage}")
-    private String tvRageApiKey;
 
     @Value("${APIKEY.rottentomatoes}")
     private String rottenTomatoesApiKey;
@@ -230,12 +226,6 @@ public class WebConfiguration  {
     public ImdbApi imdbApi() {
         LOG.trace("Initialize ImdbApi");
         return new ImdbApi(poolingHttpClient());
-    }
-
-    @Bean
-    public TVRageApi tvRageApi() {
-        LOG.trace("Initialize TVRageApi");
-        return new TVRageApi(tvRageApiKey, poolingHttpClient());
     }
 
     @Bean
