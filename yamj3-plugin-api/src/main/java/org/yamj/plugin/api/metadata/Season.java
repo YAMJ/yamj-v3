@@ -36,7 +36,6 @@ public class Season {
     private int rating = -1;
     private Collection<Episode> episodes = new ArrayList<>();
     private boolean scanNeeded;
-    private boolean found;
     
     public Map<String, String> getIds() {
         return ids;
@@ -147,13 +146,4 @@ public class Season {
         this.scanNeeded = scanNeeded;
         return this;
     } 
-    
-    public boolean isFound() {
-        return found;
-    }
-
-    public Season setFound(boolean found) {
-        this.found = found;
-        return this;
-    }    
 }

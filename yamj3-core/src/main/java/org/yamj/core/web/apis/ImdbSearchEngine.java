@@ -23,9 +23,7 @@
 package org.yamj.core.web.apis;
 
 import static org.yamj.plugin.api.tools.Constants.ALL;
-import org.yamj.plugin.api.web.HTMLTools;
-import org.yamj.plugin.api.web.TemporaryUnavailableException;
-import org.yamj.plugin.api.web.SearchEngineTools;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -42,6 +40,9 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
+import org.yamj.plugin.api.web.HTMLTools;
+import org.yamj.plugin.api.web.SearchEngineTools;
+import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine {
@@ -199,7 +200,6 @@ public class ImdbSearchEngine {
      */
     private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType, boolean throwTempError) {
         String searchMatch = configService.getProperty("imdb.id.search.match", "regular");
-        boolean searchVariable = configService.getBooleanProperty("imdb.id.search.variable", true);
 
         StringBuilder sb = new StringBuilder("http://www.imdb.com/");
         sb.append("find?q=");
@@ -211,12 +211,10 @@ public class ImdbSearchEngine {
         sb.append("&s=");
         if (objectType.equals(OBJECT_MOVIE)) {
             sb.append("tt");
-            if (searchVariable) {
-                if (categoryType.equals(CATEGORY_MOVIE)) {
-                    sb.append("&ttype=ft");
-                } else if (categoryType.equals(CATEGORY_TV)) {
-                    sb.append("&ttype=tv");
-                }
+            if (categoryType.equals(CATEGORY_MOVIE)) {
+                sb.append("&ttype=ft");
+            } else if (categoryType.equals(CATEGORY_TV)) {
+                sb.append("&ttype=tv");
             }
         } else {
             sb.append("nm");

@@ -203,4 +203,11 @@ public class Movie {
         this.credits.add(credit);
         return this;
     }    
+
+    public Movie addCredits(Collection<Credit> credits) {
+        if (credits != null && !credits.isEmpty()) {
+            this.credits.addAll(credits);
+        }
+        return this;
+    }
 }

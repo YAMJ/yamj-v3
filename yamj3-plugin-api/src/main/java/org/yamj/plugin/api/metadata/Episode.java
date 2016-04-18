@@ -160,6 +160,13 @@ public class Episode {
         return this;
     }
 
+    public Episode addCredits(Collection<Credit> credits) {
+        if (credits != null && !credits.isEmpty()) {
+            this.credits.addAll(credits);
+        }
+        return this;
+    }
+
     public boolean isFound() {
         return found;
     }
