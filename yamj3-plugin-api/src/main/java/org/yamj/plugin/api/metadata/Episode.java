@@ -38,7 +38,7 @@ public class Episode {
     private Date releaseDate;
     private int rating = -1;
     private List<Credit> credits = new ArrayList<>();
-    private boolean found;
+    private boolean valid;
     
     public Map<String, String> getIds() {
         return ids;
@@ -167,12 +167,16 @@ public class Episode {
         return this;
     }
 
-    public boolean isFound() {
-        return found;
+    public boolean isValid() {
+        return valid;
     }
 
-    public Episode setFound(boolean found) {
-        this.found = found;
+    public boolean isNotValid() {
+        return !valid;
+    }
+
+    public Episode setValid(boolean valid) {
+        this.valid = valid;
         return this;
-    }    
+    }
 }

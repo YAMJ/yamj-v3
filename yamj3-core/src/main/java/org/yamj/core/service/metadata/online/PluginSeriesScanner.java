@@ -140,7 +140,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
            final org.yamj.plugin.api.metadata.Season tvSeason = tvSeries.getSeason(season.getSeason());
             
             if (!season.isTvSeasonDone(getScannerName())) {
-                if (tvSeason == null) {
+                if (tvSeason == null || tvSeason.isNotValid()) {
                     // mark season as not found
                     season.removeOverrideSource(getScannerName());
                     season.removeSourceDbId(getScannerName());
@@ -192,7 +192,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
             }
 
             Episode episode = (tvSeason == null ? null : tvSeason.getEpisode(videoData.getEpisode()));
-            if (episode == null) {
+            if (episode == null || episode.isNotValid()) {
                 // mark episode as not found
                 videoData.removeOverrideSource(getScannerName());
                 videoData.removeSourceDbId(getScannerName());

@@ -36,6 +36,7 @@ public class Season {
     private int rating = -1;
     private Collection<Episode> episodes = new ArrayList<>();
     private boolean scanNeeded;
+    private boolean valid = true;
     
     public Map<String, String> getIds() {
         return ids;
@@ -131,7 +132,7 @@ public class Season {
     
     public Episode getEpisode(int episodeNumber) {
         for (Episode episode : this.episodes) {
-            if (episode.getEpisodeNumber() == episodeNumber && episode.isFound()) {
+            if (episode.getEpisodeNumber() == episodeNumber) {
                 return episode;
             }
         }
@@ -145,5 +146,18 @@ public class Season {
     public Season setScanNeeded(boolean scanNeeded) {
         this.scanNeeded = scanNeeded;
         return this;
-    } 
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public boolean isNotValid() {
+        return !valid;
+    }
+
+    public Season setValid(boolean valid) {
+        this.valid = valid;
+        return this;
+    }
 }
