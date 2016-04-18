@@ -248,13 +248,12 @@ public class PluginSeriesScanner implements ISeriesScanner {
     private org.yamj.plugin.api.metadata.Series buildSeriesToScan(Series series) { 
         final org.yamj.plugin.api.metadata.Series tvSeries =new org.yamj.plugin.api.metadata.Series().setIds(series.getSourceDbIdMap()); 
 
-        org.yamj.plugin.api.metadata.Season tvSeason = null;
         for (Season season : series.getSeasons()) {
-            if (!season.isTvSeasonDone(getScannerName())) {
-                // create season object
-                tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
-                tvSeason.setIds(season.getSourceDbIdMap());
-            }
+            // create season object
+            org.yamj.plugin.api.metadata.Season tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
+            tvSeason.setIds(season.getSourceDbIdMap());
+            tvSeason.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
+            tvSeries.addSeason(tvSeason);
             
             for (VideoData videoData : season.getVideoDatas()) {
                 if (videoData.isTvEpisodeDone(getScannerName())) {
@@ -262,19 +261,10 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     continue;
                 }
                 
-                if (tvSeason == null) {
-                    // create season object
-                    tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
-                    tvSeason.setIds(season.getSourceDbIdMap());
-                }
-                
                 Episode episode = new Episode().setEpisodeNumber(videoData.getEpisode());
                 episode.setIds(videoData.getSourceDbIdMap());
                 tvSeason.addEpisode(episode);
             }
-            
-            // add TV season to TV series
-            tvSeries.addSeason(tvSeason);
         }
         
         return tvSeries;

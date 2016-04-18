@@ -125,9 +125,7 @@ public class Season {
     }
     
     public Season addEpisode(Episode episode) {
-        if (episode != null) {
-            this.episodes.add(episode);
-        }
+        this.episodes.add(episode);
         return this;
     }
     

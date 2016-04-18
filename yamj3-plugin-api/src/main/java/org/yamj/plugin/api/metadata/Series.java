@@ -170,9 +170,7 @@ public class Series {
     }
     
     public Series addSeason(Season season) {
-        if (season != null) {
-            this.seasons.add(season);
-        }
+        this.seasons.add(season);
         return this;
     }
     

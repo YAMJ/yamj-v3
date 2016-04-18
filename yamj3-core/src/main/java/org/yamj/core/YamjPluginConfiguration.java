@@ -32,8 +32,10 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.PluginMovieScanner;
+import org.yamj.core.service.metadata.online.PluginSeriesScanner;
 import org.yamj.plugin.api.YamjPlugin;
 import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.SeriesScanner;
 import ro.fortsoft.pf4j.*;
 
 @Configuration
@@ -77,7 +79,15 @@ public class YamjPluginConfiguration {
             PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService);
             this.onlineScannerService.registerMetadataScanner(scanner);
         }
-        // TODO also for series, person and filmography scanner
+        
+        // add series scanner to online scanner service
+        for (SeriesScanner seriesScanner : pluginManager.getExtensions(SeriesScanner.class)) {
+            seriesScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
+            PluginSeriesScanner scanner = new PluginSeriesScanner(seriesScanner, localeService);
+            this.onlineScannerService.registerMetadataScanner(scanner);
+        }
+
+        // TODO also for person and filmography scanner
         
         return pluginManager;
     }
