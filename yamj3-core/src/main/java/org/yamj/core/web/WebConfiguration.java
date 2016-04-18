@@ -110,9 +110,6 @@ public class WebConfiguration  {
 
     @Value("${APIKEY.allocine.secretKey}")
     private String allocineApiSecretKey;
-
-    @Value("${APIKEY.moviemeter}")
-    private String movieMeterApiKey;
     
     @Value("${APIKEY.tvrage}")
     private String tvRageApiKey;
