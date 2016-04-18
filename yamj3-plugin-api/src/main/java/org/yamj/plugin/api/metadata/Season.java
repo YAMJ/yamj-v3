@@ -35,6 +35,7 @@ public class Season {
     private String outline;
     private int rating = -1;
     private Collection<Episode> episodes = new ArrayList<>();
+    private boolean scanNeeded;
 
     public Map<String, String> getIds() {
         return ids;
@@ -124,7 +125,9 @@ public class Season {
     }
     
     public Season addEpisode(Episode episode) {
-        this.episodes.add(episode);
+        if (episode != null) {
+            this.episodes.add(episode);
+        }
         return this;
     }
     
@@ -136,4 +139,13 @@ public class Season {
         }
         return null;
     }
+
+    public boolean isScanNeeded() {
+        return scanNeeded;
+    }
+
+    public Season setScanNeeded(boolean scanNeeded) {
+        this.scanNeeded = scanNeeded;
+        return this;
+    }    
 }

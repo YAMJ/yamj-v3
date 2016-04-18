@@ -29,9 +29,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.metadata.Credit;
+import org.yamj.plugin.api.metadata.Episode;
 import org.yamj.plugin.api.metadata.SeriesScanner;
 
 public class PluginSeriesScanner implements ISeriesScanner {
@@ -72,16 +77,14 @@ public class PluginSeriesScanner implements ISeriesScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final org.yamj.plugin.api.metadata.Series tvSeries = new org.yamj.plugin.api.metadata.Series().setIds(series.getSourceDbIdMap());
-        //TODO fill in season and episodes
-        
+        final org.yamj.plugin.api.metadata.Series tvSeries = buildSeriesToScan(series); 
         final boolean scanned = seriesScanner.scanSeries(tvSeries, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for series '{}'", getScannerName(), series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         
-        // set possible scanned movie IDs only if not set before   
+        // set possible scanned series IDs only if not set before   
         for (Entry<String,String> entry : tvSeries.getIds().entrySet()) {
             if (StringUtils.isBlank(series.getSourceDbId(entry.getKey()))) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
@@ -128,11 +131,155 @@ public class PluginSeriesScanner implements ISeriesScanner {
             series.setCountryCodes(countryCodes, getScannerName());
         }
 
-        // TODO fill season and episodes
+        scanSeasons(series, tvSeries);
         
         return ScanResult.OK;
     }
+
+    private void scanSeasons(Series series, org.yamj.plugin.api.metadata.Series tvSeries) {
+        for (Season season  : series.getSeasons()) {
+           final org.yamj.plugin.api.metadata.Season tvSeason = tvSeries.getSeason(season.getSeason());
+            
+            if (!season.isTvSeasonDone(getScannerName())) {
+                if (tvSeason == null) {
+                    // mark season as not found
+                    season.removeOverrideSource(getScannerName());
+                    season.removeSourceDbId(getScannerName());
+                    season.setTvSeasonNotFound();
+                } else {
+                    // set possible scanned season IDs only if not set before   
+                    for (Entry<String,String> entry : tvSeason.getIds().entrySet()) {
+                        if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
+                            series.setSourceDbId(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    if (OverrideTools.checkOverwriteTitle(season, getScannerName())) {
+                        season.setTitle(tvSeason.getTitle(), getScannerName());
+                    }
+                    if (OverrideTools.checkOverwriteOriginalTitle(season,  getScannerName())) {
+                        season.setTitleOriginal(tvSeason.getOriginalTitle(),  getScannerName());
+                    }
+                    if (OverrideTools.checkOverwriteYear(season,  getScannerName())) {
+                        season.setPublicationYear(tvSeason.getYear(), getScannerName());
+                    }
+                    if (OverrideTools.checkOverwritePlot(season,  getScannerName())) {
+                        season.setPlot(tvSeason.getPlot(),  getScannerName());
+                    }
+                    if (OverrideTools.checkOverwriteOutline(season,  getScannerName())) {
+                        season.setOutline(tvSeason.getOutline(),  getScannerName());
+                    }
+        
+                    season.addRating(getScannerName(), tvSeason.getRating());
+        
+                    // mark season as done
+                    season.setTvSeasonDone();
+                }
+            }
+            
+            scanEpisodes(season, tvSeason);
+        }
+    }
     
+    private void scanEpisodes(Season season, org.yamj.plugin.api.metadata.Season tvSeason) {
+        for (VideoData videoData : season.getVideoDatas()) {
+            
+            if (videoData.isTvEpisodeDone(getScannerName())) {
+                // nothing to do if already done
+                continue;
+            }
+
+            Episode episode = (tvSeason == null ? null : tvSeason.getEpisode(videoData.getEpisode()));
+            if (episode == null) {
+                // mark episode as not found
+                videoData.removeOverrideSource(getScannerName());
+                videoData.removeSourceDbId(getScannerName());
+                videoData.setTvEpisodeNotFound();
+                continue;
+            }
+                
+            // set possible scanned episode IDs only if not set before   
+            for (Entry<String,String> entry : episode.getIds().entrySet()) {
+                if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
+                    videoData.setSourceDbId(entry.getKey(), entry.getValue());
+                }
+            }
+
+            if (OverrideTools.checkOverwriteTitle(videoData, getScannerName())) {
+                videoData.setTitle(episode.getTitle(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwriteOriginalTitle(videoData, getScannerName())) {
+                videoData.setTitle(episode.getOriginalTitle(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwritePlot(videoData, getScannerName())) {
+                videoData.setPlot(episode.getPlot(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwriteOutline(videoData, getScannerName())) {
+                videoData.setOutline(episode.getOutline(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwriteTagline(videoData, getScannerName())) {
+                videoData.setTagline(episode.getTagline(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwriteQuote(videoData, getScannerName())) {
+                videoData.setQuote(episode.getQuote(), getScannerName());
+            }
+
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, getScannerName())) {
+                String releaseCountryCode = localeService.findCountryCode(episode.getReleaseCountry());
+                videoData.setRelease(releaseCountryCode, episode.getReleaseDate(), getScannerName());
+            }
+
+            videoData.addRating(getScannerName(), episode.getRating());
+
+            for (Credit credit : episode.getCredits()) {
+                videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
+            }
+
+            // mark episode as done
+            videoData.setTvEpisodeDone();
+        }
+    }
+    
+    private org.yamj.plugin.api.metadata.Series buildSeriesToScan(Series series) { 
+        final org.yamj.plugin.api.metadata.Series tvSeries =new org.yamj.plugin.api.metadata.Series().setIds(series.getSourceDbIdMap()); 
+
+        org.yamj.plugin.api.metadata.Season tvSeason = null;
+        for (Season season : series.getSeasons()) {
+            if (!season.isTvSeasonDone(getScannerName())) {
+                // create season object
+                tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
+                tvSeason.setIds(season.getSourceDbIdMap());
+            }
+            
+            for (VideoData videoData : season.getVideoDatas()) {
+                if (videoData.isTvEpisodeDone(getScannerName())) {
+                    // nothing to do if already done
+                    continue;
+                }
+                
+                if (tvSeason == null) {
+                    // create season object
+                    tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
+                    tvSeason.setIds(season.getSourceDbIdMap());
+                }
+                
+                Episode episode = new Episode().setEpisodeNumber(videoData.getEpisode());
+                episode.setIds(videoData.getSourceDbIdMap());
+                tvSeason.addEpisode(episode);
+            }
+            
+            // add TV season to TV series
+            tvSeries.addSeason(tvSeason);
+        }
+        
+        return tvSeries;
+    }
+
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file

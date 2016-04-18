@@ -34,9 +34,5 @@ public interface IMetadata extends IScannable {
 
     int getYear();
 
-    boolean isMovie();
-
-    int getEpisodeNumber();
-
     StatusType getStatus();
 }

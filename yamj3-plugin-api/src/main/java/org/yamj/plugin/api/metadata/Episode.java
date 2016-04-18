@@ -38,7 +38,7 @@ public class Episode {
     private Date releaseDate;
     private int rating = -1;
     private List<Credit> credits = new ArrayList<>();
-
+    
     public Map<String, String> getIds() {
         return ids;
     }
@@ -157,5 +157,5 @@ public class Episode {
     public Episode addCredit(Credit credit) {
         this.credits.add(credit);
         return this;
-    }    
+    }
 }

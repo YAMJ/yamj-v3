@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -1001,12 +1002,6 @@ public class VideoData extends AbstractMetadata {
         }        
     }
 
-    @Override
-    public int getEpisodeNumber() {
-        return getEpisode();
-    }
-
-    @Override
     public boolean isMovie() {
         return getEpisode() < 0;
     }

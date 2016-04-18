@@ -148,7 +148,7 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    protected Map<String, String> getSourceDbIdMap() {
+    public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 

@@ -185,14 +185,4 @@ public abstract class AbstractMetadata extends AbstractScannable
         }
         return -1;
     }
-
-    @Override
-    public int getEpisodeNumber() {
-        return -1;
-    }
-
-    @Override
-    public boolean isMovie() {
-        return false;
-    }
 }
