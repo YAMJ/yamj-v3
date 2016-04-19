@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
 
 public final class Credit {
@@ -56,7 +56,7 @@ public final class Credit {
     public Credit(String id, JobType jobType, String name, String role) {
         this.id = id;
         this.jobType = jobType;
-        PersonNameDTO dto = MetadataTools.splitFullName(name.trim());
+        PersonName dto = MetadataTools.splitFullName(name.trim());
         this.name = dto.getName();
         setFirstName(dto.getFirstName());
         setLastName(dto.getLastName());

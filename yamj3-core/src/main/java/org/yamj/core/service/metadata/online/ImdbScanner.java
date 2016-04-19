@@ -46,7 +46,7 @@ import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
@@ -796,7 +796,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
         
         // split person names
-        PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
+        PersonName nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
         if (OverrideTools.checkOverwriteName(person, SOURCE_IMDB)) {
             person.setName(nameDTO.getName(), SOURCE_IMDB);
         }

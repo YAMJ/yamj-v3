@@ -50,7 +50,7 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
 import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
 
 @Service("tmdbScanner")
@@ -580,7 +580,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         person.setSourceDbId(SOURCE_IMDB, StringUtils.trim(tmdbPerson.getImdbId()));
 
         // split person names
-        PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
+        PersonName nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
         if (OverrideTools.checkOverwriteName(person, SOURCE_TMDB)) {
             person.setName(nameDTO.getName(), SOURCE_TMDB);
         }

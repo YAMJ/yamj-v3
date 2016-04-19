@@ -334,8 +334,8 @@ public final class MetadataTools {
         return mpaaCertification.trim();
     }
 
-    public static PersonNameDTO splitFullName(String fullName) {
-        PersonNameDTO dto = new PersonNameDTO(fullName);
+    public static PersonName splitFullName(String fullName) {
+        PersonName dto = new PersonName(fullName);
         
         try {
             String[] result = StringUtils.split(fullName, ' ');

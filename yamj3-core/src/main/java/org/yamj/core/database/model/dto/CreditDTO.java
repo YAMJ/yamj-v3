@@ -32,7 +32,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.metadata.Credit;
 import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
@@ -66,7 +66,7 @@ public final class CreditDTO {
         this.source = source;
         this.sourceId = sourceId;
         this.jobType = jobType;
-        PersonNameDTO dto = MetadataTools.splitFullName(name.trim());
+        PersonName dto = MetadataTools.splitFullName(name.trim());
         this.name = dto.getName();
         this.identifier = YamjTools.cleanIdentifier(name);
         setFirstName(dto.getFirstName());

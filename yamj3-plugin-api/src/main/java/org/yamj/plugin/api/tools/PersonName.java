@@ -26,13 +26,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public final class PersonNameDTO {
+public final class PersonName {
 
     private final String name;
     private String firstName;
     private String lastName;
   
-    public PersonNameDTO(String name) {
+    public PersonName(String name) {
         this.name = fixName(name);
     }
     

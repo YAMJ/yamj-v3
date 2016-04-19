@@ -41,7 +41,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.plugin.api.tools.PersonNameDTO;
+import org.yamj.plugin.api.tools.PersonName;
 import org.yamj.plugin.api.tools.MetadataTools;
 
 @NamedQueries({    
@@ -212,7 +212,7 @@ public class Person extends AbstractScannable {
 
     public void removeFirstName(String source) {
         if (hasOverrideSource(OverrideFlag.FIRSTNAME, source)) {
-            PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
+            PersonName dto = MetadataTools.splitFullName(getIdentifier());
             setFirstName(dto.getFirstName());
             removeOverrideFlag(OverrideFlag.FIRSTNAME);
         }
@@ -235,7 +235,7 @@ public class Person extends AbstractScannable {
 
     public void removeLastName(String source) {
         if (hasOverrideSource(OverrideFlag.LASTNAME, source)) {
-            PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
+            PersonName dto = MetadataTools.splitFullName(getIdentifier());
             setLastName(dto.getLastName());
             removeOverrideFlag(OverrideFlag.LASTNAME);
         }
