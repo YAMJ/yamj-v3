@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.staging;
+package org.yamj.core.service.various;
 
 import java.io.File;
 import java.util.*;

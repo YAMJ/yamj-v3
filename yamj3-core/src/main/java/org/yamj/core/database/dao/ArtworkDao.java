@@ -135,7 +135,7 @@ public class ArtworkDao extends HibernateDao {
         return currentSession().createCriteria(Artwork.class)
                 .add(Restrictions.eq("artworkType", artworkType))
                 .createAlias("boxedSet", "bs")
-                .add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()))
+                .add(Restrictions.ilike("bs.name", boxedSetName))
                 .list();
     }
 

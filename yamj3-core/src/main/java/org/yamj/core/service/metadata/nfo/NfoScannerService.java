@@ -24,8 +24,9 @@ package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.core.service.various.StagingService;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.common.Constants;
 import java.util.*;
 import java.util.Map.Entry;
@@ -37,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
-import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("nfoScannerService")

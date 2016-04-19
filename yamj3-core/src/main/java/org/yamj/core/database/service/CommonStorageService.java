@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import org.yamj.core.service.various.StagingService;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -43,7 +45,6 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.WatchedDTO;
 import org.yamj.core.tools.YamjTools;
 

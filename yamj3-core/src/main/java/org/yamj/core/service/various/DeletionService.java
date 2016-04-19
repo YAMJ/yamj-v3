@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.delete;
+package org.yamj.core.service.various;
 
 import java.util.HashSet;
 import java.util.List;

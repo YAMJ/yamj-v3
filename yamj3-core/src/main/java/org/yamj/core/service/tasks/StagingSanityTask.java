@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.tasks;
 
+import org.yamj.core.service.various.StagingService;
+
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.yamj.core.scheduling.DeletionScheduler;
-import org.yamj.core.service.staging.StagingService;
 
 /**
  * Task for checking artwork sanity.

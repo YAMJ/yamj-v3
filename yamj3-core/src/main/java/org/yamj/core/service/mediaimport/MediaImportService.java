@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.yamj.plugin.api.common.Constants;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -50,9 +48,11 @@ import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.FileTools;
-import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.service.various.IdentifierService;
+import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.WatchedDTO;
 import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.common.Constants;
 
 /**
  * The media import service is a spring-managed service. This will be used by
@@ -91,6 +91,8 @@ public class MediaImportService {
     private StagingService stagingService;
     @Autowired
     private LocaleService localeService;
+    @Autowired
+    private IdentifierService identifierService;
     
     @Value("${yamj3.folder.name.nfo:null}")
     private String nfoFolderName;
@@ -968,8 +970,13 @@ public class MediaImportService {
             final String stripped = stripToken(fileBaseName, tokensPhoto);
 
             // find person artwork
-            String identifier = YamjTools.cleanIdentifier(stripped);
-            artworks = this.metadataDao.findPersonArtworks(identifier);
+            String identifier = identifierService.cleanIdentifier(stripped);
+            if (StringUtils.isBlank(identifier)) {
+                LOG.warn("Could not search person artwork with empty cleaned identifier for file '{}'", fileBaseName);
+                artworks = Collections.emptyList();
+            } else {
+                artworks = this.metadataDao.findPersonArtworks(identifier);
+            }
             
         } else if (metaDataTypes.contains(MetaDataType.BOXSET)) {
             // BOXSET IMAGE

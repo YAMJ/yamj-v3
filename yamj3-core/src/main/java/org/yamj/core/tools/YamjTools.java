@@ -215,6 +215,7 @@ public final class YamjTools {
         return watched;
     }
 
+    @Deprecated
     public static String cleanIdentifier(final String identifier) {
         String result = identifier;
         if (IDENT_TRANSLITERATE) {

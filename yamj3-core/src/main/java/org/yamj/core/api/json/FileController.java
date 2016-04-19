@@ -22,13 +22,14 @@
  */
 package org.yamj.core.api.json;
 
+import org.yamj.core.service.various.StagingService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.service.CommonStorageService;
-import org.yamj.core.service.staging.StagingService;
 
 @RestController
 @RequestMapping(value = "/api/file", produces = "application/json; charset=utf-8")
