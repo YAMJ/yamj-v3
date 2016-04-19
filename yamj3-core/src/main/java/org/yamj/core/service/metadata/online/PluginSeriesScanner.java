@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.metadata.model.Credit;
-import org.yamj.plugin.api.metadata.model.Episode;
-
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -39,6 +36,9 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.metadata.SeriesScanner;
+import org.yamj.plugin.api.metadata.dto.EpisodeDTO;
+import org.yamj.plugin.api.metadata.dto.SeasonDTO;
+import org.yamj.plugin.api.metadata.dto.SeriesDTO;
 
 public class PluginSeriesScanner implements ISeriesScanner {
 
@@ -75,15 +75,15 @@ public class PluginSeriesScanner implements ISeriesScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final org.yamj.plugin.api.metadata.model.Series tvSeries = buildSeriesToScan(series); 
-        final boolean scanned = seriesScanner.scanSeries(tvSeries, throwTempError);
+        final SeriesDTO seriesDTO = buildSeriesToScan(series); 
+        final boolean scanned = seriesScanner.scanSeries(seriesDTO, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for series '{}'", getScannerName(), series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         
         // set possible scanned series IDs only if not set before   
-        for (Entry<String,String> entry : tvSeries.getIds().entrySet()) {
+        for (Entry<String,String> entry : seriesDTO.getIds().entrySet()) {
             if (getScannerName().equalsIgnoreCase(entry.getKey())) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
             } else if (StringUtils.isBlank(series.getSourceDbId(entry.getKey()))) {
@@ -92,56 +92,56 @@ public class PluginSeriesScanner implements ISeriesScanner {
         }
 
         if (OverrideTools.checkOverwriteTitle(series, getScannerName())) {
-            series.setTitle(tvSeries.getTitle(), getScannerName());
+            series.setTitle(seriesDTO.getTitle(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteOriginalTitle(series, getScannerName())) {
-            series.setTitleOriginal(tvSeries.getOriginalTitle(), getScannerName());
+            series.setTitleOriginal(seriesDTO.getOriginalTitle(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteYear(series, getScannerName())) {
-            series.setStartYear(tvSeries.getStartYear(), getScannerName());
-            series.setEndYear(tvSeries.getEndYear(), getScannerName());
+            series.setStartYear(seriesDTO.getStartYear(), getScannerName());
+            series.setEndYear(seriesDTO.getEndYear(), getScannerName());
         }
 
         if (OverrideTools.checkOverwritePlot(series, getScannerName())) {
-            series.setPlot(tvSeries.getPlot(), getScannerName());
+            series.setPlot(seriesDTO.getPlot(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteOutline(series, getScannerName())) {
-            series.setOutline(tvSeries.getOutline(), getScannerName());
+            series.setOutline(seriesDTO.getOutline(), getScannerName());
         }
 
-        series.addRating(getScannerName(), tvSeries.getRating());
+        series.addRating(getScannerName(), seriesDTO.getRating());
 
         if (OverrideTools.checkOverwriteGenres(series, getScannerName())) {
-            series.setGenreNames(tvSeries.getGenres(), getScannerName());
+            series.setGenreNames(seriesDTO.getGenres(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteStudios(series, getScannerName())) {
-            series.setStudioNames(tvSeries.getStudios(), getScannerName());
+            series.setStudioNames(seriesDTO.getStudios(), getScannerName());
         }
 
         if (OverrideTools.checkOverwriteCountries(series, getScannerName())) {
-            Set<String> countryCodes = new HashSet<>(tvSeries.getCountries().size());
-            for (String country : tvSeries.getCountries()) {
+            Set<String> countryCodes = new HashSet<>(seriesDTO.getCountries().size());
+            for (String country : seriesDTO.getCountries()) {
                 final String countryCode = localeService.findCountryCode(country);
                 if (countryCode != null) countryCodes.add(countryCode);
             }
             series.setCountryCodes(countryCodes, getScannerName());
         }
 
-        scanSeasons(series, tvSeries);
+        scanSeasons(series, seriesDTO);
         
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, org.yamj.plugin.api.metadata.model.Series tvSeries) {
+    private void scanSeasons(Series series, SeriesDTO seriesDTO) {
         for (Season season  : series.getSeasons()) {
-           final org.yamj.plugin.api.metadata.model.Season tvSeason = tvSeries.getSeason(season.getSeason());
+           final SeasonDTO seasonDTO = seriesDTO.getSeason(season.getSeason());
             
             if (!season.isTvSeasonDone(getScannerName())) {
-                if (tvSeason == null || tvSeason.isNotValid()) {
+                if (seasonDTO == null || seasonDTO.isNotValid()) {
                     // mark season as not found
                     season.removeOverrideSource(getScannerName());
                     season.removeSourceDbId(getScannerName());
@@ -149,7 +149,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
                 } else {
 
                     // set possible scanned season IDs only if not set before   
-                    for (Entry<String,String> entry : tvSeason.getIds().entrySet()) {
+                    for (Entry<String,String> entry : seasonDTO.getIds().entrySet()) {
                         if (getScannerName().equalsIgnoreCase(entry.getKey())) {
                             season.setSourceDbId(entry.getKey(), entry.getValue());
                         } else if (StringUtils.isBlank(season.getSourceDbId(entry.getKey()))) {
@@ -158,33 +158,33 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     }
 
                     if (OverrideTools.checkOverwriteTitle(season, getScannerName())) {
-                        season.setTitle(tvSeason.getTitle(), getScannerName());
+                        season.setTitle(seasonDTO.getTitle(), getScannerName());
                     }
                     if (OverrideTools.checkOverwriteOriginalTitle(season,  getScannerName())) {
-                        season.setTitleOriginal(tvSeason.getOriginalTitle(),  getScannerName());
+                        season.setTitleOriginal(seasonDTO.getOriginalTitle(),  getScannerName());
                     }
                     if (OverrideTools.checkOverwriteYear(season,  getScannerName())) {
-                        season.setPublicationYear(tvSeason.getYear(), getScannerName());
+                        season.setPublicationYear(seasonDTO.getYear(), getScannerName());
                     }
                     if (OverrideTools.checkOverwritePlot(season,  getScannerName())) {
-                        season.setPlot(tvSeason.getPlot(),  getScannerName());
+                        season.setPlot(seasonDTO.getPlot(),  getScannerName());
                     }
                     if (OverrideTools.checkOverwriteOutline(season,  getScannerName())) {
-                        season.setOutline(tvSeason.getOutline(),  getScannerName());
+                        season.setOutline(seasonDTO.getOutline(),  getScannerName());
                     }
         
-                    season.addRating(getScannerName(), tvSeason.getRating());
+                    season.addRating(getScannerName(), seasonDTO.getRating());
         
                     // mark season as done
                     season.setTvSeasonDone();
                 }
             }
             
-            scanEpisodes(season, tvSeason);
+            scanEpisodes(season, seasonDTO);
         }
     }
     
-    private void scanEpisodes(Season season, org.yamj.plugin.api.metadata.model.Season tvSeason) {
+    private void scanEpisodes(Season season, SeasonDTO seasonDTO) {
         for (VideoData videoData : season.getVideoDatas()) {
             
             if (videoData.isTvEpisodeDone(getScannerName())) {
@@ -192,8 +192,8 @@ public class PluginSeriesScanner implements ISeriesScanner {
                 continue;
             }
 
-            Episode episode = (tvSeason == null ? null : tvSeason.getEpisode(videoData.getEpisode()));
-            if (episode == null || episode.isNotValid()) {
+            EpisodeDTO episodeDTO = (seasonDTO == null ? null : seasonDTO.getEpisode(videoData.getEpisode()));
+            if (episodeDTO == null || episodeDTO.isNotValid()) {
                 // mark episode as not found
                 videoData.removeOverrideSource(getScannerName());
                 videoData.removeSourceDbId(getScannerName());
@@ -202,7 +202,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
             }
                 
             // set possible scanned episode IDs only if not set before   
-            for (Entry<String,String> entry : episode.getIds().entrySet()) {
+            for (Entry<String,String> entry : episodeDTO.getIds().entrySet()) {
                 if (getScannerName().equalsIgnoreCase(entry.getKey())) {
                     videoData.setSourceDbId(entry.getKey(), entry.getValue());
                 } else if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
@@ -211,37 +211,37 @@ public class PluginSeriesScanner implements ISeriesScanner {
             }
 
             if (OverrideTools.checkOverwriteTitle(videoData, getScannerName())) {
-                videoData.setTitle(episode.getTitle(), getScannerName());
+                videoData.setTitle(episodeDTO.getTitle(), getScannerName());
             }
 
             if (OverrideTools.checkOverwriteOriginalTitle(videoData, getScannerName())) {
-                videoData.setTitle(episode.getOriginalTitle(), getScannerName());
+                videoData.setTitle(episodeDTO.getOriginalTitle(), getScannerName());
             }
 
             if (OverrideTools.checkOverwritePlot(videoData, getScannerName())) {
-                videoData.setPlot(episode.getPlot(), getScannerName());
+                videoData.setPlot(episodeDTO.getPlot(), getScannerName());
             }
 
             if (OverrideTools.checkOverwriteOutline(videoData, getScannerName())) {
-                videoData.setOutline(episode.getOutline(), getScannerName());
+                videoData.setOutline(episodeDTO.getOutline(), getScannerName());
             }
 
             if (OverrideTools.checkOverwriteTagline(videoData, getScannerName())) {
-                videoData.setTagline(episode.getTagline(), getScannerName());
+                videoData.setTagline(episodeDTO.getTagline(), getScannerName());
             }
 
             if (OverrideTools.checkOverwriteQuote(videoData, getScannerName())) {
-                videoData.setQuote(episode.getQuote(), getScannerName());
+                videoData.setQuote(episodeDTO.getQuote(), getScannerName());
             }
 
             if (OverrideTools.checkOverwriteReleaseDate(videoData, getScannerName())) {
-                String releaseCountryCode = localeService.findCountryCode(episode.getReleaseCountry());
-                videoData.setRelease(releaseCountryCode, episode.getReleaseDate(), getScannerName());
+                String releaseCountryCode = localeService.findCountryCode(episodeDTO.getReleaseCountry());
+                videoData.setRelease(releaseCountryCode, episodeDTO.getReleaseDate(), getScannerName());
             }
 
-            videoData.addRating(getScannerName(), episode.getRating());
+            videoData.addRating(getScannerName(), episodeDTO.getRating());
 
-            for (Credit credit : episode.getCredits()) {
+            for (org.yamj.plugin.api.metadata.dto.CreditDTO credit : episodeDTO.getCredits()) {
                 videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
             }
 
@@ -250,15 +250,15 @@ public class PluginSeriesScanner implements ISeriesScanner {
         }
     }
     
-    private org.yamj.plugin.api.metadata.model.Series buildSeriesToScan(Series series) { 
-        final org.yamj.plugin.api.metadata.model.Series tvSeries =new org.yamj.plugin.api.metadata.model.Series().setIds(series.getSourceDbIdMap()); 
+    private SeriesDTO buildSeriesToScan(Series series) { 
+        final SeriesDTO seriesDTO = new SeriesDTO().setIds(series.getSourceDbIdMap()); 
 
         for (Season season : series.getSeasons()) {
             // create season object
-            org.yamj.plugin.api.metadata.model.Season tvSeason = new org.yamj.plugin.api.metadata.model.Season().setSeasonNumber(season.getSeason());
-            tvSeason.setIds(season.getSourceDbIdMap());
-            tvSeason.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
-            tvSeries.addSeason(tvSeason);
+            SeasonDTO seasonDTO = new SeasonDTO().setSeasonNumber(season.getSeason());
+            seasonDTO.setIds(season.getSourceDbIdMap());
+            seasonDTO.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
+            seriesDTO.addSeason(seasonDTO);
             
             for (VideoData videoData : season.getVideoDatas()) {
                 if (videoData.isTvEpisodeDone(getScannerName())) {
@@ -266,13 +266,13 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     continue;
                 }
                 
-                Episode episode = new Episode().setEpisodeNumber(videoData.getEpisode());
-                episode.setIds(videoData.getSourceDbIdMap());
-                tvSeason.addEpisode(episode);
+                EpisodeDTO episodeDTO = new EpisodeDTO().setEpisodeNumber(videoData.getEpisode());
+                episodeDTO.setIds(videoData.getSourceDbIdMap());
+                seasonDTO.addEpisode(episodeDTO);
             }
         }
         
-        return tvSeries;
+        return seriesDTO;
     }
 
     @Override

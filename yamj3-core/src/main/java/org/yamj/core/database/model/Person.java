@@ -24,9 +24,6 @@ package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
-
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -44,6 +41,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 
 @NamedQueries({    
     @NamedQuery(name = Person.QUERY_REQUIRED,
@@ -213,8 +212,8 @@ public class Person extends AbstractScannable {
 
     public void removeFirstName(String source) {
         if (hasOverrideSource(OverrideFlag.FIRSTNAME, source)) {
-            PersonName dto = MetadataTools.splitFullName(getIdentifier());
-            setFirstName(dto.getFirstName());
+            PersonName personName = MetadataTools.splitFullName(getIdentifier());
+            setFirstName(personName.getFirstName());
             removeOverrideFlag(OverrideFlag.FIRSTNAME);
         }
     }
@@ -236,8 +235,8 @@ public class Person extends AbstractScannable {
 
     public void removeLastName(String source) {
         if (hasOverrideSource(OverrideFlag.LASTNAME, source)) {
-            PersonName dto = MetadataTools.splitFullName(getIdentifier());
-            setLastName(dto.getLastName());
+            PersonName personName = MetadataTools.splitFullName(getIdentifier());
+            setLastName(personName.getLastName());
             removeOverrideFlag(OverrideFlag.LASTNAME);
         }
     }

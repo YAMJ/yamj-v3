@@ -24,10 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
-
-import org.yamj.plugin.api.common.JobType;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
@@ -49,6 +45,9 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("imdbScanner")
@@ -797,15 +796,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
         
         // split person names
-        PersonName nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
+        PersonName personName = MetadataTools.splitFullName(imdbPerson.getName());
         if (OverrideTools.checkOverwriteName(person, SOURCE_IMDB)) {
-            person.setName(nameDTO.getName(), SOURCE_IMDB);
+            person.setName(personName.getName(), SOURCE_IMDB);
         }
         if (OverrideTools.checkOverwriteFirstName(person, SOURCE_IMDB)) {
-            person.setFirstName(nameDTO.getFirstName(), SOURCE_IMDB);
+            person.setFirstName(personName.getFirstName(), SOURCE_IMDB);
         }
         if (OverrideTools.checkOverwriteLastName(person, SOURCE_IMDB)) {
-            person.setLastName(nameDTO.getLastName(), SOURCE_IMDB);
+            person.setLastName(personName.getLastName(), SOURCE_IMDB);
         }
         if (OverrideTools.checkOverwriteBirthName(person, SOURCE_IMDB)) {
             person.setBirthName(imdbPerson.getRealName(), SOURCE_IMDB);

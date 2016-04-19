@@ -20,17 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.model;
+package org.yamj.plugin.api.metadata.dto;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
-
-import org.yamj.plugin.api.common.JobType;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 
-public final class Credit {
+public final class CreditDTO {
 
     private final String id;
     private final String name;
@@ -42,25 +41,25 @@ public final class Credit {
     private boolean voice;
     private Collection<String> photos;
     
-    public Credit(JobType jobType, String name) {
+    public CreditDTO(JobType jobType, String name) {
         this(null, jobType, name, null);
     }
 
-    public Credit(String id, JobType jobType, String name) {
+    public CreditDTO(String id, JobType jobType, String name) {
         this(id, jobType, name, null);
     }
 
-    public Credit(JobType jobType, String name, String role) {
+    public CreditDTO(JobType jobType, String name, String role) {
         this(null, jobType, name, role);
     }
 
-    public Credit(String id, JobType jobType, String name, String role) {
+    public CreditDTO(String id, JobType jobType, String name, String role) {
         this.id = id;
         this.jobType = jobType;
-        PersonName dto = MetadataTools.splitFullName(name.trim());
-        this.name = dto.getName();
-        setFirstName(dto.getFirstName());
-        setLastName(dto.getLastName());
+        PersonName personName = MetadataTools.splitFullName(name.trim());
+        this.name = personName.getName();
+        setFirstName(personName.getFirstName());
+        setLastName(personName.getLastName());
         setRole(role);
         setVoice(MetadataTools.isVoiceRole(role));
     }
@@ -82,7 +81,7 @@ public final class Credit {
         return firstName;
     }
 
-    public final Credit setFirstName(String firstName) {
+    public final CreditDTO setFirstName(String firstName) {
         this.firstName = StringUtils.trimToNull(firstName);
         return this;
     }
@@ -91,7 +90,7 @@ public final class Credit {
         return lastName;
     }
 
-    public final Credit setLastName(String lastName) {
+    public final CreditDTO setLastName(String lastName) {
         this.lastName = StringUtils.trimToNull(lastName);
         return this;
     }
@@ -100,7 +99,7 @@ public final class Credit {
         return realName;
     }
 
-    public Credit setRealName(String realName) {
+    public CreditDTO setRealName(String realName) {
         this.realName = StringUtils.trimToNull(realName);
         return this;
     }
@@ -109,7 +108,7 @@ public final class Credit {
         return role;
     }
 
-    public Credit setRole(String role) {
+    public CreditDTO setRole(String role) {
         this.role = MetadataTools.cleanRole(role);
         return this;
     }
@@ -118,7 +117,7 @@ public final class Credit {
         return voice;
     }
 
-    public Credit setVoice(boolean voice) {
+    public CreditDTO setVoice(boolean voice) {
         this.voice = voice;
         return this;
     }
@@ -127,7 +126,7 @@ public final class Credit {
         return photos;
     }
 
-    public Credit addPhoto(String photoURL) {
+    public CreditDTO addPhoto(String photoURL) {
         if (StringUtils.isNotBlank(photoURL)) {
             if (this.photos == null) {
                 this.photos = new HashSet<>(); 

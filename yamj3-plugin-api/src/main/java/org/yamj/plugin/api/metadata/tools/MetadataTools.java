@@ -335,29 +335,29 @@ public final class MetadataTools {
     }
 
     public static PersonName splitFullName(String fullName) {
-        PersonName dto = new PersonName(fullName);
+        PersonName personName = new PersonName(fullName);
         
         try {
             String[] result = StringUtils.split(fullName, ' ');
             if (result == null || result.length == 0) {
                 // nothing to do
             } else if (result.length == 1) {
-                dto.setFirstName(result[0]);
+                personName.setFirstName(result[0]);
             } else if (result.length == 2) {
-                dto.setFirstName(result[0]);
-                dto.setLastName(result[1]);
+                personName.setFirstName(result[0]);
+                personName.setLastName(result[1]);
             } else {
                 Matcher m = LASTNAME_PATTERN.matcher(fullName);
                 if (m.matches()) {
-                    dto.setFirstName(m.group(1));
-                    dto.setLastName(m.group(2));
+                    personName.setFirstName(m.group(1));
+                    personName.setLastName(m.group(2));
                 }
             }
         } catch (Exception ex) {
             LOG.trace("Error splitting full person name: " + fullName, ex);
         }
         
-        return dto;
+        return personName;
     }
     
     public static String fixScannedValue(final String value) {

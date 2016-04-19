@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.model;
+package org.yamj.plugin.api.metadata.dto;
 
 import java.util.*;
 
-public class Series {
+public class SeriesDTO {
 
     private Map<String, String> ids = new HashMap<>();
     private String title;
@@ -37,18 +37,18 @@ public class Series {
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
     private Collection<String> countries = new HashSet<>();
-    private Collection<Season> seasons = new ArrayList<>();
+    private Collection<SeasonDTO> seasons = new ArrayList<>();
     
     public Map<String, String> getIds() {
         return ids;
     }
 
-    public Series setIds(Map<String, String> ids) {
+    public SeriesDTO setIds(Map<String, String> ids) {
         this.ids = ids;
         return this;
     }
 
-    public Series addId(String source, String id) {
+    public SeriesDTO addId(String source, String id) {
         if (id != null && id.length() > 0) {
             this.ids.put(source, id);
         }
@@ -59,7 +59,7 @@ public class Series {
         return title;
     }
 
-    public Series setTitle(String title) {
+    public SeriesDTO setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -68,7 +68,7 @@ public class Series {
         return originalTitle;
     }
 
-    public Series setOriginalTitle(String originalTitle) {
+    public SeriesDTO setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
         return this;
     }
@@ -77,7 +77,7 @@ public class Series {
         return startYear;
     }
 
-    public Series setStartYear(int startYear) {
+    public SeriesDTO setStartYear(int startYear) {
         this.startYear = startYear;
         return this;
     }
@@ -86,7 +86,7 @@ public class Series {
         return endYear;
     }
 
-    public Series setEndYear(int endYear) {
+    public SeriesDTO setEndYear(int endYear) {
         this.endYear = endYear;
         return this;
     }
@@ -95,7 +95,7 @@ public class Series {
         return plot;
     }
 
-    public Series setPlot(String plot) {
+    public SeriesDTO setPlot(String plot) {
         this.plot = plot;
         return this;
     }
@@ -104,7 +104,7 @@ public class Series {
         return outline;
     }
 
-    public Series setOutline(String outline) {
+    public SeriesDTO setOutline(String outline) {
         this.outline = outline;
         return this;
     }
@@ -113,7 +113,7 @@ public class Series {
         return rating;
     }
 
-    public Series setRating(int rating) {
+    public SeriesDTO setRating(int rating) {
         this.rating = rating;
         return this;
     }
@@ -122,12 +122,12 @@ public class Series {
         return studios;
     }
 
-    public Series setStudios(Collection<String> studios) {
+    public SeriesDTO setStudios(Collection<String> studios) {
         this.studios = studios;
         return this;
     }
 
-    public Series addStudio(String studio) {
+    public SeriesDTO addStudio(String studio) {
         this.studios.add(studio);
         return this;
     }
@@ -136,12 +136,12 @@ public class Series {
         return genres;
     }
 
-    public Series setGenres(Collection<String> genres) {
+    public SeriesDTO setGenres(Collection<String> genres) {
         this.genres = genres;
         return this;
     }
     
-    public Series addGenre(String genre) {
+    public SeriesDTO addGenre(String genre) {
         this.genres.add(genre);
         return this;
     }
@@ -150,32 +150,32 @@ public class Series {
         return countries;
     }
 
-    public Series setCountries(Collection<String> countries) {
+    public SeriesDTO setCountries(Collection<String> countries) {
         this.countries = countries;
         return this;
     }
 
-    public Series addCountry(String country) {
+    public SeriesDTO addCountry(String country) {
         this.countries.add(country);
         return this;
     }
 
-    public Collection<Season> getSeasons() {
+    public Collection<SeasonDTO> getSeasons() {
         return seasons;
     }
 
-    public Series setSeasons(Collection<Season> seasons) {
+    public SeriesDTO setSeasons(Collection<SeasonDTO> seasons) {
         this.seasons = seasons;
         return this;
     }
     
-    public Series addSeason(Season season) {
+    public SeriesDTO addSeason(SeasonDTO season) {
         this.seasons.add(season);
         return this;
     }
     
-    public Season getSeason(int seasonNumber) {
-        for (Season season : this.seasons) {
+    public SeasonDTO getSeason(int seasonNumber) {
+        for (SeasonDTO season : this.seasons) {
             if (season.getSeasonNumber() == seasonNumber) {
                 return season;
             }

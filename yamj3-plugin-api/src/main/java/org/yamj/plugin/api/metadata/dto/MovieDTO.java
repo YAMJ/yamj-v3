@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.model;
+package org.yamj.plugin.api.metadata.dto;
 
 import java.util.*;
 
-public class Movie {
+public class MovieDTO {
 
     private Map<String, String> ids = new HashMap<>();
     private String title;
@@ -40,18 +40,18 @@ public class Movie {
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
     private Collection<String> countries = new HashSet<>();
-    private List<Credit> credits = new ArrayList<>();
+    private List<CreditDTO> credits = new ArrayList<>();
 
     public Map<String, String> getIds() {
         return ids;
     }
 
-    public Movie setIds(Map<String, String> ids) {
+    public MovieDTO setIds(Map<String, String> ids) {
         this.ids = ids;
         return this;
     }
 
-    public Movie addId(String source, String id) {
+    public MovieDTO addId(String source, String id) {
         if (id != null && id.length() > 0) {
             this.ids.put(source, id);
         }
@@ -62,7 +62,7 @@ public class Movie {
         return title;
     }
 
-    public Movie setTitle(String title) {
+    public MovieDTO setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -71,7 +71,7 @@ public class Movie {
         return originalTitle;
     }
 
-    public Movie setOriginalTitle(String originalTitle) {
+    public MovieDTO setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
         return this;
     }
@@ -80,7 +80,7 @@ public class Movie {
         return year;
     }
 
-    public Movie setYear(int year) {
+    public MovieDTO setYear(int year) {
         this.year = year;
         return this;
     }
@@ -89,7 +89,7 @@ public class Movie {
         return plot;
     }
 
-    public Movie setPlot(String plot) {
+    public MovieDTO setPlot(String plot) {
         this.plot = plot;
         return this;
     }
@@ -98,7 +98,7 @@ public class Movie {
         return outline;
     }
 
-    public Movie setOutline(String outline) {
+    public MovieDTO setOutline(String outline) {
         this.outline = outline;
         return this;
     }
@@ -107,7 +107,7 @@ public class Movie {
         return tagline;
     }
 
-    public Movie setTagline(String tagline) {
+    public MovieDTO setTagline(String tagline) {
         this.tagline = tagline;
         return this;
     }
@@ -116,7 +116,7 @@ public class Movie {
         return quote;
     }
 
-    public Movie setQuote(String quote) {
+    public MovieDTO setQuote(String quote) {
         this.quote = quote;
         return this;
     }
@@ -125,7 +125,7 @@ public class Movie {
         return releaseCountry;
     }
 
-    public Movie setReleaseCountry(String releaseCountry) {
+    public MovieDTO setReleaseCountry(String releaseCountry) {
         this.releaseCountry = releaseCountry;
         return this;
     }
@@ -134,7 +134,7 @@ public class Movie {
         return releaseDate;
     }
 
-    public Movie setReleaseDate(Date releaseDate) {
+    public MovieDTO setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
         return this;
     }
@@ -143,7 +143,7 @@ public class Movie {
         return rating;
     }
 
-    public Movie setRating(int rating) {
+    public MovieDTO setRating(int rating) {
         this.rating = rating;
         return this;
     }
@@ -152,12 +152,12 @@ public class Movie {
         return studios;
     }
 
-    public Movie setStudios(Collection<String> studios) {
+    public MovieDTO setStudios(Collection<String> studios) {
         this.studios = studios;
         return this;
     }
 
-    public Movie addStudio(String studio) {
+    public MovieDTO addStudio(String studio) {
         this.studios.add(studio);
         return this;
     }
@@ -166,12 +166,12 @@ public class Movie {
         return genres;
     }
 
-    public Movie setGenres(Collection<String> genres) {
+    public MovieDTO setGenres(Collection<String> genres) {
         this.genres = genres;
         return this;
     }
     
-    public Movie addGenre(String genre) {
+    public MovieDTO addGenre(String genre) {
         this.genres.add(genre);
         return this;
     }
@@ -180,31 +180,31 @@ public class Movie {
         return countries;
     }
 
-    public Movie setCountries(Collection<String> countries) {
+    public MovieDTO setCountries(Collection<String> countries) {
         this.countries = countries;
         return this;
     }
 
-    public Movie addCountry(String country) {
+    public MovieDTO addCountry(String country) {
         this.countries.add(country);
         return this;
     }
 
-    public List<Credit> getCredits() {
+    public List<CreditDTO> getCredits() {
         return credits;
     }
 
-    public Movie setCredits(List<Credit> credits) {
+    public MovieDTO setCredits(List<CreditDTO> credits) {
         this.credits = credits;
         return this;
     }
     
-    public Movie addCredit(Credit credit) {
+    public MovieDTO addCredit(CreditDTO credit) {
         this.credits.add(credit);
         return this;
-    }    
+    }
 
-    public Movie addCredits(Collection<Credit> credits) {
+    public MovieDTO addCredits(Collection<CreditDTO> credits) {
         if (credits != null && !credits.isEmpty()) {
             this.credits.addAll(credits);
         }

@@ -22,7 +22,7 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.metadata.model.Series;
+import org.yamj.plugin.api.metadata.dto.SeriesDTO;
 
 import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
@@ -31,5 +31,5 @@ public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionP
     
     String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
 
-    boolean scanSeries(Series series, boolean throwTempError);
+    boolean scanSeries(SeriesDTO series, boolean throwTempError);
 }

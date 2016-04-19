@@ -24,10 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.*;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
-
-import org.yamj.plugin.api.common.JobType;
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -53,6 +49,9 @@ import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
+import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -581,15 +580,15 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         person.setSourceDbId(SOURCE_IMDB, StringUtils.trim(tmdbPerson.getImdbId()));
 
         // split person names
-        PersonName nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
+        PersonName personName = MetadataTools.splitFullName(tmdbPerson.getName());
         if (OverrideTools.checkOverwriteName(person, SOURCE_TMDB)) {
-            person.setName(nameDTO.getName(), SOURCE_TMDB);
+            person.setName(personName.getName(), SOURCE_TMDB);
         }
         if (OverrideTools.checkOverwriteFirstName(person, SOURCE_TMDB)) {
-            person.setFirstName(nameDTO.getFirstName(), SOURCE_TMDB);
+            person.setFirstName(personName.getFirstName(), SOURCE_TMDB);
         }
         if (OverrideTools.checkOverwriteLastName(person, SOURCE_TMDB)) {
-            person.setLastName(nameDTO.getLastName(), SOURCE_TMDB);
+            person.setLastName(personName.getLastName(), SOURCE_TMDB);
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SOURCE_TMDB)) {

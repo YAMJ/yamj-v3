@@ -22,7 +22,7 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.metadata.model.Movie;
+import org.yamj.plugin.api.metadata.dto.MovieDTO;
 
 import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
@@ -31,5 +31,5 @@ public interface MovieScanner extends MetadataScanner, NfoIdScanner, ExtensionPo
     
     String getMovieId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
 
-    boolean scanMovie(Movie movie, boolean throwTempError);
+    boolean scanMovie(MovieDTO movie, boolean throwTempError);
 }

@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.metadata.model.Credit;
-import org.yamj.plugin.api.metadata.model.Movie;
-
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,6 +34,7 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.dto.MovieDTO;
 
 public class PluginMovieScanner implements IMovieScanner {
 
@@ -73,7 +71,7 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final Movie movie = new Movie().setIds(videoData.getSourceDbIdMap());
+        final MovieDTO movie = new MovieDTO().setIds(videoData.getSourceDbIdMap());
         final boolean scanned = movieScanner.scanMovie(movie, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for movie '{}'", getScannerName(), videoData.getIdentifier());
@@ -141,7 +139,7 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setCountryCodes(countryCodes, getScannerName());
         }
 
-        for (Credit credit : movie.getCredits()) {
+        for (org.yamj.plugin.api.metadata.dto.CreditDTO credit : movie.getCredits()) {
             videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
         }
         

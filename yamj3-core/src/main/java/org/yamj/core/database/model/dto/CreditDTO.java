@@ -22,11 +22,6 @@
  */
 package org.yamj.core.database.model.dto;
 
-import org.yamj.plugin.api.metadata.model.Credit;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
-import org.yamj.plugin.api.common.JobType;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +30,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 
 public final class CreditDTO {
 
@@ -67,16 +65,16 @@ public final class CreditDTO {
         this.source = source;
         this.sourceId = sourceId;
         this.jobType = jobType;
-        PersonName dto = MetadataTools.splitFullName(name.trim());
-        this.name = dto.getName();
-        this.identifier = YamjTools.cleanIdentifier(name);
-        setFirstName(dto.getFirstName());
-        setLastName(dto.getLastName());
+        PersonName personName = MetadataTools.splitFullName(name.trim());
+        this.name = personName.getName();
+        this.identifier = YamjTools.cleanIdentifier(this.name);
+        setFirstName(personName.getFirstName());
+        setLastName(personName.getLastName());
         setRole(role);
         setVoice(MetadataTools.isVoiceRole(role));
     }
 
-    public CreditDTO(String source, Credit credit) {
+    public CreditDTO(String source, org.yamj.plugin.api.metadata.dto.CreditDTO credit) {
         this.source = source;
         this.sourceId = credit.getId();
         this.jobType = credit.getJobType();
