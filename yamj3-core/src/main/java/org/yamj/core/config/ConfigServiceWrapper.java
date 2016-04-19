@@ -24,9 +24,9 @@ package org.yamj.core.config;
 
 import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
 
-import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.type.JobType;
 
-import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.common.PluginConfigService;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

@@ -22,6 +22,8 @@
  */
 package org.yamj.plugin.api.common;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.Date;
 import java.util.List;
 

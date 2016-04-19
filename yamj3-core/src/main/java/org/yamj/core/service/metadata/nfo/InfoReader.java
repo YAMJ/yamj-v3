@@ -24,9 +24,9 @@ package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.plugin.api.common.Constants.*;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
-import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;

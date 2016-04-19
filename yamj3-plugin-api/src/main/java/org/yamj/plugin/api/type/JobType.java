@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common;
+package org.yamj.plugin.api.type;
 
 /**
  * List of known job types for people

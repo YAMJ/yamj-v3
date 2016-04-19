@@ -25,9 +25,9 @@ package org.yamj.core.service.metadata.online;
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 import static org.yamj.plugin.api.common.Constants.SOURCE_TVDB;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
-import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;

@@ -22,7 +22,7 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.type.JobType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

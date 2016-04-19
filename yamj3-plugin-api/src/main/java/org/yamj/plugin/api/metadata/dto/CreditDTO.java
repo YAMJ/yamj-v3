@@ -22,10 +22,11 @@
  */
 package org.yamj.plugin.api.metadata.dto;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.plugin.api.common.JobType;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
 

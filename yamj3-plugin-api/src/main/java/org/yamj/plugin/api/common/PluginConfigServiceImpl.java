@@ -22,6 +22,8 @@
  */
 package org.yamj.plugin.api.common;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
 

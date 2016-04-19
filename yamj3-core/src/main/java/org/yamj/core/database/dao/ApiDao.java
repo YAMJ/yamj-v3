@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.plugin.api.common.JobType;
+import org.yamj.plugin.api.type.JobType;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model.dto;
 
+import org.yamj.plugin.api.type.JobType;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +32,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.common.JobType;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
 
