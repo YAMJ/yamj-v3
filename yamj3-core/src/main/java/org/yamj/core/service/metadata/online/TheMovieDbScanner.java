@@ -22,8 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.plugin.api.tools.Constants.*;
+import static org.yamj.plugin.api.common.Constants.*;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
+
+import org.yamj.plugin.api.common.JobType;
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -49,9 +53,6 @@ import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
-import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonName;
-import org.yamj.plugin.api.type.JobType;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {

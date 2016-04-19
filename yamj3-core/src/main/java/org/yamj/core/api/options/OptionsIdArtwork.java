@@ -22,8 +22,8 @@
  */
 package org.yamj.core.api.options;
 
-import static org.yamj.plugin.api.tools.Constants.ALL;
-import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
+import static org.yamj.plugin.api.common.Constants.ALL;
+import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;

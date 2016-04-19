@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.metadata.model;
 
 import java.util.*;
 

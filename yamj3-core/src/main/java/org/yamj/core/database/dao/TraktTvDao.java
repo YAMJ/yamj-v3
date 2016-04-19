@@ -22,8 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import static org.yamj.plugin.api.tools.Constants.*;
-
+import static org.yamj.plugin.api.common.Constants.*;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;

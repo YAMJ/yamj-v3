@@ -22,7 +22,7 @@
  */
 package org.yamj.core.config;
 
-import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
+import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang.math.NumberUtils;

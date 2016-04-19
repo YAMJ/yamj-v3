@@ -22,7 +22,9 @@
  */
 package org.yamj.core.web.apis;
 
-import static org.yamj.plugin.api.tools.Constants.UTF8;
+import static org.yamj.plugin.api.common.Constants.UTF8;
+
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.ImdbException;
@@ -43,7 +45,6 @@ import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.plugin.api.tools.MetadataTools;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
 

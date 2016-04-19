@@ -20,48 +20,46 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.metadata.model;
 
 import java.util.*;
 
-public class Episode {
+public class Season {
 
     private Map<String, String> ids = new HashMap<>();
-    private int episodeNumber;
+    private int seasonNumber;
     private String title;
     private String originalTitle;
+    private int year;
     private String plot;
     private String outline;
-    private String tagline;
-    private String quote;
-    private String releaseCountry;
-    private Date releaseDate;
     private int rating = -1;
-    private List<Credit> credits = new ArrayList<>();
-    private boolean valid;
+    private Collection<Episode> episodes = new ArrayList<>();
+    private boolean scanNeeded;
+    private boolean valid = true;
     
     public Map<String, String> getIds() {
         return ids;
     }
 
-    public Episode setIds(Map<String, String> ids) {
+    public Season setIds(Map<String, String> ids) {
         this.ids = ids;
         return this;
     }
 
-    public Episode addId(String source, String id) {
+    public Season addId(String source, String id) {
         if (id != null && id.length() > 0) {
             this.ids.put(source, id);
         }
         return this;
     }
-    
-    public int getEpisodeNumber() {
-        return episodeNumber;
+
+    public int getSeasonNumber() {
+        return seasonNumber;
     }
 
-    public Episode setEpisodeNumber(int episodeNumber) {
-        this.episodeNumber = episodeNumber;
+    public Season setSeasonNumber(int seasonNumber) {
+        this.seasonNumber = seasonNumber;
         return this;
     }
 
@@ -69,7 +67,7 @@ public class Episode {
         return title;
     }
 
-    public Episode setTitle(String title) {
+    public Season setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -78,8 +76,17 @@ public class Episode {
         return originalTitle;
     }
 
-    public Episode setOriginalTitle(String originalTitle) {
+    public Season setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
+        return this;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public Season setYear(int year) {
+        this.year = year;
         return this;
     }
 
@@ -87,7 +94,7 @@ public class Episode {
         return plot;
     }
 
-    public Episode setPlot(String plot) {
+    public Season setPlot(String plot) {
         this.plot = plot;
         return this;
     }
@@ -96,44 +103,8 @@ public class Episode {
         return outline;
     }
 
-    public Episode setOutline(String outline) {
+    public Season setOutline(String outline) {
         this.outline = outline;
-        return this;
-    }
-
-    public String getTagline() {
-        return tagline;
-    }
-
-    public Episode setTagline(String tagline) {
-        this.tagline = tagline;
-        return this;
-    }
-
-    public String getQuote() {
-        return quote;
-    }
-
-    public Episode setQuote(String quote) {
-        this.quote = quote;
-        return this;
-    }
-
-    public String getReleaseCountry() {
-        return releaseCountry;
-    }
-
-    public Episode setReleaseCountry(String releaseCountry) {
-        this.releaseCountry = releaseCountry;
-        return this;
-    }
-
-    public Date getReleaseDate() {
-        return releaseDate;
-    }
-
-    public Episode setReleaseDate(Date releaseDate) {
-        this.releaseDate = releaseDate;
         return this;
     }
 
@@ -141,29 +112,39 @@ public class Episode {
         return rating;
     }
 
-    public Episode setRating(int rating) {
+    public Season setRating(int rating) {
         this.rating = rating;
         return this;
     }
 
-    public List<Credit> getCredits() {
-        return credits;
+    public Collection<Episode> getEpisodes() {
+        return episodes;
     }
 
-    public Episode setCredits(List<Credit> credits) {
-        this.credits = credits;
+    public void setEpisodes(Collection<Episode> episodes) {
+        this.episodes = episodes;
+    }
+    
+    public Season addEpisode(Episode episode) {
+        this.episodes.add(episode);
         return this;
     }
     
-    public Episode addCredit(Credit credit) {
-        this.credits.add(credit);
-        return this;
+    public Episode getEpisode(int episodeNumber) {
+        for (Episode episode : this.episodes) {
+            if (episode.getEpisodeNumber() == episodeNumber) {
+                return episode;
+            }
+        }
+        return null;
     }
 
-    public Episode addCredits(Collection<Credit> credits) {
-        if (credits != null && !credits.isEmpty()) {
-            this.credits.addAll(credits);
-        }
+    public boolean isScanNeeded() {
+        return scanNeeded;
+    }
+
+    public Season setScanNeeded(boolean scanNeeded) {
+        this.scanNeeded = scanNeeded;
         return this;
     }
 
@@ -175,7 +156,7 @@ public class Episode {
         return !valid;
     }
 
-    public Episode setValid(boolean valid) {
+    public Season setValid(boolean valid) {
         this.valid = valid;
         return this;
     }

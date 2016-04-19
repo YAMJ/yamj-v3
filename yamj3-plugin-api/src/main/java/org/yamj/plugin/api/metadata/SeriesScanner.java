@@ -22,6 +22,8 @@
  */
 package org.yamj.plugin.api.metadata;
 
+import org.yamj.plugin.api.metadata.model.Series;
+
 import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 

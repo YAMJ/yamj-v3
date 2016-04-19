@@ -22,8 +22,7 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
-
+import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 import com.omertron.imdbapi.model.ImdbImage;
 import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.*;

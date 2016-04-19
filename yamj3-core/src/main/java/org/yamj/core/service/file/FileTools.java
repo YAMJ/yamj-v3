@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.file;
 
-import static org.yamj.plugin.api.tools.Constants.UTF8;
+import static org.yamj.plugin.api.common.Constants.UTF8;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;

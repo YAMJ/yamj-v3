@@ -22,8 +22,11 @@
  */
 package org.yamj.core.config;
 
-import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
-import org.yamj.plugin.api.type.JobType;
+import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+
+import org.yamj.plugin.api.common.PluginConfigService;
+
+import org.yamj.plugin.api.common.JobType;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +38,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.plugin.api.PluginConfigService;
 
 @Service("configServiceWrapper")
 public class ConfigServiceWrapper implements PluginConfigService {

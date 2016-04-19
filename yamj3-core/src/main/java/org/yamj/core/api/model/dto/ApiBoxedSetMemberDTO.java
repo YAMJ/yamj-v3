@@ -22,11 +22,12 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.plugin.api.tools.MetadataTools;
 
 /**
  * @author modmax

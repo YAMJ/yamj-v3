@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+
+import org.yamj.plugin.api.common.JobType;
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -47,8 +50,6 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.SearchEngineTools;
 

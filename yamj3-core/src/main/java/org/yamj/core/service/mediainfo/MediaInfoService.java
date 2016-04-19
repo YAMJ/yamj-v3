@@ -22,7 +22,9 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import static org.yamj.plugin.api.tools.Constants.DEFAULT_SPLITTER;
+import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+
+import org.yamj.plugin.api.common.Constants;
 
 import java.io.*;
 import java.util.*;
@@ -46,7 +48,6 @@ import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.ExceptionTools;
-import org.yamj.plugin.api.tools.Constants;
 
 @Service("mediaInfoService")
 public class MediaInfoService implements IQueueProcessService {

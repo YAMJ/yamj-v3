@@ -22,7 +22,10 @@
  */
 package org.yamj.core.database.model;
 
-import static org.yamj.plugin.api.tools.Constants.ALL;
+import static org.yamj.plugin.api.common.Constants.ALL;
+
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 
 import java.util.*;
 import javax.persistence.*;
@@ -41,8 +44,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.plugin.api.tools.PersonName;
-import org.yamj.plugin.api.tools.MetadataTools;
 
 @NamedQueries({    
     @NamedQuery(name = Person.QUERY_REQUIRED,

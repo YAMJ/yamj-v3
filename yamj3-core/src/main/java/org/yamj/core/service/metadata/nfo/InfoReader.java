@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import static org.yamj.plugin.api.tools.Constants.*;
+import static org.yamj.plugin.api.common.Constants.*;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+
+import org.yamj.plugin.api.common.JobType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,8 +46,6 @@ import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
-import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
 
 /**
  * Service to read the NFO files

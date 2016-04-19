@@ -22,8 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.plugin.api.tools.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
+
+import org.yamj.plugin.api.common.JobType;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
@@ -45,9 +49,6 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonName;
-import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("imdbScanner")

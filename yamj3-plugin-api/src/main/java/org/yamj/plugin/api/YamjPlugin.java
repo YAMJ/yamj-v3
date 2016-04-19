@@ -22,6 +22,8 @@
  */
 package org.yamj.plugin.api;
 
+import org.yamj.plugin.api.common.PluginConfigService;
+
 import org.yamj.api.common.http.CommonHttpClient;
 import ro.fortsoft.pf4j.Plugin;
 import ro.fortsoft.pf4j.PluginWrapper;

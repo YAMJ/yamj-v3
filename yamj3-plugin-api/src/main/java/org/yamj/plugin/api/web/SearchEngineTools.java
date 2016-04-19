@@ -22,6 +22,8 @@
  */
 package org.yamj.plugin.api.web;
 
+import org.yamj.plugin.api.common.Constants;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.plugin.api.tools.Constants;
 
 public class SearchEngineTools {
 

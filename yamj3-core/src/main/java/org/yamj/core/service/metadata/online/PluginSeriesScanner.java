@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.plugin.api.metadata.model.Credit;
+import org.yamj.plugin.api.metadata.model.Episode;
+
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -35,8 +38,6 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.Credit;
-import org.yamj.plugin.api.metadata.Episode;
 import org.yamj.plugin.api.metadata.SeriesScanner;
 
 public class PluginSeriesScanner implements ISeriesScanner {
@@ -74,7 +75,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final org.yamj.plugin.api.metadata.Series tvSeries = buildSeriesToScan(series); 
+        final org.yamj.plugin.api.metadata.model.Series tvSeries = buildSeriesToScan(series); 
         final boolean scanned = seriesScanner.scanSeries(tvSeries, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for series '{}'", getScannerName(), series.getIdentifier());
@@ -135,9 +136,9 @@ public class PluginSeriesScanner implements ISeriesScanner {
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, org.yamj.plugin.api.metadata.Series tvSeries) {
+    private void scanSeasons(Series series, org.yamj.plugin.api.metadata.model.Series tvSeries) {
         for (Season season  : series.getSeasons()) {
-           final org.yamj.plugin.api.metadata.Season tvSeason = tvSeries.getSeason(season.getSeason());
+           final org.yamj.plugin.api.metadata.model.Season tvSeason = tvSeries.getSeason(season.getSeason());
             
             if (!season.isTvSeasonDone(getScannerName())) {
                 if (tvSeason == null || tvSeason.isNotValid()) {
@@ -183,7 +184,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
         }
     }
     
-    private void scanEpisodes(Season season, org.yamj.plugin.api.metadata.Season tvSeason) {
+    private void scanEpisodes(Season season, org.yamj.plugin.api.metadata.model.Season tvSeason) {
         for (VideoData videoData : season.getVideoDatas()) {
             
             if (videoData.isTvEpisodeDone(getScannerName())) {
@@ -249,12 +250,12 @@ public class PluginSeriesScanner implements ISeriesScanner {
         }
     }
     
-    private org.yamj.plugin.api.metadata.Series buildSeriesToScan(Series series) { 
-        final org.yamj.plugin.api.metadata.Series tvSeries =new org.yamj.plugin.api.metadata.Series().setIds(series.getSourceDbIdMap()); 
+    private org.yamj.plugin.api.metadata.model.Series buildSeriesToScan(Series series) { 
+        final org.yamj.plugin.api.metadata.model.Series tvSeries =new org.yamj.plugin.api.metadata.model.Series().setIds(series.getSourceDbIdMap()); 
 
         for (Season season : series.getSeasons()) {
             // create season object
-            org.yamj.plugin.api.metadata.Season tvSeason = new org.yamj.plugin.api.metadata.Season().setSeasonNumber(season.getSeason());
+            org.yamj.plugin.api.metadata.model.Season tvSeason = new org.yamj.plugin.api.metadata.model.Season().setSeasonNumber(season.getSeason());
             tvSeason.setIds(season.getSourceDbIdMap());
             tvSeason.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
             tvSeries.addSeason(tvSeason);

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.plugin.api.metadata.model.Credit;
+import org.yamj.plugin.api.metadata.model.Movie;
+
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -33,8 +36,6 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.Credit;
-import org.yamj.plugin.api.metadata.Movie;
 import org.yamj.plugin.api.metadata.MovieScanner;
 
 public class PluginMovieScanner implements IMovieScanner {

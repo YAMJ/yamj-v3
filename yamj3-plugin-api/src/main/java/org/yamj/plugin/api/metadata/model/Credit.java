@@ -20,14 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.metadata.model;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
+
+import org.yamj.plugin.api.common.JobType;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.plugin.api.tools.MetadataTools;
-import org.yamj.plugin.api.tools.PersonName;
-import org.yamj.plugin.api.type.JobType;
 
 public final class Credit {
 

@@ -20,12 +20,10 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api;
+package org.yamj.plugin.api.common;
 
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.yamj.plugin.api.tools.Constants;
-import org.yamj.plugin.api.type.JobType;
 
 
 public class PluginConfigServiceImpl implements PluginConfigService {

@@ -22,13 +22,14 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.tools.MetadataTools;
 
 /**
  * Information on the physical file for the API

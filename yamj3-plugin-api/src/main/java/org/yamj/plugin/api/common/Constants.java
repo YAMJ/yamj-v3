@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.tools;
+package org.yamj.plugin.api.common;
 
 import java.nio.charset.Charset;
 

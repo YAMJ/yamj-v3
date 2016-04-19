@@ -22,9 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import static org.yamj.plugin.api.tools.Constants.LANGUAGE_EN;
-import static org.yamj.plugin.api.tools.Constants.SOURCE_TMDB;
-
+import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
+import static org.yamj.plugin.api.common.Constants.SOURCE_TMDB;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.enumeration.ArtworkType;

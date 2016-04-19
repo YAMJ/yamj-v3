@@ -20,9 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api;
-
-import org.yamj.plugin.api.type.JobType;
+package org.yamj.plugin.api.common;
 
 import java.util.Date;
 import java.util.List;

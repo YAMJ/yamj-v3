@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.common.JobType;
 
 import java.io.Serializable;
 import javax.persistence.*;
