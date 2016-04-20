@@ -26,7 +26,7 @@ import java.util.*;
 
 public class SeriesDTO {
 
-    private Map<String, String> ids = new HashMap<>();
+    private final Map<String, String> ids;
     private String title;
     private String originalTitle;
     private int startYear;
@@ -39,13 +39,12 @@ public class SeriesDTO {
     private Collection<String> countries = new HashSet<>();
     private Collection<SeasonDTO> seasons = new ArrayList<>();
     
-    public Map<String, String> getIds() {
-        return ids;
+    public SeriesDTO(Map<String, String> ids) {
+        this.ids = ids;
     }
 
-    public SeriesDTO setIds(Map<String, String> ids) {
-        this.ids = ids;
-        return this;
+    public Map<String, String> getIds() {
+        return ids;
     }
 
     public SeriesDTO addId(String source, String id) {

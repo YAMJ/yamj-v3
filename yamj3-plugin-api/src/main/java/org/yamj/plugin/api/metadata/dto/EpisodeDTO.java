@@ -26,8 +26,8 @@ import java.util.*;
 
 public class EpisodeDTO {
 
-    private Map<String, String> ids = new HashMap<>();
-    private int episodeNumber;
+    private final Map<String, String> ids;
+    private final int episodeNumber;
     private String title;
     private String originalTitle;
     private String plot;
@@ -38,15 +38,15 @@ public class EpisodeDTO {
     private Date releaseDate;
     private int rating = -1;
     private List<CreditDTO> credits = new ArrayList<>();
-    private boolean valid;
+    private boolean valid = true;
     
-    public Map<String, String> getIds() {
-        return ids;
+    public EpisodeDTO(Map<String, String> ids, int episodeNumber) {
+        this.ids = ids;
+        this.episodeNumber = episodeNumber;
     }
 
-    public EpisodeDTO setIds(Map<String, String> ids) {
-        this.ids = ids;
-        return this;
+    public Map<String, String> getIds() {
+        return ids;
     }
 
     public EpisodeDTO addId(String source, String id) {
@@ -60,10 +60,6 @@ public class EpisodeDTO {
         return episodeNumber;
     }
 
-    public EpisodeDTO setEpisodeNumber(int episodeNumber) {
-        this.episodeNumber = episodeNumber;
-        return this;
-    }
 
     public String getTitle() {
         return title;

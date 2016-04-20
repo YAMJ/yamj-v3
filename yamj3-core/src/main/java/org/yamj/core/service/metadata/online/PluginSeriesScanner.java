@@ -251,12 +251,11 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
     
     private SeriesDTO buildSeriesToScan(Series series) { 
-        final SeriesDTO seriesDTO = new SeriesDTO().setIds(series.getSourceDbIdMap()); 
+        final SeriesDTO seriesDTO = new SeriesDTO(series.getSourceDbIdMap()); 
 
         for (Season season : series.getSeasons()) {
             // create season object
-            SeasonDTO seasonDTO = new SeasonDTO().setSeasonNumber(season.getSeason());
-            seasonDTO.setIds(season.getSourceDbIdMap());
+            SeasonDTO seasonDTO = new SeasonDTO(season.getSourceDbIdMap(), season.getSeason());
             seasonDTO.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
             seriesDTO.addSeason(seasonDTO);
             
@@ -266,8 +265,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     continue;
                 }
                 
-                EpisodeDTO episodeDTO = new EpisodeDTO().setEpisodeNumber(videoData.getEpisode());
-                episodeDTO.setIds(videoData.getSourceDbIdMap());
+                EpisodeDTO episodeDTO = new EpisodeDTO(videoData.getSourceDbIdMap(), videoData.getEpisode());
                 seasonDTO.addEpisode(episodeDTO);
             }
         }

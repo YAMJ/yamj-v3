@@ -32,8 +32,7 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.various.IdentifierService;
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import org.yamj.plugin.api.metadata.*;
 import ro.fortsoft.pf4j.PluginManager;
 
 /**
@@ -76,6 +75,18 @@ public class OnlineScannerInitialization {
             this.onlineScannerService.registerMetadataScanner(scanner);
         }
 
-        // TODO also for person and filmography scanner
+        // add person scanner to online scanner service
+        for (PersonScanner personScanner : pluginManager.getExtensions(PersonScanner.class)) {
+            personScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
+            PluginPersonScanner scanner = new PluginPersonScanner(personScanner);
+            this.onlineScannerService.registerMetadataScanner(scanner);
+        }
+
+        // add filmography scanner to online scanner service
+        for (FilmographyScanner filmographyScanner : pluginManager.getExtensions(FilmographyScanner.class)) {
+            filmographyScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
+            PluginFilmographyScanner scanner = new PluginFilmographyScanner(filmographyScanner, localeService);
+            this.onlineScannerService.registerMetadataScanner(scanner);
+        }
     }
 }

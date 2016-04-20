@@ -26,7 +26,7 @@ import java.util.*;
 
 public class MovieDTO {
 
-    private Map<String, String> ids = new HashMap<>();
+    private final Map<String, String> ids;
     private String title;
     private String originalTitle;
     private int year;
@@ -42,13 +42,12 @@ public class MovieDTO {
     private Collection<String> countries = new HashSet<>();
     private List<CreditDTO> credits = new ArrayList<>();
 
-    public Map<String, String> getIds() {
-        return ids;
+    public MovieDTO(Map<String, String> ids) {
+        this.ids = ids;
     }
 
-    public MovieDTO setIds(Map<String, String> ids) {
-        this.ids = ids;
-        return this;
+    public Map<String, String> getIds() {
+        return ids;
     }
 
     public MovieDTO addId(String source, String id) {

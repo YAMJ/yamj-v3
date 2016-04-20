@@ -22,12 +22,15 @@
  */
 package org.yamj.plugin.api.metadata.dto;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 public class SeasonDTO {
 
-    private Map<String, String> ids = new HashMap<>();
-    private int seasonNumber;
+    private final Map<String, String> ids;
+    private final int seasonNumber;
+    private boolean scanNeeded;
     private String title;
     private String originalTitle;
     private int year;
@@ -35,16 +38,15 @@ public class SeasonDTO {
     private String outline;
     private int rating = -1;
     private Collection<EpisodeDTO> episodes = new ArrayList<>();
-    private boolean scanNeeded;
     private boolean valid = true;
+    
+    public SeasonDTO(Map<String, String> ids, int seasonNumber) {
+        this.ids = ids;
+        this.seasonNumber = seasonNumber;
+    }
     
     public Map<String, String> getIds() {
         return ids;
-    }
-
-    public SeasonDTO setIds(Map<String, String> ids) {
-        this.ids = ids;
-        return this;
     }
 
     public SeasonDTO addId(String source, String id) {
@@ -58,8 +60,12 @@ public class SeasonDTO {
         return seasonNumber;
     }
 
-    public SeasonDTO setSeasonNumber(int seasonNumber) {
-        this.seasonNumber = seasonNumber;
+    public boolean isScanNeeded() {
+        return scanNeeded;
+    }
+
+    public SeasonDTO setScanNeeded(boolean scanNeeded) {
+        this.scanNeeded = scanNeeded;
         return this;
     }
 
@@ -137,15 +143,6 @@ public class SeasonDTO {
             }
         }
         return null;
-    }
-
-    public boolean isScanNeeded() {
-        return scanNeeded;
-    }
-
-    public SeasonDTO setScanNeeded(boolean scanNeeded) {
-        this.scanNeeded = scanNeeded;
-        return this;
     }
 
     public boolean isValid() {

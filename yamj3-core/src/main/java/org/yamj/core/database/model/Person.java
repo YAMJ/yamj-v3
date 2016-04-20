@@ -374,7 +374,7 @@ public class Person extends AbstractScannable {
     }
 
     @Override
-    protected Map<String, String> getSourceDbIdMap() {
+    public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
