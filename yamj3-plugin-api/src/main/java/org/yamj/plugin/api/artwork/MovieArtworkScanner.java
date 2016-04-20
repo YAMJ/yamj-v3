@@ -23,12 +23,12 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import java.util.Map;
 import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
+import org.yamj.plugin.api.metadata.dto.MovieDTO;
 
 public interface MovieArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDTO> getPosters(String title, String originalTitle, int year, Map<String,String> ids);
+    List<ArtworkDTO> getPosters(MovieDTO movie);
 
-    List<ArtworkDTO> getFanarts(String title, String originalTitle, int year, Map<String,String> ids);
+    List<ArtworkDTO> getFanarts(MovieDTO movie);
 }

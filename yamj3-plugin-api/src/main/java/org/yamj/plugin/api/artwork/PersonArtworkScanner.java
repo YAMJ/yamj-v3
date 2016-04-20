@@ -23,10 +23,10 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import java.util.Map;
 import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
+import org.yamj.plugin.api.metadata.dto.PersonDTO;
 
 public interface PersonArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDTO> getPhotos(String name, Map<String,String> ids);
+    List<ArtworkDTO> getPhotos(PersonDTO person);
 }

@@ -28,6 +28,7 @@ public class EpisodeDTO {
 
     private final Map<String, String> ids;
     private final int episodeNumber;
+    private SeasonDTO season;
     private String title;
     private String originalTitle;
     private String plot;
@@ -60,6 +61,14 @@ public class EpisodeDTO {
         return episodeNumber;
     }
 
+    public SeasonDTO getSeason() {
+        return season;
+    }
+
+    public EpisodeDTO setSeason(SeasonDTO season) {
+        this.season = season;
+        return this;
+    }
 
     public String getTitle() {
         return title;

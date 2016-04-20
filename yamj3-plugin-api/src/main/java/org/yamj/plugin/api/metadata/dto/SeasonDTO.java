@@ -30,6 +30,7 @@ public class SeasonDTO {
 
     private final Map<String, String> ids;
     private final int seasonNumber;
+    private SeriesDTO series;
     private boolean scanNeeded;
     private String title;
     private String originalTitle;
@@ -58,6 +59,15 @@ public class SeasonDTO {
 
     public int getSeasonNumber() {
         return seasonNumber;
+    }
+
+    public SeriesDTO getSeries() {
+        return series;
+    }
+
+    public SeasonDTO setSeries(SeriesDTO series) {
+        this.series = series;
+        return this;
     }
 
     public boolean isScanNeeded() {
