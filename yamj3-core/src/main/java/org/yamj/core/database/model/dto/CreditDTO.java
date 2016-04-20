@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model.dto;
 
-import org.yamj.plugin.api.type.JobType;
-
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -31,17 +29,16 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
 
     private final String source;
     private final String sourceId;
     private final JobType jobType;
-    private final String name;
     private final String identifier;
+    private final String name;
     private String firstName;
     private String lastName;
     private String realName;
@@ -50,49 +47,12 @@ public final class CreditDTO {
     private Long personId;
     private Set<ArtworkDetailDTO> photoDTOS;
     
-    public CreditDTO(String source, JobType jobType, String name) {
-        this(source, null, jobType, name, null);
-    }
-
-    public CreditDTO(String source, String sourceId, JobType jobType, String name) {
-        this(source, sourceId, jobType, name, null);
-    }
-
-    public CreditDTO(String source, JobType jobType, String name, String role) {
-        this(source, null, jobType, name, role);
-    }
-
-    public CreditDTO(String source, String sourceId, JobType jobType, String name, String role) {
+    public CreditDTO(String source, String sourceId, JobType jobType, String identifier, String name) {
         this.source = source;
         this.sourceId = sourceId;
         this.jobType = jobType;
-        PersonName personName = MetadataTools.splitFullName(name.trim());
-        this.name = personName.getName();
-        this.identifier = YamjTools.cleanIdentifier(this.name);
-        setFirstName(personName.getFirstName());
-        setLastName(personName.getLastName());
-        setRole(role);
-        setVoice(MetadataTools.isVoiceRole(role));
-    }
-
-    public CreditDTO(String source, org.yamj.plugin.api.metadata.dto.CreditDTO credit) {
-        this.source = source;
-        this.sourceId = credit.getId();
-        this.jobType = credit.getJobType();
-        this.name = credit.getName();
-        this.identifier = YamjTools.cleanIdentifier(credit.getName());
-        
-        this.firstName = credit.getFirstName();
-        this.lastName = credit.getLastName();
-        this.role = credit.getRole();
-        this.voice = credit.isVoice();
-        this.realName = credit.getRealName();
-        
-        if (credit.getPhotos() != null) {
-            for (String photo : credit.getPhotos()) {
-                this.addPhoto(source, photo);
-            }
-        }
+        this.identifier = identifier;
+        this.name = name;
     }
 
     public String getSource() {

@@ -30,10 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.dto.CreditDTO;
 import org.yamj.plugin.api.metadata.dto.MovieDTO;
 
 public class PluginMovieScanner implements IMovieScanner {
@@ -41,10 +42,12 @@ public class PluginMovieScanner implements IMovieScanner {
     private final Logger LOG = LoggerFactory.getLogger(PluginMovieScanner.class);
     private final MovieScanner movieScanner;
     private final LocaleService localeService;
+    private final IdentifierService identifierService;
     
-    public PluginMovieScanner(MovieScanner movieScanner, LocaleService localeService) {
+    public PluginMovieScanner(MovieScanner movieScanner, LocaleService localeService, IdentifierService identifierService) {
         this.movieScanner = movieScanner;
         this.localeService = localeService;
+        this.identifierService = identifierService;
     }
     
     @Override
@@ -139,8 +142,8 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setCountryCodes(countryCodes, getScannerName());
         }
 
-        for (org.yamj.plugin.api.metadata.dto.CreditDTO credit : movie.getCredits()) {
-            videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
+        for (CreditDTO credit : movie.getCredits()) {
+            videoData.addCreditDTO(identifierService.createCredit(getScannerName(), credit));
         }
         
         return ScanResult.OK;

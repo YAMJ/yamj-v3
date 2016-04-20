@@ -154,7 +154,7 @@ public class MediaImportService {
         LOG.debug("Scanned filename {}-'{}': title='{}', year={}",
                 stageFile.getId(), stageFile.getFileName(), dto.getTitle(), dto.getYear());
 
-        if (StringUtils.isBlank(dto.getTitle()) && (dto.getYear() > 0)) {
+        if (StringUtils.isBlank(dto.getTitle())) {
             if (dto.getYear() > 0) {
                 LOG.warn("No valid title scanned from '{}', year will be used as title", stageFile.getFileName());
                 dto.setTitle(String.valueOf(dto.getYear()));
@@ -165,6 +165,18 @@ public class MediaImportService {
                 mediaDao.updateEntity(stageFile);
                 return;
             }
+        } else {
+            // clean the title
+            final String cleanTitle = this.identifierService.cleanIdentifier(dto.getTitle());
+            if (StringUtils.isBlank(cleanTitle)) {
+                LOG.error("No valid clean title for  '{}' from filename '{}'", dto.getTitle(), stageFile.getFileName());
+                stageFile.setStatus(StatusType.ERROR);
+                mediaDao.updateEntity(stageFile);
+                return;
+            }
+            
+            // set clean title in DTO for later reuse
+            dto.setCleanTitle(cleanTitle);
         }
 
         // determine if watched file exists for the video file
@@ -253,8 +265,11 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    LOG.debug("Add movie filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                    final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
+                    if (StringUtils.isNotBlank(boxedSetIdentifier)) {
+                        LOG.debug("Add movie filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                        videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                    }
                 }
 
                 // store associated entities (only sets right now)
@@ -321,8 +336,11 @@ public class MediaImportService {
                         if (MapUtils.isNotEmpty(dto.getSetMap())) {
                             for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                                 // add boxed set to video data
-                                LOG.debug("Add series filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                                final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
+                                if (StringUtils.isNotBlank(boxedSetIdentifier)) {
+                                    LOG.debug("Add series filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                                }
                             }
 
                             // store associated entities (only sets right now)
@@ -972,7 +990,7 @@ public class MediaImportService {
             // find person artwork
             String identifier = identifierService.cleanIdentifier(stripped);
             if (StringUtils.isBlank(identifier)) {
-                LOG.warn("Could not search person artwork with empty cleaned identifier for file '{}'", fileBaseName);
+                LOG.warn("Could not search person artwork with empty identifier for file '{}'", fileBaseName);
                 artworks = Collections.emptyList();
             } else {
                 artworks = this.metadataDao.findPersonArtworks(identifier);

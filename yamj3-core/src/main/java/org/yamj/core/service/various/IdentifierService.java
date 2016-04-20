@@ -32,7 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
+import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.tools.PersonName;
 import org.yamj.plugin.api.transliteration.Transliterator;
+import org.yamj.plugin.api.type.JobType;
 import ro.fortsoft.pf4j.PluginManager;
 
 @Service("identifierService")
@@ -45,6 +50,8 @@ public class IdentifierService {
 
     @Autowired
     private PluginManager pluginManager;
+    @Autowired
+    private ConfigServiceWrapper configServiceWrapper;
     
     @Value("${yamj3.identifier.transliterate:false}")
     private boolean transliterationEnabled;
@@ -72,12 +79,12 @@ public class IdentifierService {
         }
     }
     
-    public String cleanIdentifier(final String identifier) {
-        if (StringUtils.isBlank(identifier)) {
+    public String cleanIdentifier(final String input) {
+        if (StringUtils.isBlank(input)) {
             return null;
         }
         
-        String result = identifier;
+        String result = input;
         if (this.transliterationEnabled) {
             result = transliterator.transliterate(result);
         }
@@ -97,4 +104,69 @@ public class IdentifierService {
         
         return result;
     }
+    
+    public CreditDTO createCredit(final String source, final JobType jobType, final String name) {
+        return createCredit(source, null, jobType, name);
+    }
+
+    public CreditDTO createCredit(final String source, final String sourceId, final JobType jobType, final String name) {
+        final String trimmedName = StringUtils.trimToNull(name);
+        if (trimmedName == null) {
+            return null;
+        }
+        
+        final String identifier = cleanIdentifier(trimmedName);
+        if (StringUtils.isBlank(identifier)) {
+            LOG.warn("Empty identifier for {} {} '{}'", source, jobType.name().toLowerCase(), trimmedName);
+            return null;
+        }
+
+        CreditDTO credit = new CreditDTO(source, sourceId, jobType, identifier, trimmedName);
+        PersonName personName = MetadataTools.splitFullName(trimmedName);
+        credit.setFirstName(personName.getFirstName());
+        credit.setLastName(personName.getLastName());
+        return credit;
+    }
+
+    public CreditDTO createCredit(final String source, final JobType jobType, final String name, final String role) {
+        return createCredit(source, null, jobType, name, role);
+    }
+
+    public CreditDTO createCredit(final String source, final String sourceId, final JobType jobType, final String name, final String role) {
+        CreditDTO credit = this.createCredit(source, sourceId, jobType, name);
+        if (credit != null && role != null) {
+            credit.setRole(role);
+            credit.setVoice(MetadataTools.isVoiceRole(role));
+        }
+        return credit;
+    }
+
+    public CreditDTO createCredit(final String source, final org.yamj.plugin.api.metadata.dto.CreditDTO dto) {
+        final String trimmedName = StringUtils.trimToNull(dto.getName());
+        if (trimmedName == null) {
+            return null;
+        }
+       
+        final String identifier = cleanIdentifier(trimmedName);
+        if (StringUtils.isBlank(identifier)) {
+            LOG.warn("Empty identifier for {} {} '{}'", source, dto.getJobType().name().toLowerCase(), trimmedName);
+            return null;
+        }
+        
+        CreditDTO credit = new CreditDTO(source, dto.getId(), dto.getJobType(), identifier, trimmedName);
+        credit.setFirstName(dto.getFirstName());
+        credit.setLastName(dto.getLastName());
+        credit.setRealName(dto.getRealName());
+        credit.setRole(dto.getRole());
+        credit.setVoice(dto.isVoice());
+        
+        if (dto.getPhotos() != null) {
+            for (String photo : dto.getPhotos()) {
+                credit.addPhoto(source, photo);
+            }
+        }
+        
+        return credit;
+    }
+
 }

@@ -25,9 +25,6 @@ package org.yamj.core.service.metadata.online;
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 import static org.yamj.plugin.api.common.Constants.SOURCE_TVDB;
 
-import org.yamj.plugin.api.type.JobType;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -45,8 +42,11 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
@@ -61,6 +61,8 @@ public class TheTVDbScanner implements ISeriesScanner {
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private LocaleService localeService;
+    @Autowired
+    private IdentifierService identifierService;
     
     @Override
     public String getScannerName() {
@@ -164,8 +166,10 @@ public class TheTVDbScanner implements ISeriesScanner {
             if (CollectionUtils.isNotEmpty(tvdbActors)) {
                 actors = new LinkedHashSet<>(tvdbActors.size());
                 for (Actor actor : tvdbActors) {
-                    if (StringUtils.isNotBlank(actor.getName())) {
-                        actors.add(new CreditDTO(SOURCE_TVDB, JobType.ACTOR, actor.getName(), actor.getRole()));
+                    final String sourceId = (actor.getId() > 0 ? Integer.toString(actor.getId()) : null);
+                    CreditDTO credit = this.identifierService.createCredit(SOURCE_TVDB,sourceId, JobType.ACTOR, actor.getName(), actor.getRole());
+                    if (credit != null) {
+                        actors.add(credit);
                     }
                 }
             }
@@ -272,9 +276,7 @@ public class TheTVDbScanner implements ISeriesScanner {
     private void addCredits(VideoData videoData, JobType jobType, Collection<String> persons) {
         if (persons != null && this.configServiceWrapper.isCastScanEnabled(jobType)) {
             for (String person : persons) {
-                if (StringUtils.isNotBlank(person)) {
-                    videoData.addCreditDTO(new CreditDTO(SOURCE_TVDB, jobType, person));
-                }
+                videoData.addCreditDTO(this.identifierService.createCredit(SOURCE_TVDB, jobType, person));
             }
         }
     }

@@ -24,10 +24,6 @@ package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
 
-import org.yamj.core.service.various.StagingService;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.common.Constants;
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
+import org.yamj.core.service.various.IdentifierService;
+import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.common.Constants;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 
 @Service("nfoScannerService")
 public class NfoScannerService {
@@ -50,7 +50,9 @@ public class NfoScannerService {
     private StagingService stagingService;
     @Autowired
     private InfoReader infoReader;
-    
+    @Autowired
+    private IdentifierService identifierService;
+
     public void scanMovie(VideoData videoData) {
         // remove override source for NFO
         videoData.removeOverrideSource(SCANNER_ID);
@@ -163,8 +165,13 @@ public class NfoScannerService {
 
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                LOG.debug("Add movie nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
+                if (StringUtils.isBlank(boxedSetIdentifier)) {
+                    LOG.warn("Empty boxed set identifier for '{}'", entry.getKey());
+                } else {
+                    LOG.debug("Add movie nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                    videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                }
             }
 
             // add credit DTOs for update in database
@@ -286,8 +293,13 @@ public class NfoScannerService {
             
             // add boxed sets
             for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
-                LOG.debug("Add series nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
+                if (StringUtils.isBlank(boxedSetIdentifier)) {
+                    LOG.warn("Empty boxed set identifier for '{}'", entry.getKey());
+                } else {
+                    LOG.debug("Add series nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                }
             }
             
             for (Season season : series.getSeasons()) {

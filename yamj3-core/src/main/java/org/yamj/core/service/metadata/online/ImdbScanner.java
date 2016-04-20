@@ -24,8 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
-import org.yamj.plugin.api.type.JobType;
-
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
@@ -43,12 +41,14 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("imdbScanner")
@@ -72,7 +72,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private LocaleService localeService;
     @Autowired
     private ImdbApiWrapper imdbApiWrapper;
-    
+    @Autowired
+    private IdentifierService identifierService;
+
     @Override
     public String getScannerName() {
         return SOURCE_IMDB;
@@ -719,10 +721,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 // skip faceless actors only
                 continue; //NOSONAR
             }
-            
-            CreditDTO creditDTO = new CreditDTO(SOURCE_IMDB, person.getActorId(), jobType, person.getName());
-            creditDTO.setRole(cast.getCharacter());
-            creditDTO.setVoice(MetadataTools.isVoiceRole(cast.getAttr()));
+
+            CreditDTO creditDTO = this.identifierService.createCredit(SOURCE_IMDB, person.getActorId(), jobType,  person.getName(), cast.getCharacter());
             videoData.addCreditDTO(creditDTO);
         }
     }

@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -520,9 +521,9 @@ public class Series extends AbstractMetadata {
         return boxedSetDTOS;
     }
 
-    public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
-        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
-            getBoxedSetDTOS().add(new BoxedSetDTO(source, name, ordering, sourceId));
+    public void addBoxedSetDTO(String source, String identifier, String name, Integer ordering, String sourceId) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(identifier)) {
+            getBoxedSetDTOS().add(new BoxedSetDTO(source, identifier, name, ordering, sourceId));
         }
     }
     

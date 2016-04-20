@@ -22,12 +22,10 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.plugin.api.type.JobType;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
 
 public final class InfoDTO {
 
@@ -353,24 +351,8 @@ public final class InfoDTO {
         return credits;
     }
 
-    public void addDirector(String director) {
-        if (StringUtils.isNotBlank(director)) {
-            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.DIRECTOR, director));
-            this.changed = true;
-        }
-    }
-
-    public void addWriter(String writer) {
-        if (StringUtils.isNotBlank(writer)) {
-            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.WRITER, writer));
-            this.changed = true;
-        }
-    }
-
-    public void addActor(String actor, String role, String photoURL) {
-        if (StringUtils.isNotBlank(actor)) {
-            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor, role);
-            credit.addPhoto(NfoScannerService.SCANNER_ID, photoURL);
+    public void addCredit(CreditDTO credit) {
+        if (credit != null) {
             this.credits.add(credit);
             this.changed = true;
         }

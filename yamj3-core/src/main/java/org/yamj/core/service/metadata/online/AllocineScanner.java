@@ -24,9 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
-import org.yamj.plugin.api.type.JobType;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -47,9 +44,12 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.SearchEngineTools;
 
@@ -74,7 +74,9 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
     private LocaleService localeService;
-    
+    @Autowired
+    private IdentifierService identifierService;
+
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -305,9 +307,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // ACTORS
         if (configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             for (MoviePerson person : movieInfos.getActors()) {
-                CreditDTO credit = createCredit(person, JobType.ACTOR);
-                credit.setRole(person.getRole());
-                videoData.addCreditDTO(credit);
+                videoData.addCreditDTO(createCredit(person, JobType.ACTOR, person.getRole()));
             }
         }
         
@@ -528,15 +528,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 }
                 
                 if (member.isActor() && configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                    CreditDTO credit;
-                    if (member.isLeadActor()) {
-                        credit = createCredit(member, JobType.ACTOR);
-                    } else {
-                        credit = createCredit(member, JobType.GUEST_STAR);
-                    }
-                    credit.setRole(member.getRole());
-                    credit.setVoice(MetadataTools.isVoiceRole(member.getRole()));
-                    videoData.addCreditDTO(credit);
+                    final JobType jobType = (member.isLeadActor() ? JobType.ACTOR : JobType.GUEST_STAR);
+                    videoData.addCreditDTO(createCredit(member, jobType, member.getRole()));
                 } else if (member.isDirector() && configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
                     videoData.addCreditDTO(createCredit(member, JobType.DIRECTOR));
                 } else if (member.isWriter() && configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
@@ -549,17 +542,25 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
     }
-    
-    private static CreditDTO createCredit(CastMember member, JobType jobType) {
-        String sourceId = (member.getShortPerson().getCode() > 0 ?  String.valueOf(member.getShortPerson().getCode()) : null);
-        return new CreditDTO(SCANNER_ID, sourceId, jobType, member.getShortPerson().getName());
+
+    private CreditDTO createCredit(CastMember member, JobType jobType) {
+        return createCredit(member, jobType, null);
     }
 
-    private static CreditDTO createCredit(MoviePerson person, JobType jobType) {
+    private CreditDTO createCredit(CastMember member, JobType jobType, String role) {
+        final String sourceId = (member.getShortPerson().getCode() > 0 ?  String.valueOf(member.getShortPerson().getCode()) : null);
+        return this.identifierService.createCredit(SCANNER_ID, sourceId, jobType, member.getShortPerson().getName(), role);
+    }
+
+    private CreditDTO createCredit(MoviePerson person, JobType jobType) {
+        return createCredit(person, jobType, null);
+    }
+
+    private CreditDTO createCredit(MoviePerson person, JobType jobType, String role) {
         String sourceId = (person.getCode() > 0 ?  String.valueOf(person.getCode()) : null);
-        return new CreditDTO(SCANNER_ID, sourceId, jobType, person.getName());
+        return this.identifierService.createCredit(SCANNER_ID, sourceId, jobType, person.getName(), role);
     }
-
+    
     @Override
     public ScanResult scanPerson(Person person, boolean throwTempError) {
         // get person id

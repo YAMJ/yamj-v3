@@ -20,27 +20,31 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core;
+package org.yamj.core.service.metadata.online;
 
-import java.io.File;
+import javax.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.service.metadata.online.PluginMovieScanner;
-import org.yamj.core.service.metadata.online.PluginSeriesScanner;
-import org.yamj.plugin.api.YamjPlugin;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.metadata.MovieScanner;
 import org.yamj.plugin.api.metadata.SeriesScanner;
-import ro.fortsoft.pf4j.*;
+import ro.fortsoft.pf4j.PluginManager;
 
-@Configuration
-public class YamjPluginConfiguration {
+/**
+ * Just used for initialization of online scanner plugins on startup.
+ */
+@Component("onlineScannerInitialization")
+@DependsOn({"onlineScannerService","pluginManager"})
+public class OnlineScannerInitialization {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OnlineScannerInitialization.class);
+    
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
@@ -49,46 +53,29 @@ public class YamjPluginConfiguration {
     private PoolingHttpClient poolingHttpClient;
     @Autowired
     private OnlineScannerService onlineScannerService;
+    @Autowired
+    private PluginManager pluginManager;
+    @Autowired
+    private IdentifierService identifierService;
     
-    @Bean(destroyMethod="stopPlugins")
-    @DependsOn({"configServiceWrapper", "localeService", "onlineScannerService", "poolingHttpClient"})
-    public PluginManager pluginManager() {
-        final String yamjHome = System.getProperty("yamj3.home", ".");
-        File pluginsDir = new File (yamjHome + "/plugins");
+    @PostConstruct
+    public void init() {
+        LOG.debug("Initialize online scanner with plugins");
         
-        // load PlugIns
-        PluginManager pluginManager = new DefaultPluginManager(pluginsDir);
-        pluginManager.loadPlugins();
-        
-        // set service within PlugIns
-        for (PluginWrapper wrapper : pluginManager.getPlugins()) {
-            Plugin plugin = wrapper.getPlugin();
-            if (plugin instanceof YamjPlugin) {
-                YamjPlugin yamjPlugin = (YamjPlugin)plugin;
-                yamjPlugin.setConfigService(configServiceWrapper);
-                yamjPlugin.setHttpClient(poolingHttpClient);
-            }
-        }
-
-        // start PlugIns
-        pluginManager.startPlugins();
-
         // add movie scanner to online scanner service
         for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
             movieScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
-            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService);
+            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService, identifierService);
             this.onlineScannerService.registerMetadataScanner(scanner);
         }
         
         // add series scanner to online scanner service
         for (SeriesScanner seriesScanner : pluginManager.getExtensions(SeriesScanner.class)) {
             seriesScanner.init(configServiceWrapper, poolingHttpClient, localeService.getLocale());
-            PluginSeriesScanner scanner = new PluginSeriesScanner(seriesScanner, localeService);
+            PluginSeriesScanner scanner = new PluginSeriesScanner(seriesScanner, localeService, identifierService);
             this.onlineScannerService.registerMetadataScanner(scanner);
         }
 
         // TODO also for person and filmography scanner
-        
-        return pluginManager;
     }
 }

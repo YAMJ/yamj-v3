@@ -32,23 +32,23 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.metadata.SeriesScanner;
-import org.yamj.plugin.api.metadata.dto.EpisodeDTO;
-import org.yamj.plugin.api.metadata.dto.SeasonDTO;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
+import org.yamj.plugin.api.metadata.dto.*;
 
 public class PluginSeriesScanner implements ISeriesScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginSeriesScanner.class);
     private final SeriesScanner seriesScanner;
     private final LocaleService localeService;
-    
-    public PluginSeriesScanner(SeriesScanner seriesScanner, LocaleService localeService) {
+    private final IdentifierService identifierService;
+
+    public PluginSeriesScanner(SeriesScanner seriesScanner, LocaleService localeService, IdentifierService identifierService) {
         this.seriesScanner = seriesScanner;
         this.localeService = localeService;
+        this.identifierService = identifierService;
     }
     
     @Override
@@ -241,8 +241,8 @@ public class PluginSeriesScanner implements ISeriesScanner {
 
             videoData.addRating(getScannerName(), episodeDTO.getRating());
 
-            for (org.yamj.plugin.api.metadata.dto.CreditDTO credit : episodeDTO.getCredits()) {
-                videoData.addCreditDTO(new CreditDTO(getScannerName(), credit));
+            for (CreditDTO credit : episodeDTO.getCredits()) {
+                videoData.addCreditDTO(identifierService.createCredit(getScannerName(), credit));
             }
 
             // mark episode as done

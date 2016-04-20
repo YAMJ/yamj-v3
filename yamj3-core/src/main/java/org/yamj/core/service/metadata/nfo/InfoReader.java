@@ -24,10 +24,6 @@ package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.plugin.api.common.Constants.*;
 
-import org.yamj.core.service.various.StagingService;
-
-import org.yamj.plugin.api.type.JobType;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,8 +40,13 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.service.various.IdentifierService;
+import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
+import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 /**
  * Service to read the NFO files
@@ -66,6 +67,8 @@ public final class InfoReader {
     private StagingService stagingService;
     @Autowired
     private OnlineScannerService onlineScannerService;
+    @Autowired
+    private IdentifierService identifierService;
 
     /**
      * Try and read a NFO file for information
@@ -589,7 +592,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private static void parseDirectors(NodeList nlElements, InfoDTO dto) {
+    private void parseDirectors(NodeList nlElements, InfoDTO dto) {
         // check if we have a node
         if (nlElements == null || nlElements.getLength() == 0) {
             return;
@@ -598,12 +601,10 @@ public final class InfoReader {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
-            if (nElements.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
+            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
+                final String personName = ((Element) nElements).getTextContent();
+                dto.addCredit(this.identifierService.createCredit(NfoScannerService.SCANNER_ID, JobType.DIRECTOR, personName));
             }
-            
-            Element eDirector = (Element) nElements;
-            dto.addDirector(eDirector.getTextContent());
         }
     }
 
@@ -613,7 +614,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private static void parseWriters(List<Node> nlWriters, InfoDTO dto) {
+    private void parseWriters(List<Node> nlWriters, InfoDTO dto) {
         // check if we have nodes
         if (nlWriters == null || nlWriters.isEmpty()) {
             return;
@@ -621,23 +622,22 @@ public final class InfoReader {
 
         for (Node nWriter : nlWriters) {
             NodeList nlChilds = ((Element)nWriter).getChildNodes();
-            Node nChilds;
             for (int looper = 0; looper < nlChilds.getLength(); looper++) {
-                nChilds = nlChilds.item(looper);
+                Node nChilds = nlChilds.item(looper);
                 if (nChilds.getNodeType() == Node.TEXT_NODE) {
-                    dto.addWriter(nChilds.getNodeValue());
+                    dto.addCredit(this.identifierService.createCredit(NfoScannerService.SCANNER_ID, JobType.WRITER, nChilds.getNodeValue()));
                 }
             }
         }
     }
-
+    
     /**
      * Parse Actors from the XML NFO file.
      *
      * @param nlElements
      * @param dto
      */
-    private static void parseActors(NodeList nlElements, InfoDTO dto) {
+    private void parseActors(NodeList nlElements, InfoDTO dto) {
         // check if we have a node
         if (nlElements == null || nlElements.getLength() == 0) {
             return;
@@ -663,11 +663,17 @@ public final class InfoReader {
 
                     Element eCast = (Element) nElement;
                     if (eCast.getNodeName().equalsIgnoreCase("name")) {
+                        
                         if (firstActor) {
                             firstActor = false;
                         } else {
-                            dto.addActor(aName, aRole, aThumb);
+                            CreditDTO credit = this.identifierService.createCredit(NfoScannerService.SCANNER_ID, JobType.ACTOR, aName, aRole);
+                            if (credit != null) {
+                                credit.addPhoto(NfoScannerService.SCANNER_ID, aThumb);
+                                dto.addCredit(credit);
+                            }
                         }
+                        
                         aName = eCast.getTextContent();
                         aRole = null;
                         aThumb = null;
@@ -685,7 +691,11 @@ public final class InfoReader {
             }
 
             // after all add the last scraped actor
-            dto.addActor(aName, aRole, aThumb);
+            CreditDTO credit = this.identifierService.createCredit(NfoScannerService.SCANNER_ID, JobType.ACTOR, aName, aRole);
+            if (credit != null) {
+                credit.addPhoto(NfoScannerService.SCANNER_ID, aThumb);
+                dto.addCredit(credit);
+            }
         }
     }
 

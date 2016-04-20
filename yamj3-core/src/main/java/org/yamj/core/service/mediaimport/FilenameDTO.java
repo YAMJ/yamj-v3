@@ -29,7 +29,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.tools.YamjTools;
 
 /**
  * Container of parsed data from movie file name. Contains only information which could be possibly extracted from file name.
@@ -44,6 +43,7 @@ public class FilenameDTO {
     private final boolean directory;
     private String rest;
     private String title = null;
+    private String cleanTitle = null;
     private int year = -1;
     private boolean extra = false;
     private int part = -1;
@@ -100,6 +100,14 @@ public class FilenameDTO {
 
     public void setTitle(String title) {
         this.title = StringUtils.trim(title);
+    }
+
+    public String getCleanTitle() {
+        return cleanTitle;
+    }
+
+    public void setCleanTitle(String cleanTitle) {
+        this.cleanTitle = cleanTitle;
     }
 
     public int getYear() {
@@ -238,7 +246,7 @@ public class FilenameDTO {
 
     public String buildIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(YamjTools.cleanIdentifier(getTitle()));
+        sb.append(getCleanTitle());
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         return sb.toString();
@@ -246,7 +254,7 @@ public class FilenameDTO {
 
     public String buildEpisodeIdentifier(int episode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(YamjTools.cleanIdentifier(getTitle()));
+        sb.append(getCleanTitle());
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
@@ -258,7 +266,7 @@ public class FilenameDTO {
 
     public String buildSeasonIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(YamjTools.cleanIdentifier(getTitle()));
+        sb.append(getCleanTitle());
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
@@ -270,6 +278,7 @@ public class FilenameDTO {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[Title=").append(title);
+        sb.append("],[CleanTitle=").append(cleanTitle);
         sb.append("],[Year=").append(year);
         sb.append("],[Extra=").append(extra);
         sb.append("],[Part=").append(part);

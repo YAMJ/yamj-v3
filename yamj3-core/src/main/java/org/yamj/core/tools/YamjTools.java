@@ -22,13 +22,10 @@
  */
 package org.yamj.core.tools;
 
-import com.ibm.icu.text.Transliterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.AbstractMetadata;
@@ -36,9 +33,6 @@ import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
 
 public final class YamjTools {
-
-    private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9\\-\\(\\)]");
-    private static final char[] CLEAN_DELIMITERS = new char[]{'.', ' ', '_', '-'};
 
     private static final long KB = 1024;
     private static final long MB = KB * KB;
@@ -48,12 +42,8 @@ public final class YamjTools {
     private static final DecimalFormat FILESIZE_FORMAT_0;
     private static final DecimalFormat FILESIZE_FORMAT_1;
     private static final DecimalFormat FILESIZE_FORMAT_2;
-    private static final boolean IDENT_TRANSLITERATE;
-    private static final Transliterator TRANSLITERATOR;
 
     static {
-        IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", false);
-
         // Populate the charReplacementMap
         String temp = PropertyTools.getProperty("indexing.character.replacement", "");
         StringTokenizer tokenizer = new StringTokenizer(temp, ",");
@@ -75,9 +65,6 @@ public final class YamjTools {
         FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
         FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
         FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
-
-        // create a new transliterator
-        TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
     }
 
     private YamjTools() {
@@ -213,29 +200,6 @@ public final class YamjTools {
         }
 
         return watched;
-    }
-
-    @Deprecated
-    public static String cleanIdentifier(final String identifier) {
-        String result = identifier;
-        if (IDENT_TRANSLITERATE) {
-            result = TRANSLITERATOR.transliterate(result);
-        }
-        
-        // format ß to ss
-        result = result.replaceAll("ß", "ss");
-        // remove all accents from letters
-        result = StringUtils.stripAccents(result);
-        // capitalize first letter
-        result = WordUtils.capitalize(result, CLEAN_DELIMITERS);
-        // remove punctuation and symbols
-        result = result.replaceAll("[\\p{Po}|\\p{S}]", "");
-        // just leave characters and digits
-        result = CLEAN_STRING_PATTERN.matcher(result).replaceAll(" ").trim();
-        // remove double whitespaces
-        result = result.replaceAll("( )+", " ").trim();
-        
-        return result;
     }
 
     /**

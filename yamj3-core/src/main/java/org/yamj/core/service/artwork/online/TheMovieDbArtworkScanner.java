@@ -24,6 +24,7 @@ package org.yamj.core.service.artwork.online;
 
 import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
 import static org.yamj.plugin.api.common.Constants.SOURCE_TMDB;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.enumeration.ArtworkType;
@@ -47,6 +48,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.ExceptionTools;
 import org.yamj.core.tools.YamjTools;
 
@@ -71,7 +73,9 @@ public class TheMovieDbArtworkScanner implements
     private TheMovieDbApi tmdbApi;
     @Autowired
     private Cache tmdbArtworkCache;
-
+    @Autowired
+    private IdentifierService identifierService;
+    
     private String getDefaultLanguage() {
         return localeService.getLocaleForConfig("themoviedb").getLanguage();
     }
@@ -186,9 +190,9 @@ public class TheMovieDbArtworkScanner implements
                 }
 
                 // 1. check name
-                String boxedSetName = YamjTools.cleanIdentifier(boxedSet.getName());
-                String collectionName = YamjTools.cleanIdentifier(collection.getTitle());
-                if (StringUtils.equalsIgnoreCase(boxedSetName, collectionName)) {
+                String boxedSetIdentifier = boxedSet.getIdentifier();
+                String collectionIdentifier = identifierService.cleanIdentifier(collection.getTitle());
+                if (StringUtils.equalsIgnoreCase(boxedSetIdentifier, collectionIdentifier)) {
                     // found matching collection
                     return collection;
                 }

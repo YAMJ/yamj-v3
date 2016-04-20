@@ -24,8 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.*;
 
-import org.yamj.plugin.api.type.JobType;
-
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -49,10 +47,12 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.type.JobType;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -67,6 +67,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     private TheMovieDbApiWrapper tmdbApiWrapper;
     @Autowired
     private LocaleService localeService;
+    @Autowired
+    private IdentifierService identifierService;
     
     @Override
     public String getScannerName() {
@@ -303,7 +305,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                     continue;
                 }
                 
-                CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                CreditDTO credit = this.identifierService.createCredit(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                 videoData.addCreditDTO(credit);
             }
         }
@@ -316,7 +318,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 continue;
             }
 
-            CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+            CreditDTO credit = this.identifierService.createCredit(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
             videoData.addCreditDTO(credit);
         }
 
@@ -324,7 +326,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", false)) {
             Collection collection = movieInfo.getBelongsToCollection();
             if (collection != null && collection.getName() != null) {
-                videoData.addBoxedSetDTO(SOURCE_TMDB, collection.getName(), Integer.valueOf(-1), Integer.toString(collection.getId()));
+                final String boxedSetIdentifier = identifierService.cleanIdentifier(collection.getName());
+                videoData.addBoxedSetDTO(SOURCE_TMDB, boxedSetIdentifier, collection.getName(), Integer.valueOf(-1), Integer.toString(collection.getId()));
             }
         }
         
@@ -529,7 +532,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
                 if (CollectionUtils.isNotEmpty(credits.getCast()) && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
                     for (MediaCreditCast person : credits.getCast()) {
-                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                        CreditDTO credit = this.identifierService.createCredit(SOURCE_TMDB, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                         videoData.addCreditDTO(credit);
                     }
                 }
@@ -537,7 +540,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 // GUEST STARS
                 if (CollectionUtils.isNotEmpty(credits.getGuestStars()) && this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
                     for (MediaCreditCast person : credits.getGuestStars()) {
-                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
+                        CreditDTO credit = this.identifierService.createCredit(SOURCE_TMDB, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
                         videoData.addCreditDTO(credit);
                     }
                 }
@@ -550,7 +553,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                             // scan not enabled for that job
                             continue;
                         }
-                        CreditDTO credit = new CreditDTO(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+                        
+                        CreditDTO credit = this.identifierService.createCredit(SOURCE_TMDB, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
                         videoData.addCreditDTO(credit);
                     }
                 }
