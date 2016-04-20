@@ -53,7 +53,7 @@ public class IdentifierService {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     
-    @Value("${yamj3.identifier.transliterate:false}")
+    @Value("${yamj3.transliterate:false}")
     private boolean transliterationEnabled;
 
     private Transliterator transliterator;
