@@ -34,14 +34,14 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
-public final class ArtworkTools {
+public final class ArtworkStorageTools {
 
     protected static final String SOURCE_UPLOAD = "upload";
     private static final String TYPE_MOVIE_SCANNER = "movie_scanner";
     private static final String TYPE_SERIES_SCANNER = "series_scanner";
     private static final String TYPE_PERSON_SCANNER = "person_scanner";
 
-    private ArtworkTools() {
+    private ArtworkStorageTools() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 

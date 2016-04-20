@@ -48,13 +48,10 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.ExceptionTools;
-import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.artwork.tools.ArtworkTools;
 
 @Service("tmdbArtworkScanner")
-public class TheMovieDbArtworkScanner implements
-        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner,
-        IBoxedSetPosterScanner, IBoxedSetFanartScanner,
-        ITvShowPosterScanner, ITvShowFanartScanner, ITvShowVideoImageScanner {
+public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesArtworkScanner, IBoxedSetArtworkScanner, IPersonArtworkScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_SIZE = "original";
@@ -118,6 +115,16 @@ public class TheMovieDbArtworkScanner implements
     }
 
     @Override
+    public List<ArtworkDetailDTO> getBanners(Season season) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(Series series) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
         String tmdbId = tmdbScanner.getSeriesId(videoData.getSeason().getSeries());
         return getFilteredArtwork(tmdbId, videoData.getSeason().getSeason(), videoData.getEpisode(), getDefaultLanguage(), MetaDataType.EPISODE, ArtworkType.STILL, DEFAULT_SIZE);
@@ -162,6 +169,11 @@ public class TheMovieDbArtworkScanner implements
             return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(BoxedSet boxedSet) {
         return Collections.emptyList();
     }
 
@@ -317,7 +329,7 @@ public class TheMovieDbArtworkScanner implements
             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
         } else {
             String url = artworkURL.toString();
-            dtos.add(new ArtworkDetailDTO(getScannerName(), url, YamjTools.getPartialHashCode(url)));
+            dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url)));
         }
     }
 

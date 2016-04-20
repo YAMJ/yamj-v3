@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork;
 
-import static org.yamj.core.service.artwork.ArtworkTools.SOURCE_UPLOAD;
+import static org.yamj.core.service.artwork.ArtworkStorageTools.SOURCE_UPLOAD;
 
 import java.io.File;
 import org.apache.commons.io.FilenameUtils;
@@ -39,11 +39,11 @@ import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
+import org.yamj.plugin.api.type.ImageType;
 
 @Service("artworkUploadService")
 public class ArtworkUploadService {
@@ -93,12 +93,12 @@ public class ArtworkUploadService {
             located.setStatus(StatusType.UPDATED);
         }
 
-        final String cacheFilename = ArtworkTools.buildCacheFilename(located);
+        final String cacheFilename = ArtworkStorageTools.buildCacheFilename(located);
         LOG.trace("Cache uploaded image with file name: {}", cacheFilename);
 
         // save file to cache
         try {
-            fileStorageService.store(ArtworkTools.getStorageType(artwork), cacheFilename, image.getBytes());
+            fileStorageService.store(ArtworkStorageTools.getStorageType(artwork), cacheFilename, image.getBytes());
         } catch (Exception e) {
             LOG.warn("Failed to store uploaded file: " + cacheFilename, e);
             return ApiStatus.internalError("Failed to store uploaded file into cache");

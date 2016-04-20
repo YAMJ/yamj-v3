@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork;
 
-import static org.yamj.core.service.artwork.ArtworkTools.SOURCE_UPLOAD;
+import static org.yamj.core.service.artwork.ArtworkStorageTools.SOURCE_UPLOAD;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -80,7 +80,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
     private void processLocatedArtwork(final Long id) {
         // get required located artwork
         ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(id);
-        final StorageType storageType = ArtworkTools.getStorageType(located);
+        final StorageType storageType = ArtworkStorageTools.getStorageType(located);
         LOG.debug("Process located artwork: {}", located);
 
         if (located.isNotCached()) {
@@ -104,7 +104,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             }
 
             // store original in file cache
-            String cacheFilename = ArtworkTools.buildCacheFilename(located);
+            String cacheFilename = ArtworkStorageTools.buildCacheFilename(located);
             LOG.trace("Cache artwork with file name: {}", cacheFilename);
     
             boolean stored;
@@ -237,7 +237,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
     
     private ArtworkGenerated generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         // build cache filename
-        final String cacheFilename = ArtworkTools.buildCacheFilename(located, profile);
+        final String cacheFilename = ArtworkStorageTools.buildCacheFilename(located, profile);
         
         // create and store image
         createAndStoreImage(located, profile, cacheFilename);
@@ -248,7 +248,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
         } catch (Exception ex) {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
-            final StorageType storageType = ArtworkTools.getStorageType(profile);
+            final StorageType storageType = ArtworkStorageTools.getStorageType(profile);
             fileStorageService.deleteFile(storageType, cacheFilename);
             throw ex;
         }
@@ -291,7 +291,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
 
         ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, profileName);
         if (generated != null) {
-            final StorageType storageType = ArtworkTools.getStorageType(generated.getArtworkProfile().getArtworkType());
+            final StorageType storageType = ArtworkStorageTools.getStorageType(generated.getArtworkProfile().getArtworkType());
             final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
             result.setResource(this.fileStorageService.getStorageName(storageType, filename));
             result.setMediaType(MediaType.IMAGE_JPEG);
@@ -311,7 +311,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             return null;
         }
         
-        final MetaDataType metaDataType = ArtworkTools.getMetaDataType(located);
+        final MetaDataType metaDataType = ArtworkStorageTools.getMetaDataType(located);
         final ArtworkType artworkType = located.getArtwork().getArtworkType();
         ArtworkProfile profile = this.artworkStorageService.getArtworkProfile(profileName, metaDataType, artworkType);
         if (profile == null) {
@@ -323,7 +323,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
         generated = this.generateImage(located, profile);
         
         // return the image
-        final StorageType storageType = ArtworkTools.getStorageType(located);
+        final StorageType storageType = ArtworkStorageTools.getStorageType(located);
         final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
         result.setResource(this.fileStorageService.getStorageName(storageType, filename));
         result.setMediaType(MediaType.IMAGE_JPEG);
@@ -331,7 +331,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
     }
 
     private void createAndStoreImage(ArtworkLocated located, ArtworkProfile profile, String cacheFilename) throws Exception {
-        final StorageType storageType = ArtworkTools.getStorageType(profile);
+        final StorageType storageType = ArtworkStorageTools.getStorageType(profile);
         
         LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));

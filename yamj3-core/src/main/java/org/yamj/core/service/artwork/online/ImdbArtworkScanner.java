@@ -40,7 +40,7 @@ import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 
 @Service("imdbArtworkScanner")
-public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner {
+public class ImdbArtworkScanner implements IMovieArtworkScanner, IPersonArtworkScanner {
 
     @Autowired
     private ImdbScanner imdbScanner;

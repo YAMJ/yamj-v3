@@ -20,13 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.online;
+package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import java.util.Map;
+import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
 
-public interface ITvShowVideoImageScanner extends IArtworkScanner {
+public interface MovieArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDetailDTO> getVideoImages(VideoData videoData);
+    List<ArtworkDTO> getPosters(String title, String originalTitle, int year, Map<String,String> ids);
+
+    List<ArtworkDTO> getFanarts(String title, String originalTitle, int year, Map<String,String> ids);
 }

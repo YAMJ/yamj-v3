@@ -23,13 +23,14 @@
 package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-public interface ITvShowBannerScanner extends IArtworkScanner {
+public interface IBoxedSetArtworkScanner extends IArtworkScanner {
 
-    List<ArtworkDetailDTO> getBanners(Season season);
+    List<ArtworkDetailDTO> getPosters(BoxedSet boxedSet);
 
-    List<ArtworkDetailDTO> getBanners(Series series);
+    List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet);
+
+    List<ArtworkDetailDTO> getBanners(BoxedSet boxedSet);
 }

@@ -20,20 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.type;
+package org.yamj.core.service.artwork.online;
 
-public enum ImageType {
+import java.util.List;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-    JPG,
-    PNG,
-    BMP,
-    GIF;
-    
-    public static ImageType fromString(final String imageType) {
-        try {
-            return ImageType.valueOf(imageType.trim().toUpperCase());
-        } catch (Exception ex) { //NOSONAR
-            return JPG;
-        }
-    }
+public interface IPersonArtworkScanner extends IArtworkScanner {
+
+    List<ArtworkDetailDTO> getPhotos(Person person);
 }

@@ -44,9 +44,7 @@ import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.web.apis.FanartTvApiWrapper;
 
 @Service("fanartTvScanner")
-public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner,
-    ITvShowFanartScanner, ITvShowPosterScanner, ITvShowBannerScanner 
-{
+public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScanner {
 
     private static final String SCANNER_ID = "fanarttv";
     private static final String LANGUAGE_NONE = "00";
@@ -111,6 +109,11 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     public List<ArtworkDetailDTO> getBanners(Season season) {
         String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
         return getSeriesArtworkType(tvdbId, FTArtworkType.SEASONBANNER, season.getSeason());
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+        return Collections.emptyList();
     }
 
     /**

@@ -20,13 +20,20 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.online;
+package org.yamj.plugin.api.type;
 
-import java.util.List;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+public enum ImageType {
 
-public interface IBoxedSetFanartScanner extends IArtworkScanner {
-
-    List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet);
+    JPG,
+    PNG,
+    BMP,
+    GIF;
+    
+    public static ImageType fromString(final String imageType) {
+        try {
+            return ImageType.valueOf(imageType.trim().toUpperCase());
+        } catch (Exception ex) { //NOSONAR
+            return JPG;
+        }
+    }
 }

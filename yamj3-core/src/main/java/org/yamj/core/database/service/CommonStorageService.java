@@ -42,7 +42,7 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.service.artwork.ArtworkTools;
+import org.yamj.core.service.artwork.ArtworkStorageTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.WatchedDTO;
@@ -300,7 +300,7 @@ public class CommonStorageService {
     }
 
     private void delete(Artwork artwork, ArtworkLocated located, Set<String> filesToDelete) {
-        final StorageType storageType = ArtworkTools.getStorageType(artwork);
+        final StorageType storageType = ArtworkStorageTools.getStorageType(artwork);
 
         // delete generated files
         for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
@@ -399,7 +399,7 @@ public class CommonStorageService {
     public Set<String> ignoreArtworkLocated(Long id) {
         ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
         if (located != null) {
-            final StorageType storageType = ArtworkTools.getStorageType(located);
+            final StorageType storageType = ArtworkStorageTools.getStorageType(located);
 
             Set<String> filesToDelete = new HashSet<>();
             // delete generated files

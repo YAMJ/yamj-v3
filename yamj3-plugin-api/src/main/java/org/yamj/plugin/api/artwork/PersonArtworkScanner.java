@@ -20,16 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.online;
+package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import java.util.Map;
+import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
 
-public interface ITvShowFanartScanner extends IArtworkScanner {
+public interface PersonArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDetailDTO> getFanarts(Season season);
-
-    List<ArtworkDetailDTO> getFanarts(Series series);
+    List<ArtworkDTO> getPhotos(String name, Map<String,String> ids);
 }

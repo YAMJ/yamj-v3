@@ -34,11 +34,11 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.AllocineScanner;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
+import org.yamj.plugin.api.artwork.tools.ArtworkTools;
 
 @Service("allocineArtworkScanner")
-public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPosterScanner, IPhotoScanner {
+public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtworkScanner, IPersonArtworkScanner {
 
     @Autowired
     private AllocineScanner allocineScanner;
@@ -62,6 +62,11 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
             return Collections.emptyList();
         }
         return buildArtworkDetails(movieInfos.getPosters());
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -92,12 +97,37 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
         return buildArtworkDetails(tvSeasonInfos.getPosters());
     }
 
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Season season) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Series series) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(Season season) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(Series series) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+        return Collections.emptyList();
+    }
+
     private List<ArtworkDetailDTO> buildArtworkDetails(Map<String,Long> artworks) {
         List<ArtworkDetailDTO> dtos = new ArrayList<>(artworks.size());
         for (Entry<String,Long> entry : artworks.entrySet()) {
             final String hashCode;
             if (entry.getValue() == null || entry.getValue().longValue() == 0) {
-                hashCode = YamjTools.getSimpleHashCode(entry.getKey());
+                hashCode = ArtworkTools.getSimpleHashCode(entry.getKey());
             } else {
                 hashCode = entry.getValue().toString();
             }

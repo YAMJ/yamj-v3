@@ -276,45 +276,6 @@ public final class YamjTools {
         return format;
     }
     
-    /**
-     * Get the hash code of an URL.
-     * 
-     * @param string
-     * @return the hash code
-     */
-    public static String getSimpleHashCode(String string) {
-        // hash code of string
-        return Integer.toString(Math.abs(string.hashCode()));
-    }
-    
-    /**
-     * Get a part of the string as hash code.
-     * 
-     * @param string
-     * @return the hash code
-     */
-    public static String getPartialHashCode(String string) {
-        String hashCode = null;
-        try {
-            int index = StringUtils.lastIndexOf(string, "/");
-            if (index > -1) {
-                String tmp = string.substring(index+1);
-                index = tmp.indexOf(".");
-                if (index > -1) {
-                    hashCode = tmp.substring(0, index);
-                }
-            }
-        } catch (Exception ignore) {
-            // ignore any exception
-        }
-        
-        if (StringUtils.isEmpty(hashCode)) {
-            hashCode = getSimpleHashCode(string);
-        }
-        
-        return hashCode;
-    }
-    
     public static <T extends Object> T getEqualObject(Collection<T> coll, T object) {
         if (CollectionUtils.isEmpty(coll)) {
             return null;

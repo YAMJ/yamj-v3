@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import org.yamj.plugin.api.type.ImageType;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -44,7 +46,6 @@ import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.FileTools;

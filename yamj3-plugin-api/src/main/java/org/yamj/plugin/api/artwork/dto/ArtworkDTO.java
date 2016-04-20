@@ -20,36 +20,34 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork;
+package org.yamj.plugin.api.artwork.dto;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.plugin.api.artwork.tools.ArtworkTools;
 import org.yamj.plugin.api.type.ImageType;
 
-public class ArtworkDetailDTO {
+public class ArtworkDTO {
 
-    private final String source;
     private final String url;
     private final String hashCode;
     private final ImageType imageType;
-    private String languageCode = null;
+    private String language = null;
     private int rating = -1;
 
-    public ArtworkDetailDTO(String source, String url) {
-        this(source, url, null, ImageType.fromString(FilenameUtils.getExtension(url)));
+    public ArtworkDTO(String url) {
+        this(url, null, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
-    public ArtworkDetailDTO(String source, String url, ImageType imageType) {
-        this(source, url, null, imageType);
+    public ArtworkDTO(String url, ImageType imageType) {
+        this(url, null, imageType);
     }
 
-    public ArtworkDetailDTO(String source, String url, String hashCode) {
-        this(source, url, hashCode, ImageType.fromString(FilenameUtils.getExtension(url)));
+    public ArtworkDTO(String url, String hashCode) {
+        this(url, hashCode, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
-    public ArtworkDetailDTO(String source, String url, String hashCode, ImageType imageType) {
-        this.source = source;
+    public ArtworkDTO(String url, String hashCode, ImageType imageType) {
         this.url = url;
         if (StringUtils.isBlank(hashCode)) {
             this.hashCode = ArtworkTools.getSimpleHashCode(url);
@@ -57,10 +55,6 @@ public class ArtworkDetailDTO {
             this.hashCode = hashCode;
         }
         this.imageType = imageType;
-    }
-    
-    public String getSource() {
-        return source;
     }
 
     public String getUrl() {
@@ -75,12 +69,12 @@ public class ArtworkDetailDTO {
         return imageType;
     }
     
-    public String getLanguageCode() {
-        return languageCode;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setLanguageCode(String languageCode) {
-        this.languageCode = languageCode;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public int getRating() {
@@ -89,24 +83,5 @@ public class ArtworkDetailDTO {
 
     public void setRating(int rating) {
         this.rating = rating;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ArtworkDetailDTO [Source=");
-        sb.append(getSource());
-        sb.append(", url=");
-        sb.append(getUrl());
-        sb.append(", hashCode=");
-        sb.append(getHashCode());
-        sb.append(", imageType=");
-        sb.append(getImageType());
-        sb.append(", languageCode=");
-        sb.append(getLanguageCode());
-        sb.append(", rating=");
-        sb.append(getRating());
-        sb.append("]");
-        return sb.toString();
     }
 }

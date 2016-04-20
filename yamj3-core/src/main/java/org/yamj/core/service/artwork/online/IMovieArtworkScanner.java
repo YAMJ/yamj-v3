@@ -26,7 +26,9 @@ import java.util.List;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-public interface IMovieFanartScanner extends IArtworkScanner {
+public interface IMovieArtworkScanner extends IArtworkScanner {
+
+    List<ArtworkDetailDTO> getPosters(VideoData videoData);
 
     List<ArtworkDetailDTO> getFanarts(VideoData videoData);
 }

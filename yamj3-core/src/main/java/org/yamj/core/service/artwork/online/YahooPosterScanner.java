@@ -23,6 +23,7 @@
 package org.yamj.core.service.artwork.online;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("yahooPosterScanner")
-public class YahooPosterScanner implements IMoviePosterScanner {
+public class YahooPosterScanner implements IMovieArtworkScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(YahooPosterScanner.class);
 
@@ -80,5 +81,10 @@ public class YahooPosterScanner implements IMoviePosterScanner {
         }
 
         return dtos;
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+        return Collections.emptyList();
     }
 }

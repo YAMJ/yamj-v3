@@ -20,13 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.online;
+package org.yamj.plugin.api.artwork;
 
-import java.util.List;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.common.PluginConfigService;
 
-public interface IPhotoScanner extends IArtworkScanner {
+import java.util.Locale;
+import org.yamj.api.common.http.CommonHttpClient;
 
-    List<ArtworkDetailDTO> getPhotos(Person person);
+public interface ArtworkScanner {
+
+    String getScannerName();
+
+    void init(PluginConfigService configService, CommonHttpClient httpClient, Locale locale);
 }

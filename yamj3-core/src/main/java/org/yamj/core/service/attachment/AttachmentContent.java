@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.attachment;
 
-import org.yamj.core.database.model.type.ImageType;
+import org.yamj.plugin.api.type.ImageType;
 
 /**
  * A volatile container for content information of an attachment.

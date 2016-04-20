@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.plugin.api.type.ImageType;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -30,7 +32,6 @@ import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.model.type.ScalingType;
 
 @NamedQueries({
