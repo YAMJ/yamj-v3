@@ -22,9 +22,11 @@
  */
 package org.yamj.plugin.api.metadata;
 
+import java.util.Map;
+
 public interface NfoIdScanner {
 
     String getScannerName();
     
-    String scanNFO(String nfoContent);
+    Map<String,String> scanNFO(String nfoContent);
 }

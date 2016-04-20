@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -128,6 +129,10 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     
     abstract Map<String, String> getSourceDbIdMap();
         
+    public Map<String,String> getIdMap() {
+        return new HashMap<>(getSourceDbIdMap());
+    }
+    
     @Override
     public String getSourceDbId(String sourceDb) {
         return getSourceDbIdMap().get(sourceDb);

@@ -20,23 +20,25 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common;
+package org.yamj.plugin.api.mockobjects;
+
+import org.yamj.plugin.api.common.Constants;
+import org.yamj.plugin.api.common.PluginConfigService;
 
 import org.yamj.plugin.api.type.JobType;
-
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
 
 
-public class PluginConfigServiceImpl implements PluginConfigService {
+public class PluginConfigServiceMock implements PluginConfigService {
 
     private final Properties properties;
 
-    public PluginConfigServiceImpl() {
+    public PluginConfigServiceMock() {
         this.properties = new Properties();
     }
 
-    public PluginConfigServiceImpl(Properties properties) {
+    public PluginConfigServiceMock(Properties properties) {
         this.properties = properties;
     }
     

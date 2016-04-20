@@ -72,7 +72,7 @@ public class NfoScannerService {
         
         // create an info DTO for movie
         InfoDTO infoDTO = new InfoDTO(false);
-        infoDTO.setIds(videoData.getSourceDbIdMap());
+        infoDTO.setIds(videoData.getIdMap());
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);
@@ -230,7 +230,7 @@ public class NfoScannerService {
         
         // create an info DTO for TV show
         InfoDTO infoDTO = new InfoDTO(true);
-        infoDTO.setIds(series.getSourceDbIdMap());
+        infoDTO.setIds(series.getIdMap());
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);

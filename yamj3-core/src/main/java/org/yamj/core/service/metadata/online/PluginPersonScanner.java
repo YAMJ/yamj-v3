@@ -40,6 +40,10 @@ public class PluginPersonScanner implements IPersonScanner {
         this.personScanner = personScanner;
     }
     
+    public PersonScanner getPersonScanner() {
+        return personScanner;
+    }
+
     @Override
     public String getScannerName() {
         return personScanner.getScannerName();
@@ -51,7 +55,7 @@ public class PluginPersonScanner implements IPersonScanner {
     }
 
     private String getPersonId(Person person, boolean throwTempError) {
-        String personId = personScanner.getPersonId(person.getName(), person.getSourceDbIdMap(), throwTempError);
+        String personId = personScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
         person.setSourceDbId(getScannerName(), personId);
         return personId;
     }
@@ -64,7 +68,7 @@ public class PluginPersonScanner implements IPersonScanner {
             return ScanResult.MISSING_ID;
         }
 
-        final PersonDTO personDTO = new PersonDTO(person.getSourceDbIdMap());
+        final PersonDTO personDTO = new PersonDTO(person.getIdMap());
         final boolean scanned = personScanner.scanPerson(personDTO, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for person '{}'", getScannerName(), person.getName());

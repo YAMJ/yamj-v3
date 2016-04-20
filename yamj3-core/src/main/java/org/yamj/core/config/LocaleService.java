@@ -34,9 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.plugin.api.common.PluginLocaleService;
 
 @Service("localeService")
-public class LocaleService  {
+public class LocaleService implements PluginLocaleService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocaleService.class);
 
@@ -284,6 +285,7 @@ public class LocaleService  {
         return null;
     }
     
+    @Override
     public Locale getLocale() {
         return yamjLocale;
     }

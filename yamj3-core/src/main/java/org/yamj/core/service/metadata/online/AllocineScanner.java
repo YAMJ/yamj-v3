@@ -97,7 +97,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (StringUtils.isBlank(allocineId)) {
             allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
 
-            if (StringUtils.isBlank(allocineId) && videoData.isTitleOriginalScannable()) {
+            if (StringUtils.isBlank(allocineId) && MetadataTools.isOriginalTitleScannable(videoData.getTitle(), videoData.getTitleOriginal())) {
                 // try with original title
                 allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
             }
@@ -132,7 +132,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
         return allocineId;
     }
-
 
     @Override
     public String getSeriesId(Series series) {

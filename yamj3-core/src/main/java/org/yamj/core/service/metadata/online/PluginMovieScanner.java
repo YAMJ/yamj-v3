@@ -22,9 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +50,10 @@ public class PluginMovieScanner implements IMovieScanner {
         this.identifierService = identifierService;
     }
     
+    public MovieScanner getMovieScanner() {
+        return movieScanner;
+    }
+    
     @Override
     public String getScannerName() {
         return movieScanner.getScannerName();
@@ -61,7 +65,7 @@ public class PluginMovieScanner implements IMovieScanner {
     }
 
     private String getMovieId(VideoData videoData, boolean throwTempError) {
-        String movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getSourceDbIdMap(), throwTempError);
+        String movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getIdMap(), throwTempError);
         videoData.setSourceDbId(getScannerName(), movieId);
         return movieId;
     }
@@ -74,7 +78,7 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final MovieDTO movie = new MovieDTO(videoData.getSourceDbIdMap());
+        final MovieDTO movie = new MovieDTO(new HashMap<>(videoData.getIdMap()));
         final boolean scanned = movieScanner.scanMovie(movie, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for movie '{}'", getScannerName(), videoData.getIdentifier());
@@ -156,19 +160,26 @@ public class PluginMovieScanner implements IMovieScanner {
             return true;
         }
 
-        LOG.trace("Scanning NFO for {} ID", getScannerName());
         try {
-            String id = movieScanner.scanNFO(nfoContent);
-            if (StringUtils.isNotBlank(id)) {
-                LOG.debug("{} ID found in NFO: {}", getScannerName(), id);
-                dto.addId(getScannerName(), id);
-                return true;
+            Map<String,String> ids = movieScanner.scanNFO(nfoContent);
+            boolean result = false;
+            if (MapUtils.isNotEmpty(ids)) {
+                // set possible scanned movie IDs   
+                for (Entry<String,String> entry : ids.entrySet()) {
+                    if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                        // desired ID found
+                        dto.addId(entry.getKey(), entry.getValue());
+                        result = true;
+                    } else if (StringUtils.isBlank(dto.getId(entry.getKey()))) {
+                        // another ID found
+                        dto.addId(entry.getKey(), entry.getValue());
+                    }
+                }
             }
+            return result;
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
+            return false;
         }
-
-        LOG.debug("No {} ID found in NFO", getScannerName());
-        return false;
     }
 }

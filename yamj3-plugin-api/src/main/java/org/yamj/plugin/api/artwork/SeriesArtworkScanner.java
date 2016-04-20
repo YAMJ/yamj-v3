@@ -20,15 +20,27 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.artwork;
 
-import java.util.Map;
+import java.util.List;
+import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
+import org.yamj.plugin.api.metadata.dto.EpisodeDTO;
+import org.yamj.plugin.api.metadata.dto.SeasonDTO;
 import org.yamj.plugin.api.metadata.dto.SeriesDTO;
-import ro.fortsoft.pf4j.ExtensionPoint;
 
-public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
-    
-    String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+public interface SeriesArtworkScanner extends ArtworkScanner {
 
-    boolean scanSeries(SeriesDTO series, boolean throwTempError);
+    List<ArtworkDTO> getPosters(SeasonDTO season);
+
+    List<ArtworkDTO> getPosters(SeriesDTO series);
+
+    List<ArtworkDTO> getFanarts(SeasonDTO season);
+
+    List<ArtworkDTO> getFanarts(SeriesDTO series);
+
+    List<ArtworkDTO> getBanners(SeasonDTO season);
+
+    List<ArtworkDTO> getBanners(SeriesDTO series);
+
+    List<ArtworkDTO> getVideoImages(EpisodeDTO episode);
 }

@@ -101,7 +101,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitle(), videoData.getPublicationYear(), tmdbLocale, throwTempError);
         }
 
-        if (!StringUtils.isNumeric(tmdbId) && videoData.isTitleOriginalScannable()) {
+        if (!StringUtils.isNumeric(tmdbId) && MetadataTools.isOriginalTitleScannable(videoData.getTitle(), videoData.getTitleOriginal())) {
             LOG.debug("No TMDb id found for '{}', searching original title with year {}", videoData.getTitleOriginal(), videoData.getPublicationYear());
             tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), tmdbLocale, throwTempError);
         }

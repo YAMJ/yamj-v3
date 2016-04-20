@@ -114,13 +114,6 @@ public abstract class AbstractMetadata extends AbstractScannable
         }
     }
 
-    public final boolean isTitleOriginalScannable() {
-        if (StringUtils.isBlank(getTitleOriginal())) {
-            return false;
-        }
-        return !StringUtils.equalsIgnoreCase(getTitle(), getTitleOriginal());
-    }
-    
     @Override
     public String getTitleSort() {
         return titleSort;

@@ -20,15 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.common;
 
-import java.util.Map;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
-import ro.fortsoft.pf4j.ExtensionPoint;
+import java.util.Locale;
 
-public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
-    
-    String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+public interface PluginLocaleService {
 
-    boolean scanSeries(SeriesDTO series, boolean throwTempError);
+    Locale getLocale();
 }

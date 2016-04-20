@@ -20,15 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.mockobjects;
 
-import java.util.Map;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
-import ro.fortsoft.pf4j.ExtensionPoint;
+import org.yamj.plugin.api.common.PluginLocaleService;
 
-public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
-    
-    String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+import java.util.Locale;
 
-    boolean scanSeries(SeriesDTO series, boolean throwTempError);
+public class PluginLocaleServiceMock implements PluginLocaleService {
+
+    @Override
+    public Locale getLocale() {
+        return Locale.getDefault();
+    }
 }

@@ -22,9 +22,8 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.metadata.dto.MovieDTO;
-
 import java.util.Map;
+import org.yamj.plugin.api.metadata.dto.MovieDTO;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface MovieScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {

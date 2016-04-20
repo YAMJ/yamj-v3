@@ -90,7 +90,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             videoData.setSourceDbId(SOURCE_IMDB, imdbId);
         }
         // search by original title
-        if (StringUtils.isBlank(imdbId) && videoData.isTitleOriginalScannable()) {
+        if (StringUtils.isBlank(imdbId) && MetadataTools.isOriginalTitleScannable(videoData.getTitle(), videoData.getTitleOriginal())) {
             imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, throwTempError);
             videoData.setSourceDbId(SOURCE_IMDB, imdbId);
         }

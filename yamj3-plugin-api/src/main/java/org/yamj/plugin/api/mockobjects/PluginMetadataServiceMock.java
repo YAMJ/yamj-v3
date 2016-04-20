@@ -20,15 +20,28 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.mockobjects;
 
-import java.util.Map;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
-import ro.fortsoft.pf4j.ExtensionPoint;
+import org.yamj.plugin.api.common.PluginMetadataService;
 
-public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
-    
-    String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.PersonScanner;
+import org.yamj.plugin.api.metadata.SeriesScanner;
 
-    boolean scanSeries(SeriesDTO series, boolean throwTempError);
+public class PluginMetadataServiceMock implements PluginMetadataService {
+
+    @Override
+    public MovieScanner getMovieScanner(String source) {
+        return null;
+    }
+
+    @Override
+    public SeriesScanner getSeriesScanner(String source) {
+        return null;
+    }
+
+    @Override
+    public PersonScanner getPersonScanner(String source) {
+        return null;
+    }
 }

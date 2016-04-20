@@ -22,9 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,10 @@ public class PluginSeriesScanner implements ISeriesScanner {
         this.identifierService = identifierService;
     }
     
+    public SeriesScanner getSeriesScanner() {
+        return seriesScanner;
+    }
+
     @Override
     public String getScannerName() {
         return seriesScanner.getScannerName();
@@ -62,7 +66,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
 
     private String getSeriesId(Series series, boolean throwTempError) {
-        String seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getSourceDbIdMap(), throwTempError);
+        String seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getIdMap(), throwTempError);
         series.setSourceDbId(getScannerName(), seriesId);
         return seriesId;
     }
@@ -251,11 +255,11 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
     
     private SeriesDTO buildSeriesToScan(Series series) { 
-        final SeriesDTO seriesDTO = new SeriesDTO(series.getSourceDbIdMap()); 
+        final SeriesDTO seriesDTO = new SeriesDTO(series.getIdMap()); 
 
         for (Season season : series.getSeasons()) {
             // create season object
-            SeasonDTO seasonDTO = new SeasonDTO(season.getSourceDbIdMap(), season.getSeason());
+            SeasonDTO seasonDTO = new SeasonDTO(season.getIdMap(), season.getSeason());
             seasonDTO.setScanNeeded(!season.isTvSeasonDone(getScannerName()));
             seriesDTO.addSeason(seasonDTO);
             seasonDTO.setSeries(seriesDTO);
@@ -266,7 +270,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
                     continue;
                 }
                 
-                EpisodeDTO episodeDTO = new EpisodeDTO(videoData.getSourceDbIdMap(), videoData.getEpisode());
+                EpisodeDTO episodeDTO = new EpisodeDTO(videoData.getIdMap(), videoData.getEpisode());
                 seasonDTO.addEpisode(episodeDTO);
                 episodeDTO.setSeason(seasonDTO);
             }
@@ -282,19 +286,26 @@ public class PluginSeriesScanner implements ISeriesScanner {
             return true;
         }
 
-        LOG.trace("Scanning NFO for {} ID", getScannerName());
         try {
-            String id = seriesScanner.scanNFO(nfoContent);
-            if (StringUtils.isNotBlank(id)) {
-                LOG.debug("{} ID found in NFO: {}", getScannerName(), id);
-                dto.addId(getScannerName(), id);
-                return true;
+            Map<String,String> ids = seriesScanner.scanNFO(nfoContent);
+            boolean result = false;
+            if (MapUtils.isNotEmpty(ids)) {
+                // set possible scanned movie IDs   
+                for (Entry<String,String> entry : ids.entrySet()) {
+                    if (getScannerName().equalsIgnoreCase(entry.getKey())) {
+                        // desired ID found
+                        dto.addId(entry.getKey(), entry.getValue());
+                        result = true;
+                    } else if (StringUtils.isBlank(dto.getId(entry.getKey()))) {
+                        // another ID found
+                        dto.addId(entry.getKey(), entry.getValue());
+                    }
+                }
             }
+            return result;
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
+            return false;
         }
-
-        LOG.debug("No {} ID found in NFO", getScannerName());
-        return false;
     }
 }

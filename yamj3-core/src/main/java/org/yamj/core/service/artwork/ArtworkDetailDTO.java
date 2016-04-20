@@ -58,7 +58,7 @@ public class ArtworkDetailDTO {
         }
         this.imageType = imageType;
     }
-    
+
     public String getSource() {
         return source;
     }

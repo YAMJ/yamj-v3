@@ -22,14 +22,14 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.common.PluginConfigService;
-
-import java.util.Locale;
 import org.yamj.api.common.http.CommonHttpClient;
+import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.common.PluginLocaleService;
+import org.yamj.plugin.api.common.PluginMetadataService;
 
 public interface MetadataScanner {
 
     String getScannerName();
 
-    void init(PluginConfigService configService, CommonHttpClient httpClient, Locale locale);
+    void init(PluginConfigService configService, PluginMetadataService metadataService, PluginLocaleService localeService, CommonHttpClient httpClient);
 }
