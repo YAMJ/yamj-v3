@@ -28,7 +28,6 @@ import static org.yamj.plugin.api.common.Constants.SOURCE_TVDB;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,8 +53,6 @@ public class TheTVDbScanner implements ISeriesScanner {
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
 
     @Autowired
-    private OnlineScannerService onlineScannerService;
-    @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
@@ -67,14 +64,6 @@ public class TheTVDbScanner implements ISeriesScanner {
     @Override
     public String getScannerName() {
         return SOURCE_TVDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize TheTVDb scanner");
-        
-        // register this scanner
-        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

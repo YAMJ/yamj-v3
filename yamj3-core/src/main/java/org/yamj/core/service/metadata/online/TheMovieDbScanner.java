@@ -24,8 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.*;
 
-import org.yamj.plugin.api.type.ParticipationType;
-
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
@@ -36,7 +34,6 @@ import com.omertron.themoviedbapi.model.tv.TVEpisodeInfo;
 import com.omertron.themoviedbapi.model.tv.TVInfo;
 import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,14 +51,13 @@ import org.yamj.core.web.apis.TheMovieDbApiWrapper;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.type.ParticipationType;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
     
-    @Autowired
-    private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
@@ -74,14 +70,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     @Override
     public String getScannerName() {
         return SOURCE_TMDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize TheMovieDb scanner");
-
-        // register this scanner
-        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

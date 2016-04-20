@@ -22,31 +22,15 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import javax.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("traktTvScanner")
 public class TraktTvScanner implements IMetadataScanner {
 
     public static final String SCANNER_ID = "trakttv";
-    private static final Logger LOG = LoggerFactory.getLogger(TraktTvScanner.class);
 
-    @Autowired
-    private OnlineScannerService onlineScannerService;
-    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize Trakt.TV scanner");
-        
-        // register this scanner
-        onlineScannerService.registerMetadataScanner(this);
     }
 }

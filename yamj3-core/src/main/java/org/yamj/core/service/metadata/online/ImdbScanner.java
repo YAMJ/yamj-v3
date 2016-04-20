@@ -27,7 +27,6 @@ import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -65,8 +64,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
-    private OnlineScannerService onlineScannerService;
-    @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private LocaleService localeService;
@@ -78,14 +75,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Override
     public String getScannerName() {
         return SOURCE_IMDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize IMDb scanner");
-        
-        // register this scanner
-        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

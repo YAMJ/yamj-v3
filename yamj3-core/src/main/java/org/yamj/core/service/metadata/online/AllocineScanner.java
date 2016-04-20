@@ -24,8 +24,6 @@ package org.yamj.core.service.metadata.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 
-import org.yamj.plugin.api.type.ParticipationType;
-
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -51,6 +49,7 @@ import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.type.ParticipationType;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.SearchEngineTools;
 
@@ -68,8 +67,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     @Autowired
     private AllocineApiWrapper allocineApiWrapper;
     @Autowired
-    private OnlineScannerService onlineScannerService;
-    @Autowired
     private ConfigServiceWrapper configServiceWrapper; 
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
@@ -85,13 +82,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
     @PostConstruct
     public void init() {
-        LOG.trace("Initialize Allocine scanner");
-        
         searchEngineTools = new SearchEngineTools(httpClient, Locale.FRANCE);
         searchEngineLock = new ReentrantLock(true);
-        
-        // register this scanner
-        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override
