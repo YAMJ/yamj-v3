@@ -567,19 +567,31 @@ public class OnlineScannerService implements PluginMetadataService {
 
     @Override
     public MovieScanner getMovieScanner(String source) {
-        // TODO Auto-generated method stub
+        IMovieScanner movieScanner = registeredMovieScanner.get(source);
+        if (movieScanner instanceof PluginMovieScanner) {
+            return ((PluginMovieScanner)movieScanner).getMovieScanner();
+        }
+        LOG.info("Plugin movie scanner {} not registered", source);
         return null;
     }
 
     @Override
     public SeriesScanner getSeriesScanner(String source) {
-        // TODO Auto-generated method stub
+        ISeriesScanner seriesScanner = registeredSeriesScanner.get(source);
+        if (seriesScanner instanceof PluginSeriesScanner) {
+            return ((PluginSeriesScanner)seriesScanner).getSeriesScanner();
+        }
+        LOG.info("Plugin series scanner {} not registered", source);
         return null;
     }
 
     @Override
     public PersonScanner getPersonScanner(String source) {
-        // TODO Auto-generated method stub
+        IPersonScanner personScanner = registeredPersonScanner.get(source);
+        if (personScanner instanceof PluginPersonScanner) {
+            return ((PluginPersonScanner)personScanner).getPersonScanner();
+        }
+        LOG.info("Plugin person scanner {} not registered", source);
         return null;
     }
 }
