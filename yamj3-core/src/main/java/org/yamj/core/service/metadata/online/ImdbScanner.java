@@ -732,23 +732,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         try {
             int beginIndex = nfoContent.indexOf("/tt");
             if (beginIndex != -1) {
-                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$");
-                String sourceId = st.nextToken();
-                LOG.debug("IMDb ID found in NFO: {}", sourceId);
-                dto.addId(SOURCE_IMDB, sourceId);
-                return true;
-            }
-        } catch (Exception ex) {
-            LOG.trace("NFO scanning error", ex);
-        }
-
-        try {
-            int beginIndex = nfoContent.indexOf("/Title?");
-            if (beginIndex != -1 && beginIndex + 7 < nfoContent.length()) {
-                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$");
-                String sourceId = "tt" + st.nextToken();
-                LOG.debug("IMDb ID found in NFO: {}", sourceId);
-                dto.addId(SOURCE_IMDB, sourceId);
+                String imdbId =  new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$").nextToken();
+                LOG.debug("IMDb ID found in NFO: {}", imdbId);
+                dto.addId(SOURCE_IMDB, imdbId);
                 return true;
             }
         } catch (Exception ex) {

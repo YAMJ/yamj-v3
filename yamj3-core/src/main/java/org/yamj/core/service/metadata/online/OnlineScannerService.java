@@ -571,7 +571,6 @@ public class OnlineScannerService implements PluginMetadataService {
         if (movieScanner instanceof PluginMovieScanner) {
             return ((PluginMovieScanner)movieScanner).getMovieScanner();
         }
-        LOG.info("Plugin movie scanner {} not registered", source);
         return null;
     }
 
@@ -581,7 +580,6 @@ public class OnlineScannerService implements PluginMetadataService {
         if (seriesScanner instanceof PluginSeriesScanner) {
             return ((PluginSeriesScanner)seriesScanner).getSeriesScanner();
         }
-        LOG.info("Plugin series scanner {} not registered", source);
         return null;
     }
 
@@ -591,7 +589,6 @@ public class OnlineScannerService implements PluginMetadataService {
         if (personScanner instanceof PluginPersonScanner) {
             return ((PluginPersonScanner)personScanner).getPersonScanner();
         }
-        LOG.info("Plugin person scanner {} not registered", source);
         return null;
     }
 }
