@@ -23,6 +23,7 @@
 package org.yamj.core.service.artwork.online;
 
 import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
+
 import com.omertron.fanarttvapi.enumeration.FTArtworkType;
 import com.omertron.fanarttvapi.model.FTArtwork;
 import com.omertron.fanarttvapi.model.FTMovie;
@@ -30,10 +31,7 @@ import com.omertron.fanarttvapi.model.FTSeries;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.LocaleService;
@@ -41,7 +39,6 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.web.apis.FanartTvApiWrapper;
@@ -51,12 +48,9 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     ITvShowFanartScanner, ITvShowPosterScanner, ITvShowBannerScanner 
 {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FanartTvScanner.class);
     private static final String SCANNER_ID = "fanarttv";
     private static final String LANGUAGE_NONE = "00";
     
-    @Autowired
-    private ArtworkScannerService artworkScannerService;
     @Autowired
     private LocaleService localeService;
     @Autowired
@@ -65,14 +59,6 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     private ImdbScanner imdbScanner;
     @Autowired
     private TheTVDbScanner tvdbScanner;
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize FanartTV artwork scanner");
-
-        // register this scanner
-        artworkScannerService.registerArtworkScanner(this);
-    }
 
     @Override
     public String getScannerName() {

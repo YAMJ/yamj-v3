@@ -23,6 +23,7 @@
 package org.yamj.core.service.trailer;
 
 import java.util.*;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +52,22 @@ public class TrailerScannerService implements IQueueProcessService {
     private ConfigService configService;
     @Autowired
     private TrailerStorageService trailerStorageService;
-    
-    public void registerTrailerScanner(ITrailerScanner trailersScanner) {
+    @Autowired
+    private ImdbTrailerScanner imdbTrailerScanner;
+    @Autowired
+    private TrailersLandScanner trailersLandScanner;
+    @Autowired
+    private YouTubeTrailerScanner youTubeTrailerScanner;
+
+    @PostConstruct
+    public void init() {
+        LOG.trace("Initialize trailer scanner");
+        this.registerTrailerScanner(imdbTrailerScanner);
+        this.registerTrailerScanner(trailersLandScanner);
+        this.registerTrailerScanner(youTubeTrailerScanner);
+    }
+
+    private void registerTrailerScanner(ITrailerScanner trailersScanner) {
         if (trailersScanner instanceof IMovieTrailerScanner) {
             LOG.trace("Registered movie trailer scanner: {}", trailersScanner.getScannerName().toLowerCase());
             registeredMovieTrailerScanner.put(trailersScanner.getScannerName().toLowerCase(), (IMovieTrailerScanner)trailersScanner);

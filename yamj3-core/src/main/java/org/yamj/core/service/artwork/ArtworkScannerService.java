@@ -23,6 +23,7 @@
 package org.yamj.core.service.artwork;
 
 import java.util.*;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,31 @@ public class ArtworkScannerService implements IQueueProcessService {
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private AttachmentScannerService attachmentScannerService;
+    @Autowired
+    private AllocineArtworkScanner allocineArtworkScanner;
+    @Autowired
+    private FanartTvScanner fanartTvScanner;
+    @Autowired
+    private ImdbArtworkScanner imdbArtworkScanner;
+    @Autowired
+    private TheMovieDbArtworkScanner theMovieDbArtworkScanner;
+    @Autowired
+    private TheTVDbArtworkScanner theTVDbArtworkScanner;
+    @Autowired
+    private YahooPosterScanner yahooPosterScanner;
     
-    public void registerArtworkScanner(IArtworkScanner artworkScanner) {
+    @PostConstruct
+    public void init() {
+        LOG.debug("Initialize artwork scanner");
+        this.registerArtworkScanner(allocineArtworkScanner);
+        this.registerArtworkScanner(fanartTvScanner);
+        this.registerArtworkScanner(imdbArtworkScanner);
+        this.registerArtworkScanner(theMovieDbArtworkScanner);
+        this.registerArtworkScanner(theTVDbArtworkScanner);
+        this.registerArtworkScanner(yahooPosterScanner);
+    }
+    
+    private void registerArtworkScanner(IArtworkScanner artworkScanner) {
         final String scannerName = artworkScanner.getScannerName().toLowerCase();
         
         if (artworkScanner instanceof IMoviePosterScanner) {

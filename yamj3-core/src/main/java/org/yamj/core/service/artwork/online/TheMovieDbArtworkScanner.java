@@ -35,7 +35,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,6 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.ExceptionTools;
@@ -66,8 +64,6 @@ public class TheMovieDbArtworkScanner implements
     @Autowired
     private LocaleService localeService;
     @Autowired
-    private ArtworkScannerService artworkScannerService;
-    @Autowired
     private TheMovieDbScanner tmdbScanner;
     @Autowired
     private TheMovieDbApi tmdbApi;
@@ -83,14 +79,6 @@ public class TheMovieDbArtworkScanner implements
     @Override
     public String getScannerName() {
         return SOURCE_TMDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize TheMovieDb artwork scanner");
-
-        // register this scanner
-        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

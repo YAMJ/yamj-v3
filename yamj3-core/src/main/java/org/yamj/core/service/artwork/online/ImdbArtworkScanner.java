@@ -23,32 +23,25 @@
 package org.yamj.core.service.artwork.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
+
 import com.omertron.imdbapi.model.ImdbImage;
 import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 
 @Service("imdbArtworkScanner")
 public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImdbArtworkScanner.class);
-
-    @Autowired
-    private ArtworkScannerService artworkScannerService;
     @Autowired
     private ImdbScanner imdbScanner;
     @Autowired
@@ -57,14 +50,6 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
     @Override
     public String getScannerName() {
         return SOURCE_IMDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize IMDb artwork scanner");
-
-        // register this scanner
-        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

@@ -45,7 +45,6 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
-import org.yamj.core.service.trailer.TrailerScannerService;
 
 @Service("youTubeTrailerScanner")
 public class YouTubeTrailerScanner implements IMovieTrailerScanner {
@@ -57,8 +56,6 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
     @Value("${APIKEY.youtube:null}")
     private String youtubeApiKey;
 
-    @Autowired
-    private TrailerScannerService trailerScannerService;
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -90,9 +87,6 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             })
             .setApplicationName("youtube-yamj3-search")
             .build();
-        
-        // register this scanner
-        trailerScannerService.registerTrailerScanner(this);
     }
 
     @Override

@@ -23,11 +23,11 @@
 package org.yamj.core.service.artwork.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_TVDB;
+
 import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,7 +40,6 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.tools.YamjTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
@@ -56,8 +55,6 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
     @Autowired
     private LocaleService localeService;
     @Autowired
-    private ArtworkScannerService artworkScannerService;
-    @Autowired
     private TheTVDbScanner tvdbScanner;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
@@ -65,14 +62,6 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
     @Override
     public String getScannerName() {
         return SOURCE_TVDB;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize TheTVDb artwork scanner");
-
-        // register this scanner
-        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

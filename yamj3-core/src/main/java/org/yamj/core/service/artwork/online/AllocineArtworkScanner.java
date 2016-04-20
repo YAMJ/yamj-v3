@@ -25,18 +25,14 @@ package org.yamj.core.service.artwork.online;
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.Map.Entry;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 import org.yamj.core.tools.YamjTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
@@ -44,10 +40,6 @@ import org.yamj.core.web.apis.AllocineApiWrapper;
 @Service("allocineArtworkScanner")
 public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPosterScanner, IPhotoScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AllocineArtworkScanner.class);
-
-    @Autowired
-    private ArtworkScannerService artworkScannerService;
     @Autowired
     private AllocineScanner allocineScanner;
     @Autowired
@@ -56,14 +48,6 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     @Override
     public String getScannerName() {
         return allocineScanner.getScannerName();
-    }
-
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize Allocine artwork scanner");
-
-        // register this scanner
-        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

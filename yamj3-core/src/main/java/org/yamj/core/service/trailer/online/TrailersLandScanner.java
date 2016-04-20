@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -42,7 +41,6 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
-import org.yamj.core.service.trailer.TrailerScannerService;
 
 @Service("trailersLandScanner")
 public class TrailersLandScanner implements IMovieTrailerScanner {
@@ -56,8 +54,6 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
     private static final String TL_TRAILER_FILE_URL = "wrapping/tls.php?";
 
     @Autowired
-    private TrailerScannerService trailerScannerService;
-    @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
     private ConfigService configService;
@@ -65,14 +61,6 @@ public class TrailersLandScanner implements IMovieTrailerScanner {
     @Override
     public String getScannerName() {
         return SCANNER_ID;
-    }
-    
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize TrailersLand trailer scanner");
-        
-        // register this scanner
-        trailerScannerService.registerTrailerScanner(this);
     }
 
     @Override

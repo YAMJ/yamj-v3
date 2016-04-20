@@ -123,19 +123,19 @@ public class OnlineScannerService {
         final String scannerName =  metadataScanner.getScannerName().toLowerCase();
         
         if (metadataScanner instanceof IMovieScanner) {
-            LOG.debug("Registered movie scanner: {}", scannerName);
+            LOG.trace("Registered movie scanner: {}", scannerName);
             registeredMovieScanner.put(scannerName, (IMovieScanner)metadataScanner);
         }
         if (metadataScanner instanceof ISeriesScanner) {
-            LOG.debug("Registered series scanner: {}", scannerName);
+            LOG.trace("Registered series scanner: {}", scannerName);
             registeredSeriesScanner.put(scannerName, (ISeriesScanner)metadataScanner);
         }
         if (metadataScanner instanceof IPersonScanner) {
-            LOG.debug("Registered person scanner: {}", scannerName);
+            LOG.trace("Registered person scanner: {}", scannerName);
             registeredPersonScanner.put(scannerName, (IPersonScanner)metadataScanner);
         }
         if (metadataScanner instanceof IFilmographyScanner) {
-            LOG.debug("Registered filmography scanner: {}", scannerName);
+            LOG.trace("Registered filmography scanner: {}", scannerName);
             registeredFilmographyScanner.put(scannerName, (IFilmographyScanner)metadataScanner);
         }
     }

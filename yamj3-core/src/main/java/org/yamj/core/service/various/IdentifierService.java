@@ -62,20 +62,23 @@ public class IdentifierService {
     public void init() {
         LOG.trace("Initialize identifier service");
 
-        for (Transliterator transliterator : pluginManager.getExtensions(Transliterator.class)) {
-            if (this.transliterator == null) {
-                this.transliterator = transliterator;
-                LOG.info("Use transliterator: {}", transliterator.getClass().getName());
-            } else {
-                LOG.warn("Another transliterator present, but ignored: {}", transliterator.getClass().getName()); 
+        if (transliterationEnabled) {
+            for (Transliterator transliterator : pluginManager.getExtensions(Transliterator.class)) {
+                if (this.transliterator == null) {
+                    this.transliterator = transliterator;
+                    LOG.info("Use transliterator: {}", transliterator.getClass().getName());
+                } else {
+                    LOG.warn("Another transliterator present, but ignored: {}", transliterator.getClass().getName()); 
+                }
             }
-        }
         
-        if (this.transliterator == null) {
-            LOG.debug("No transliteration service present: no transliteration could be done");
-
-            // transliteration not possible; regardless what is configured
-            this.transliterationEnabled = false;
+            if (this.transliterator == null) {
+                LOG.info("No transliteration service present: no transliteration could be done");
+                // transliteration not possible; regardless what is configured
+                this.transliterationEnabled = false;
+            }
+        } else {
+            LOG.info("Transliteration is not enabled");
         }
     }
     

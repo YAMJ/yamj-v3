@@ -23,16 +23,14 @@
 package org.yamj.core.service.trailer.online;
 
 import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
+
 import com.omertron.imdbapi.model.ImdbEncodingFormat;
 import com.omertron.imdbapi.model.ImdbMovieDetails;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
@@ -40,16 +38,11 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.trailer.TrailerScannerService;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 
 @Service("imdbTrailerScanner")
 public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImdbTrailerScanner.class);
-
-    @Autowired
-    private TrailerScannerService trailerScannerService;
     @Autowired
     private ImdbScanner imdbScanner;
     @Autowired
@@ -60,14 +53,6 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
         return imdbScanner.getScannerName();
     }
     
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize IMDb trailer scanner");
-        
-        // register this scanner
-        trailerScannerService.registerTrailerScanner(this);
-    }
-
     @Override
     public List<TrailerDTO> getTrailers(VideoData videoData) {
         String imdbId = imdbScanner.getMovieId(videoData);
