@@ -22,6 +22,7 @@
  */
 package org.yamj.core.web.apis;
 
+import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
 import static org.yamj.plugin.api.common.Constants.UTF8;
 
 import com.omertron.imdbapi.ImdbApi;
@@ -42,7 +43,7 @@ import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.dto.AwardDTO;
+import org.yamj.plugin.api.metadata.AwardDTO;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
@@ -365,7 +366,7 @@ public class ImdbApiWrapper {
                             category = StringUtils.trimToEmpty(HTMLTools.extractTag(outcomeBlock, "<span class=\"award_category\">", "</span>"));
                         }
                         
-                        awards.add(new AwardDTO(event, category, "imdb", year).setWon(awardWon).setNominated(!awardWon));
+                        awards.add(new AwardDTO(SOURCE_IMDB, event, category, year).setWon(awardWon).setNominated(!awardWon));
                     }
                 }
             }

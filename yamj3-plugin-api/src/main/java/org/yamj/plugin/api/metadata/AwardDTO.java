@@ -20,24 +20,28 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.dto;
+package org.yamj.plugin.api.metadata;
 
 import org.apache.commons.lang3.builder.*;
 
 public final class AwardDTO {
 
+    private final String source;
     private final String event;
     private final String category;
-    private final String source;
     private final int year;
-    private boolean won = false;
+    private boolean won = true;
     private boolean nominated = false;
 
     public AwardDTO(String event, String category, String source, int year) {
+        this.source = source;
         this.event = event;
         this.category = category;
-        this.source = source;
         this.year = year;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public String getEvent() {
@@ -46,10 +50,6 @@ public final class AwardDTO {
 
     public String getCategory() {
         return category;
-    }
-
-    public String getSource() {
-        return source;
     }
 
     public int getYear() {

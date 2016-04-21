@@ -24,6 +24,8 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
+import org.yamj.plugin.api.metadata.AwardDTO;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;

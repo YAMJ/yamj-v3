@@ -37,6 +37,8 @@ public class SeriesDTO {
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
     private Collection<String> countries = new HashSet<>();
+    private Map<String,String> certifications = new HashMap<>();
+    private Set<AwardDTO> awards = new HashSet<>();
     private Collection<SeasonDTO> seasons = new ArrayList<>();
     
     public SeriesDTO(Map<String, String> ids) {
@@ -156,6 +158,24 @@ public class SeriesDTO {
 
     public SeriesDTO addCountry(String country) {
         this.countries.add(country);
+        return this;
+    }
+
+    public Map<String, String> getCertifications() {
+        return certifications;
+    }
+
+    public SeriesDTO addCertification(String country, String certificate) {
+        this.certifications.put(country, certificate);
+        return this;
+    }
+    
+    public Set<AwardDTO> getAwards() {
+        return awards;
+    }
+
+    public SeriesDTO addAward(AwardDTO award) {
+        this.awards.add(award);
         return this;
     }
 

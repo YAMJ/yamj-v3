@@ -44,10 +44,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.plugin.api.metadata.AwardDTO;
 
 @NamedQueries({
     @NamedQuery(name = Series.QUERY_REQUIRED,
@@ -546,7 +546,7 @@ public class Series extends AbstractMetadata {
 
     public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            getAwardDTOS().add(new AwardDTO(event, category, source, year).setWon(true));
+            getAwardDTOS().add(new AwardDTO(source, event, category, year));
         }
     }
 

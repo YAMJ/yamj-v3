@@ -45,12 +45,12 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
-import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.metadata.AwardDTO;
 
 @NamedQueries({
     @NamedQuery(name = VideoData.QUERY_REQUIRED,
@@ -970,7 +970,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            getAwardDTOS().add(new AwardDTO(event, category, source, year).setWon(true));
+            getAwardDTOS().add(new AwardDTO(source, event, category, year));
         }
     }
 

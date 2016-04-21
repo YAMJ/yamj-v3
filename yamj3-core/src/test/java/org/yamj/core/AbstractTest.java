@@ -22,6 +22,8 @@
  */
 package org.yamj.core;
 
+import org.yamj.plugin.api.metadata.AwardDTO;
+
 import java.util.List;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -30,7 +32,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.plugin.api.artwork.ArtworkDTO;

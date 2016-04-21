@@ -40,8 +40,10 @@ public class MovieDTO {
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
     private Collection<String> countries = new HashSet<>();
+    private Map<String,String> certifications = new HashMap<>();
+    private Set<AwardDTO> awards = new HashSet<>();
     private List<CreditDTO> credits = new ArrayList<>();
-
+    
     public MovieDTO(Map<String, String> ids) {
         this.ids = ids;
     }
@@ -188,7 +190,25 @@ public class MovieDTO {
         this.countries.add(country);
         return this;
     }
+    
+    public Map<String, String> getCertifications() {
+        return certifications;
+    }
 
+    public MovieDTO addCertification(String country, String certificate) {
+        this.certifications.put(country, certificate);
+        return this;
+    }
+
+    public Set<AwardDTO> getAwards() {
+        return awards;
+    }
+
+    public MovieDTO addAward(AwardDTO award) {
+        this.awards.add(award);
+        return this;
+    }
+    
     public List<CreditDTO> getCredits() {
         return credits;
     }
