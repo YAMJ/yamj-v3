@@ -77,10 +77,10 @@ public final class AwardDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
+            .append(source)
             .append(event)
             .append(category)
             .append(year)
-            .append(source)
             .toHashCode();
     }
 
@@ -89,10 +89,10 @@ public final class AwardDTO {
         if (obj instanceof AwardDTO) {
             final AwardDTO other = (AwardDTO) obj;
             return new EqualsBuilder()
+            .append(source, other.source)
                 .append(event, other.event)
                 .append(category, other.category)
                 .append(year, other.year)
-                .append(source, other.source)
                 .isEquals();
         }
         return false;

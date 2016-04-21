@@ -24,6 +24,8 @@ package org.yamj.plugin.api.artwork;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.plugin.api.type.ImageType;
 
 public class ArtworkDTO {
@@ -92,20 +94,6 @@ public class ArtworkDTO {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ArtworkDTO [Source=");
-        sb.append(getSource());
-        sb.append(", url=");
-        sb.append(getUrl());
-        sb.append(", hashCode=");
-        sb.append(getHashCode());
-        sb.append(", imageType=");
-        sb.append(getImageType());
-        sb.append(", languageCode=");
-        sb.append(getLanguageCode());
-        sb.append(", rating=");
-        sb.append(getRating());
-        sb.append("]");
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

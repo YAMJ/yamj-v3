@@ -25,6 +25,8 @@ package org.yamj.plugin.api.metadata;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.type.JobType;
 
@@ -137,5 +139,10 @@ public final class CreditDTO {
             }
             this.photos.add(new ArtworkDTO(source, url));
         }
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }
