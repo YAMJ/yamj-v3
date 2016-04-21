@@ -73,6 +73,7 @@
         <hibernate.version>5.1.0.Final</hibernate.version>
         <spring.version>4.2.5.RELEASE</spring.version>
         <org.slf4j.version>1.7.16</org.slf4j.version>
+        <ehcache.version>2.6.11</ehcache.version>
         <jackson.version>2.6.5</jackson.version> <!-- Not working with later than 2.6.5 versions, until spring is fixed -->
         <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
@@ -258,6 +259,11 @@
                 <artifactId>joda-convert</artifactId>
                 <version>1.8.1</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.ehcache</groupId>
+                <artifactId>ehcache-core</artifactId>
+                <version>${ehcache.version}</version>
             </dependency>
             <!--JACKSON JSON-->
             <dependency>
