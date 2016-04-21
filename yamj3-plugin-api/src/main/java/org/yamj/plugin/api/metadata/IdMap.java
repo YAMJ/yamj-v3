@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.metadata.IdMap;
+public interface IdMap {
 
-public interface INfoScanner extends IMetadataScanner {
-
-    public boolean scanNFO(String nfoContent, IdMap idMap);
+    String getId(String sourceDb);
+    
+    void addId(String sourceDb, String sourceId);
 }

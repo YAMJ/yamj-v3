@@ -23,6 +23,7 @@
 package org.yamj.core.config;
 
 import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang.math.NumberUtils;
@@ -78,6 +79,10 @@ public class ConfigService {
         return cachedProperties.get(key);
     }
 
+    public boolean hasProperty(final String key) {
+        return cachedProperties.containsKey(key);
+    }
+    
     public String getProperty(final String key, final String defaultValue) {
         final String value = cachedProperties.get(key);
         return (value == null) ? defaultValue : value;

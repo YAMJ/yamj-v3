@@ -126,7 +126,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // PATCHES
     
-    public void deleteErrorHandlingConfigs() {
+    public void deleteOrphanConfigs() {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.throwError.tempUnavailable'")
         .executeUpdate();
@@ -148,7 +148,15 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
         
         currentSession()
-        .createSQLQuery("DELETE FROM configuration WHERE config_key='ofdb.search.imdb'")
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='tvrage.language'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='tvrage.country'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='nfo.ignore.present.id'")
         .executeUpdate();
     }
 }

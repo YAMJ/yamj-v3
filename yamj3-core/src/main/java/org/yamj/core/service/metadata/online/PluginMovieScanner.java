@@ -24,15 +24,14 @@ package org.yamj.core.service.metadata.online;
 
 import java.util.*;
 import java.util.Map.Entry;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.MovieScanner;
 import org.yamj.plugin.api.metadata.dto.CreditDTO;
 import org.yamj.plugin.api.metadata.dto.MovieDTO;
@@ -154,29 +153,9 @@ public class PluginMovieScanner implements IMovieScanner {
     }
     
     @Override
-    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
-        // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(getScannerName()))) {
-            return true;
-        }
-
+    public boolean scanNFO(String nfoContent, IdMap idMap) {
         try {
-            Map<String,String> ids = movieScanner.scanNFO(nfoContent);
-            boolean result = false;
-            if (MapUtils.isNotEmpty(ids)) {
-                // set possible scanned movie IDs   
-                for (Entry<String,String> entry : ids.entrySet()) {
-                    if (getScannerName().equalsIgnoreCase(entry.getKey())) {
-                        // desired ID found
-                        dto.addId(entry.getKey(), entry.getValue());
-                        result = true;
-                    } else if (StringUtils.isBlank(dto.getId(entry.getKey()))) {
-                        // another ID found
-                        dto.addId(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-            return result;
+            return movieScanner.scanNFO(nfoContent, idMap);
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
             return false;

@@ -44,10 +44,10 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
@@ -751,12 +751,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+    public boolean scanNFO(String nfoContent, IdMap idMap) {
+        boolean ignorePresentId = this.configServiceWrapper.getBooleanProperty("themoviedb.nfo.ignore.present.id", false);
+
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SOURCE_TMDB))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(idMap.getId(SOURCE_TMDB))) {
             return true;
         }
-
+        
         LOG.trace("Scanning NFO for TheMovieDb ID");
 
         try {
@@ -765,7 +767,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&é\"'(--è_çà)=$");
                 String sourceId = st.nextToken();
                 LOG.debug("TheMovieDb ID found in NFO: {}", sourceId);
-                dto.addId(SOURCE_TMDB, sourceId);
+                idMap.addId(SOURCE_TMDB, sourceId);
                 return true;
             }
         } catch (Exception ex) {

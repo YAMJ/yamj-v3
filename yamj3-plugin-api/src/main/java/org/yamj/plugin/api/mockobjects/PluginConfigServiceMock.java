@@ -22,13 +22,11 @@
  */
 package org.yamj.plugin.api.mockobjects;
 
-import org.yamj.plugin.api.common.Constants;
-import org.yamj.plugin.api.common.PluginConfigService;
-
-import org.yamj.plugin.api.type.JobType;
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
-
+import org.yamj.plugin.api.common.Constants;
+import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.type.JobType;
 
 public class PluginConfigServiceMock implements PluginConfigService {
 
@@ -42,6 +40,15 @@ public class PluginConfigServiceMock implements PluginConfigService {
         this.properties = properties;
     }
     
+    @Override
+    public void pluginConfiguration(Properties pluginProperties) {
+        for (Object key : pluginProperties.keySet()) {
+            if (!properties.containsKey(key)) {
+                properties.setProperty(key.toString(), pluginProperties.getProperty(key.toString()));
+            }
+        }
+    }
+
     @Override
     public String getProperty(String key) {
         return properties.getProperty(key);

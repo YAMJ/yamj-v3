@@ -24,12 +24,7 @@ package org.yamj.core.config;
 
 import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
 
-import org.yamj.plugin.api.type.JobType;
-
-import org.yamj.plugin.api.common.PluginConfigService;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.type.JobType;
 
 @Service("configServiceWrapper")
 public class ConfigServiceWrapper implements PluginConfigService {
@@ -90,6 +87,16 @@ public class ConfigServiceWrapper implements PluginConfigService {
     @Override
     public Date getDateProperty(String key) {
         return this.configService.getDateProperty(key);
+    }
+
+    @Override
+    public void pluginConfiguration(Properties pluginProperties) {
+        for (Object key : pluginProperties.keySet()) {
+            String sKey = key.toString();
+            if (!configService.hasProperty(sKey)) {
+                configService.setProperty(sKey, StringUtils.trimToEmpty(sKey));
+            }
+        }
     }
 
     @Override

@@ -39,12 +39,12 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.metadata.tools.PersonName;
 import org.yamj.plugin.api.type.JobType;
@@ -717,13 +717,14 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     @Override
-    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
-        return scanImdbID(nfoContent, dto, ignorePresentId);
+    public boolean scanNFO(String nfoContent, IdMap idMap) {
+        boolean ignorePresentId = this.configServiceWrapper.getBooleanProperty("imdb.nfo.ignore.present.id", false);
+        return scanImdbID(nfoContent, idMap, ignorePresentId);
     }
 
-    public static boolean scanImdbID(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+    public static boolean scanImdbID(String nfoContent, IdMap idMap, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SOURCE_IMDB))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(idMap.getId(SOURCE_IMDB))) {
             return true;
         }
 
@@ -734,7 +735,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             if (beginIndex != -1) {
                 String imdbId =  new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$").nextToken();
                 LOG.debug("IMDb ID found in NFO: {}", imdbId);
-                dto.addId(SOURCE_IMDB, imdbId);
+                idMap.addId(SOURCE_IMDB, imdbId);
                 return true;
             }
         } catch (Exception ex) {

@@ -513,11 +513,10 @@ public class OnlineScannerService implements PluginMetadataService {
         }
 
         boolean autodetect = this.configServiceWrapper.getBooleanProperty("nfo.autodetect.scanner", false);
-        boolean ignorePresentId = this.configServiceWrapper.getBooleanProperty("nfo.ignore.present.id", false);
 
         boolean foundInfo = false;
         if (nfoScanner != null) {
-            foundInfo = nfoScanner.scanNFO(nfoContent, dto, ignorePresentId);
+            foundInfo = nfoScanner.scanNFO(nfoContent, dto);
         }
         
         if (autodetect && !foundInfo) {
@@ -529,7 +528,7 @@ public class OnlineScannerService implements PluginMetadataService {
             }
             
             for (INfoScanner autodetectScanner : nfoScanners) {
-                foundInfo = autodetectScanner.scanNFO(nfoContent, dto, ignorePresentId);
+                foundInfo = autodetectScanner.scanNFO(nfoContent, dto);
                 if (foundInfo) {
                     // set auto-detected scanner
                     dto.setOnlineScanner(autodetectScanner.getScannerName());

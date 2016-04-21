@@ -42,11 +42,11 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.type.ParticipationType;
@@ -675,15 +675,17 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+    public boolean scanNFO(String nfoContent, IdMap idMap) {
+        boolean ignorePresentId = this.configServiceWrapper.getBooleanProperty("allocine.nfo.ignore.present.id", false);
+
+        // scan for IMDb ID
+        ImdbScanner.scanImdbID(nfoContent, idMap, ignorePresentId);
+
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(idMap.getId(SCANNER_ID))) {
             return true;
         }
         
-        // scan for IMDb ID
-        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
-
         LOG.trace("Scanning NFO for Allocine ID");
         
         // http://www.allocine.fr/...=XXXXX.html
@@ -696,7 +698,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                     if (endIdIndex != -1) {
                         String sourceId = nfoContent.substring(beginIdIndex + 1, endIdIndex);
                         LOG.debug("Allocine ID found in NFO: {}", sourceId);
-                        dto.addId(SCANNER_ID, sourceId);
+                        idMap.addId(SCANNER_ID, sourceId);
                         return true;
                     }
                 }

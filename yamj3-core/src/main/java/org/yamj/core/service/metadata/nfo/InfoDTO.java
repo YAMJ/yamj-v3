@@ -25,9 +25,10 @@ package org.yamj.core.service.metadata.nfo;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 
-public final class InfoDTO {
+public final class InfoDTO implements IdMap {
 
     private boolean changed = false;
     private boolean tvShow = false;

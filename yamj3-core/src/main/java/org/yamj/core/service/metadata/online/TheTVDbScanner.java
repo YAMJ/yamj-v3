@@ -40,10 +40,10 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
+import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 
@@ -271,14 +271,16 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
     
     @Override
-    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+    public boolean scanNFO(String nfoContent, IdMap idMap) {
+        boolean ignorePresentId = this.configServiceWrapper.getBooleanProperty("thetvdb.nfo.ignore.present.id", false);
+
+        // scan for IMDb ID
+        ImdbScanner.scanImdbID(nfoContent, idMap, ignorePresentId);
+
         // if we already have the ID, skip the scanning of the NFO file
-        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SOURCE_TVDB))) {
+        if (!ignorePresentId && StringUtils.isNotBlank(idMap.getId(SOURCE_TVDB))) {
             return true;
         }
-    
-        // scan for IMDb ID
-        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
 
         LOG.trace("Scanning NFO for TheTVDB ID");
         
@@ -312,7 +314,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
                     if (StringUtils.isNotBlank(id)) {
                         String sourceId = id.trim();
-                        dto.addId(SOURCE_TVDB, sourceId);
+                        idMap.addId(SOURCE_TVDB, sourceId);
                         LOG.debug("TheTVDB ID found in NFO: {}", sourceId);
                         return true;
                     }

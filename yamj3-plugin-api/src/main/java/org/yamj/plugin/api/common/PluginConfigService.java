@@ -22,13 +22,15 @@
  */
 package org.yamj.plugin.api.common;
 
-import org.yamj.plugin.api.type.JobType;
-
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import org.yamj.plugin.api.type.JobType;
 
 public interface PluginConfigService {
 
+    void pluginConfiguration(Properties properties);
+    
     String getProperty(String key);
 
     String getProperty(String key, String defaultValue);

@@ -63,11 +63,11 @@ public class UpgradeDatabaseService {
 
         LOG.trace("Run patches for database type {}", databaseType);
 
-        // patch error handling configuration entries
+        // delete orphan configuration entries (same for all database types)
         try {
-            upgradeDatabaseDao.deleteErrorHandlingConfigs();
+            upgradeDatabaseDao.deleteOrphanConfigs();
         } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'deleteErrorHandlingConfigs' for database type "+databaseType, ex);
+            LOG.warn("Failed upgrade 'deleteOrphanConfigs' for database type "+databaseType, ex);
         }
     }
 }
