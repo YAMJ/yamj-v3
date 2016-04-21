@@ -244,7 +244,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
             videoData.addRating(getScannerName(), episodeDTO.getRating());
 
             for (CreditDTO credit : episodeDTO.getCredits()) {
-                videoData.addCreditDTO(identifierService.createCredit(getScannerName(), credit));
+                videoData.addCreditDTO(identifierService.createCredit(credit));
             }
 
             // mark episode as done

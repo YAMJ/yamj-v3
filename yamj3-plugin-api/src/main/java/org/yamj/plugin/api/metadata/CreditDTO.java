@@ -22,13 +22,15 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
 
+    private final String source;
     private final String id;
     private final String name;
     private final JobType jobType;
@@ -37,21 +39,22 @@ public final class CreditDTO {
     private String realName;
     private String role;
     private boolean voice;
-    private Collection<String> photos;
+    private Set<ArtworkDTO> photos;
     
-    public CreditDTO(JobType jobType, String name) {
-        this(null, jobType, name, null);
+    public CreditDTO(String source, JobType jobType, String name) {
+        this(source, null, jobType, name, null);
     }
 
-    public CreditDTO(String id, JobType jobType, String name) {
-        this(id, jobType, name, null);
+    public CreditDTO(String source, String id, JobType jobType, String name) {
+        this(source, id, jobType, name, null);
     }
 
-    public CreditDTO(JobType jobType, String name, String role) {
-        this(null, jobType, name, role);
+    public CreditDTO(String source, JobType jobType, String name, String role) {
+        this(source, null, jobType, name, role);
     }
 
-    public CreditDTO(String id, JobType jobType, String name, String role) {
+    public CreditDTO(String source, String id, JobType jobType, String name, String role) {
+        this.source = source;
         this.id = id;
         this.jobType = jobType;
         PersonName personName = MetadataTools.splitFullName(name.trim());
@@ -62,6 +65,9 @@ public final class CreditDTO {
         setVoice(MetadataTools.isVoiceRole(role));
     }
 
+    public String getSource() {
+        return source;
+    }
 
     public String getId() {
         return id;
@@ -120,17 +126,16 @@ public final class CreditDTO {
         return this;
     }
 
-    public Collection<String> getPhotos() {
+    public Set<ArtworkDTO> getPhotos() {
         return photos;
     }
 
-    public CreditDTO addPhoto(String photoURL) {
-        if (StringUtils.isNotBlank(photoURL)) {
-            if (this.photos == null) {
-                this.photos = new HashSet<>(); 
+    public void addPhoto(String source, String url) {
+        if (StringUtils.isNotBlank(url)) {
+            if (photos == null) {
+                photos = new HashSet<>(1);
             }
-            this.photos.add(photoURL);
+            this.photos.add(new ArtworkDTO(source, url));
         }
-        return this;
     }
 }

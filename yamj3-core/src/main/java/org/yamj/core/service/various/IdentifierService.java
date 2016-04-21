@@ -144,7 +144,7 @@ public class IdentifierService {
         return credit;
     }
 
-    public CreditDTO createCredit(final String source, final org.yamj.plugin.api.metadata.CreditDTO dto) {
+    public CreditDTO createCredit(final org.yamj.plugin.api.metadata.CreditDTO dto) {
         final String trimmedName = StringUtils.trimToNull(dto.getName());
         if (trimmedName == null) {
             return null;
@@ -152,23 +152,17 @@ public class IdentifierService {
        
         final String identifier = cleanIdentifier(trimmedName);
         if (StringUtils.isBlank(identifier)) {
-            LOG.warn("Empty identifier for {} {} '{}'", source, dto.getJobType().name().toLowerCase(), trimmedName);
+            LOG.warn("Empty identifier for {} {} '{}'", dto.getSource(), dto.getJobType().name().toLowerCase(), trimmedName);
             return null;
         }
         
-        CreditDTO credit = new CreditDTO(source, dto.getId(), dto.getJobType(), identifier, trimmedName);
+        CreditDTO credit = new CreditDTO(dto.getSource(), dto.getId(), dto.getJobType(), identifier, trimmedName);
         credit.setFirstName(dto.getFirstName());
         credit.setLastName(dto.getLastName());
         credit.setRealName(dto.getRealName());
         credit.setRole(dto.getRole());
         credit.setVoice(dto.isVoice());
-        
-        if (dto.getPhotos() != null) {
-            for (String photo : dto.getPhotos()) {
-                credit.addPhoto(source, photo);
-            }
-        }
-        
+        credit.setPhotoDTOS(dto.getPhotos());
         return credit;
     }
 

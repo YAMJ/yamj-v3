@@ -127,6 +127,10 @@ public final class CreditDTO {
         return photoDTOS;
     }
 
+    public void setPhotoDTOS(Set<ArtworkDTO> photoDTOS) {
+        this.photoDTOS = photoDTOS;
+    }
+
     public void addPhoto(String source, String url) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
             if (photoDTOS == null) {
@@ -135,7 +139,6 @@ public final class CreditDTO {
             this.photoDTOS.add(new ArtworkDTO(source, url));
         }
     }
-
 
     @Override
     public int hashCode() {

@@ -143,7 +143,7 @@ public class PluginMovieScanner implements IMovieScanner {
         }
 
         for (CreditDTO credit : movie.getCredits()) {
-            videoData.addCreditDTO(identifierService.createCredit(getScannerName(), credit));
+            videoData.addCreditDTO(identifierService.createCredit(credit));
         }
         
         return ScanResult.OK;
