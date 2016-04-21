@@ -45,7 +45,7 @@ import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 
 /**

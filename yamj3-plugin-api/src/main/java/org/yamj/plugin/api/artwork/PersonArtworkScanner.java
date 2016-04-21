@@ -23,8 +23,7 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
-import org.yamj.plugin.api.metadata.dto.PersonDTO;
+import org.yamj.plugin.api.metadata.PersonDTO;
 
 public interface PersonArtworkScanner extends ArtworkScanner {
 

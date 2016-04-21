@@ -32,10 +32,10 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 import org.yamj.core.web.apis.AllocineApiWrapper;
-import org.yamj.plugin.api.artwork.tools.ArtworkTools;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.artwork.ArtworkTools;
 
 @Service("allocineArtworkScanner")
 public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtworkScanner, IPersonArtworkScanner {
@@ -51,7 +51,7 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
         String allocineId = allocineScanner.getMovieId(videoData);
         if (StringUtils.isBlank(allocineId)) {
             return Collections.emptyList();
@@ -65,12 +65,12 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Series series) {
+    public List<ArtworkDTO> getPosters(Series series) {
         String allocineId = allocineScanner.getSeriesId(series);
         if (StringUtils.isBlank(allocineId)) {
             return Collections.emptyList();
@@ -84,7 +84,7 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Season season) {
+    public List<ArtworkDTO> getPosters(Season season) {
         String allocineId = season.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(allocineId)) {
             return Collections.emptyList();
@@ -98,32 +98,32 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Season season) {
+    public List<ArtworkDTO> getFanarts(Season season) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Series series) {
+    public List<ArtworkDTO> getFanarts(Series series) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Season season) {
+    public List<ArtworkDTO> getBanners(Season season) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Series series) {
+    public List<ArtworkDTO> getBanners(Series series) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+    public List<ArtworkDTO> getVideoImages(VideoData videoData) {
         return Collections.emptyList();
     }
 
-    private List<ArtworkDetailDTO> buildArtworkDetails(Map<String,Long> artworks) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>(artworks.size());
+    private List<ArtworkDTO> buildArtworkDetails(Map<String,Long> artworks) {
+        List<ArtworkDTO> dtos = new ArrayList<>(artworks.size());
         for (Entry<String,Long> entry : artworks.entrySet()) {
             final String hashCode;
             if (entry.getValue() == null || entry.getValue().longValue() == 0) {
@@ -131,14 +131,14 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
             } else {
                 hashCode = entry.getValue().toString();
             }
-            ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), entry.getKey(), hashCode);
+            ArtworkDTO dto = new ArtworkDTO(getScannerName(), entry.getKey(), hashCode);
             dtos.add(dto);
         }
         return dtos;
     }
     
     @Override
-    public List<ArtworkDetailDTO> getPhotos(Person person) {
+    public List<ArtworkDTO> getPhotos(Person person) {
         String allocineId = allocineScanner.getPersonId(person);
         if (StringUtils.isBlank(allocineId)) {
             return Collections.emptyList();
@@ -149,7 +149,7 @@ public class AllocineArtworkScanner implements IMovieArtworkScanner, ISeriesArtw
             return Collections.emptyList();
         }
 
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), personInfos.getPhotoURL(), allocineId);
+        ArtworkDTO dto = new ArtworkDTO(getScannerName(), personInfos.getPhotoURL(), allocineId);
         return Collections.singletonList(dto);
     }
 }

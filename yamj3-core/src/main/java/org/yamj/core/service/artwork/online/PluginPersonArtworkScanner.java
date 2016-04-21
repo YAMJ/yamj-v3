@@ -23,18 +23,16 @@
 package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Person;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.PersonArtworkScanner;
-import org.yamj.plugin.api.metadata.dto.PersonDTO;
+import org.yamj.plugin.api.metadata.PersonDTO;
 
-public class PluginPersonArtworkScanner extends PluginArtworkScanner implements IPersonArtworkScanner {
+public class PluginPersonArtworkScanner implements IPersonArtworkScanner {
 
     private final PersonArtworkScanner personArtworkScanner;
     
-    public PluginPersonArtworkScanner(PersonArtworkScanner personArtworkScanner, LocaleService localeService) {
-        super(localeService);
+    public PluginPersonArtworkScanner(PersonArtworkScanner personArtworkScanner) {
         this.personArtworkScanner = personArtworkScanner;
     }
     
@@ -44,8 +42,8 @@ public class PluginPersonArtworkScanner extends PluginArtworkScanner implements 
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPhotos(Person person) {
-        return createArtworkDetails(personArtworkScanner.getPhotos(buildPerson(person)));
+    public List<ArtworkDTO> getPhotos(Person person) {
+        return personArtworkScanner.getPhotos(buildPerson(person));
     }
 
     private static PersonDTO buildPerson(Person person) {

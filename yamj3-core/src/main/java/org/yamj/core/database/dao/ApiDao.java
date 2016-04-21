@@ -22,9 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.plugin.api.type.ParticipationType;
-
-import org.yamj.plugin.api.type.JobType;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -43,8 +40,12 @@ import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.type.*;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.ResolutionType;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.type.ParticipationType;
 
 @Repository("apiDao")
 public class ApiDao extends HibernateDao {

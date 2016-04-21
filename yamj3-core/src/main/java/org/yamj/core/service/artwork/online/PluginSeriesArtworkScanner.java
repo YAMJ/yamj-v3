@@ -23,22 +23,20 @@
 package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.SeriesArtworkScanner;
-import org.yamj.plugin.api.metadata.dto.EpisodeDTO;
-import org.yamj.plugin.api.metadata.dto.SeasonDTO;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
+import org.yamj.plugin.api.metadata.EpisodeDTO;
+import org.yamj.plugin.api.metadata.SeasonDTO;
+import org.yamj.plugin.api.metadata.SeriesDTO;
 
-public class PluginSeriesArtworkScanner extends PluginArtworkScanner implements ISeriesArtworkScanner {
+public class PluginSeriesArtworkScanner implements ISeriesArtworkScanner {
 
     private final SeriesArtworkScanner seriesArtworkScanner;
     
-    public PluginSeriesArtworkScanner(SeriesArtworkScanner seriesArtworkScanner, LocaleService localeService) {
-        super(localeService);
+    public PluginSeriesArtworkScanner(SeriesArtworkScanner seriesArtworkScanner) {
         this.seriesArtworkScanner = seriesArtworkScanner;
     }
     
@@ -48,38 +46,38 @@ public class PluginSeriesArtworkScanner extends PluginArtworkScanner implements 
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Season season) {
-        return createArtworkDetails(seriesArtworkScanner.getPosters(buildSeason(season)));
+    public List<ArtworkDTO> getPosters(Season season) {
+        return seriesArtworkScanner.getPosters(buildSeason(season));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Series series) {
-        return createArtworkDetails(seriesArtworkScanner.getPosters(buildSeries(series)));
+    public List<ArtworkDTO> getPosters(Series series) {
+        return seriesArtworkScanner.getPosters(buildSeries(series));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Season season) {
-        return createArtworkDetails(seriesArtworkScanner.getFanarts(buildSeason(season)));
+    public List<ArtworkDTO> getFanarts(Season season) {
+        return seriesArtworkScanner.getFanarts(buildSeason(season));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Series series) {
-        return createArtworkDetails(seriesArtworkScanner.getFanarts(buildSeries(series)));
+    public List<ArtworkDTO> getFanarts(Series series) {
+        return seriesArtworkScanner.getFanarts(buildSeries(series));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Season season) {
-        return createArtworkDetails(seriesArtworkScanner.getBanners(buildSeason(season)));
+    public List<ArtworkDTO> getBanners(Season season) {
+        return seriesArtworkScanner.getBanners(buildSeason(season));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Series series) {
-        return createArtworkDetails(seriesArtworkScanner.getBanners(buildSeries(series)));
+    public List<ArtworkDTO> getBanners(Series series) {
+        return seriesArtworkScanner.getBanners(buildSeries(series));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
-        return createArtworkDetails(seriesArtworkScanner.getVideoImages(buildEpisode(videoData)));
+    public List<ArtworkDTO> getVideoImages(VideoData videoData) {
+        return seriesArtworkScanner.getVideoImages(buildEpisode(videoData));
     }
 
     private static SeriesDTO buildSeries(Series series) {

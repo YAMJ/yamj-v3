@@ -23,6 +23,7 @@
 package org.yamj.core.pages;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;

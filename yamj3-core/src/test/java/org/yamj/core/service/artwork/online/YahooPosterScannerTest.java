@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public class YahooPosterScannerTest extends AbstractTest {
 
@@ -41,7 +41,7 @@ public class YahooPosterScannerTest extends AbstractTest {
         videoData.setTitle("Avatar", yahooPosterScanner.getScannerName());
         videoData.setPublicationYear(2009, yahooPosterScanner.getScannerName());
         
-        List<ArtworkDetailDTO> dtos = yahooPosterScanner.getPosters(videoData);
+        List<ArtworkDTO> dtos = yahooPosterScanner.getPosters(videoData);
         logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 }

@@ -44,11 +44,11 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.ExceptionTools;
-import org.yamj.plugin.api.artwork.tools.ArtworkTools;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.artwork.ArtworkTools;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesArtworkScanner, IBoxedSetArtworkScanner, IPersonArtworkScanner {
@@ -79,65 +79,65 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
         String tmdbId = tmdbScanner.getMovieId(videoData);
         return getFilteredArtwork(tmdbId, getDefaultLanguage(), MetaDataType.MOVIE, ArtworkType.POSTER, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
         String tmdbId = tmdbScanner.getMovieId(videoData);
         return getFilteredArtwork(tmdbId, getDefaultLanguage(), MetaDataType.MOVIE, ArtworkType.BACKDROP, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Season season) {
+    public List<ArtworkDTO> getPosters(Season season) {
         String tmdbId = tmdbScanner.getSeriesId(season.getSeries());
         return getFilteredArtwork(tmdbId, season.getSeason(), -1, getDefaultLanguage(), MetaDataType.SEASON, ArtworkType.POSTER, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Season season) {
+    public List<ArtworkDTO> getFanarts(Season season) {
         String tmdbId = tmdbScanner.getSeriesId(season.getSeries());
         return getFilteredArtwork(tmdbId, season.getSeason(), -1, getDefaultLanguage(), MetaDataType.SEASON, ArtworkType.BACKDROP, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Series series) {
+    public List<ArtworkDTO> getPosters(Series series) {
         String tmdbId = tmdbScanner.getSeriesId(series);
         return getFilteredArtwork(tmdbId, getDefaultLanguage(), MetaDataType.SERIES, ArtworkType.POSTER, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Series series) {
+    public List<ArtworkDTO> getFanarts(Series series) {
         String tmdbId = tmdbScanner.getSeriesId(series);
         return getFilteredArtwork(tmdbId, getDefaultLanguage(), MetaDataType.SERIES, ArtworkType.BACKDROP, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Season season) {
+    public List<ArtworkDTO> getBanners(Season season) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Series series) {
+    public List<ArtworkDTO> getBanners(Series series) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+    public List<ArtworkDTO> getVideoImages(VideoData videoData) {
         String tmdbId = tmdbScanner.getSeriesId(videoData.getSeason().getSeries());
         return getFilteredArtwork(tmdbId, videoData.getSeason().getSeason(), videoData.getEpisode(), getDefaultLanguage(), MetaDataType.EPISODE, ArtworkType.STILL, DEFAULT_SIZE);
     }
     
     @Override
-    public List<ArtworkDetailDTO> getPhotos(Person person) {
+    public List<ArtworkDTO> getPhotos(Person person) {
         String tmdbId = tmdbScanner.getPersonId(person);
         return getFilteredArtwork(tmdbId, NO_LANGUAGE, MetaDataType.PERSON, ArtworkType.PROFILE, DEFAULT_SIZE);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(BoxedSet boxedSet) {
+    public List<ArtworkDTO> getPosters(BoxedSet boxedSet) {
         String tmdbId = boxedSet.getSourceDbId(getScannerName());
         String defaultLanguage = getDefaultLanguage();
         
@@ -155,7 +155,7 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet) {
+    public List<ArtworkDTO> getFanarts(BoxedSet boxedSet) {
         String tmdbId = boxedSet.getSourceDbId(getScannerName());
         String defaultLanguage = getDefaultLanguage();
         
@@ -173,7 +173,7 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(BoxedSet boxedSet) {
+    public List<ArtworkDTO> getBanners(BoxedSet boxedSet) {
         return Collections.emptyList();
     }
 
@@ -221,7 +221,7 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
      * @param artworkSize
      * @return
      */
-    private List<ArtworkDetailDTO> getFilteredArtwork(String tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+    private List<ArtworkDTO> getFilteredArtwork(String tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         return this.getFilteredArtwork(tmdbId, -1, -1, language, metaDataType, artworkType, artworkSize);
     }
 
@@ -240,7 +240,7 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
      * @param artworkSize
      * @return
      */
-    private List<ArtworkDetailDTO> getFilteredArtwork(String tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+    private List<ArtworkDTO> getFilteredArtwork(String tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         if (StringUtils.isNumeric(tmdbId)) {
             return this.getFilteredArtwork(Integer.parseInt(tmdbId), season, episode, language, metaDataType, artworkType, artworkSize);
         }
@@ -262,7 +262,7 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
      * @param artworkSize
      * @return
      */
-    private List<ArtworkDetailDTO> getFilteredArtwork(int tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+    private List<ArtworkDTO> getFilteredArtwork(int tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         return this.getFilteredArtwork(tmdbId, -1, -1, language, metaDataType, artworkType, artworkSize);
     }
     
@@ -281,8 +281,8 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
      * @param artworkSize
      * @return
      */
-    private List<ArtworkDetailDTO> getFilteredArtwork(int tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>();
+    private List<ArtworkDTO> getFilteredArtwork(int tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+        List<ArtworkDTO> dtos = new ArrayList<>();
         try {
             ResultList<Artwork> results = getArtworksFromTMDb(tmdbId, season, episode, metaDataType);
             
@@ -323,13 +323,13 @@ public class TheMovieDbArtworkScanner implements IMovieArtworkScanner, ISeriesAr
         return dtos;
     }
     
-    private void addArtworkDTO(List<ArtworkDetailDTO> dtos, Artwork artwork, ArtworkType artworkType, String artworkSize) throws MovieDbException {
+    private void addArtworkDTO(List<ArtworkDTO> dtos, Artwork artwork, ArtworkType artworkType, String artworkSize) throws MovieDbException {
         URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
         if (artworkURL == null || artworkURL.toString().endsWith("null")) {
             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
         } else {
             String url = artworkURL.toString();
-            dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url)));
+            dtos.add(new ArtworkDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url)));
         }
     }
 

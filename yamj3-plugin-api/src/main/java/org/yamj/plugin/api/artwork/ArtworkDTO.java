@@ -20,14 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork;
+package org.yamj.plugin.api.artwork;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.plugin.api.artwork.tools.ArtworkTools;
 import org.yamj.plugin.api.type.ImageType;
 
-public class ArtworkDetailDTO {
+public class ArtworkDTO {
 
     private final String source;
     private final String url;
@@ -36,19 +35,19 @@ public class ArtworkDetailDTO {
     private String languageCode = null;
     private int rating = -1;
 
-    public ArtworkDetailDTO(String source, String url) {
+    public ArtworkDTO(String source, String url) {
         this(source, url, null, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
-    public ArtworkDetailDTO(String source, String url, ImageType imageType) {
+    public ArtworkDTO(String source, String url, ImageType imageType) {
         this(source, url, null, imageType);
     }
 
-    public ArtworkDetailDTO(String source, String url, String hashCode) {
+    public ArtworkDTO(String source, String url, String hashCode) {
         this(source, url, hashCode, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
-    public ArtworkDetailDTO(String source, String url, String hashCode, ImageType imageType) {
+    public ArtworkDTO(String source, String url, String hashCode, ImageType imageType) {
         this.source = source;
         this.url = url;
         if (StringUtils.isBlank(hashCode)) {
@@ -94,7 +93,7 @@ public class ArtworkDetailDTO {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("ArtworkDetailDTO [Source=");
+        sb.append("ArtworkDTO [Source=");
         sb.append(getSource());
         sb.append(", url=");
         sb.append(getUrl());

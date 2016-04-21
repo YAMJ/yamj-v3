@@ -22,14 +22,13 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.plugin.api.type.ParticipationType;
-
-import org.yamj.plugin.api.type.JobType;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.type.ParticipationType;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiFilmographyDTO extends AbstractApiDTO {

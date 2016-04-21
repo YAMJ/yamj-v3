@@ -33,7 +33,7 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("yahooPosterScanner")
@@ -50,8 +50,8 @@ public class YahooPosterScanner implements IMovieArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>(1);
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
+        List<ArtworkDTO> dtos = new ArrayList<>(1);
 
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
@@ -66,10 +66,10 @@ public class YahooPosterScanner implements IMovieArtworkScanner {
                     int endIndex = response.getContent().indexOf("rurl=", beginIndex);
                     if (endIndex > 0) {
                         String url = HTMLTools.decodeUrl(response.getContent().substring(beginIndex + 7, endIndex - 1));
-                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+                        dtos.add(new ArtworkDTO(getScannerName(), url));
                     } else {
                         String url = HTMLTools.decodeUrl(response.getContent().substring(beginIndex + 7));
-                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+                        dtos.add(new ArtworkDTO(getScannerName(), url));
                     }
                 }
             } else {
@@ -84,7 +84,7 @@ public class YahooPosterScanner implements IMovieArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
         return Collections.emptyList();
     }
 }

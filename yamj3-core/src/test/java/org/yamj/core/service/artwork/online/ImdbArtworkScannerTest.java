@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public class ImdbArtworkScannerTest extends AbstractTest {
 
@@ -40,7 +40,7 @@ public class ImdbArtworkScannerTest extends AbstractTest {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(imdbArtworkScanner.getScannerName(), "tt0499549");
 
-        List<ArtworkDetailDTO> dtos = imdbArtworkScanner.getPosters(videoData);
+        List<ArtworkDTO> dtos = imdbArtworkScanner.getPosters(videoData);
         logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
@@ -49,7 +49,7 @@ public class ImdbArtworkScannerTest extends AbstractTest {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(imdbArtworkScanner.getScannerName(), "tt0499549");
 
-        List<ArtworkDetailDTO> dtos = imdbArtworkScanner.getFanarts(videoData);
+        List<ArtworkDTO> dtos = imdbArtworkScanner.getFanarts(videoData);
         logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 }

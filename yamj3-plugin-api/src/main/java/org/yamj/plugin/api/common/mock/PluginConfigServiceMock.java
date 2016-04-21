@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.mockobjects;
+package org.yamj.plugin.api.common.mock;
 
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;

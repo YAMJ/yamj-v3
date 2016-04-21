@@ -20,15 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.dto;
-
-import org.yamj.plugin.api.type.JobType;
+package org.yamj.plugin.api.metadata;
 
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
 

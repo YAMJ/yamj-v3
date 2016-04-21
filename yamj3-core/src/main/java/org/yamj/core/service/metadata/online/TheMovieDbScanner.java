@@ -48,8 +48,8 @@ import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
 import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.metadata.PersonName;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.type.ParticipationType;
 

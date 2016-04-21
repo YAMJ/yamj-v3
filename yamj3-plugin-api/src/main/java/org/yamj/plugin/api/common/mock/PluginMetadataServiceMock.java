@@ -20,10 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.mockobjects;
+package org.yamj.plugin.api.common.mock;
 
 import org.yamj.plugin.api.common.PluginMetadataService;
-
 import org.yamj.plugin.api.metadata.MovieScanner;
 import org.yamj.plugin.api.metadata.PersonScanner;
 import org.yamj.plugin.api.metadata.SeriesScanner;

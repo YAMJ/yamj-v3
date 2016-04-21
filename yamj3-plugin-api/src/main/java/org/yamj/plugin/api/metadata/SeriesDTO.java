@@ -20,29 +20,26 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.dto;
+package org.yamj.plugin.api.metadata;
 
 import java.util.*;
 
-public class MovieDTO {
+public class SeriesDTO {
 
     private final Map<String, String> ids;
     private String title;
     private String originalTitle;
-    private int year;
+    private int startYear;
+    private int endYear;
     private String plot;
     private String outline;
-    private String tagline;
-    private String quote;
-    private String releaseCountry;
-    private Date releaseDate;
     private int rating = -1;
     private Collection<String> genres = new HashSet<>();
     private Collection<String> studios = new HashSet<>();
     private Collection<String> countries = new HashSet<>();
-    private List<CreditDTO> credits = new ArrayList<>();
-
-    public MovieDTO(Map<String, String> ids) {
+    private Collection<SeasonDTO> seasons = new ArrayList<>();
+    
+    public SeriesDTO(Map<String, String> ids) {
         this.ids = ids;
     }
 
@@ -50,7 +47,7 @@ public class MovieDTO {
         return ids;
     }
 
-    public MovieDTO addId(String source, String id) {
+    public SeriesDTO addId(String source, String id) {
         if (id != null && id.length() > 0) {
             this.ids.put(source, id);
         }
@@ -61,7 +58,7 @@ public class MovieDTO {
         return title;
     }
 
-    public MovieDTO setTitle(String title) {
+    public SeriesDTO setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -70,17 +67,26 @@ public class MovieDTO {
         return originalTitle;
     }
 
-    public MovieDTO setOriginalTitle(String originalTitle) {
+    public SeriesDTO setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
         return this;
     }
 
-    public int getYear() {
-        return year;
+    public int getStartYear() {
+        return startYear;
     }
 
-    public MovieDTO setYear(int year) {
-        this.year = year;
+    public SeriesDTO setStartYear(int startYear) {
+        this.startYear = startYear;
+        return this;
+    }
+
+    public int getEndYear() {
+        return endYear;
+    }
+
+    public SeriesDTO setEndYear(int endYear) {
+        this.endYear = endYear;
         return this;
     }
 
@@ -88,7 +94,7 @@ public class MovieDTO {
         return plot;
     }
 
-    public MovieDTO setPlot(String plot) {
+    public SeriesDTO setPlot(String plot) {
         this.plot = plot;
         return this;
     }
@@ -97,44 +103,8 @@ public class MovieDTO {
         return outline;
     }
 
-    public MovieDTO setOutline(String outline) {
+    public SeriesDTO setOutline(String outline) {
         this.outline = outline;
-        return this;
-    }
-
-    public String getTagline() {
-        return tagline;
-    }
-
-    public MovieDTO setTagline(String tagline) {
-        this.tagline = tagline;
-        return this;
-    }
-
-    public String getQuote() {
-        return quote;
-    }
-
-    public MovieDTO setQuote(String quote) {
-        this.quote = quote;
-        return this;
-    }
-
-    public String getReleaseCountry() {
-        return releaseCountry;
-    }
-
-    public MovieDTO setReleaseCountry(String releaseCountry) {
-        this.releaseCountry = releaseCountry;
-        return this;
-    }
-
-    public Date getReleaseDate() {
-        return releaseDate;
-    }
-
-    public MovieDTO setReleaseDate(Date releaseDate) {
-        this.releaseDate = releaseDate;
         return this;
     }
 
@@ -142,7 +112,7 @@ public class MovieDTO {
         return rating;
     }
 
-    public MovieDTO setRating(int rating) {
+    public SeriesDTO setRating(int rating) {
         this.rating = rating;
         return this;
     }
@@ -151,12 +121,12 @@ public class MovieDTO {
         return studios;
     }
 
-    public MovieDTO setStudios(Collection<String> studios) {
+    public SeriesDTO setStudios(Collection<String> studios) {
         this.studios = studios;
         return this;
     }
 
-    public MovieDTO addStudio(String studio) {
+    public SeriesDTO addStudio(String studio) {
         this.studios.add(studio);
         return this;
     }
@@ -165,12 +135,12 @@ public class MovieDTO {
         return genres;
     }
 
-    public MovieDTO setGenres(Collection<String> genres) {
+    public SeriesDTO setGenres(Collection<String> genres) {
         this.genres = genres;
         return this;
     }
     
-    public MovieDTO addGenre(String genre) {
+    public SeriesDTO addGenre(String genre) {
         this.genres.add(genre);
         return this;
     }
@@ -179,34 +149,36 @@ public class MovieDTO {
         return countries;
     }
 
-    public MovieDTO setCountries(Collection<String> countries) {
+    public SeriesDTO setCountries(Collection<String> countries) {
         this.countries = countries;
         return this;
     }
 
-    public MovieDTO addCountry(String country) {
+    public SeriesDTO addCountry(String country) {
         this.countries.add(country);
         return this;
     }
 
-    public List<CreditDTO> getCredits() {
-        return credits;
+    public Collection<SeasonDTO> getSeasons() {
+        return seasons;
     }
 
-    public MovieDTO setCredits(List<CreditDTO> credits) {
-        this.credits = credits;
+    public SeriesDTO setSeasons(Collection<SeasonDTO> seasons) {
+        this.seasons = seasons;
         return this;
     }
     
-    public MovieDTO addCredit(CreditDTO credit) {
-        this.credits.add(credit);
+    public SeriesDTO addSeason(SeasonDTO season) {
+        this.seasons.add(season);
         return this;
     }
-
-    public MovieDTO addCredits(Collection<CreditDTO> credits) {
-        if (credits != null && !credits.isEmpty()) {
-            this.credits.addAll(credits);
+    
+    public SeasonDTO getSeason(int seasonNumber) {
+        for (SeasonDTO season : this.seasons) {
+            if (season.getSeasonNumber() == seasonNumber) {
+                return season;
+            }
         }
-        return this;
+        return null;
     }
 }

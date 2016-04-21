@@ -41,8 +41,8 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 @Transactional
 @Repository("metadataDao")
@@ -182,8 +182,8 @@ public class MetadataDao extends HibernateDao {
         dto.setPersonId(person.getId());
     }
 
-    public void updateLocatedArtwork(Artwork artwork, Collection<ArtworkDetailDTO> dtos) {
-        for (ArtworkDetailDTO dto : dtos) {
+    public void updateLocatedArtwork(Artwork artwork, Collection<ArtworkDTO> dtos) {
+        for (ArtworkDTO dto : dtos) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource(dto.getSource());

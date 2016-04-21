@@ -26,21 +26,21 @@ import java.util.List;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public interface ISeriesArtworkScanner extends IArtworkScanner {
 
-    List<ArtworkDetailDTO> getPosters(Season season);
+    List<ArtworkDTO> getPosters(Season season);
 
-    List<ArtworkDetailDTO> getPosters(Series series);
+    List<ArtworkDTO> getPosters(Series series);
 
-    List<ArtworkDetailDTO> getFanarts(Season season);
+    List<ArtworkDTO> getFanarts(Season season);
 
-    List<ArtworkDetailDTO> getFanarts(Series series);
+    List<ArtworkDTO> getFanarts(Series series);
 
-    List<ArtworkDetailDTO> getBanners(Season season);
+    List<ArtworkDTO> getBanners(Season season);
 
-    List<ArtworkDetailDTO> getBanners(Series series);
+    List<ArtworkDTO> getBanners(Series series);
 
-    List<ArtworkDetailDTO> getVideoImages(VideoData videoData);
+    List<ArtworkDTO> getVideoImages(VideoData videoData);
 }

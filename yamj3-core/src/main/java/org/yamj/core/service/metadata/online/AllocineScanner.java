@@ -47,7 +47,7 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.type.ParticipationType;
 import org.yamj.plugin.api.web.HTMLTools;

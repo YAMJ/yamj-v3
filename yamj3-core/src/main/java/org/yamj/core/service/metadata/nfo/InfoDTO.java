@@ -26,7 +26,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 
 public final class InfoDTO implements IdMap {
 
@@ -92,6 +92,7 @@ public final class InfoDTO implements IdMap {
         return ids;
     }
 
+    @Override
     public String getId(String sourceDb) {
         return ids.get(sourceDb);
     }
@@ -100,6 +101,7 @@ public final class InfoDTO implements IdMap {
         this.ids = ids;
     }
 
+    @Override
     public void addId(String sourceDb, String sourceId) {
         if (StringUtils.isNotBlank(sourceDb) && StringUtils.isNotBlank(sourceId)) {
             if ("-1".equals(sourceId)) {

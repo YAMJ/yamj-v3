@@ -22,11 +22,10 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * List of the options available for the indexes

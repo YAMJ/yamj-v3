@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.HttpClientWrapper;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
-import org.yamj.plugin.api.web.SearchEngineTools;
 
 @SuppressWarnings("resource")
 public class SearchEngineToolsTest {

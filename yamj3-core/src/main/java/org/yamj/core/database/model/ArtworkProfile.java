@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.plugin.api.type.ImageType;
-
 import java.io.Serializable;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -33,6 +31,7 @@ import org.hibernate.annotations.Type;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
+import org.yamj.plugin.api.type.ImageType;
 
 @NamedQueries({
     @NamedQuery(name = ArtworkProfile.QUERY_GET_ALL,

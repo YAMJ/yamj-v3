@@ -44,9 +44,7 @@ import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.plugin.api.artwork.MovieArtworkScanner;
-import org.yamj.plugin.api.artwork.PersonArtworkScanner;
-import org.yamj.plugin.api.artwork.SeriesArtworkScanner;
+import org.yamj.plugin.api.artwork.*;
 import org.yamj.plugin.api.type.ImageType;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -104,21 +102,21 @@ public class ArtworkScannerService implements IQueueProcessService {
         // add movie artwork scanner to artwork scanner service
         for (MovieArtworkScanner movieArtworkScanner : pluginManager.getExtensions(MovieArtworkScanner.class)) {
             movieArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginMovieArtworkScanner scanner = new PluginMovieArtworkScanner(movieArtworkScanner, localeService);
+            PluginMovieArtworkScanner scanner = new PluginMovieArtworkScanner(movieArtworkScanner);
             this.registerArtworkScanner(scanner);
         }
         
         // add series artwork scanner to artwork scanner service
         for (SeriesArtworkScanner seriesArtworkScanner : pluginManager.getExtensions(SeriesArtworkScanner.class)) {
             seriesArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginSeriesArtworkScanner scanner = new PluginSeriesArtworkScanner(seriesArtworkScanner, localeService);
+            PluginSeriesArtworkScanner scanner = new PluginSeriesArtworkScanner(seriesArtworkScanner);
             this.registerArtworkScanner(scanner);
         }
 
         // add person artwork scanner to artwork scanner service
         for (PersonArtworkScanner personArtworkScanner : pluginManager.getExtensions(PersonArtworkScanner.class)) {
             personArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginPersonArtworkScanner scanner = new PluginPersonArtworkScanner(personArtworkScanner, localeService);
+            PluginPersonArtworkScanner scanner = new PluginPersonArtworkScanner(personArtworkScanner);
             this.registerArtworkScanner(scanner);
         }
     }
@@ -240,7 +238,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         }
         
         LOG.debug("Scan online for poster: {}", artwork);
-        List<ArtworkDetailDTO> posters = Collections.emptyList();
+        List<ArtworkDTO> posters = Collections.emptyList();
         int maxResults = 0;
         
         if (artwork.getBoxedSet() != null) {
@@ -342,7 +340,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         }
 
         LOG.debug("Scan online for fanart: {}", artwork);
-        List<ArtworkDetailDTO> fanarts = Collections.emptyList();
+        List<ArtworkDTO> fanarts = Collections.emptyList();
         int maxResults = 0;
         
         if (artwork.getBoxedSet() != null) {
@@ -442,7 +440,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         }
 
         LOG.debug("Scan online for banner: {}", artwork);
-        List<ArtworkDetailDTO> banners = Collections.emptyList();
+        List<ArtworkDTO> banners = Collections.emptyList();
         int maxResults = 0;
         
         if (artwork.getBoxedSet() != null) {
@@ -548,7 +546,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         }
 
         LOG.debug("Scan online for TV show episode image: {}", artwork);
-        List<ArtworkDetailDTO> videoimages = Collections.emptyList();
+        List<ArtworkDTO> videoimages = Collections.emptyList();
         
         for (String prio : determinePriorities("yamj3.artwork.scanner.videoimage.priorities", registeredSeriesArtworkScanner.keySet())) {
             ISeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
@@ -603,7 +601,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         }
 
         LOG.debug("Scan online for photo: {}", artwork);
-        List<ArtworkDetailDTO> photos = Collections.emptyList();
+        List<ArtworkDTO> photos = Collections.emptyList();
 
         for (String prio : determinePriorities("yamj3.artwork.scanner.photo.priorities", registeredPersonArtworkScanner.keySet())) {
             IPersonArtworkScanner scanner = registeredPersonArtworkScanner.get(prio);
@@ -628,8 +626,8 @@ public class ArtworkScannerService implements IQueueProcessService {
         createLocatedArtworksOnline(artwork, photos, locatedArtworks);
     }
 
-    private static void createLocatedArtworksOnline(Artwork artwork, List<ArtworkDetailDTO> dtos, List<ArtworkLocated> locatedArtworks) {
-        for (ArtworkDetailDTO dto : dtos) {
+    private static void createLocatedArtworksOnline(Artwork artwork, List<ArtworkDTO> dtos, List<ArtworkLocated> locatedArtworks) {
+        for (ArtworkDTO dto : dtos) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource(dto.getSource());

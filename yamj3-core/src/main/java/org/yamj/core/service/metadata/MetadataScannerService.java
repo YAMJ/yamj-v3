@@ -35,8 +35,8 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.core.tools.ExceptionTools;
+import org.yamj.core.tools.YamjTools;
 
 @Service("metadataScannerService")
 public class MetadataScannerService implements IQueueProcessService {

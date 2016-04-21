@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.plugin.api.type.JobType;
-
 import java.io.Serializable;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -31,6 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
+import org.yamj.plugin.api.type.JobType;
 
 @Embeddable
 public class CastCrewPK implements Serializable {

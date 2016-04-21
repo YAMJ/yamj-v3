@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public class AllocineArtworkScannerTest extends AbstractTest {
 
@@ -40,7 +40,7 @@ public class AllocineArtworkScannerTest extends AbstractTest {
         Person person = new Person();
         person.setSourceDbId(allocineArtworkScanner.getScannerName(), "6693");
         
-        List<ArtworkDetailDTO> dtos = allocineArtworkScanner.getPhotos(person);
+        List<ArtworkDTO> dtos = allocineArtworkScanner.getPhotos(person);
         logArtworks(ArtworkType.PHOTO, dtos, getClass());
     }
 }

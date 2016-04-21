@@ -45,8 +45,8 @@ import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.metadata.PersonName;
 import org.yamj.plugin.api.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
@@ -733,7 +733,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         try {
             int beginIndex = nfoContent.indexOf("/tt");
             if (beginIndex != -1) {
-                String imdbId =  new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$").nextToken();
+                String imdbId = new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©\"'(--ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨_ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â )=$").nextToken();
+                LOG.debug("IMDb ID found in NFO: {}", imdbId);
+                idMap.addId(SOURCE_IMDB, imdbId);
+                return true;
+            }
+
+            beginIndex = nfoContent.indexOf("/Title?");
+            if (beginIndex != -1 && beginIndex + 7 < nfoContent.length()) {
+                String imdbId = "tt" + new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©\"'(--ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨_ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â )=$").nextToken();
                 LOG.debug("IMDb ID found in NFO: {}", imdbId);
                 idMap.addId(SOURCE_IMDB, imdbId);
                 return true;

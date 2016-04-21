@@ -28,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 
 public final class CreditDTO {
@@ -45,7 +45,7 @@ public final class CreditDTO {
     private String role;
     private boolean voice = false;
     private Long personId;
-    private Set<ArtworkDetailDTO> photoDTOS;
+    private Set<ArtworkDTO> photoDTOS;
     
     public CreditDTO(String source, String sourceId, JobType jobType, String identifier, String name) {
         this.source = source;
@@ -123,7 +123,7 @@ public final class CreditDTO {
         this.personId = personId;
     }
 
-    public Set<ArtworkDetailDTO> getPhotoDTOS() {
+    public Set<ArtworkDTO> getPhotoDTOS() {
         return photoDTOS;
     }
 
@@ -132,7 +132,7 @@ public final class CreditDTO {
             if (photoDTOS == null) {
                 photoDTOS = new HashSet<>(1);
             }
-            this.photoDTOS.add(new ArtworkDetailDTO(source, url));
+            this.photoDTOS.add(new ArtworkDTO(source, url));
         }
     }
 

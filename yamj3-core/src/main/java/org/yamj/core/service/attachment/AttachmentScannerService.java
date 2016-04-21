@@ -24,9 +24,6 @@ package org.yamj.core.service.attachment;
 
 import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
 
-import org.yamj.plugin.api.type.ImageType;
-
-import org.yamj.core.service.various.StagingService;
 import java.io.*;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -42,6 +39,8 @@ import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileTools;
+import org.yamj.core.service.various.StagingService;
+import org.yamj.plugin.api.type.ImageType;
 
 /**
  * Scans and extracts attachments within a file i.e. matroska files.

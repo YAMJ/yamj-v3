@@ -50,7 +50,7 @@ import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 @NamedQueries({
     @NamedQuery(name = VideoData.QUERY_REQUIRED,
@@ -340,10 +340,10 @@ public class VideoData extends AbstractMetadata {
     private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
-    private final Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
+    private final Collection<ArtworkDTO> posterDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
+    private final Collection<ArtworkDTO> fanartDTOS = new HashSet<>(0);
 
     @Transient
     private final Collection<AwardDTO> awardDTOS = new HashSet<>(0);
@@ -931,23 +931,23 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Collection<ArtworkDetailDTO> getPosterDTOS() {
+    public Collection<ArtworkDTO> getPosterDTOS() {
         return posterDTOS;
     }
 
     public void addPosterDTO(String source, String url) {
          if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-             getPosterDTOS().add(new ArtworkDetailDTO(source, url));
+             getPosterDTOS().add(new ArtworkDTO(source, url));
         }
     }
 
-    public Collection<ArtworkDetailDTO> getFanartDTOS() {
+    public Collection<ArtworkDTO> getFanartDTOS() {
         return this.fanartDTOS;
     }
 
     public void addFanartDTO(String source, String url) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            getFanartDTOS().add(new ArtworkDetailDTO(source, url));
+            getFanartDTOS().add(new ArtworkDTO(source, url));
         }
     }
 

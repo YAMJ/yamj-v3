@@ -22,14 +22,13 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.plugin.api.type.JobType;
-
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.type.JobType;
 
 /**
  * @author stuart.boston

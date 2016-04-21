@@ -24,7 +24,6 @@ package org.yamj.plugin.api.metadata;
 
 import java.util.List;
 import java.util.Map;
-import org.yamj.plugin.api.metadata.dto.FilmographyDTO;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface FilmographyScanner extends MetadataScanner, ExtensionPoint {

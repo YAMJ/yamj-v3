@@ -94,7 +94,7 @@ public class ConfigServiceWrapper implements PluginConfigService {
         for (Object key : pluginProperties.keySet()) {
             String sKey = key.toString();
             if (!configService.hasProperty(sKey)) {
-                configService.setProperty(sKey, StringUtils.trimToEmpty(sKey));
+                configService.setProperty(sKey, StringUtils.trimToEmpty(pluginProperties.getProperty(sKey)));
             }
         }
     }

@@ -39,10 +39,10 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
-import org.yamj.plugin.api.artwork.tools.ArtworkTools;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.artwork.ArtworkTools;
 
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
@@ -64,7 +64,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Season season) {
+    public List<ArtworkDTO> getPosters(Season season) {
         String id = tvdbScanner.getSeriesId(season.getSeries());
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -72,9 +72,9 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
 
         LOG.debug("Scan posters for season {}-{}", id, season.getSeason());
 
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> noLangDTOs = new ArrayList<>(5);
 
         String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         String altLanguage = configService.getProperty("thetvdb.language.alternate", language);
@@ -102,7 +102,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         }
         LOG.debug("Season {}-{}: Found {} posters without language", id, season, noLangDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (!langDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using posters with language '{}'", id, season, language);
             returnDTOs = langDTOs;
@@ -123,7 +123,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Season {}-{}: Using default series poster", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), ArtworkTools.getPartialHashCode(tvdbSeries.getPoster()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getPoster(), ArtworkTools.getPartialHashCode(tvdbSeries.getPoster()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -132,7 +132,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Series series) {
+    public List<ArtworkDTO> getPosters(Series series) {
         String id = tvdbScanner.getSeriesId(series);
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -140,9 +140,9 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
   
         LOG.debug("Scan posters for series {}", id);
       
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> noLangDTOs = new ArrayList<>(5);
 
         String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         String altLanguage = configService.getProperty("thetvdb.language.alternate", language);
@@ -170,7 +170,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         }
         LOG.debug("Series {}: Found {} posters without language", id, noLangDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (!langDTOs.isEmpty()) {
             LOG.info("Series {}: Using posters with language '{}'", id, language);
             returnDTOs = langDTOs;
@@ -186,7 +186,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series poster", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getPoster(), ArtworkTools.getPartialHashCode(tvdbSeries.getPoster()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getPoster(), ArtworkTools.getPartialHashCode(tvdbSeries.getPoster()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -198,7 +198,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
      * NOTE: No explicit season fanart; so right now the same as series fanarts
      */
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Season season) {
+    public List<ArtworkDTO> getFanarts(Season season) {
         String id = tvdbScanner.getSeriesId(season.getSeries());
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -206,8 +206,8 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
   
         LOG.debug("Scan fanarts for season {}-{}", id, season.getSeason());
       
-        List<ArtworkDetailDTO> hdDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> sdDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> hdDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> sdDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -227,7 +227,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         LOG.debug("Season {}-{}: Found {} HD fanart", id, season, hdDTOs.size());
         LOG.debug("Season {}-{}: Found {} SD fanart", id, season, sdDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (!hdDTOs.isEmpty()) {
             LOG.debug("Season {}-{}: Using HD fanart", id, season);
             returnDTOs = hdDTOs;
@@ -241,7 +241,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.debug("Season {}-{}: Using default series fanart", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), ArtworkTools.getPartialHashCode(tvdbSeries.getFanart()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getFanart(), ArtworkTools.getPartialHashCode(tvdbSeries.getFanart()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -250,7 +250,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Series series) {
+    public List<ArtworkDTO> getFanarts(Series series) {
         String id = tvdbScanner.getSeriesId(series);
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -258,8 +258,8 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
   
         LOG.debug("Scan fanarts for series {}", id);
 
-        List<ArtworkDetailDTO> hdDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> sdDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> hdDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> sdDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -279,7 +279,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         LOG.debug("Series {}: Found {} HD fanart", id, hdDTOs.size());
         LOG.debug("Series {}: Found {} SD fanart", id, sdDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (!hdDTOs.isEmpty()) {
             LOG.info("Series {}: Using HD fanart", id);
             returnDTOs = hdDTOs;
@@ -293,7 +293,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series fanart", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getFanart(), ArtworkTools.getPartialHashCode(tvdbSeries.getFanart()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getFanart(), ArtworkTools.getPartialHashCode(tvdbSeries.getFanart()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -302,7 +302,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Season season) {
+    public List<ArtworkDTO> getBanners(Season season) {
         String id = tvdbScanner.getSeriesId(season.getSeries());
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -310,13 +310,13 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
   
         LOG.debug("Scan banners for season {}-{}", id, season.getSeason());
       
-        List<ArtworkDetailDTO> seasonLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> seasonAltLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> seasonNoLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> seriesLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> seriesAltLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> seriesNoLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> blankDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seasonLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seasonAltLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seasonNoLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seriesLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seriesAltLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> seriesNoLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> blankDTOs = new ArrayList<>(5);
 
         String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         String altLanguage = configService.getProperty("thetvdb.language.alternate", language);
@@ -369,7 +369,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         LOG.debug("Season {}-{}: Found {} series banners without language", id, season, seasonNoLangDTOs.size());
         LOG.debug("season {}-{}: Found {} blank banners", id, season, blankDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", false) && !blankDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using blanks banners", id, season);
             returnDTOs = blankDTOs;
@@ -400,7 +400,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Season {}-{}: Using default series banner", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), ArtworkTools.getPartialHashCode(tvdbSeries.getBanner()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getBanner(), ArtworkTools.getPartialHashCode(tvdbSeries.getBanner()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -409,7 +409,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Series series) {
+    public List<ArtworkDTO> getBanners(Series series) {
         String id = tvdbScanner.getSeriesId(series);
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
@@ -417,10 +417,10 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
   
         LOG.debug("Scan banners for series {}", id);
       
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
-        List<ArtworkDetailDTO> blankDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> noLangDTOs = new ArrayList<>(5);
+        List<ArtworkDTO> blankDTOs = new ArrayList<>(5);
 
         // get series artwork
         String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
@@ -451,7 +451,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         LOG.debug("Series {}: Found {} banners without language", id, noLangDTOs.size());
         LOG.debug("Series {}: Found {} blank banners", id, blankDTOs.size());
 
-        final List<ArtworkDetailDTO> returnDTOs;
+        final List<ArtworkDTO> returnDTOs;
         if (!langDTOs.isEmpty()) {
             LOG.info("Series {}: Using banners with language '{}'", id, language);
             returnDTOs = langDTOs;
@@ -470,7 +470,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
                 returnDTOs = Collections.emptyList();
             } else {
                 LOG.info("Series {}: Using default series banner", id);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), tvdbSeries.getBanner(), ArtworkTools.getPartialHashCode(tvdbSeries.getBanner()));
+                ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), tvdbSeries.getBanner(), ArtworkTools.getPartialHashCode(tvdbSeries.getBanner()));
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -478,9 +478,9 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         return returnDTOs;
     }
 
-    private ArtworkDetailDTO createArtworDetail(Banner banner) {
+    private ArtworkDTO createArtworDetail(Banner banner) {
         String url = banner.getUrl();
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
+        ArtworkDTO dto = new ArtworkDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
 
         // set language
         if (StringUtils.isNotBlank(banner.getLanguage())) {
@@ -500,7 +500,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+    public List<ArtworkDTO> getVideoImages(VideoData videoData) {
         if (videoData.isMovie()) {
             return Collections.emptyList();
         }
@@ -513,7 +513,7 @@ public class TheTVDbArtworkScanner implements ISeriesArtworkScanner {
         final String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
         Episode episode = tvdbApiWrapper.getEpisode(id, videoData.getSeason().getSeason(), videoData.getEpisode(), language);
         if (episode != null && StringUtils.isNotBlank(episode.getFilename())) {
-            ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), ArtworkTools.getPartialHashCode(episode.getFilename()));
+            ArtworkDTO detailDTO = new ArtworkDTO(getScannerName(), episode.getFilename(), ArtworkTools.getPartialHashCode(episode.getFilename()));
             return Collections.singletonList(detailDTO);
         }
         

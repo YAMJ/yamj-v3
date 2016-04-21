@@ -25,8 +25,6 @@ package org.yamj.core.api.options;
 import static org.yamj.plugin.api.common.Constants.ALL;
 import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
 
-import org.yamj.plugin.api.type.JobType;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -37,6 +35,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.plugin.api.type.JobType;
 /**
  * Abstract class for the query options
  *

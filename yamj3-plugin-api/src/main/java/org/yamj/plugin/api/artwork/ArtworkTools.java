@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.artwork.tools;
+package org.yamj.plugin.api.artwork;
 
 import org.apache.commons.lang3.StringUtils;
 

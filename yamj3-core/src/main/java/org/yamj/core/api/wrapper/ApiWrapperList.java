@@ -24,7 +24,6 @@ package org.yamj.core.api.wrapper;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.yamj.core.api.model.ApiStatus;
 

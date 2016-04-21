@@ -23,6 +23,7 @@
 package org.yamj.core.web.apis;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.StringTokenizer;

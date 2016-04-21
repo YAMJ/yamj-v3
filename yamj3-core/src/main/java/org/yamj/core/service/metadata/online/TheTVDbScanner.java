@@ -44,7 +44,7 @@ import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
 import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
 
 @Service("tvdbScanner")

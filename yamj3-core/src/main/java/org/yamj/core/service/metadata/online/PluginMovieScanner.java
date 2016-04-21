@@ -31,10 +31,7 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.dto.CreditDTO;
-import org.yamj.plugin.api.metadata.dto.MovieDTO;
+import org.yamj.plugin.api.metadata.*;
 
 public class PluginMovieScanner implements IMovieScanner {
 
@@ -122,8 +119,8 @@ public class PluginMovieScanner implements IMovieScanner {
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, getScannerName())) {
-            final String countryCode = localeService.findCountryCode(movie.getReleaseCountry());
-            videoData.setRelease(countryCode, movie.getReleaseDate(), getScannerName());
+            String releaseCountryCode = localeService.findCountryCode(movie.getReleaseCountry());
+            videoData.setRelease(releaseCountryCode, movie.getReleaseDate(), getScannerName());
         }
 
         videoData.addRating(getScannerName(), movie.getRating());

@@ -34,9 +34,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.IdMap;
-import org.yamj.plugin.api.metadata.SeriesScanner;
-import org.yamj.plugin.api.metadata.dto.*;
+import org.yamj.plugin.api.metadata.*;
 
 public class PluginSeriesScanner implements ISeriesScanner {
 

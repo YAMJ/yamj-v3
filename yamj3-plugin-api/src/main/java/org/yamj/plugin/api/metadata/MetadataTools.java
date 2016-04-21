@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.tools;
+package org.yamj.plugin.api.metadata;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

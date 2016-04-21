@@ -23,6 +23,7 @@
 package org.yamj.core.service.trakttv;
 
 import static org.yamj.plugin.api.common.Constants.*;
+
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;

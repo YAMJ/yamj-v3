@@ -23,7 +23,6 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.Map;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {

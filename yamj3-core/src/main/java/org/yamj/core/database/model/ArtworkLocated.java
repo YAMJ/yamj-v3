@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.plugin.api.type.ImageType;
-
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -39,6 +37,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.yamj.plugin.api.type.ImageType;
 
 @NamedQueries({    
     @NamedQuery(name = ArtworkLocated.QUERY_REQUIRED,

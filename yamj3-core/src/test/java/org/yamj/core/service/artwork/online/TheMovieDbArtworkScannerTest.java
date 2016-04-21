@@ -30,7 +30,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public class TheMovieDbArtworkScannerTest extends AbstractTest {
 
@@ -42,7 +42,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractTest {
         Series series = new Series();
         series.setSourceDbId(tmdbArtworkScanner.getScannerName(), "1399");
         
-        List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getPosters(series);
+        List<ArtworkDTO> dtos = tmdbArtworkScanner.getPosters(series);
         logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
@@ -51,7 +51,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractTest {
         Series series = new Series();
         series.setSourceDbId(tmdbArtworkScanner.getScannerName(), "1399");
         
-        List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getFanarts(series);
+        List<ArtworkDTO> dtos = tmdbArtworkScanner.getFanarts(series);
         logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 
@@ -64,7 +64,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractTest {
         season.setSeries(series);
         series.getSeasons().add(season);
         
-        List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getPosters(season);
+        List<ArtworkDTO> dtos = tmdbArtworkScanner.getPosters(season);
         logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
@@ -77,7 +77,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractTest {
         season.setSeries(series);
         series.getSeasons().add(season);
         
-        List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getFanarts(season);
+        List<ArtworkDTO> dtos = tmdbArtworkScanner.getFanarts(season);
         logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 
@@ -94,7 +94,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractTest {
         episode.setSeason(season);
         season.getVideoDatas().add(episode);
         
-        List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getVideoImages(episode);
+        List<ArtworkDTO> dtos = tmdbArtworkScanner.getVideoImages(episode);
         logArtworks(ArtworkType.VIDEOIMAGE, dtos, getClass());
     }
 }

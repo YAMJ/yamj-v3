@@ -35,7 +35,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.ExtraScannerService;
 import org.yamj.core.service.metadata.online.TraktTvScanner;
 import org.yamj.core.service.trakttv.TraktTvService;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 
 @Service("traktTvIdScanner")
 public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner {

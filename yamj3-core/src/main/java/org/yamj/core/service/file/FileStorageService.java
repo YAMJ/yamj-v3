@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.file;
 
-import org.yamj.plugin.api.type.ImageType;
-
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -50,6 +48,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.attachment.AttachmentScannerService;
+import org.yamj.plugin.api.type.ImageType;
 
 @Service("fileStorageService")
 public class FileStorageService {

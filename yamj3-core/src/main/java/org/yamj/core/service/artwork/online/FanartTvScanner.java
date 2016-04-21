@@ -38,10 +38,10 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.web.apis.FanartTvApiWrapper;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 @Service("fanartTvScanner")
 public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScanner {
@@ -64,55 +64,55 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
         String imdbId = imdbScanner.getMovieId(videoData);
         return getMovieArtworkType(imdbId, FTArtworkType.MOVIEPOSTER);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
         String imdbId = imdbScanner.getMovieId(videoData);
         return getMovieArtworkType(imdbId, FTArtworkType.MOVIEBACKGROUND);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Series series) {
+    public List<ArtworkDTO> getPosters(Series series) {
         String tvdbId = tvdbScanner.getSeriesId(series);
         return getSeriesArtworkType(tvdbId, FTArtworkType.TVPOSTER, -1);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Series series) {
+    public List<ArtworkDTO> getFanarts(Series series) {
         String tvdbId = tvdbScanner.getSeriesId(series);
         return getSeriesArtworkType(tvdbId, FTArtworkType.SHOWBACKGROUND, -1);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Series series) {
+    public List<ArtworkDTO> getBanners(Series series) {
         String tvdbId = tvdbScanner.getSeriesId(series);
         return getSeriesArtworkType(tvdbId, FTArtworkType.TVBANNER, -1);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(Season season) {
+    public List<ArtworkDTO> getPosters(Season season) {
         String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
         return getSeriesArtworkType(tvdbId, FTArtworkType.SEASONPOSTER, season.getSeason());
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(Season season) {
+    public List<ArtworkDTO> getFanarts(Season season) {
         String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
         return getSeriesArtworkType(tvdbId, FTArtworkType.SHOWBACKGROUND, -1);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getBanners(Season season) {
+    public List<ArtworkDTO> getBanners(Season season) {
         String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
         return getSeriesArtworkType(tvdbId, FTArtworkType.SEASONBANNER, season.getSeason());
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+    public List<ArtworkDTO> getVideoImages(VideoData videoData) {
         return Collections.emptyList();
     }
 
@@ -123,7 +123,7 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
      * @param artworkType type of the artwork to get
      * @return list of the appropriate artwork
      */
-    private List<ArtworkDetailDTO> getMovieArtworkType(String id, FTArtworkType artworkType) {
+    private List<ArtworkDTO> getMovieArtworkType(String id, FTArtworkType artworkType) {
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
         }
@@ -144,7 +144,7 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
      * @param artworkType type of the artwork to get
      * @return list of the appropriate artwork
      */
-    private List<ArtworkDetailDTO> getSeriesArtworkType(String id, FTArtworkType artworkType, int seasonNumber) {
+    private List<ArtworkDTO> getSeriesArtworkType(String id, FTArtworkType artworkType, int seasonNumber) {
         if (StringUtils.isBlank(id)) {
             return Collections.emptyList();
         }
@@ -158,8 +158,8 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
         return getArtworkList(ftSeries.getArtwork(artworkType), language, seasonNumber);
     }
     
-    private static List<ArtworkDetailDTO> getArtworkList(List<FTArtwork> ftArtwork, String language, int seasonNumber) {
-        List<ArtworkDetailDTO> artworkList = new ArrayList<>();
+    private static List<ArtworkDTO> getArtworkList(List<FTArtwork> ftArtwork, String language, int seasonNumber) {
+        List<ArtworkDTO> artworkList = new ArrayList<>();
         final String season = Integer.toString(seasonNumber);
         
         // first try for default language
@@ -169,7 +169,7 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
             }
             
             if (language.equalsIgnoreCase(artwork.getLanguage())) {
-                ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
+                ArtworkDTO aDto = new ArtworkDTO(SCANNER_ID, artwork.getUrl());
                 aDto.setLanguageCode(artwork.getLanguage());
                 artworkList.add(aDto);
             } 
@@ -183,7 +183,7 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
                 }
 
                 if (LANGUAGE_EN.equalsIgnoreCase(artwork.getLanguage())) {
-                    ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
+                    ArtworkDTO aDto = new ArtworkDTO(SCANNER_ID, artwork.getUrl());
                     aDto.setLanguageCode(artwork.getLanguage());
                     artworkList.add(aDto);
                 }
@@ -197,7 +197,7 @@ public class FanartTvScanner implements IMovieArtworkScanner, ISeriesArtworkScan
             }
 
             if (LANGUAGE_NONE.equalsIgnoreCase(artwork.getLanguage())) {
-                artworkList.add(new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl()));
+                artworkList.add(new ArtworkDTO(SCANNER_ID, artwork.getUrl()));
             }
         }
 

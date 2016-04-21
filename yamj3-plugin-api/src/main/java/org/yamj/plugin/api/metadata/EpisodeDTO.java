@@ -20,62 +20,53 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.dto;
+package org.yamj.plugin.api.metadata;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
-public class SeasonDTO {
+public class EpisodeDTO {
 
     private final Map<String, String> ids;
-    private final int seasonNumber;
-    private SeriesDTO series;
-    private boolean scanNeeded;
+    private final int episodeNumber;
+    private SeasonDTO season;
     private String title;
     private String originalTitle;
-    private int year;
     private String plot;
     private String outline;
+    private String tagline;
+    private String quote;
+    private String releaseCountry;
+    private Date releaseDate;
     private int rating = -1;
-    private Collection<EpisodeDTO> episodes = new ArrayList<>();
+    private List<CreditDTO> credits = new ArrayList<>();
     private boolean valid = true;
     
-    public SeasonDTO(Map<String, String> ids, int seasonNumber) {
+    public EpisodeDTO(Map<String, String> ids, int episodeNumber) {
         this.ids = ids;
-        this.seasonNumber = seasonNumber;
+        this.episodeNumber = episodeNumber;
     }
-    
+
     public Map<String, String> getIds() {
         return ids;
     }
 
-    public SeasonDTO addId(String source, String id) {
+    public EpisodeDTO addId(String source, String id) {
         if (id != null && id.length() > 0) {
             this.ids.put(source, id);
         }
         return this;
     }
-
-    public int getSeasonNumber() {
-        return seasonNumber;
+    
+    public int getEpisodeNumber() {
+        return episodeNumber;
     }
 
-    public SeriesDTO getSeries() {
-        return series;
+    public SeasonDTO getSeason() {
+        return season;
     }
 
-    public SeasonDTO setSeries(SeriesDTO series) {
-        this.series = series;
-        return this;
-    }
-
-    public boolean isScanNeeded() {
-        return scanNeeded;
-    }
-
-    public SeasonDTO setScanNeeded(boolean scanNeeded) {
-        this.scanNeeded = scanNeeded;
+    public EpisodeDTO setSeason(SeasonDTO season) {
+        this.season = season;
         return this;
     }
 
@@ -83,7 +74,7 @@ public class SeasonDTO {
         return title;
     }
 
-    public SeasonDTO setTitle(String title) {
+    public EpisodeDTO setTitle(String title) {
         this.title = title;
         return this;
     }
@@ -92,17 +83,8 @@ public class SeasonDTO {
         return originalTitle;
     }
 
-    public SeasonDTO setOriginalTitle(String originalTitle) {
+    public EpisodeDTO setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
-        return this;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public SeasonDTO setYear(int year) {
-        this.year = year;
         return this;
     }
 
@@ -110,7 +92,7 @@ public class SeasonDTO {
         return plot;
     }
 
-    public SeasonDTO setPlot(String plot) {
+    public EpisodeDTO setPlot(String plot) {
         this.plot = plot;
         return this;
     }
@@ -119,8 +101,44 @@ public class SeasonDTO {
         return outline;
     }
 
-    public SeasonDTO setOutline(String outline) {
+    public EpisodeDTO setOutline(String outline) {
         this.outline = outline;
+        return this;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
+    public EpisodeDTO setTagline(String tagline) {
+        this.tagline = tagline;
+        return this;
+    }
+
+    public String getQuote() {
+        return quote;
+    }
+
+    public EpisodeDTO setQuote(String quote) {
+        this.quote = quote;
+        return this;
+    }
+
+    public String getReleaseCountry() {
+        return releaseCountry;
+    }
+
+    public EpisodeDTO setReleaseCountry(String releaseCountry) {
+        this.releaseCountry = releaseCountry;
+        return this;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public EpisodeDTO setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
         return this;
     }
 
@@ -128,31 +146,30 @@ public class SeasonDTO {
         return rating;
     }
 
-    public SeasonDTO setRating(int rating) {
+    public EpisodeDTO setRating(int rating) {
         this.rating = rating;
         return this;
     }
 
-    public Collection<EpisodeDTO> getEpisodes() {
-        return episodes;
+    public List<CreditDTO> getCredits() {
+        return credits;
     }
 
-    public void setEpisodes(Collection<EpisodeDTO> episodes) {
-        this.episodes = episodes;
-    }
-    
-    public SeasonDTO addEpisode(EpisodeDTO episode) {
-        this.episodes.add(episode);
+    public EpisodeDTO setCredits(List<CreditDTO> credits) {
+        this.credits = credits;
         return this;
     }
     
-    public EpisodeDTO getEpisode(int episodeNumber) {
-        for (EpisodeDTO episode : this.episodes) {
-            if (episode.getEpisodeNumber() == episodeNumber) {
-                return episode;
-            }
+    public EpisodeDTO addCredit(CreditDTO credit) {
+        this.credits.add(credit);
+        return this;
+    }
+
+    public EpisodeDTO addCredits(Collection<CreditDTO> credits) {
+        if (credits != null && !credits.isEmpty()) {
+            this.credits.addAll(credits);
         }
-        return null;
+        return this;
     }
 
     public boolean isValid() {
@@ -163,7 +180,7 @@ public class SeasonDTO {
         return !valid;
     }
 
-    public SeasonDTO setValid(boolean valid) {
+    public EpisodeDTO setValid(boolean valid) {
         this.valid = valid;
         return this;
     }

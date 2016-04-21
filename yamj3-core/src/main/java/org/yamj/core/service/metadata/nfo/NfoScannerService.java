@@ -38,7 +38,7 @@ import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.common.Constants;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
+import org.yamj.plugin.api.metadata.MetadataTools;
 
 @Service("nfoScannerService")
 public class NfoScannerService {

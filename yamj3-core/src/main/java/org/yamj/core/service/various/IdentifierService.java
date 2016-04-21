@@ -34,8 +34,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-import org.yamj.plugin.api.metadata.tools.PersonName;
+import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.metadata.PersonName;
 import org.yamj.plugin.api.transliteration.Transliterator;
 import org.yamj.plugin.api.type.JobType;
 import ro.fortsoft.pf4j.PluginManager;
@@ -144,7 +144,7 @@ public class IdentifierService {
         return credit;
     }
 
-    public CreditDTO createCredit(final String source, final org.yamj.plugin.api.metadata.dto.CreditDTO dto) {
+    public CreditDTO createCredit(final String source, final org.yamj.plugin.api.metadata.CreditDTO dto) {
         final String trimmedName = StringUtils.trimToNull(dto.getName());
         if (trimmedName == null) {
             return null;

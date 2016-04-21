@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import org.yamj.plugin.api.web.HTMLTools;
-
 import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -42,6 +40,7 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerDownloadDTO;
+import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("youTubeDownloadParser")
 public class YouTubeDownloadParser  {

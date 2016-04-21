@@ -22,9 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.plugin.api.type.ParticipationType;
-
-import org.yamj.plugin.api.type.JobType;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -35,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.type.ParticipationType;
 
 @Entity
 @Table(name = "participation",

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.remote.service;
 
-import org.yamj.core.service.various.StagingService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,7 @@ import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.remote.service.FileImportService;
 import org.yamj.core.database.model.Library;
 import org.yamj.core.scheduling.ImportScheduler;
+import org.yamj.core.service.various.StagingService;
 
 @Service("fileImportService")
 public class FileImportServiceImpl implements FileImportService {

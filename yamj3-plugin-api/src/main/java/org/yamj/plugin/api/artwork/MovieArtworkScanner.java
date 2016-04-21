@@ -23,8 +23,7 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
-import org.yamj.plugin.api.metadata.dto.MovieDTO;
+import org.yamj.plugin.api.metadata.MovieDTO;
 
 public interface MovieArtworkScanner extends ArtworkScanner {
 

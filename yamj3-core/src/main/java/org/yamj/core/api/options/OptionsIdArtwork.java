@@ -24,13 +24,14 @@ package org.yamj.core.api.options;
 
 import static org.yamj.plugin.api.common.Constants.ALL;
 import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.ArtworkType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * List of the options available for the indexes

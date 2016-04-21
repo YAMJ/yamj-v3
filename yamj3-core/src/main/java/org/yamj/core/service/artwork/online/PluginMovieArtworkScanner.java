@@ -23,18 +23,16 @@
 package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.MovieArtworkScanner;
-import org.yamj.plugin.api.metadata.dto.MovieDTO;
+import org.yamj.plugin.api.metadata.MovieDTO;
 
-public class PluginMovieArtworkScanner extends PluginArtworkScanner implements IMovieArtworkScanner {
+public class PluginMovieArtworkScanner implements IMovieArtworkScanner {
 
     private final MovieArtworkScanner movieArtworkScanner;
     
-    public PluginMovieArtworkScanner(MovieArtworkScanner movieArtworkScanner, LocaleService localeService) {
-        super(localeService);
+    public PluginMovieArtworkScanner(MovieArtworkScanner movieArtworkScanner) {
         this.movieArtworkScanner = movieArtworkScanner;
     }
     
@@ -44,13 +42,13 @@ public class PluginMovieArtworkScanner extends PluginArtworkScanner implements I
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-        return createArtworkDetails(movieArtworkScanner.getPosters(buildMovie(videoData)));
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
+        return movieArtworkScanner.getPosters(buildMovie(videoData));
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
-        return createArtworkDetails(movieArtworkScanner.getFanarts(buildMovie(videoData)));
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
+        return movieArtworkScanner.getFanarts(buildMovie(videoData));
     }
     
     private static MovieDTO buildMovie(VideoData videoData) {

@@ -24,13 +24,13 @@ package org.yamj.core.service.artwork.online;
 
 import java.util.List;
 import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 public interface IBoxedSetArtworkScanner extends IArtworkScanner {
 
-    List<ArtworkDetailDTO> getPosters(BoxedSet boxedSet);
+    List<ArtworkDTO> getPosters(BoxedSet boxedSet);
 
-    List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet);
+    List<ArtworkDTO> getFanarts(BoxedSet boxedSet);
 
-    List<ArtworkDetailDTO> getBanners(BoxedSet boxedSet);
+    List<ArtworkDTO> getBanners(BoxedSet boxedSet);
 }

@@ -35,9 +35,9 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.web.apis.ImdbApiWrapper;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 @Service("imdbArtworkScanner")
 public class ImdbArtworkScanner implements IMovieArtworkScanner, IPersonArtworkScanner {
@@ -53,19 +53,19 @@ public class ImdbArtworkScanner implements IMovieArtworkScanner, IPersonArtworkS
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+    public List<ArtworkDTO> getPosters(VideoData videoData) {
         String imdbId = imdbScanner.getMovieId(videoData);
         return getArtworks(imdbId, ArtworkType.POSTER);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+    public List<ArtworkDTO> getFanarts(VideoData videoData) {
         String imdbId = imdbScanner.getMovieId(videoData);
         return getArtworks(imdbId, ArtworkType.FANART);
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPhotos(Person person) {
+    public List<ArtworkDTO> getPhotos(Person person) {
         String imdbId = imdbScanner.getPersonId(person);
         if (StringUtils.isBlank(imdbId)) {
             return Collections.emptyList();
@@ -76,18 +76,18 @@ public class ImdbArtworkScanner implements IMovieArtworkScanner, IPersonArtworkS
             return Collections.emptyList();
         }
         
-        final ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
+        final ArtworkDTO dto = new ArtworkDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
         return Collections.singletonList(dto);
     }
 
-    private List<ArtworkDetailDTO> getArtworks(String imdbId, ArtworkType artworkType) {
+    private List<ArtworkDTO> getArtworks(String imdbId, ArtworkType artworkType) {
         if (StringUtils.isBlank(imdbId)) {
             return Collections.emptyList();
         }
 
-        List<ArtworkDetailDTO> dtos = new ArrayList<>();
+        List<ArtworkDTO> dtos = new ArrayList<>();
         for (ImdbArtwork artwork : this.getImdbArtwork(imdbId, artworkType)) {
-            dtos.add(new ArtworkDetailDTO(getScannerName(), artwork.getUrl(), artwork.getHashCode()));
+            dtos.add(new ArtworkDTO(getScannerName(), artwork.getUrl(), artwork.getHashCode()));
         }
         return dtos;
     }

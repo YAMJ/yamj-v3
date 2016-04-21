@@ -33,7 +33,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public abstract class AbstractTest extends AbstractJUnit4SpringContextTests {
@@ -69,10 +69,10 @@ public abstract class AbstractTest extends AbstractJUnit4SpringContextTests {
     }
 
     @SuppressWarnings("rawtypes")
-    protected static void logArtworks(ArtworkType type, List<ArtworkDetailDTO> dtos, Class scannerClass) {
+    protected static void logArtworks(ArtworkType type, List<ArtworkDTO> dtos, Class scannerClass) {
         Logger LOG = LoggerFactory.getLogger(scannerClass);
         if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
+            for (ArtworkDTO dto : dtos) {
                 LOG.info("{}: {}", type, dto);
             }
         }

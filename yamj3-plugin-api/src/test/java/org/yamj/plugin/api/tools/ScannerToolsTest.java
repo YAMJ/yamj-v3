@@ -22,11 +22,10 @@
  */
 package org.yamj.plugin.api.tools;
 
-import org.yamj.plugin.api.metadata.tools.MetadataTools;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.plugin.api.metadata.MetadataTools;
 
 public class ScannerToolsTest {
 

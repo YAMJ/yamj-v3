@@ -23,10 +23,9 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.artwork.dto.ArtworkDTO;
-import org.yamj.plugin.api.metadata.dto.EpisodeDTO;
-import org.yamj.plugin.api.metadata.dto.SeasonDTO;
-import org.yamj.plugin.api.metadata.dto.SeriesDTO;
+import org.yamj.plugin.api.metadata.EpisodeDTO;
+import org.yamj.plugin.api.metadata.SeasonDTO;
+import org.yamj.plugin.api.metadata.SeriesDTO;
 
 public interface SeriesArtworkScanner extends ArtworkScanner {
 

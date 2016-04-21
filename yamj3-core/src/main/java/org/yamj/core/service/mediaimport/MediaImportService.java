@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.yamj.plugin.api.type.ImageType;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,6 +52,7 @@ import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.WatchedDTO;
 import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.common.Constants;
+import org.yamj.plugin.api.type.ImageType;
 
 /**
  * The media import service is a spring-managed service. This will be used by

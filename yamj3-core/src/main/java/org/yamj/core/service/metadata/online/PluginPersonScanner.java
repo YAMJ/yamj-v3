@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.metadata.PersonDTO;
 import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.dto.PersonDTO;
 
 public class PluginPersonScanner implements IPersonScanner {
 
