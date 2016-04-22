@@ -64,8 +64,7 @@ public class ArtworkInitialization {
         initArtworkProfile("default", MetaDataType.PERSON, ArtworkType.PHOTO, 200, 300);
     }
     
-    private void initArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType, int width, int height)
-    {
+    private void initArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType, int width, int height) {
         try {
             ArtworkProfile artworkProfile = artworkStorageService.getArtworkProfile(profileName, metaDataType, artworkType);
             if (artworkProfile == null) {
