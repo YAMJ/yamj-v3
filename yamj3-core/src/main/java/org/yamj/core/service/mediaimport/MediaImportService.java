@@ -214,8 +214,7 @@ public class MediaImportService {
             if (videoData == null) {
 
                 // NEW video data
-                videoData = new VideoData(identifier);
-                videoData.setSourceDbIdMap(dto.getIdMap());
+                videoData = new VideoData(identifier, dto.getIdMap());
                 videoData.setTitle(dto.getTitle(), SCANNER_ID);
                 videoData.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                 videoData.setPublicationYear(dto.getYear(), SCANNER_ID);
@@ -297,10 +296,9 @@ public class MediaImportService {
                         String seriesIdentifier = dto.buildIdentifier();
                         Series series = metadataDao.getSeries(seriesIdentifier);
                         if (series == null) {
-                            series = new Series(seriesIdentifier);
+                            series = new Series(seriesIdentifier, dto.getIdMap());
                             series.setTitle(dto.getTitle(), SCANNER_ID);
                             series.setTitleOriginal(dto.getTitle(), SCANNER_ID);
-                            series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
                             series.setTrailerStatus(StatusType.NEW);
 

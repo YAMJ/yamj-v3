@@ -221,6 +221,11 @@ public class Series extends AbstractMetadata {
         super(identifier);
     }
 
+    public Series(String identifier, Map<String, String> sourceDbIdMap) {
+        super(identifier);
+        this.sourceDbIdMap = sourceDbIdMap;
+    }
+
     // GETTER and SETTER
 
     public int getStartYear() {
@@ -274,10 +279,6 @@ public class Series extends AbstractMetadata {
         return sourceDbIdMap;
     }
 
-    public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
-        this.sourceDbIdMap = sourceDbIdMap;
-    }
-    
     private String getSkipScanNfo() {
         return skipScanNfo;
     }
@@ -507,13 +508,9 @@ public class Series extends AbstractMetadata {
     public void addCertificationInfo(String countryCode, String certificate) {
         if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
             // check if country already present
-            for (String storedCode : getCertificationInfos().keySet()) {
-                if (countryCode.equals(storedCode)) {
-                    // certificate for country already present
-                    return;
-                }
+            if (!getCertificationInfos().containsKey(countryCode)) {
+                getCertificationInfos().put(countryCode, certificate);
             }
-            getCertificationInfos().put(countryCode, certificate);
         }
     }
 
@@ -541,12 +538,6 @@ public class Series extends AbstractMetadata {
                 continue;
             }
             getAwardDTOS().add(awardDTO);
-        }
-    }
-
-    public void addAwardDTO(String event, String category, String source, int year) {
-        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
-            getAwardDTOS().add(new AwardDTO(source, event, category, year));
         }
     }
 

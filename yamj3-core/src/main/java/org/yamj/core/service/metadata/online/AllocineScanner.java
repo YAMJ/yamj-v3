@@ -46,6 +46,7 @@ import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.plugin.api.metadata.AwardDTO;
 import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.type.JobType;
@@ -321,9 +322,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", false) &&
             CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards()))
         {
+            HashSet<AwardDTO> awards = new HashSet<>();
             for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
-                videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
+                awards.add(new AwardDTO(SCANNER_ID, festivalAward.getFestival(), festivalAward.getName(), festivalAward.getYear()));
             }
+            videoData.addAwardDTOS(awards);
         }
         
         return ScanResult.OK;
@@ -391,9 +394,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", false) &&
             CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) 
         {
+            HashSet<AwardDTO> awards = new HashSet<>();
             for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
-                series.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
+                awards.add(new AwardDTO(SCANNER_ID, festivalAward.getFestival(), festivalAward.getName(), festivalAward.getYear()));
             }
+            series.addAwardDTOS(awards);
         }
 
         // SCAN SEASONS

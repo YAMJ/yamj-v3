@@ -75,7 +75,7 @@ public class PluginPersonScanner implements IPersonScanner {
             return ScanResult.NO_RESULT;
         }
         
-        // set possible scanned person IDs only if not set before   
+        // set  IDs only if not set before   
         for (Entry<String,String> entry : personDTO.getIds().entrySet()) {
             if (getScannerName().equalsIgnoreCase(entry.getKey())) {
                 person.setSourceDbId(entry.getKey(), entry.getValue());

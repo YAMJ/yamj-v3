@@ -23,6 +23,7 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 public class MovieDTO {
 
@@ -196,7 +197,9 @@ public class MovieDTO {
     }
 
     public MovieDTO addCertification(String country, String certificate) {
-        this.certifications.put(country, certificate);
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certificate)) {
+            this.certifications.put(country, certificate);
+        }
         return this;
     }
 

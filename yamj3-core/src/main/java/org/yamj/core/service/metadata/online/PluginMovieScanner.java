@@ -81,7 +81,7 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.NO_RESULT;
         }
         
-        // set possible scanned movie IDs only if not set before   
+        // set  IDs only if not set before   
         for (Entry<String,String> entry : movie.getIds().entrySet()) {
             if (getScannerName().equalsIgnoreCase(entry.getKey())) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
@@ -123,8 +123,6 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setRelease(releaseCountryCode, movie.getReleaseDate(), getScannerName());
         }
 
-        videoData.addRating(getScannerName(), movie.getRating());
-
         if (OverrideTools.checkOverwriteGenres(videoData, getScannerName())) {
             videoData.setGenreNames(movie.getGenres(), getScannerName());
         }
@@ -142,9 +140,18 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setCountryCodes(countryCodes, getScannerName());
         }
 
+        for (Entry<String,String> certification : movie.getCertifications().entrySet()) {
+            String countryCode = localeService.findCountryCode(certification.getKey());
+            videoData.addCertificationInfo(countryCode, certification.getValue());
+        }
+
         for (CreditDTO credit : movie.getCredits()) {
             videoData.addCreditDTO(identifierService.createCredit(credit));
         }
+
+        videoData.addRating(getScannerName(), movie.getRating());
+
+        videoData.addAwardDTOS(movie.getAwards());
         
         return ScanResult.OK;
     }
