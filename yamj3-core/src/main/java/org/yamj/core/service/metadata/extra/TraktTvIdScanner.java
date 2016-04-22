@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.ExtraScannerService;
-import org.yamj.core.service.metadata.online.TraktTvScanner;
 import org.yamj.core.service.trakttv.TraktTvService;
 import org.yamj.plugin.api.metadata.MetadataTools;
 
@@ -63,7 +62,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
     
     @Override
     public String getScannerName() {
-        return TraktTvScanner.SCANNER_ID;
+        return SOURCE_TRAKTTV;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
     @Override
     public void scanMovie(VideoData videoData) {
-        int traktId = NumberUtils.toInt(videoData.getSourceDbId(TraktTvScanner.SCANNER_ID), NO_ID);
+        int traktId = NumberUtils.toInt(videoData.getSourceDbId(SOURCE_TRAKTTV), NO_ID);
         if (traktId > NO_ID) {
             // nothing to do anymore cause Trakt.TV id already present
             return;
@@ -84,7 +83,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try IMDB id
         Integer found = traktTvService.searchMovieIdByIMDB(videoData.getSourceDbId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -92,7 +91,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try TheMovieDB id
         found = traktTvService.searchMovieIdByTMDB(videoData.getSourceDbId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -101,7 +100,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         if (MetadataTools.isOriginalTitleScannable(videoData.getTitle(), videoData.getTitleOriginal())) {
             found = traktTvService.searchMovieByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear());
             if (found != null && found.intValue() > NO_ID) {
-                videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+                videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
                 // nothing to do anymore cause Trakt.TV id found
                 return;
             }
@@ -110,7 +109,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // search by title if still not found
         found = traktTvService.searchMovieByTitleAndYear(videoData.getTitle(), videoData.getYear());
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -121,7 +120,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
     @Override
     public void scanSeries(Series series) {
-        int traktId = NumberUtils.toInt(series.getSourceDbId(TraktTvScanner.SCANNER_ID), NO_ID);
+        int traktId = NumberUtils.toInt(series.getSourceDbId(SOURCE_TRAKTTV), NO_ID);
         if (traktId > NO_ID) {
             // nothing to do anymore cause Trakt.TV id already present
             return;
@@ -132,7 +131,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try TheTVDb id
         Integer found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -140,7 +139,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try TVRage id
         found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVRAGE));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -148,7 +147,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try IMDB id
         found = traktTvService.searchShowIdByIMDB(series.getSourceDbId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -156,7 +155,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // try TheMovieDB id
         found = traktTvService.searchShowIdByTMDB(series.getSourceDbId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
@@ -165,7 +164,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         if (MetadataTools.isOriginalTitleScannable(series.getTitle(), series.getTitleOriginal())) {
             found = traktTvService.searchShowByTitleAndYear(series.getTitleOriginal(), series.getStartYear());
             if (found != null && found.intValue() > NO_ID) {
-                series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+                series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
                 // nothing to do anymore cause Trakt.TV id found
                 return;
             }
@@ -174,7 +173,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // search by title if still not found
         found = traktTvService.searchShowByTitleAndYear(series.getTitle(), series.getStartYear());
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(TraktTvScanner.SCANNER_ID, Integer.toString(found.intValue()));
+            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }

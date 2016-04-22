@@ -70,8 +70,6 @@ public class OnlineScannerService implements PluginMetadataService {
     @Autowired
     private IdentifierService identifierService;
     @Autowired
-    private AllocineScanner allocineScanner;
-    @Autowired
     private ImdbScanner imdbScanner;
     @Autowired
     private TheMovieDbScanner theMovieDbScanner;
@@ -81,7 +79,6 @@ public class OnlineScannerService implements PluginMetadataService {
     @PostConstruct
     public void init() {
         LOG.debug("Initialize online scanner");
-        this.registerMetadataScanner(allocineScanner);
         this.registerMetadataScanner(imdbScanner);
         this.registerMetadataScanner(theMovieDbScanner);
         this.registerMetadataScanner(theTVDbScanner);

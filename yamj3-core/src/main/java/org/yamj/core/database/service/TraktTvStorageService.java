@@ -23,6 +23,8 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.plugin.api.common.Constants.SOURCE_TRAKTTV;
+
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,7 +36,6 @@ import org.yamj.core.database.dao.TraktTvDao;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
-import org.yamj.core.service.metadata.online.TraktTvScanner;
 
 @Service("traktTvStorageService")
 public class TraktTvStorageService {
@@ -83,9 +84,9 @@ public class TraktTvStorageService {
             updated = false;
             VideoData videoData = metadataStorageService.getRequiredVideoData(id);
             
-            if (!StringUtils.equals(videoData.getSourceDbId(TraktTvScanner.SCANNER_ID), traktTvId)) {
+            if (!StringUtils.equals(videoData.getSourceDbId(SOURCE_TRAKTTV), traktTvId)) {
                 updated = true;
-                videoData.setSourceDbId(TraktTvScanner.SCANNER_ID, traktTvId);
+                videoData.setSourceDbId(SOURCE_TRAKTTV, traktTvId);
             }
             
             if (videoData.getWatchedTraktTvLastDate() == null || videoData.getWatchedTraktTvLastDate().before(lastWatched)) {

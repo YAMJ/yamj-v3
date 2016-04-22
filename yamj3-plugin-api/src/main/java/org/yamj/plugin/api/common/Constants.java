@@ -42,6 +42,7 @@ public final class Constants {
     public static final String SOURCE_TMDB = "tmdb";
     public static final String SOURCE_TVDB = "tvdb";
     public static final String SOURCE_TVRAGE = "tvrage";
+    public static final String SOURCE_TRAKTTV = "trakttv";
     
     private Constants() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

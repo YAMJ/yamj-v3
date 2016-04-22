@@ -47,7 +47,6 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.database.service.TraktTvStorageService;
-import org.yamj.core.service.metadata.online.TraktTvScanner;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
 @Service("traktTvService")
@@ -666,7 +665,7 @@ public class TraktTvService {
     private static Set<Long> getUpdateableMovies(Ids movieIds, Map<String,List<Long>> updatedMovies) {
         Set<Long> updateable = new HashSet<>();
         if (movieIds.trakt() != null) {
-            List<Long> i = updatedMovies.get(TraktTvScanner.SCANNER_ID+"#"+movieIds.trakt());
+            List<Long> i = updatedMovies.get(SOURCE_TRAKTTV+"#"+movieIds.trakt());
             if (i != null) updateable.addAll(i);
         }
         if (movieIds.imdb() != null) {
@@ -751,7 +750,7 @@ public class TraktTvService {
     private static Set<Long> getUpdateableEpisodes(Ids showIds, int season, int episode, Map<String,List<Long>> updatedEpisodes) {
         Set<Long> updateable = new HashSet<>();
         if (showIds.trakt() != null) {
-            List<Long> i = updatedEpisodes.get(TraktTvScanner.SCANNER_ID+"#"+showIds.trakt()+"#"+season+"#"+episode);
+            List<Long> i = updatedEpisodes.get(SOURCE_TRAKTTV+"#"+showIds.trakt()+"#"+season+"#"+episode);
             if (i != null) updateable.addAll(i);
         }
         if (showIds.tvdb() != null) {

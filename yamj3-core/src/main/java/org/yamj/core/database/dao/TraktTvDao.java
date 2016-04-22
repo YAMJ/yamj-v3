@@ -34,7 +34,6 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TraktEpisodeDTO;
 import org.yamj.core.database.model.dto.TraktMovieDTO;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.service.metadata.online.TraktTvScanner;
 
 @Repository("traktTvDao")
 public class TraktTvDao extends HibernateDao {
@@ -233,7 +232,7 @@ public class TraktTvDao extends HibernateDao {
 
     private static void setMovieId(TraktMovieDTO dto, Object[] row) {
         final String source = convertRowElementToString(row[1]);
-        if (TraktTvScanner.SCANNER_ID.equals(source)) {
+        if (SOURCE_TRAKTTV.equals(source)) {
             dto.setTrakt(convertRowElementToInteger(row[2]));
         } else if (SOURCE_IMDB.equals(source)) {
             dto.setImdb(convertRowElementToString(row[2]));
@@ -244,7 +243,7 @@ public class TraktTvDao extends HibernateDao {
 
     private static void setMovieId(TraktEpisodeDTO dto, Object[] row) {
         final String source = convertRowElementToString(row[1]);
-        if (TraktTvScanner.SCANNER_ID.equals(source)) {
+        if (SOURCE_TRAKTTV.equals(source)) {
             dto.setTrakt(convertRowElementToInteger(row[2]));
         } else if (SOURCE_IMDB.equals(source)) {
             dto.setImdb(convertRowElementToString(row[2]));
