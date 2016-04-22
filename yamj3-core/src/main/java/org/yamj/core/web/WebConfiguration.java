@@ -22,7 +22,6 @@
  */
 package org.yamj.core.web;
 
-import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
@@ -103,12 +102,6 @@ public class WebConfiguration  {
 
     @Value("${APIKEY.fanarttv.clientKey}")
     private String fanartTvApiClientKey;
-
-    @Value("${APIKEY.allocine.partnerKey}")
-    private String allocineApiPartnerKey;
-
-    @Value("${APIKEY.allocine.secretKey}")
-    private String allocineApiSecretKey;
 
     @Value("${APIKEY.rottentomatoes}")
     private String rottenTomatoesApiKey;
@@ -214,12 +207,6 @@ public class WebConfiguration  {
     public FanartTvApi fanartTvApi() throws Exception {
         LOG.trace("Initialize FanartTvApi");
         return new FanartTvApi(fanartTvApiKey, fanartTvApiClientKey, poolingHttpClient());
-    }
-
-    @Bean
-    public AllocineApi allocineApi() throws Exception {
-        LOG.trace("Initialize AllocineApi");
-        return new AllocineApi(allocineApiPartnerKey, allocineApiSecretKey, poolingHttpClient());
     }
 
     @Bean

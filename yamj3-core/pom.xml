@@ -27,7 +27,6 @@
         <themoviedbapi.version>4.2</themoviedbapi.version>
         <thetvdbapi.version>1.8</thetvdbapi.version>
         <fanarttvapi.version>3.3-SNAPSHOT</fanarttvapi.version>
-        <allocineapi.version>1.5</allocineapi.version>
         <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <rottentomatoesapi.version>1.6-SNAPSHOT</rottentomatoesapi.version>
@@ -180,11 +179,6 @@
             <groupId>com.omertron</groupId>
             <artifactId>fanarttvapi</artifactId>
             <version>${fanarttvapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.moviejukebox</groupId>
-            <artifactId>allocine-api</artifactId>
-            <version>${allocineapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.moviejukebox</groupId>

@@ -77,8 +77,6 @@ public class ArtworkScannerService implements IQueueProcessService {
     @Autowired
     private PluginManager pluginManager;
     @Autowired
-    private AllocineArtworkScanner allocineArtworkScanner;
-    @Autowired
     private FanartTvScanner fanartTvScanner;
     @Autowired
     private ImdbArtworkScanner imdbArtworkScanner;
@@ -92,7 +90,6 @@ public class ArtworkScannerService implements IQueueProcessService {
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork scanner");
-        this.registerArtworkScanner(allocineArtworkScanner);
         this.registerArtworkScanner(fanartTvScanner);
         this.registerArtworkScanner(imdbArtworkScanner);
         this.registerArtworkScanner(theMovieDbArtworkScanner);
