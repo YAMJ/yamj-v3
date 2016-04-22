@@ -62,8 +62,11 @@ public class PluginMovieScanner implements IMovieScanner {
     }
 
     private String getMovieId(VideoData videoData, boolean throwTempError) {
-        String movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getIdMap(), throwTempError);
-        videoData.setSourceDbId(getScannerName(), movieId);
+        String movieId = videoData.getSourceDbId(getScannerName());
+        if (!movieScanner.isValidMovieId(movieId)) {
+            movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getIdMap(), throwTempError);
+            videoData.setSourceDbId(getScannerName(), movieId);
+        }
         return movieId;
     }
     

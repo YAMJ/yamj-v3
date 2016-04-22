@@ -53,8 +53,11 @@ public class PluginFilmographyScanner implements IFilmographyScanner {
     
 
     private String getPersonId(Person person, boolean throwTempError) {
-        String personId = filmographyScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
-        person.setSourceDbId(getScannerName(), personId);
+        String personId = person.getSourceDbId(getScannerName());
+        if (!filmographyScanner.isValidPersonId(personId)) {
+            personId = filmographyScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
+            person.setSourceDbId(getScannerName(), personId);
+        }
         return personId;
     }
 

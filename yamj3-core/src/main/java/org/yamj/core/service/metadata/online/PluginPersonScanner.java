@@ -55,8 +55,11 @@ public class PluginPersonScanner implements IPersonScanner {
     }
 
     private String getPersonId(Person person, boolean throwTempError) {
-        String personId = personScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
-        person.setSourceDbId(getScannerName(), personId);
+        String personId = person.getSourceDbId(getScannerName());
+        if (!personScanner.isValidPersonId(personId)) {
+            personId = personScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
+            person.setSourceDbId(getScannerName(), personId);
+        }
         return personId;
     }
 

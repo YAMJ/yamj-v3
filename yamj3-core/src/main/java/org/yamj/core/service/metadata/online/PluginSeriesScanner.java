@@ -64,8 +64,11 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
 
     private String getSeriesId(Series series, boolean throwTempError) {
-        String seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getIdMap(), throwTempError);
-        series.setSourceDbId(getScannerName(), seriesId);
+        String seriesId = series.getSourceDbId(getScannerName());
+        if (!seriesScanner.isValidSeriesId(seriesId)) {
+            seriesId = seriesScanner.getSeriesId(series.getTitle(), series.getTitleOriginal(), series.getStartYear(), series.getIdMap(), throwTempError);
+            series.setSourceDbId(getScannerName(), seriesId);
+        }
         return seriesId;
     }
 

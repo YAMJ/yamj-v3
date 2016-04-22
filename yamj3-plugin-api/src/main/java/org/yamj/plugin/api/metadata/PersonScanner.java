@@ -27,6 +27,8 @@ import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface PersonScanner extends MetadataScanner, ExtensionPoint {
     
+    boolean isValidPersonId(String personId);
+
     String getPersonId(String name, Map<String,String> ids, boolean throwTempError);
 
     boolean scanPerson(PersonDTO person, boolean throwTempError);
