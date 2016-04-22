@@ -68,7 +68,7 @@ public class PluginPersonScanner implements IPersonScanner {
             return ScanResult.MISSING_ID;
         }
 
-        final PersonDTO personDTO = new PersonDTO(person.getIdMap());
+        final PersonDTO personDTO = new PersonDTO(person.getIdMap()).setName(person.getName());
         final boolean scanned = personScanner.scanPerson(personDTO, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for person '{}'", getScannerName(), person.getName());

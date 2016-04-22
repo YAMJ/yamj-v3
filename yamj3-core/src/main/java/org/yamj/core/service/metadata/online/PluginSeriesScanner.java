@@ -122,7 +122,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
             series.setStudioNames(seriesDTO.getStudios(), getScannerName());
         }
 
-        if (OverrideTools.checkOverwriteCountries(series, getScannerName())) {
+        if (seriesDTO.getCountries() != null && OverrideTools.checkOverwriteCountries(series, getScannerName())) {
             Set<String> countryCodes = new HashSet<>(seriesDTO.getCountries().size());
             for (String country : seriesDTO.getCountries()) {
                 final String countryCode = localeService.findCountryCode(country);
@@ -252,10 +252,12 @@ public class PluginSeriesScanner implements ISeriesScanner {
                 videoData.setRelease(releaseCountryCode, episodeDTO.getReleaseDate(), getScannerName());
             }
 
-            for (CreditDTO credit : episodeDTO.getCredits()) {
-                videoData.addCreditDTO(identifierService.createCredit(credit));
+            if (episodeDTO.getCredits() != null) {
+                for (CreditDTO credit : episodeDTO.getCredits()) {
+                    videoData.addCreditDTO(identifierService.createCredit(credit));
+                }
             }
-
+            
             videoData.addRating(getScannerName(), episodeDTO.getRating());
 
             // mark episode as done
@@ -264,7 +266,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
     
     private SeriesDTO buildSeriesToScan(Series series) { 
-        final SeriesDTO seriesDTO = new SeriesDTO(series.getIdMap()); 
+        final SeriesDTO seriesDTO = new SeriesDTO(series.getIdMap()).setTitle(series.getTitle());
 
         for (Season season : series.getSeasons()) {
             // create season object

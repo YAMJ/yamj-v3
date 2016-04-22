@@ -23,6 +23,7 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 public class EpisodeDTO {
 
@@ -51,7 +52,7 @@ public class EpisodeDTO {
     }
 
     public EpisodeDTO addId(String source, String id) {
-        if (id != null && id.length() > 0) {
+        if (StringUtils.isNotBlank(id)) {
             this.ids.put(source, id);
         }
         return this;

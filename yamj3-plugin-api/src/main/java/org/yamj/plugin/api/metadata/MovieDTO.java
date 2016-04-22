@@ -54,7 +54,7 @@ public class MovieDTO {
     }
 
     public MovieDTO addId(String source, String id) {
-        if (id != null && id.length() > 0) {
+        if (StringUtils.isNotBlank(id)) {
             this.ids.put(source, id);
         }
         return this;
@@ -160,7 +160,9 @@ public class MovieDTO {
     }
 
     public MovieDTO addStudio(String studio) {
-        this.studios.add(studio);
+        if (studio != null) {
+            this.studios.add(studio);
+        }
         return this;
     }
 
@@ -174,7 +176,9 @@ public class MovieDTO {
     }
     
     public MovieDTO addGenre(String genre) {
-        this.genres.add(genre);
+        if (genre != null) {
+            this.genres.add(genre);
+        }
         return this;
     }
 
@@ -188,7 +192,9 @@ public class MovieDTO {
     }
 
     public MovieDTO addCountry(String country) {
-        this.countries.add(country);
+        if (country != null) {
+            this.countries.add(country);
+        }
         return this;
     }
     
@@ -208,7 +214,9 @@ public class MovieDTO {
     }
 
     public MovieDTO addAward(AwardDTO award) {
-        this.awards.add(award);
+        if (award != null) {
+            this.awards.add(award);
+        }
         return this;
     }
     

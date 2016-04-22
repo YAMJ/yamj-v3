@@ -24,6 +24,7 @@ package org.yamj.plugin.api.metadata;
 
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class PersonDTO {
 
@@ -47,7 +48,7 @@ public class PersonDTO {
     }
 
     public PersonDTO addId(String source, String id) {
-        if (id != null && id.length() > 0) {
+        if (StringUtils.isNotBlank(id)) {
             this.ids.put(source, id);
         }
         return this;

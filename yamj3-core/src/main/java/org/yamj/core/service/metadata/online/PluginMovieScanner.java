@@ -22,8 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.*;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +75,7 @@ public class PluginMovieScanner implements IMovieScanner {
             return ScanResult.MISSING_ID;
         }
         
-        final MovieDTO movie = new MovieDTO(new HashMap<>(videoData.getIdMap()));
+        final MovieDTO movie = new MovieDTO(videoData.getIdMap()).setTitle(videoData.getTitle());
         final boolean scanned = movieScanner.scanMovie(movie, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for movie '{}'", getScannerName(), videoData.getIdentifier());
@@ -131,7 +132,7 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.setStudioNames(movie.getStudios(), getScannerName());
         }
 
-        if (OverrideTools.checkOverwriteCountries(videoData, getScannerName())) {
+        if (movie.getCountries() != null && OverrideTools.checkOverwriteCountries(videoData, getScannerName())) {
             Set<String> countryCodes = new HashSet<>(movie.getCountries().size());
             for (String country : movie.getCountries()) {
                 final String countryCode = localeService.findCountryCode(country);
@@ -145,10 +146,12 @@ public class PluginMovieScanner implements IMovieScanner {
             videoData.addCertificationInfo(countryCode, certification.getValue());
         }
 
-        for (CreditDTO credit : movie.getCredits()) {
-            videoData.addCreditDTO(identifierService.createCredit(credit));
+        if (movie.getCredits() != null) {
+            for (CreditDTO credit : movie.getCredits()) {
+                videoData.addCreditDTO(identifierService.createCredit(credit));
+            }
         }
-
+        
         videoData.addRating(getScannerName(), movie.getRating());
 
         videoData.addAwardDTOS(movie.getAwards());
