@@ -158,5 +158,13 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='nfo.ignore.present.id'")
         .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.language'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.country'")
+        .executeUpdate();
     }
 }
