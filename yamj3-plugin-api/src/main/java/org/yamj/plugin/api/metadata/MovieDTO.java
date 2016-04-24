@@ -44,6 +44,8 @@ public class MovieDTO {
     private Map<String,String> certifications = new HashMap<>();
     private Set<AwardDTO> awards = new HashSet<>();
     private List<CreditDTO> credits = new ArrayList<>();
+    private String collectionName;
+    private String collectionId;
     
     public MovieDTO(Map<String, String> ids) {
         this.ids = ids;
@@ -240,4 +242,22 @@ public class MovieDTO {
         }
         return this;
     }
+
+    public String getCollectionName() {
+        return collectionName;
+    }
+
+    public MovieDTO setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
+        return this;
+    }
+
+    public String getCollectionId() {
+        return collectionId;
+    }
+
+    public MovieDTO setCollectionId(String collectionId) {
+        this.collectionId = collectionId;
+        return this;
+    }    
 }

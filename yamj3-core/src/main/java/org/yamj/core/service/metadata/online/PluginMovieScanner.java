@@ -155,6 +155,11 @@ public class PluginMovieScanner implements IMovieScanner {
             }
         }
         
+        final String collectionIdentifier = this.identifierService.cleanIdentifier(movie.getCollectionName());
+        if (StringUtils.isNotBlank(collectionIdentifier)) {
+            videoData.addBoxedSetDTO(getScannerName(), collectionIdentifier, movie.getCollectionName(), Integer.valueOf(-1), movie.getCollectionId());
+        }
+        
         videoData.addRating(getScannerName(), movie.getRating());
 
         videoData.addAwardDTOS(movie.getAwards());

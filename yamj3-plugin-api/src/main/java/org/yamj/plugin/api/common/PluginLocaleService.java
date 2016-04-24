@@ -23,6 +23,7 @@
 package org.yamj.plugin.api.common;
 
 import java.util.Locale;
+import java.util.Set;
 
 public interface PluginLocaleService {
 
@@ -31,4 +32,8 @@ public interface PluginLocaleService {
     String findCountryCode(String country);
     
     String findLanguageCode(String language);
+    
+    Set<String> getCountryNames(String countryCode);
+
+    Set<String> getCertificationCountryCodes(Locale locale);
 }

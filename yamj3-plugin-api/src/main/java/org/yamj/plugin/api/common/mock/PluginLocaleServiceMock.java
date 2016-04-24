@@ -22,7 +22,9 @@
  */
 package org.yamj.plugin.api.common.mock;
 
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 import org.yamj.plugin.api.common.PluginLocaleService;
 
 public class PluginLocaleServiceMock implements PluginLocaleService {
@@ -40,5 +42,15 @@ public class PluginLocaleServiceMock implements PluginLocaleService {
     @Override
     public String findLanguageCode(String language) {
         return language;
+    }
+
+    @Override
+    public Set<String> getCountryNames(String countryCode) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> getCertificationCountryCodes(Locale locale) {
+        return Collections.emptySet();
     }
 }

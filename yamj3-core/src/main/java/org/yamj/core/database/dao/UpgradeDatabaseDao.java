@@ -166,5 +166,13 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.country'")
         .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.uncredited'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.faceless'")
+        .executeUpdate();
     }
 }

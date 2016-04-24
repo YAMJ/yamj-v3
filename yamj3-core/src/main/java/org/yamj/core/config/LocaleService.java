@@ -243,6 +243,7 @@ public class LocaleService implements PluginLocaleService {
         return props;
     }
     
+    @Override
     public String findLanguageCode(String language) {
         if (StringUtils.isBlank(language)) {
             return null;
@@ -264,6 +265,7 @@ public class LocaleService implements PluginLocaleService {
         return null;
     }
 
+    @Override
     public String findCountryCode(String country) {
         if (StringUtils.isBlank(country)) {
             return null;
@@ -391,6 +393,7 @@ public class LocaleService implements PluginLocaleService {
         return this.getCertificationCountryCodes(yamjLocale);
     }
 
+    @Override
     public Set<String> getCertificationCountryCodes(Locale locale) {
         Set<String> result = new HashSet<>();
         List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", locale.getCountry());
@@ -403,6 +406,7 @@ public class LocaleService implements PluginLocaleService {
         return result;
     }
     
+    @Override
     public Set<String> getCountryNames(String countryCode) {
         if (StringUtils.isBlank(countryCode)) {
             return Collections.emptySet();
