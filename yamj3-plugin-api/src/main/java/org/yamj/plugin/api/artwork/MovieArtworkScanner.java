@@ -23,11 +23,11 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.metadata.MovieDTO;
+import org.yamj.plugin.api.metadata.IMovie;
 
 public interface MovieArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDTO> getPosters(MovieDTO movie);
+    List<ArtworkDTO> getPosters(IMovie movie);
 
-    List<ArtworkDTO> getFanarts(MovieDTO movie);
+    List<ArtworkDTO> getFanarts(IMovie movie);
 }

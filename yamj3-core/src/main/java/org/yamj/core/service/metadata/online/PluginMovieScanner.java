@@ -22,17 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.various.IdentifierService;
-import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.*;
+import org.yamj.plugin.api.metadata.IdMap;
+import org.yamj.plugin.api.metadata.MovieScanner;
 
 public class PluginMovieScanner implements IMovieScanner {
 
@@ -58,111 +54,36 @@ public class PluginMovieScanner implements IMovieScanner {
     
     @Override
     public String getMovieId(VideoData videoData) {
-        return getMovieId(videoData, false);
+        // create movie wrapper
+        WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
+        wrapper.setScannerName(movieScanner.getScannerName());
+        
+        return getMovieId(wrapper, false);
     }
 
-    private String getMovieId(VideoData videoData, boolean throwTempError) {
-        String movieId = videoData.getSourceDbId(getScannerName());
-        if (!movieScanner.isValidMovieId(movieId)) {
-            movieId = movieScanner.getMovieId(videoData.getTitle(), videoData.getTitleOriginal(), videoData.getPublicationYear(), videoData.getIdMap(), throwTempError);
-            videoData.setSourceDbId(getScannerName(), movieId);
-        }
+    private String getMovieId(WrapperMovie wrapper, boolean throwTempError) {
+        String movieId = movieScanner.getMovieId(wrapper, throwTempError);
+        wrapper.addId(getScannerName(), movieId);
         return movieId;
     }
-    
+
     @Override
     public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
-        String movieId = getMovieId(videoData, throwTempError);
-        if (StringUtils.isBlank(movieId)) {
-            LOG.debug("{} id not available '{}'", getScannerName(), videoData.getIdentifier());
+        // create movie wrapper
+        WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
+        wrapper.setScannerName(movieScanner.getScannerName());
+
+        String movieId = getMovieId(wrapper, throwTempError);
+        if (!movieScanner.isValidMovieId(movieId)) {
+            LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getTitle());
             return ScanResult.MISSING_ID;
         }
         
-        final MovieDTO movie = new MovieDTO(videoData.getIdMap()).setTitle(videoData.getTitle());
-        final boolean scanned = movieScanner.scanMovie(movie, throwTempError);
+        final boolean scanned = movieScanner.scanMovie(wrapper, throwTempError);
         if (!scanned) {
-            LOG.error("Can't find {} informations for movie '{}'", getScannerName(), videoData.getIdentifier());
+            LOG.error("Can't find {} informations for movie '{}'", getScannerName(), wrapper.getTitle());
             return ScanResult.NO_RESULT;
         }
-        
-        // set  IDs only if not set before   
-        for (Entry<String,String> entry : movie.getIds().entrySet()) {
-            if (getScannerName().equalsIgnoreCase(entry.getKey())) {
-                videoData.setSourceDbId(entry.getKey(), entry.getValue());
-            } else if (StringUtils.isBlank(videoData.getSourceDbId(entry.getKey()))) {
-                videoData.setSourceDbId(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (OverrideTools.checkOverwriteTitle(videoData, getScannerName())) {
-            videoData.setTitle(movie.getTitle(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteOriginalTitle(videoData, getScannerName())) {
-            videoData.setTitleOriginal(movie.getOriginalTitle(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteYear(videoData, getScannerName())) {
-            videoData.setPublicationYear(movie.getYear(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwritePlot(videoData, getScannerName())) {
-            videoData.setPlot(movie.getPlot(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteOutline(videoData, getScannerName())) {
-            videoData.setOutline(movie.getOutline(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteTagline(videoData, getScannerName())) {
-            videoData.setTagline(movie.getTagline(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteQuote(videoData, getScannerName())) {
-            videoData.setTagline(movie.getQuote(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteReleaseDate(videoData, getScannerName())) {
-            String releaseCountryCode = localeService.findCountryCode(movie.getReleaseCountry());
-            videoData.setRelease(releaseCountryCode, movie.getReleaseDate(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteGenres(videoData, getScannerName())) {
-            videoData.setGenreNames(movie.getGenres(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteStudios(videoData, getScannerName())) {
-            videoData.setStudioNames(movie.getStudios(), getScannerName());
-        }
-
-        if (movie.getCountries() != null && OverrideTools.checkOverwriteCountries(videoData, getScannerName())) {
-            Set<String> countryCodes = new HashSet<>(movie.getCountries().size());
-            for (String country : movie.getCountries()) {
-                final String countryCode = localeService.findCountryCode(country);
-                if (countryCode != null) countryCodes.add(countryCode);
-            }
-            videoData.setCountryCodes(countryCodes, getScannerName());
-        }
-
-        for (Entry<String,String> certification : movie.getCertifications().entrySet()) {
-            String countryCode = localeService.findCountryCode(certification.getKey());
-            videoData.addCertificationInfo(countryCode, certification.getValue());
-        }
-
-        if (movie.getCredits() != null) {
-            for (CreditDTO credit : movie.getCredits()) {
-                videoData.addCreditDTO(identifierService.createCredit(credit));
-            }
-        }
-        
-        final String collectionIdentifier = this.identifierService.cleanIdentifier(movie.getCollectionName());
-        if (StringUtils.isNotBlank(collectionIdentifier)) {
-            videoData.addBoxedSetDTO(getScannerName(), collectionIdentifier, movie.getCollectionName(), Integer.valueOf(-1), movie.getCollectionId());
-        }
-        
-        videoData.addRating(getScannerName(), movie.getRating());
-
-        videoData.addAwardDTOS(movie.getAwards());
         
         return ScanResult.OK;
     }

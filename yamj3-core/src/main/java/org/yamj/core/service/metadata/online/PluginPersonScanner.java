@@ -68,13 +68,13 @@ public class PluginPersonScanner implements IPersonScanner {
 
         final String personId = getPersonId(wrapper, throwTempError);
         if (!personScanner.isValidPersonId(personId)) {
-            LOG.debug("{} id not available '{}'", getScannerName(), person.getName());
+            LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getName());
             return ScanResult.MISSING_ID;
         }
 
         final boolean scanned = personScanner.scanPerson(wrapper, throwTempError);
         if (!scanned) {
-            LOG.error("Can't find {} informations for person '{}'", getScannerName(), person.getName());
+            LOG.error("Can't find {} informations for person '{}'", getScannerName(), wrapper.getName());
             return ScanResult.NO_RESULT;
         }
         

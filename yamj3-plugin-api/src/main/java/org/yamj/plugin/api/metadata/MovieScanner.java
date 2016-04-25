@@ -22,14 +22,13 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface MovieScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
     
     boolean isValidMovieId(String movieId);
     
-    String getMovieId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+    String getMovieId(IMovie movie, boolean throwTempError);
 
-    boolean scanMovie(MovieDTO movie, boolean throwTempError);
+    boolean scanMovie(IMovie movie, boolean throwTempError);
 }

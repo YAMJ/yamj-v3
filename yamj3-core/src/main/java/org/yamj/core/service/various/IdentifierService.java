@@ -108,6 +108,7 @@ public class IdentifierService {
         return result;
     }
     
+    @Deprecated
     public CreditDTO createCredit(final String source, final JobType jobType, final String name) {
         return createCredit(source, null, jobType, name);
     }
@@ -131,6 +132,7 @@ public class IdentifierService {
         return credit;
     }
 
+    @Deprecated
     public CreditDTO createCredit(final String source, final JobType jobType, final String name, final String role) {
         return createCredit(source, null, jobType, name, role);
     }
@@ -144,6 +146,7 @@ public class IdentifierService {
         return credit;
     }
 
+    @Deprecated
     public CreditDTO createCredit(final org.yamj.plugin.api.metadata.CreditDTO dto) {
         final String trimmedName = StringUtils.trimToNull(dto.getName());
         if (trimmedName == null) {

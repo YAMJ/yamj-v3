@@ -33,7 +33,7 @@ public final class AwardDTO {
     private boolean won = true;
     private boolean nominated = false;
 
-    public AwardDTO(String event, String category, String source, int year) {
+    public AwardDTO(String source, String event, String category, int year) {
         this.source = source;
         this.event = event;
         this.category = category;
@@ -89,7 +89,7 @@ public final class AwardDTO {
         if (obj instanceof AwardDTO) {
             final AwardDTO other = (AwardDTO) obj;
             return new EqualsBuilder()
-            .append(source, other.source)
+                .append(source, other.source)
                 .append(event, other.event)
                 .append(category, other.category)
                 .append(year, other.year)

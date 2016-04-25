@@ -858,6 +858,7 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @Deprecated
     public void addCreditDTOS(Collection<CreditDTO> creditDTOS) {
         if (creditDTOS != null) {
             getCreditDTOS().addAll(creditDTOS);
@@ -952,19 +953,12 @@ public class VideoData extends AbstractMetadata {
         return awardDTOS;
     }
 
-    public void addAwardDTOS(Collection<AwardDTO> awardDTOS) {
-        if (CollectionUtils.isEmpty(awardDTOS)) {
-            return;
-        }
-
-        for (AwardDTO awardDTO : awardDTOS) {
-            if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
-                continue;
-            }
-            getAwardDTOS().add(awardDTO);
+    public void addAwardDTO(String source, String event, String category, int year, boolean won, boolean nominated) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year > 0) {
+            awardDTOS.add(new AwardDTO(source, event, category, year).setWon(won).setNominated(nominated));
         }
     }
-
+    
     // TV CHECKS
     
     public boolean isTvEpisodeDone(String sourceDb) {

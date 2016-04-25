@@ -205,7 +205,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", false)) {
-            videoData.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
+            //videoData.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
         }
         
         return ScanResult.OK;

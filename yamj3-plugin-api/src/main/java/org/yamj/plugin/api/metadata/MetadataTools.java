@@ -464,7 +464,7 @@ public final class MetadataTools {
         
         return newRole;
     }
-    
+        
     public static boolean isOriginalTitleScannable(String title, String originalTitle) {
         if (StringUtils.isBlank(originalTitle)) {
             return false;

@@ -26,7 +26,8 @@ import java.util.List;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.MovieArtworkScanner;
-import org.yamj.plugin.api.metadata.MovieDTO;
+import org.yamj.plugin.api.metadata.IMovie;
+import org.yamj.plugin.api.metadata.mock.MovieMock;
 
 public class PluginMovieArtworkScanner implements IMovieArtworkScanner {
 
@@ -51,10 +52,11 @@ public class PluginMovieArtworkScanner implements IMovieArtworkScanner {
         return movieArtworkScanner.getFanarts(buildMovie(videoData));
     }
     
-    private static MovieDTO buildMovie(VideoData videoData) {
-        return new MovieDTO(videoData.getIdMap())
-            .setTitle(videoData.getTitle())
-            .setOriginalTitle(videoData.getTitleOriginal())
-            .setYear(videoData.getYear());
+    private static IMovie buildMovie(VideoData videoData) {
+        MovieMock mock = new MovieMock(videoData.getIdMap());
+        mock.setTitle(videoData.getTitle());
+        mock.setOriginalTitle(videoData.getTitleOriginal());
+        mock.setYear(videoData.getPublicationYear());
+        return mock;
     }
 }
