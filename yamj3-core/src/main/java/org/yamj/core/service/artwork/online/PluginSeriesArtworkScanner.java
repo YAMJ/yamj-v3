@@ -28,9 +28,12 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.SeriesArtworkScanner;
-import org.yamj.plugin.api.metadata.EpisodeDTO;
-import org.yamj.plugin.api.metadata.SeasonDTO;
-import org.yamj.plugin.api.metadata.SeriesDTO;
+import org.yamj.plugin.api.metadata.IEpisode;
+import org.yamj.plugin.api.metadata.ISeason;
+import org.yamj.plugin.api.metadata.ISeries;
+import org.yamj.plugin.api.metadata.mock.EpisodeMock;
+import org.yamj.plugin.api.metadata.mock.SeasonMock;
+import org.yamj.plugin.api.metadata.mock.SeriesMock;
 
 public class PluginSeriesArtworkScanner implements ISeriesArtworkScanner {
 
@@ -80,26 +83,29 @@ public class PluginSeriesArtworkScanner implements ISeriesArtworkScanner {
         return seriesArtworkScanner.getVideoImages(buildEpisode(videoData));
     }
 
-    private static SeriesDTO buildSeries(Series series) {
-        return new SeriesDTO(series.getIdMap())
-            .setTitle(series.getTitle())
-            .setOriginalTitle(series.getTitleOriginal())
-            .setStartYear(series.getStartYear())
-            .setEndYear(series.getEndYear());
+    private static ISeries buildSeries(Series series) {
+        SeriesMock mock = new SeriesMock(series.getIdMap());
+        mock.setTitle(series.getTitle());
+        mock.setOriginalTitle(series.getTitleOriginal());
+        mock.setStartYear(series.getStartYear());
+        mock.setEndYear(series.getEndYear());
+        return mock;
     }
 
-    private static SeasonDTO buildSeason(Season season) {
-        return new SeasonDTO(season.getIdMap(), season.getSeason())
-            .setTitle(season.getTitle())
-            .setOriginalTitle(season.getTitleOriginal())
-            .setYear(season.getPublicationYear())
-            .setSeries(buildSeries(season.getSeries()));
+    private static ISeason buildSeason(Season season) {
+        SeasonMock mock = new SeasonMock(season.getSeason(), season.getIdMap());
+        mock.setTitle(season.getTitle());
+        mock.setOriginalTitle(season.getTitleOriginal());
+        mock.setYear(season.getPublicationYear());
+        mock.setSeries(buildSeries(season.getSeries()));
+        return mock;
     }
 
-    private static EpisodeDTO buildEpisode(VideoData videoData) {
-        return new EpisodeDTO(videoData.getIdMap(), videoData.getEpisode())
-            .setTitle(videoData.getTitle())
-            .setOriginalTitle(videoData.getTitleOriginal())
-            .setSeason(buildSeason(videoData.getSeason()));
+    private static IEpisode buildEpisode(VideoData videoData) {
+        EpisodeMock mock = new EpisodeMock(videoData.getEpisode(), videoData.getIdMap());
+        mock.setTitle(videoData.getTitle());
+        mock.setOriginalTitle(videoData.getTitleOriginal());
+        mock.setSeason(buildSeason(videoData.getSeason()));
+        return mock;
     }
 }

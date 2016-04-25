@@ -22,19 +22,22 @@
  */
 package org.yamj.plugin.api.metadata.mock;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.metadata.IMovie;
+import org.yamj.plugin.api.metadata.IEpisode;
+import org.yamj.plugin.api.metadata.ISeason;
 import org.yamj.plugin.api.type.JobType;
 
-public class MovieMock implements IMovie {
+public class EpisodeMock implements IEpisode {
 
+    private final int number;
     private final Map<String, String> ids;
     private String title;
     private String originalTitle;
-    private int year;
     private String plot;
     private String outline;
     private String tagline;
@@ -42,21 +45,25 @@ public class MovieMock implements IMovie {
     private String releaseCountry;
     private Date releaseDate;
     private int rating = -1;
-    private Collection<String> genres;
-    private Collection<String> studios;
-    private Collection<String> countries;
-    private Map<String,String> certifications;
     private Map<String, JobType> credits;
-    private Map<String,String> collections;
+    private boolean done = false;
+    private ISeason season;
     
-    public MovieMock() {
+    public EpisodeMock(int number) {
+        this.number = number;
         this.ids = new HashMap<>(1);
     }
 
-    public MovieMock(Map<String, String> ids) {
+    public EpisodeMock(int number, Map<String, String> ids) {
+        this.number = number;
         this.ids = ids;
     }
 
+    @Override
+    public int getNumber() {
+        return this.number;
+    }
+    
     @Override
     public Map<String,String> getIds() {
         return ids;
@@ -92,16 +99,6 @@ public class MovieMock implements IMovie {
     @Override
     public void setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
-    }
-
-    @Override
-    public int getYear() {
-        return year;
-    }
-
-    @Override
-    public void setYear(int year) {
-        this.year = year;
     }
 
     public String getPlot() {
@@ -141,6 +138,11 @@ public class MovieMock implements IMovie {
     }
 
     @Override
+    public void setRelease(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    @Override
     public void setRelease(String country, Date releaseDate) {
         this.releaseCountry = country;
         this.releaseDate = releaseDate;
@@ -161,47 +163,6 @@ public class MovieMock implements IMovie {
     @Override
     public void setRating(int rating) {
         this.rating = rating;
-    }
-
-    public Collection<String> getStudios() {
-        return studios;
-    }
-
-    @Override
-    public void setStudios(Collection<String> studios) {
-        this.studios = studios;
-    }
-
-    public Collection<String> getGenres() {
-        return genres;
-    }
-
-    @Override
-    public void setGenres(Collection<String> genres) {
-        this.genres = genres;
-    }
-    
-    public Collection<String> getCountries() {
-        return countries;
-    }
-
-    @Override
-    public void setCountries(Collection<String> countries) {
-        this.countries = countries;
-    }
-
-    public Map<String, String> getCertifications() {
-        return certifications;
-    }
-
-    @Override
-    public void addCertification(String country, String certificate) {
-        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certificate)) {
-            if (this.certifications == null) {
-                this.certifications = new HashMap<>(1);
-            }
-            this.certifications.put(country, certificate);
-        }
     }
 
     @Override
@@ -257,27 +218,33 @@ public class MovieMock implements IMovie {
     }
 
     @Override
-    public void addCollection(String name, String id) {
-        if (StringUtils.isNotBlank(name)) {
-            if (this.collections == null) {
-                this.collections = new HashMap<>(1);
-            }
-            this.collections.put(name,  id);
-        }
+    public boolean isDone() {
+        return done;
     }
 
     @Override
-    public void addAward(String event, String category, int year) {
-        // TODO Auto-generated method stub
+    public void setDone() {
+        this.done = true;
+    }
+
+    @Override
+    public void setNotFound() {
+        this.done = false;
+    }
+    
+    public void setSeason(ISeason season) {
+        this.season = season;
     }
     
     @Override
-    public void addAward(String event, String category, int year, boolean won, boolean nominated) {
-        // TODO Auto-generated method stub
+    public ISeason getSeason() {
+        return this.season;
     }
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
+
+
 }

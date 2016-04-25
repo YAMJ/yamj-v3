@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
 

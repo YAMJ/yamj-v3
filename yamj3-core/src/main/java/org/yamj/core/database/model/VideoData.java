@@ -45,12 +45,12 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
-import org.yamj.plugin.api.metadata.AwardDTO;
 
 @NamedQueries({
     @NamedQuery(name = VideoData.QUERY_REQUIRED,
@@ -858,7 +858,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @Deprecated
     public void addCreditDTOS(Collection<CreditDTO> creditDTOS) {
         if (creditDTOS != null) {
             getCreditDTOS().addAll(creditDTOS);

@@ -205,6 +205,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", false)) {
+            // TODO
             //videoData.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
         }
         
@@ -346,7 +347,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", false)) {
-            series.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
+            // TODO
+            //series.addAwardDTOS(imdbApiWrapper.getAwards(imdbId));
         }
 
         // scan seasons

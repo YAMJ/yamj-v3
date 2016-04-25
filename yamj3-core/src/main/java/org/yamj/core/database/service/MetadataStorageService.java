@@ -24,6 +24,8 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
+import org.yamj.core.database.model.dto.AwardDTO;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,7 +55,6 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.GenreXmlTools;
 import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.metadata.AwardDTO;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {

@@ -20,12 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.metadata.mock;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.plugin.api.metadata.ISeason;
+import org.yamj.plugin.api.metadata.ISeries;
 
-public class SeriesDTO {
+public class SeriesMock implements ISeries {
 
     private final Map<String, String> ids;
     private String title;
@@ -35,181 +39,169 @@ public class SeriesDTO {
     private String plot;
     private String outline;
     private int rating = -1;
-    private Collection<String> genres = new HashSet<>();
-    private Collection<String> studios = new HashSet<>();
-    private Collection<String> countries = new HashSet<>();
-    private Map<String,String> certifications = new HashMap<>();
-    private Set<AwardDTO> awards = new HashSet<>();
-    private Collection<SeasonDTO> seasons = new ArrayList<>();
+    private Collection<String> genres;
+    private Collection<String> studios;
+    private Collection<String> countries;
+    private Map<String,String> certifications;
+    private Collection<ISeason> seasons;
     
-    public SeriesDTO(Map<String, String> ids) {
+    public SeriesMock() {
+        this.ids = new HashMap<>(1);
+    }
+
+    public SeriesMock(Map<String, String> ids) {
         this.ids = ids;
     }
 
-    public Map<String, String> getIds() {
+    @Override
+    public Map<String,String> getIds() {
         return ids;
     }
 
-    public SeriesDTO addId(String source, String id) {
+    @Override
+    public String getId(String source) {
+        return ids.get(source);
+    }
+    
+    @Override
+    public void addId(String source, String id) {
         if (StringUtils.isNotBlank(id)) {
             this.ids.put(source, id);
         }
-        return this;
     }
 
+    @Override
     public String getTitle() {
         return title;
     }
 
-    public SeriesDTO setTitle(String title) {
+    @Override
+    public void setTitle(String title) {
         this.title = title;
-        return this;
     }
 
+    @Override
     public String getOriginalTitle() {
         return originalTitle;
     }
 
-    public SeriesDTO setOriginalTitle(String originalTitle) {
+    @Override
+    public void setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
-        return this;
     }
 
+    @Override
     public int getStartYear() {
         return startYear;
     }
 
-    public SeriesDTO setStartYear(int startYear) {
+    @Override
+    public void setStartYear(int startYear) {
         this.startYear = startYear;
-        return this;
     }
 
+    @Override
     public int getEndYear() {
         return endYear;
     }
 
-    public SeriesDTO setEndYear(int endYear) {
+    @Override
+    public void setEndYear(int endYear) {
         this.endYear = endYear;
-        return this;
     }
 
     public String getPlot() {
         return plot;
     }
 
-    public SeriesDTO setPlot(String plot) {
+    @Override
+    public void setPlot(String plot) {
         this.plot = plot;
-        return this;
     }
 
     public String getOutline() {
         return outline;
     }
 
-    public SeriesDTO setOutline(String outline) {
+    @Override
+    public void setOutline(String outline) {
         this.outline = outline;
-        return this;
     }
 
     public int getRating() {
         return rating;
     }
 
-    public SeriesDTO setRating(int rating) {
+    @Override
+    public void setRating(int rating) {
         this.rating = rating;
-        return this;
     }
 
     public Collection<String> getStudios() {
         return studios;
     }
 
-    public SeriesDTO setStudios(Collection<String> studios) {
+    @Override
+    public void setStudios(Collection<String> studios) {
         this.studios = studios;
-        return this;
-    }
-
-    public SeriesDTO addStudio(String studio) {
-        if (studio != null) {
-            this.studios.add(studio);
-        }
-        return this;
     }
 
     public Collection<String> getGenres() {
         return genres;
     }
 
-    public SeriesDTO setGenres(Collection<String> genres) {
+    @Override
+    public void setGenres(Collection<String> genres) {
         this.genres = genres;
-        return this;
     }
     
-    public SeriesDTO addGenre(String genre) {
-        if (genre != null) {
-            this.genres.add(genre);
-        }
-        return this;
-    }
-
     public Collection<String> getCountries() {
         return countries;
     }
 
-    public SeriesDTO setCountries(Collection<String> countries) {
+    @Override
+    public void setCountries(Collection<String> countries) {
         this.countries = countries;
-        return this;
-    }
-
-    public SeriesDTO addCountry(String country) {
-        if (country != null) {
-            this.countries.add(country);
-        }
-        return this;
     }
 
     public Map<String, String> getCertifications() {
         return certifications;
     }
 
-    public SeriesDTO addCertification(String country, String certificate) {
+    @Override
+    public void addCertification(String country, String certificate) {
         if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certificate)) {
+            if (this.certifications == null) {
+                this.certifications = new HashMap<>(1);
+            }
             this.certifications.put(country, certificate);
         }
-        return this;
-    }
-    
-    public Set<AwardDTO> getAwards() {
-        return awards;
     }
 
-    public SeriesDTO addAward(AwardDTO award) {
-        if (award != null) {
-            this.awards.add(award);
+    @Override
+    public void addAward(String event, String category, int year) {
+        // TODO Auto-generated method stub
+    }
+    
+    @Override
+    public void addAward(String event, String category, int year, boolean won, boolean nominated) {
+        // TODO Auto-generated method stub
+    }    
+
+    public void addSeason(ISeason season) {
+        if (this.seasons == null) {
+            this.seasons = new ArrayList<>();
         }
-        return this;
-    }
-
-    public Collection<SeasonDTO> getSeasons() {
-        return seasons;
-    }
-
-    public SeriesDTO setSeasons(Collection<SeasonDTO> seasons) {
-        this.seasons = seasons;
-        return this;
-    }
-    
-    public SeriesDTO addSeason(SeasonDTO season) {
         this.seasons.add(season);
-        return this;
     }
     
-    public SeasonDTO getSeason(int seasonNumber) {
-        for (SeasonDTO season : this.seasons) {
-            if (season.getSeasonNumber() == seasonNumber) {
-                return season;
-            }
-        }
-        return null;
+    @Override
+    public Collection<ISeason> getSeasons() {
+        return this.seasons;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

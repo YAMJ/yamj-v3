@@ -22,14 +22,13 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
 
     boolean isValidSeriesId(String seriesId);
 
-    String getSeriesId(String title, String originalTitle, int year, Map<String,String> ids, boolean throwTempError);
+    String getSeriesId(ISeries series, boolean throwTempError);
 
-    boolean scanSeries(SeriesDTO series, boolean throwTempError);
+    boolean scanSeries(ISeries series, boolean throwTempError);
 }

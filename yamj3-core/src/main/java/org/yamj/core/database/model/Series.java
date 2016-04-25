@@ -24,6 +24,8 @@ package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.service.Constants.ALL;
 
+import org.yamj.core.database.model.dto.AwardDTO;
+
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -47,7 +49,6 @@ import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.plugin.api.metadata.AwardDTO;
 
 @NamedQueries({
     @NamedQuery(name = Series.QUERY_REQUIRED,
@@ -528,16 +529,9 @@ public class Series extends AbstractMetadata {
         return awardDTOS;
     }
 
-    public void addAwardDTOS(Collection<AwardDTO> awardDTOS) {
-        if (CollectionUtils.isEmpty(awardDTOS)) {
-            return;
-        }
-
-        for (AwardDTO awardDTO : awardDTOS) {
-            if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
-                continue;
-            }
-            getAwardDTOS().add(awardDTO);
+    public void addAwardDTO(String source, String event, String category, int year, boolean won, boolean nominated) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year > 0) {
+            awardDTOS.add(new AwardDTO(source, event, category, year).setWon(won).setNominated(nominated));
         }
     }
 

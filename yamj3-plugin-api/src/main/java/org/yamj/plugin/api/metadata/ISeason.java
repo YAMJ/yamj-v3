@@ -20,26 +20,46 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.artwork;
+package org.yamj.plugin.api.metadata;
 
-import java.util.List;
-import org.yamj.plugin.api.metadata.IEpisode;
-import org.yamj.plugin.api.metadata.ISeason;
-import org.yamj.plugin.api.metadata.ISeries;
+import java.util.Collection;
+import java.util.Map;
 
-public interface SeriesArtworkScanner extends ArtworkScanner {
+public interface ISeason {
 
-    List<ArtworkDTO> getPosters(ISeason season);
+    int getNumber();
 
-    List<ArtworkDTO> getPosters(ISeries series);
+    Map<String,String> getIds();
+    
+    String getId(String source);
+    
+    void addId(String source, String id);
+    
+    String getTitle();
 
-    List<ArtworkDTO> getFanarts(ISeason season);
+    void setTitle(String title);
 
-    List<ArtworkDTO> getFanarts(ISeries series);
+    String getOriginalTitle();
 
-    List<ArtworkDTO> getBanners(ISeason season);
+    void setOriginalTitle(String originalTitle);
 
-    List<ArtworkDTO> getBanners(ISeries series);
+    int getYear();
 
-    List<ArtworkDTO> getVideoImages(IEpisode episode);
+    void setYear(int year);
+
+    void setPlot(String plot);
+
+    void setOutline(String outline);
+
+    void setRating(int rating);
+    
+    boolean isDone();
+    
+    void setDone();
+
+    void setNotFound();
+    
+    ISeries getSeries();
+    
+    Collection<IEpisode> getEpisodes();
 }
