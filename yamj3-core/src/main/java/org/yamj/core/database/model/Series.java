@@ -24,8 +24,6 @@ package org.yamj.core.database.model;
 
 import static org.yamj.plugin.api.service.Constants.ALL;
 
-import org.yamj.core.database.model.dto.AwardDTO;
-
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -46,6 +44,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.SeriesAward;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;

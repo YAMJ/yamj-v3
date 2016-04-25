@@ -25,8 +25,6 @@ package org.yamj.core.web.apis;
 import static org.yamj.plugin.api.service.Constants.SOURCE_IMDB;
 import static org.yamj.plugin.api.service.Constants.UTF8;
 
-import org.yamj.core.database.model.dto.AwardDTO;
-
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.ImdbException;
 import com.omertron.imdbapi.model.*;
@@ -45,6 +43,7 @@ import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.web.HTMLTools;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
