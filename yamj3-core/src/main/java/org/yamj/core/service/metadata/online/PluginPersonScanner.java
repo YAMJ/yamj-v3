@@ -22,13 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Map.Entry;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.database.model.Person;
-import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.PersonDTO;
 import org.yamj.plugin.api.metadata.PersonScanner;
 
 public class PluginPersonScanner implements IPersonScanner {
@@ -51,76 +47,35 @@ public class PluginPersonScanner implements IPersonScanner {
     
     @Override
     public String getPersonId(Person person) {
-        return getPersonId(person, false);
+        // create person wrapper
+        WrapperPerson wrapper = new WrapperPerson(person);
+        wrapper.setScannerName(personScanner.getScannerName());
+        
+        return getPersonId(wrapper, false);
     }
 
-    private String getPersonId(Person person, boolean throwTempError) {
-        String personId = person.getSourceDbId(getScannerName());
-        if (!personScanner.isValidPersonId(personId)) {
-            personId = personScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
-            person.setSourceDbId(getScannerName(), personId);
-        }
+    private String getPersonId(WrapperPerson wrapper, boolean throwTempError) {
+        String personId = personScanner.getPersonId(wrapper, throwTempError);
+        wrapper.addId(getScannerName(), personId);
         return personId;
     }
 
     @Override
     public ScanResult scanPerson(Person person, boolean throwTempError) {
-        String personId = getPersonId(person, throwTempError);
-        if (StringUtils.isBlank(personId)) {
+        // create person wrapper
+        WrapperPerson wrapper = new WrapperPerson(person);
+        wrapper.setScannerName(personScanner.getScannerName());
+
+        final String personId = getPersonId(wrapper, throwTempError);
+        if (!personScanner.isValidPersonId(personId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), person.getName());
             return ScanResult.MISSING_ID;
         }
 
-        final PersonDTO personDTO = new PersonDTO(person.getIdMap()).setName(person.getName());
-        final boolean scanned = personScanner.scanPerson(personDTO, throwTempError);
+        final boolean scanned = personScanner.scanPerson(wrapper, throwTempError);
         if (!scanned) {
             LOG.error("Can't find {} informations for person '{}'", getScannerName(), person.getName());
             return ScanResult.NO_RESULT;
-        }
-        
-        // set  IDs only if not set before   
-        for (Entry<String,String> entry : personDTO.getIds().entrySet()) {
-            if (getScannerName().equalsIgnoreCase(entry.getKey())) {
-                person.setSourceDbId(entry.getKey(), entry.getValue());
-            } else if (StringUtils.isBlank(person.getSourceDbId(entry.getKey()))) {
-                person.setSourceDbId(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (OverrideTools.checkOverwriteName(person, getScannerName())) {
-            person.setName(personDTO.getName(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteFirstName(person, getScannerName())) {
-            person.setFirstName(personDTO.getFirstName(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteLastName(person, getScannerName())) {
-            person.setLastName(personDTO.getLastName(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteBirthDay(person, getScannerName())) {
-            person.setBirthDay(personDTO.getBirthDay(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteBirthPlace(person, getScannerName())) {
-            person.setBirthPlace(personDTO.getBirthPlace(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteBirthName(person, getScannerName())) {
-            person.setBirthName(personDTO.getBirthName(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteDeathDay(person, getScannerName())) {
-            person.setDeathDay(personDTO.getDeathDay(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteDeathPlace(person, getScannerName())) {
-            person.setDeathPlace(personDTO.getDeathPlace(), getScannerName());
-        }
-
-        if (OverrideTools.checkOverwriteBiography(person, getScannerName())) {
-            person.setBiography(personDTO.getBiography(), getScannerName());
         }
         
         return ScanResult.OK;

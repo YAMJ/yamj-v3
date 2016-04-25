@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.plugin.api.common.Constants.*;
+import static org.yamj.plugin.api.service.Constants.*;
 
 import com.omertron.themoviedbapi.model.collection.Collection;
 import com.omertron.themoviedbapi.model.credits.*;

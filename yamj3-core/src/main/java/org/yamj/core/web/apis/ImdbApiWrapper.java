@@ -22,8 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
-import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
-import static org.yamj.plugin.api.common.Constants.UTF8;
+import static org.yamj.plugin.api.service.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.service.Constants.UTF8;
 
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.ImdbException;

@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.extra;
 
-import static org.yamj.plugin.api.common.Constants.*;
+import static org.yamj.plugin.api.service.Constants.*;
 
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.math.NumberUtils;

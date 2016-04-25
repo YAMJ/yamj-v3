@@ -20,27 +20,34 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common.mock;
+package org.yamj.plugin.api.service;
 
-import org.yamj.plugin.api.common.PluginMetadataService;
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import org.yamj.plugin.api.type.JobType;
 
-public class PluginMetadataServiceMock implements PluginMetadataService {
+public interface PluginConfigService {
 
-    @Override
-    public MovieScanner getMovieScanner(String source) {
-        return null;
-    }
+    void pluginConfiguration(Properties properties);
+    
+    String getProperty(String key);
 
-    @Override
-    public SeriesScanner getSeriesScanner(String source) {
-        return null;
-    }
+    String getProperty(String key, String defaultValue);
 
-    @Override
-    public PersonScanner getPersonScanner(String source) {
-        return null;
-    }
+    List<String> getPropertyAsList(String key, String defaultValue);
+
+    List<String> getPropertyAsList(String key, String defaultValue, String splitter);
+    
+    boolean getBooleanProperty(String key, boolean defaultValue);
+
+    int getIntProperty(String key, int defaultValue);
+
+    long getLongProperty(String key, long defaultValue);
+
+    float getFloatProperty(String key, float defaultValue);
+
+    Date getDateProperty(String key);
+    
+    boolean isCastScanEnabled(JobType jobType);
 }

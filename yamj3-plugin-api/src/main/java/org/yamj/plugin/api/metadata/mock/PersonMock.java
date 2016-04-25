@@ -20,13 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.metadata.mock;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.plugin.api.metadata.IPerson;
 
-public class PersonDTO {
+public class PersonMock implements IPerson {
 
     private final Map<String, String> ids;
     private String name;
@@ -38,100 +42,113 @@ public class PersonDTO {
     private Date deathDay;
     private String deathPlace;
     private String biography;
-    
-    public PersonDTO(Map<String, String> ids) {
+
+    public PersonMock() {
+        this.ids = new HashMap<>(1);
+    }
+
+    public PersonMock(Map<String, String> ids) {
         this.ids = ids;
     }
 
-    public Map<String, String> getIds() {
+    @Override
+    public Map<String,String> getIds() {
         return ids;
     }
 
-    public PersonDTO addId(String source, String id) {
+    @Override
+    public String getId(String source) {
+        return ids.get(source);
+    }
+    
+    @Override
+    public void addId(String source, String id) {
         if (StringUtils.isNotBlank(id)) {
             this.ids.put(source, id);
         }
-        return this;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public PersonDTO setName(String name) {
+    @Override
+    public void setName(String name) {
         this.name = name;
-        return this;
+    }
+
+    @Override
+    public void setNames(String name, String firstName, String lastName) {
+        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public PersonDTO setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
     public String getLastName() {
         return lastName;
-    }
-
-    public PersonDTO setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
     }
 
     public Date getBirthDay() {
         return birthDay;
     }
 
-    public PersonDTO setBirthDay(Date birthDay) {
+    @Override
+    public void setBirthDay(Date birthDay) {
         this.birthDay = birthDay;
-        return this;
     }
 
     public String getBirthPlace() {
         return birthPlace;
     }
 
-    public PersonDTO setBirthPlace(String birthPlace) {
+    @Override
+    public void setBirthPlace(String birthPlace) {
         this.birthPlace = birthPlace;
-        return this;
     }
 
     public String getBirthName() {
         return birthName;
     }
 
-    public PersonDTO setBirthName(String birthName) {
+    @Override
+    public void setBirthName(String birthName) {
         this.birthName = birthName;
-        return this;
     }
 
     public Date getDeathDay() {
         return deathDay;
     }
 
-    public PersonDTO setDeathDay(Date deathDay) {
+    @Override
+    public void setDeathDay(Date deathDay) {
         this.deathDay = deathDay;
-        return this;
     }
 
     public String getDeathPlace() {
         return deathPlace;
     }
 
-    public PersonDTO setDeathPlace(String deathPlace) {
+    @Override
+    public void setDeathPlace(String deathPlace) {
         this.deathPlace = deathPlace;
-        return this;
     }
 
     public String getBiography() {
         return biography;
     }
 
-    public PersonDTO setBiography(String biography) {
+    @Override
+    public void setBiography(String biography) {
         this.biography = biography;
-        return this;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

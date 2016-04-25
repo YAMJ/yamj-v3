@@ -22,7 +22,7 @@
  */
 package org.yamj.core.api.json;
 
-import static org.yamj.plugin.api.common.Constants.ALL;
+import static org.yamj.plugin.api.service.Constants.ALL;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.model;
 
-import static org.yamj.plugin.api.common.Constants.ALL;
+import static org.yamj.plugin.api.service.Constants.ALL;
 
 import java.util.*;
 import javax.persistence.*;

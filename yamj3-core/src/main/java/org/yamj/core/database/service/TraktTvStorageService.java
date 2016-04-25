@@ -23,7 +23,7 @@
  */
 package org.yamj.core.database.service;
 
-import static org.yamj.plugin.api.common.Constants.SOURCE_TRAKTTV;
+import static org.yamj.plugin.api.service.Constants.SOURCE_TRAKTTV;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;

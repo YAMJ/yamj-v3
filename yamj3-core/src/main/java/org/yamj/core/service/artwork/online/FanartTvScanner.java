@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
+import static org.yamj.plugin.api.service.Constants.LANGUAGE_EN;
 
 import com.omertron.fanarttvapi.enumeration.FTArtworkType;
 import com.omertron.fanarttvapi.model.FTArtwork;

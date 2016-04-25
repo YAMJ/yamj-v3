@@ -22,14 +22,13 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface PersonScanner extends MetadataScanner, ExtensionPoint {
     
     boolean isValidPersonId(String personId);
 
-    String getPersonId(String name, Map<String,String> ids, boolean throwTempError);
+    String getPersonId(IPerson person, boolean throwTempError);
 
-    boolean scanPerson(PersonDTO person, boolean throwTempError);
+    boolean scanPerson(IPerson person, boolean throwTempError);
 }

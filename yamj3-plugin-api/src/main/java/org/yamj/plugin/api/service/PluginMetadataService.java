@@ -20,27 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api;
+package org.yamj.plugin.api.service;
 
-import org.yamj.api.common.http.CommonHttpClient;
-import org.yamj.plugin.api.service.PluginConfigService;
-import ro.fortsoft.pf4j.Plugin;
-import ro.fortsoft.pf4j.PluginWrapper;
+import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.PersonScanner;
+import org.yamj.plugin.api.metadata.SeriesScanner;
 
-public abstract class YamjPlugin extends Plugin {
+public interface PluginMetadataService {
 
-    protected PluginConfigService configService;
-    protected CommonHttpClient httpClient;
-    
-    public YamjPlugin(PluginWrapper wrapper) {
-        super(wrapper);
-    }
+    MovieScanner getMovieScanner(String source);
 
-    public final void setConfigService(PluginConfigService configService) {
-        this.configService = configService;
-    }
+    SeriesScanner getSeriesScanner(String source);
 
-    public final void setHttpClient(CommonHttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
+    PersonScanner getPersonScanner(String source);
 }

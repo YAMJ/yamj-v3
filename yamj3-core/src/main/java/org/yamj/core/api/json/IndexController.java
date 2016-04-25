@@ -22,8 +22,8 @@
  */
 package org.yamj.core.api.json;
 
-import static org.yamj.plugin.api.common.Constants.ALL;
-import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+import static org.yamj.plugin.api.service.Constants.ALL;
+import static org.yamj.plugin.api.service.Constants.DEFAULT_SPLITTER;
 
 import java.util.ArrayList;
 import java.util.Arrays;

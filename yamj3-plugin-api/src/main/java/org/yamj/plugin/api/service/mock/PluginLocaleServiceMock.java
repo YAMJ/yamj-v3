@@ -20,20 +20,37 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common;
+package org.yamj.plugin.api.service.mock;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
+import org.yamj.plugin.api.service.PluginLocaleService;
 
-public interface PluginLocaleService {
+public class PluginLocaleServiceMock implements PluginLocaleService {
 
-    Locale getLocale();
+    @Override
+    public Locale getLocale() {
+        return Locale.getDefault();
+    }
     
-    String findCountryCode(String country);
-    
-    String findLanguageCode(String language);
-    
-    Set<String> getCountryNames(String countryCode);
+    @Override
+    public String findCountryCode(String country) {
+        return country;
+    }
 
-    Set<String> getCertificationCountryCodes(Locale locale);
+    @Override
+    public String findLanguageCode(String language) {
+        return language;
+    }
+
+    @Override
+    public Set<String> getCountryNames(String countryCode) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> getCertificationCountryCodes(Locale locale) {
+        return Collections.emptySet();
+    }
 }

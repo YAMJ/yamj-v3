@@ -22,7 +22,7 @@
  */
 package org.yamj.core.config;
 
-import static org.yamj.plugin.api.common.Constants.DEFAULT_SPLITTER;
+import static org.yamj.plugin.api.service.Constants.DEFAULT_SPLITTER;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.service.PluginConfigService;
 import org.yamj.plugin.api.type.JobType;
 
 @Service("configServiceWrapper")

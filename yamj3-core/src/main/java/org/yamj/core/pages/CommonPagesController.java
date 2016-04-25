@@ -22,7 +22,7 @@
  */
 package org.yamj.core.pages;
 
-import static org.yamj.plugin.api.common.Constants.ALL;
+import static org.yamj.plugin.api.service.Constants.ALL;
 
 import java.util.ArrayList;
 import java.util.List;

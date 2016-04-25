@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.attachment;
 
-import static org.yamj.plugin.api.common.Constants.LANGUAGE_EN;
+import static org.yamj.plugin.api.service.Constants.LANGUAGE_EN;
 
 import java.io.*;
 import java.util.*;

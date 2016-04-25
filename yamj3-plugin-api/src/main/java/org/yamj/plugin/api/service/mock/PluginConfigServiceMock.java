@@ -20,12 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common.mock;
+package org.yamj.plugin.api.service.mock;
 
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.yamj.plugin.api.common.Constants;
-import org.yamj.plugin.api.common.PluginConfigService;
+import org.yamj.plugin.api.service.Constants;
+import org.yamj.plugin.api.service.PluginConfigService;
 import org.yamj.plugin.api.type.JobType;
 
 public class PluginConfigServiceMock implements PluginConfigService {

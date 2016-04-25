@@ -23,9 +23,9 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.metadata.PersonDTO;
+import org.yamj.plugin.api.metadata.IPerson;
 
 public interface PersonArtworkScanner extends ArtworkScanner {
 
-    List<ArtworkDTO> getPhotos(PersonDTO person);
+    List<ArtworkDTO> getPhotos(IPerson person);
 }

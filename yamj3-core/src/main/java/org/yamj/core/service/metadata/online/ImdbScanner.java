@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import static org.yamj.plugin.api.common.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.service.Constants.SOURCE_IMDB;
 
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;

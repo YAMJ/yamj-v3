@@ -51,20 +51,15 @@ public class PluginFilmographyScanner implements IFilmographyScanner {
         return filmographyScanner.getScannerName();
     }
     
-
-    private String getPersonId(Person person, boolean throwTempError) {
-        String personId = person.getSourceDbId(getScannerName());
-        if (!filmographyScanner.isValidPersonId(personId)) {
-            personId = filmographyScanner.getPersonId(person.getName(), person.getIdMap(), throwTempError);
-            person.setSourceDbId(getScannerName(), personId);
-        }
-        return personId;
-    }
-
     @Override
     public ScanResult scanFilmography(Person person, boolean throwTempError) {
-        String personId = getPersonId(person, throwTempError);
-        if (StringUtils.isBlank(personId)) {
+        // create person wrapper
+        WrapperPerson wrapper = new WrapperPerson(person);
+        wrapper.setScannerName(filmographyScanner.getScannerName());
+
+        // get the person id
+        String personId = filmographyScanner.getPersonId(wrapper, throwTempError);
+        if (!filmographyScanner.isValidPersonId(personId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), person.getName());
             return ScanResult.MISSING_ID;
         }

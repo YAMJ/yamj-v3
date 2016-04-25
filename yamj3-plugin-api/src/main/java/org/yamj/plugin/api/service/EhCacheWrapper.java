@@ -20,17 +20,32 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common;
+package org.yamj.plugin.api.service;
 
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 
-public interface PluginMetadataService {
+public class EhCacheWrapper {
 
-    MovieScanner getMovieScanner(String source);
+    private final Ehcache ehcache;
+    
+    public EhCacheWrapper(Ehcache ehcache) {
+        this.ehcache = ehcache;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key, Class<T> type) {
+        Element element = this.ehcache.get(key);
+        Object value = (element != null ? element.getObjectValue() : null);
+        if (value != null && type != null && !type.isInstance(value)) {
+            throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+        }
+        return (T) value;
+    }
 
-    SeriesScanner getSeriesScanner(String source);
-
-    PersonScanner getPersonScanner(String source);
+    public void store(String key, Object value) {
+        if (value != null) {
+            this.ehcache.putIfAbsent(new Element(key, value));
+        }
+    }
 }

@@ -23,14 +23,13 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.List;
-import java.util.Map;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface FilmographyScanner extends MetadataScanner, ExtensionPoint {
     
     boolean isValidPersonId(String personId);
 
-    String getPersonId(String name, Map<String,String> ids, boolean throwTempError);
+    String getPersonId(IPerson person, boolean throwTempError);
 
     List<FilmographyDTO> scanFilmography(String personId, boolean throwTempError);
 }

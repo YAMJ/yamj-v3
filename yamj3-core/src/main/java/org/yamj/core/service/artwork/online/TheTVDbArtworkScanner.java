@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import static org.yamj.plugin.api.common.Constants.SOURCE_TVDB;
+import static org.yamj.plugin.api.service.Constants.SOURCE_TVDB;
 
 import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;

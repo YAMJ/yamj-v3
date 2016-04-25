@@ -20,34 +20,34 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.common;
+package org.yamj.plugin.api.metadata;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import org.yamj.plugin.api.type.JobType;
+import java.util.Map;
 
-public interface PluginConfigService {
+public interface IPerson {
 
-    void pluginConfiguration(Properties properties);
+    Map<String,String> getIds();
     
-    String getProperty(String key);
-
-    String getProperty(String key, String defaultValue);
-
-    List<String> getPropertyAsList(String key, String defaultValue);
-
-    List<String> getPropertyAsList(String key, String defaultValue, String splitter);
+    String getId(String source);
     
-    boolean getBooleanProperty(String key, boolean defaultValue);
+    void addId(String source, String id);
 
-    int getIntProperty(String key, int defaultValue);
+    String getName();
 
-    long getLongProperty(String key, long defaultValue);
+    void setName(String name);
 
-    float getFloatProperty(String key, float defaultValue);
+    void setNames(String name, String firstName, String lastName);
 
-    Date getDateProperty(String key);
-    
-    boolean isCastScanEnabled(JobType jobType);
+    void setBirthDay(Date birthDay);
+
+    void setBirthPlace(String birthPlace);
+
+    void setBirthName(String birthName);
+
+    void setDeathDay(Date deathDay);
+
+    void setDeathPlace(String deathPlace);
+
+    void setBiography(String biography);
 }

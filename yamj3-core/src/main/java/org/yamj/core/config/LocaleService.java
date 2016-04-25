@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.plugin.api.common.PluginLocaleService;
+import org.yamj.plugin.api.service.PluginLocaleService;
 
 @Service("localeService")
 public class LocaleService implements PluginLocaleService {

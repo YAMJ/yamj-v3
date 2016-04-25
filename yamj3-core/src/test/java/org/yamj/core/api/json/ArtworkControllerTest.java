@@ -1,6 +1,6 @@
 package org.yamj.core.api.json;
 
-import static org.yamj.plugin.api.common.Constants.UTF8;
+import static org.yamj.plugin.api.service.Constants.UTF8;
 
 import java.io.File;
 import org.apache.http.HttpEntity;

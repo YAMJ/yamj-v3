@@ -23,9 +23,9 @@
 package org.yamj.plugin.api.artwork;
 
 import org.yamj.api.common.http.CommonHttpClient;
-import org.yamj.plugin.api.common.PluginConfigService;
-import org.yamj.plugin.api.common.PluginLocaleService;
-import org.yamj.plugin.api.common.PluginMetadataService;
+import org.yamj.plugin.api.service.PluginConfigService;
+import org.yamj.plugin.api.service.PluginLocaleService;
+import org.yamj.plugin.api.service.PluginMetadataService;
 
 public interface ArtworkScanner {
 

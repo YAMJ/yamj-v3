@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import static org.yamj.plugin.api.common.Constants.*;
+import static org.yamj.plugin.api.service.Constants.*;
 
 import java.io.File;
 import java.util.ArrayList;

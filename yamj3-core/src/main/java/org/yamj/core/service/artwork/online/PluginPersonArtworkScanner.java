@@ -24,9 +24,9 @@ package org.yamj.core.service.artwork.online;
 
 import java.util.List;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.service.metadata.online.WrapperPerson;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.PersonArtworkScanner;
-import org.yamj.plugin.api.metadata.PersonDTO;
 
 public class PluginPersonArtworkScanner implements IPersonArtworkScanner {
 
@@ -43,13 +43,8 @@ public class PluginPersonArtworkScanner implements IPersonArtworkScanner {
 
     @Override
     public List<ArtworkDTO> getPhotos(Person person) {
-        return personArtworkScanner.getPhotos(buildPerson(person));
-    }
-
-    private static PersonDTO buildPerson(Person person) {
-        return new PersonDTO(person.getIdMap())
-            .setName(person.getName())
-            .setFirstName(person.getFirstName())
-            .setLastName(person.getLastName());
+        WrapperPerson wrapper = new WrapperPerson(person);
+        wrapper.setScannerName(personArtworkScanner.getScannerName());
+        return personArtworkScanner.getPhotos(wrapper);
     }
 }
