@@ -20,11 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model;
 
-public interface IdMap {
+import java.util.Map;
 
-    String getId(String sourceDb);
+public interface IBoxedSet {
+
+    Map<String,String> getIds();
     
-    void addId(String sourceDb, String sourceId);
+    String getId(String source);
+
+    String getName();
 }

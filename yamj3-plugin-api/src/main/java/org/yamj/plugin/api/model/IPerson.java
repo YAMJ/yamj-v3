@@ -20,12 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model;
 
-import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
-public interface ISeries {
+public interface IPerson {
 
     Map<String,String> getIds();
     
@@ -33,39 +33,21 @@ public interface ISeries {
     
     void addId(String source, String id);
 
-    String getTitle();
+    String getName();
 
-    void setTitle(String title);
+    void setName(String name);
 
-    String getOriginalTitle();
+    void setNames(String name, String firstName, String lastName);
 
-    void setOriginalTitle(String originalTitle);
+    void setBirthDay(Date birthDay);
 
-    int getStartYear();
+    void setBirthPlace(String birthPlace);
 
-    void setStartYear(int startYear);
+    void setBirthName(String birthName);
 
-    int getEndYear();
+    void setDeathDay(Date deathDay);
 
-    void setEndYear(int endYear);
+    void setDeathPlace(String deathPlace);
 
-    void setPlot(String plot);
-
-    void setOutline(String outline);
-
-    void setRating(int rating);
-
-    void setStudios(Collection<String> studios);
-
-    void setGenres(Collection<String> genres);
-
-    void setCountries(Collection<String> countries);
-
-    void addCertification(String country, String certificate);
-    
-    void addAward(String event, String category, int year);
-
-    void addAward(String event, String category, int year, boolean won, boolean nominated);
-    
-    Collection<ISeason> getSeasons(); 
+    void setBiography(String biography);
 }

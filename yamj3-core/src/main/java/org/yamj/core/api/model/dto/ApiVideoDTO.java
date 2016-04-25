@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Studio;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 /**
  * @author stuart.boston

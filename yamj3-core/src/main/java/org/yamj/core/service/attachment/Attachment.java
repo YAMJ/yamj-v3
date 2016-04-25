@@ -25,7 +25,7 @@ package org.yamj.core.service.attachment;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.plugin.api.type.ImageType;
+import org.yamj.plugin.api.model.type.ImageType;
 
 /**
  * File attachment.

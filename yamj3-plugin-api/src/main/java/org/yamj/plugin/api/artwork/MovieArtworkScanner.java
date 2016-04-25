@@ -23,7 +23,7 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.metadata.IMovie;
+import org.yamj.plugin.api.model.IMovie;
 
 public interface MovieArtworkScanner extends ArtworkScanner {
 

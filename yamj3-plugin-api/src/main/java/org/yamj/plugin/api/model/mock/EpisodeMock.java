@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.mock;
+package org.yamj.plugin.api.model.mock;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,9 +28,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.metadata.IEpisode;
-import org.yamj.plugin.api.metadata.ISeason;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.IEpisode;
+import org.yamj.plugin.api.model.ISeason;
+import org.yamj.plugin.api.model.type.JobType;
 
 public class EpisodeMock implements IEpisode {
 
@@ -217,6 +217,10 @@ public class EpisodeMock implements IEpisode {
         this.credits.put(name, jobType);
     }
 
+    public Map<String,JobType> getCredits() {
+        return credits;
+    }
+    
     @Override
     public boolean isDone() {
         return done;

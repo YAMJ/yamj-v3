@@ -30,7 +30,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 public final class CreditDTO {
 

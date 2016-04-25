@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.service.PluginConfigService;
-import org.yamj.plugin.api.type.JobType;
 
 @Service("configServiceWrapper")
 public class ConfigServiceWrapper implements PluginConfigService {

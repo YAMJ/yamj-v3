@@ -27,8 +27,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
-import org.yamj.plugin.api.type.ParticipationType;
+import org.yamj.plugin.api.model.type.JobType;
+import org.yamj.plugin.api.model.type.ParticipationType;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiFilmographyDTO extends AbstractApiDTO {

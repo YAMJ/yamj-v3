@@ -20,15 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
-public interface IMovie {
+public interface IEpisode {
 
+    int getNumber();
+    
     Map<String,String> getIds();
     
     String getId(String source);
@@ -43,10 +44,6 @@ public interface IMovie {
 
     void setOriginalTitle(String originalTitle);
 
-    int getYear();
-
-    void setYear(int year);
-
     void setPlot(String plot);
 
     void setOutline(String outline);
@@ -55,17 +52,11 @@ public interface IMovie {
 
     void setQuote(String quote);
 
+    void setRelease(Date releaseDate);
+
     void setRelease(String country, Date releaseDate);
 
     void setRating(int rating);
-
-    void setStudios(Collection<String> studios);
-
-    void setGenres(Collection<String> genres);
-
-    void setCountries(Collection<String> countries);
-
-    void addCertification(String country, String certificate);
 
     void addCredit(JobType jobType, String name);
 
@@ -82,10 +73,12 @@ public interface IMovie {
     void addCredit(String id, JobType jobType, String name, String role, boolean voiceRole);
 
     void addCredit(String id, JobType jobType, String name, String role, String photoUrl);
-
-    void addCollection(String name, String id);
     
-    void addAward(String event, String category, int year);
+    boolean isDone();
+    
+    void setDone();
 
-    void addAward(String event, String category, int year, boolean won, boolean nominated);
+    void setNotFound();
+    
+    ISeason getSeason();
 }

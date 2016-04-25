@@ -25,7 +25,6 @@ package org.yamj.core.web;
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
-import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,9 +89,6 @@ public class WebConfiguration  {
 
     @Value("${yamj3.http.maxDownloadSlots:null}")
     private String maxDownloadSlots;
-
-    @Value("${APIKEY.themoviedb}")
-    private String theMovieDbApiKey;
 
     @Value("${APIKEY.tvdb}")
     private String theTVDBApiKey;
@@ -189,12 +185,6 @@ public class WebConfiguration  {
         }
         
         return wrapper;
-    }
-
-    @Bean
-    public TheMovieDbApi theMovieDbApi() throws Exception {
-        LOG.trace("Initialize TheMovieDbApi");
-        return new TheMovieDbApi(theMovieDbApiKey, poolingHttpClient());
     }
 
     @Bean

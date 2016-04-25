@@ -23,8 +23,10 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.Date;
-import org.yamj.plugin.api.type.JobType;
-import org.yamj.plugin.api.type.ParticipationType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.plugin.api.model.type.JobType;
+import org.yamj.plugin.api.model.type.ParticipationType;
 
 public class FilmographyDTO {
 
@@ -147,5 +149,10 @@ public class FilmographyDTO {
     public FilmographyDTO setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

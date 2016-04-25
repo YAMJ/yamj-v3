@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 /**
  * @author stuart.boston

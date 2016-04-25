@@ -20,21 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model;
 
 import java.util.Collection;
 import java.util.Map;
 
-public interface ISeason {
-
-    int getNumber();
+public interface ISeries {
 
     Map<String,String> getIds();
     
     String getId(String source);
     
     void addId(String source, String id);
-    
+
     String getTitle();
 
     void setTitle(String title);
@@ -43,23 +41,31 @@ public interface ISeason {
 
     void setOriginalTitle(String originalTitle);
 
-    int getYear();
+    int getStartYear();
 
-    void setYear(int year);
+    void setStartYear(int startYear);
+
+    int getEndYear();
+
+    void setEndYear(int endYear);
 
     void setPlot(String plot);
 
     void setOutline(String outline);
 
     void setRating(int rating);
-    
-    boolean isDone();
-    
-    void setDone();
 
-    void setNotFound();
+    void setStudios(Collection<String> studios);
+
+    void setGenres(Collection<String> genres);
+
+    void setCountries(Collection<String> countries);
+
+    void addCertification(String country, String certificate);
     
-    ISeries getSeries();
+    void addAward(String event, String category, int year);
+
+    void addAward(String event, String category, int year, boolean won, boolean nominated);
     
-    Collection<IEpisode> getEpisodes();
+    Collection<ISeason> getSeasons(); 
 }

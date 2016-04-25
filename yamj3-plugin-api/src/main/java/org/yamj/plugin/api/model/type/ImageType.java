@@ -20,34 +20,20 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model.type;
 
-import java.util.Date;
-import java.util.Map;
+public enum ImageType {
 
-public interface IPerson {
-
-    Map<String,String> getIds();
+    JPG,
+    PNG,
+    BMP,
+    GIF;
     
-    String getId(String source);
-    
-    void addId(String source, String id);
-
-    String getName();
-
-    void setName(String name);
-
-    void setNames(String name, String firstName, String lastName);
-
-    void setBirthDay(Date birthDay);
-
-    void setBirthPlace(String birthPlace);
-
-    void setBirthName(String birthName);
-
-    void setDeathDay(Date deathDay);
-
-    void setDeathPlace(String deathPlace);
-
-    void setBiography(String biography);
+    public static ImageType fromString(final String imageType) {
+        try {
+            return ImageType.valueOf(imageType.trim().toUpperCase());
+        } catch (Exception ex) { //NOSONAR
+            return JPG;
+        }
+    }
 }

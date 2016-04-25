@@ -29,7 +29,7 @@ import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Studio;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 /**
  * @author stuart.boston

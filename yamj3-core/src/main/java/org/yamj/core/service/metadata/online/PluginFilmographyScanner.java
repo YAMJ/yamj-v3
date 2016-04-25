@@ -33,7 +33,7 @@ import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
 import org.yamj.plugin.api.metadata.FilmographyDTO;
 import org.yamj.plugin.api.metadata.FilmographyScanner;
-import org.yamj.plugin.api.type.ParticipationType;
+import org.yamj.plugin.api.model.type.ParticipationType;
 
 public class PluginFilmographyScanner implements IFilmographyScanner {
 

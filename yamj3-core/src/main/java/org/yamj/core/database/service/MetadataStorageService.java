@@ -891,7 +891,7 @@ public class MetadataStorageService {
                 BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
                 
                 // remove modified sources for idMap clone
-                Map<String,String> boxedSetSources = new HashMap<>(boxedSet.getSourceDbIdMap());
+                Map<String,String> boxedSetSources = boxedSet.getIdMap();
                 for (String source : videoData.getModifiedSources()) {
                     boxedSetSources.remove(source);
                 }
@@ -996,7 +996,7 @@ public class MetadataStorageService {
                 BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
                 
                 // remove modified sources for idMap clone
-                Map<String,String> boxedSetSources = new HashMap<>(boxedSet.getSourceDbIdMap());
+                Map<String,String> boxedSetSources = boxedSet.getIdMap();
                 for (String source : series.getModifiedSources()) {
                     boxedSetSources.remove(source);
                 }

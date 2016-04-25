@@ -31,7 +31,7 @@ import org.hibernate.annotations.Type;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
-import org.yamj.plugin.api.type.ImageType;
+import org.yamj.plugin.api.model.type.ImageType;
 
 @NamedQueries({
     @NamedQuery(name = ArtworkProfile.QUERY_GET_ALL,

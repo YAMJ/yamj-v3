@@ -46,7 +46,7 @@ import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 /**
  * Service to read the NFO files

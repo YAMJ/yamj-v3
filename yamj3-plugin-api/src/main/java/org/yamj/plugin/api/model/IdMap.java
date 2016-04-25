@@ -20,28 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.type;
+package org.yamj.plugin.api.model;
 
-/**
- * List of participation types.
- */
-public enum ParticipationType {
+public interface IdMap {
 
-    MOVIE,
-    SERIES,
-    UNKNOWN;
-
-    /**
-     * Determine the job type from a string
-     *
-     * @param type
-     * @return
-     */
-    public static ParticipationType fromString(final String type) {
-        try {
-            return ParticipationType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) { //NOSONAR
-            return UNKNOWN;
-        }
-    }
+    String getId(String sourceDb);
+    
+    void addId(String sourceDb, String sourceId);
 }

@@ -23,7 +23,7 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.metadata.IPerson;
+import org.yamj.plugin.api.model.IPerson;
 
 public interface PersonArtworkScanner extends ArtworkScanner {
 

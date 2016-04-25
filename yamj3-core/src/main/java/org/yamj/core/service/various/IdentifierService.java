@@ -36,8 +36,8 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.metadata.PersonName;
+import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.transliteration.Transliterator;
-import org.yamj.plugin.api.type.JobType;
 import ro.fortsoft.pf4j.PluginManager;
 
 @Service("identifierService")

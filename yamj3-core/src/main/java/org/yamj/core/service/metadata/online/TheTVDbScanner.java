@@ -43,9 +43,9 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TheTVDbApiWrapper;
-import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.IdMap;
+import org.yamj.plugin.api.model.type.JobType;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {

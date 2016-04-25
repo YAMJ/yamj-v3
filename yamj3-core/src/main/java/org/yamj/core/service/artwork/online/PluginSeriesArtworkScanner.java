@@ -28,12 +28,12 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.SeriesArtworkScanner;
-import org.yamj.plugin.api.metadata.IEpisode;
-import org.yamj.plugin.api.metadata.ISeason;
-import org.yamj.plugin.api.metadata.ISeries;
-import org.yamj.plugin.api.metadata.mock.EpisodeMock;
-import org.yamj.plugin.api.metadata.mock.SeasonMock;
-import org.yamj.plugin.api.metadata.mock.SeriesMock;
+import org.yamj.plugin.api.model.IEpisode;
+import org.yamj.plugin.api.model.ISeason;
+import org.yamj.plugin.api.model.ISeries;
+import org.yamj.plugin.api.model.mock.EpisodeMock;
+import org.yamj.plugin.api.model.mock.SeasonMock;
+import org.yamj.plugin.api.model.mock.SeriesMock;
 
 public class PluginSeriesArtworkScanner implements ISeriesArtworkScanner {
 

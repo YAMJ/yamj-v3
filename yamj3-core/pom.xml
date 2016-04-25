@@ -24,7 +24,6 @@
         <hsqldb.version>2.3.3</hsqldb.version>
         <h2.version>1.4.191</h2.version>
         <!-- api versions -->
-        <themoviedbapi.version>4.2</themoviedbapi.version>
         <thetvdbapi.version>1.8</thetvdbapi.version>
         <fanarttvapi.version>3.3-SNAPSHOT</fanarttvapi.version>
         <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
@@ -165,11 +164,6 @@
             <scope>test</scope>
         </dependency>
         <!-- APIs -->
-        <dependency>
-            <groupId>com.omertron</groupId>
-            <artifactId>themoviedbapi</artifactId>
-            <version>${themoviedbapi.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>thetvdbapi</artifactId>

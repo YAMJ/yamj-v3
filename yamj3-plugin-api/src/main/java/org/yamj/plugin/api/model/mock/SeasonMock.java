@@ -20,15 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.mock;
+package org.yamj.plugin.api.model.mock;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.metadata.IEpisode;
-import org.yamj.plugin.api.metadata.ISeason;
-import org.yamj.plugin.api.metadata.ISeries;
+import org.yamj.plugin.api.model.IEpisode;
+import org.yamj.plugin.api.model.ISeason;
+import org.yamj.plugin.api.model.ISeries;
 
 public class SeasonMock implements ISeason {
 

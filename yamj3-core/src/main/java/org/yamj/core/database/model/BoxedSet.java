@@ -101,7 +101,11 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.artworks = artworks;
     }
 
-    public Map<String, String> getSourceDbIdMap() {
+    public Map<String,String> getIdMap() {
+        return new HashMap<>(getSourceDbIdMap());
+    }
+    
+    private Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 

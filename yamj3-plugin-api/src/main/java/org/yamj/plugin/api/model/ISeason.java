@@ -20,20 +20,46 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.type;
+package org.yamj.plugin.api.model;
 
-public enum ImageType {
+import java.util.Collection;
+import java.util.Map;
 
-    JPG,
-    PNG,
-    BMP,
-    GIF;
+public interface ISeason {
+
+    int getNumber();
+
+    Map<String,String> getIds();
     
-    public static ImageType fromString(final String imageType) {
-        try {
-            return ImageType.valueOf(imageType.trim().toUpperCase());
-        } catch (Exception ex) { //NOSONAR
-            return JPG;
-        }
-    }
+    String getId(String source);
+    
+    void addId(String source, String id);
+    
+    String getTitle();
+
+    void setTitle(String title);
+
+    String getOriginalTitle();
+
+    void setOriginalTitle(String originalTitle);
+
+    int getYear();
+
+    void setYear(int year);
+
+    void setPlot(String plot);
+
+    void setOutline(String outline);
+
+    void setRating(int rating);
+    
+    boolean isDone();
+    
+    void setDone();
+
+    void setNotFound();
+    
+    ISeries getSeries();
+    
+    Collection<IEpisode> getEpisodes();
 }

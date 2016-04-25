@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.plugin.api.metadata.IdMap;
+import org.yamj.plugin.api.model.IdMap;
 
 public interface INfoScanner extends IMetadataScanner {
 

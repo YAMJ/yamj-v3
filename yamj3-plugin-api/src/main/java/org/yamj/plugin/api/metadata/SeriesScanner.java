@@ -22,6 +22,7 @@
  */
 package org.yamj.plugin.api.metadata;
 
+import org.yamj.plugin.api.model.ISeries;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface SeriesScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {

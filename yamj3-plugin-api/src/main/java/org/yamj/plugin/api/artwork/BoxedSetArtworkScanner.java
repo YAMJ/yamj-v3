@@ -20,14 +20,16 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.artwork;
 
-import org.yamj.plugin.api.model.IdMap;
+import java.util.List;
+import org.yamj.plugin.api.model.IBoxedSet;
 
+public interface BoxedSetArtworkScanner extends ArtworkScanner {
 
-public interface NfoIdScanner {
+    List<ArtworkDTO> getPosters(IBoxedSet boxedSet);
 
-    String getScannerName();
-    
-    boolean scanNFO(String nfoContent, IdMap idMap);
+    List<ArtworkDTO> getFanarts(IBoxedSet boxedSet);
+
+    List<ArtworkDTO> getBanners(IBoxedSet boxedSet);
 }

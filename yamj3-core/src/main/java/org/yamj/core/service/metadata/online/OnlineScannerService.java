@@ -72,15 +72,12 @@ public class OnlineScannerService implements PluginMetadataService {
     @Autowired
     private ImdbScanner imdbScanner;
     @Autowired
-    private TheMovieDbScanner theMovieDbScanner;
-    @Autowired
     private TheTVDbScanner theTVDbScanner;
     
     @PostConstruct
     public void init() {
         LOG.debug("Initialize online scanner");
         this.registerMetadataScanner(imdbScanner);
-        this.registerMetadataScanner(theMovieDbScanner);
         this.registerMetadataScanner(theTVDbScanner);
         
         // add movie scanner to online scanner service

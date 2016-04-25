@@ -20,14 +20,28 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model.type;
 
-import org.yamj.plugin.api.model.IdMap;
+/**
+ * List of participation types.
+ */
+public enum ParticipationType {
 
+    MOVIE,
+    SERIES,
+    UNKNOWN;
 
-public interface NfoIdScanner {
-
-    String getScannerName();
-    
-    boolean scanNFO(String nfoContent, IdMap idMap);
+    /**
+     * Determine the job type from a string
+     *
+     * @param type
+     * @return
+     */
+    public static ParticipationType fromString(final String type) {
+        try {
+            return ParticipationType.valueOf(type.trim().toUpperCase());
+        } catch (Exception ex) { //NOSONAR
+            return UNKNOWN;
+        }
+    }
 }

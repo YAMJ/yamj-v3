@@ -26,8 +26,8 @@ import java.util.List;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.artwork.MovieArtworkScanner;
-import org.yamj.plugin.api.metadata.IMovie;
-import org.yamj.plugin.api.metadata.mock.MovieMock;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.mock.MovieMock;
 
 public class PluginMovieArtworkScanner implements IMovieArtworkScanner {
 

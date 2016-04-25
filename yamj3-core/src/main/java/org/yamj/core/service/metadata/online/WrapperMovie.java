@@ -29,8 +29,8 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.IMovie;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.type.JobType;
 
 public class WrapperMovie implements IMovie {
 

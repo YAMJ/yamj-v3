@@ -20,40 +20,36 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.mock;
+package org.yamj.plugin.api.model.mock;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.metadata.IMovie;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.ISeason;
+import org.yamj.plugin.api.model.ISeries;
 
-public class MovieMock implements IMovie {
+public class SeriesMock implements ISeries {
 
     private final Map<String, String> ids;
     private String title;
     private String originalTitle;
-    private int year;
+    private int startYear;
+    private int endYear;
     private String plot;
     private String outline;
-    private String tagline;
-    private String quote;
-    private String releaseCountry;
-    private Date releaseDate;
     private int rating = -1;
     private Collection<String> genres;
     private Collection<String> studios;
     private Collection<String> countries;
     private Map<String,String> certifications;
-    private Map<String, JobType> credits;
-    private Map<String,String> collections;
+    private Collection<ISeason> seasons;
     
-    public MovieMock() {
+    public SeriesMock() {
         this.ids = new HashMap<>(1);
     }
 
-    public MovieMock(Map<String, String> ids) {
+    public SeriesMock(Map<String, String> ids) {
         this.ids = ids;
     }
 
@@ -95,13 +91,23 @@ public class MovieMock implements IMovie {
     }
 
     @Override
-    public int getYear() {
-        return year;
+    public int getStartYear() {
+        return startYear;
     }
 
     @Override
-    public void setYear(int year) {
-        this.year = year;
+    public void setStartYear(int startYear) {
+        this.startYear = startYear;
+    }
+
+    @Override
+    public int getEndYear() {
+        return endYear;
+    }
+
+    @Override
+    public void setEndYear(int endYear) {
+        this.endYear = endYear;
     }
 
     public String getPlot() {
@@ -120,38 +126,6 @@ public class MovieMock implements IMovie {
     @Override
     public void setOutline(String outline) {
         this.outline = outline;
-    }
-
-    public String getTagline() {
-        return tagline;
-    }
-
-    @Override
-    public void setTagline(String tagline) {
-        this.tagline = tagline;
-    }
-
-    public String getQuote() {
-        return quote;
-    }
-
-    @Override
-    public void setQuote(String quote) {
-        this.quote = quote;
-    }
-
-    @Override
-    public void setRelease(String country, Date releaseDate) {
-        this.releaseCountry = country;
-        this.releaseDate = releaseDate;
-    }
-
-    public String getReleaseCountry() {
-        return releaseCountry;
-    }
-
-    public Date getReleaseDate() {
-        return releaseDate;
     }
 
     public int getRating() {
@@ -205,68 +179,6 @@ public class MovieMock implements IMovie {
     }
 
     @Override
-    public void addCredit(JobType jobType, String name) {
-        addCredit(null, jobType, name);
-    }
-
-    @Override
-    public void addCredit(JobType jobType, String name, String role) {
-        addCredit(null, jobType, name, role);
-    }
-
-    @Override
-    public void addCredit(JobType jobType, String name, String role, boolean voiceRole) {
-        addCredit(null, jobType, name, role, voiceRole);
-    }
-
-    @Override
-    public void addCredit(JobType jobType, String name, String role, String photoUrl) {
-        addCredit(null, jobType, name, role, photoUrl);
-    }
-
-    @Override
-    public void addCredit(String id, JobType jobType, String name) {
-        if (this.credits == null) {
-            this.credits = new HashMap<>();
-        }
-        this.credits.put(name, jobType);
-    }
-
-    @Override
-    public void addCredit(String id, JobType jobType, String name, String role) {
-        if (this.credits == null) {
-            this.credits = new HashMap<>();
-        }
-        this.credits.put(name, jobType);
-    }
-
-    @Override
-    public void addCredit(String id, JobType jobType, String name, String role, boolean voiceRole) {
-        if (this.credits == null) {
-            this.credits = new HashMap<>();
-        }
-        this.credits.put(name, jobType);
-    }
-
-    @Override
-    public void addCredit(String id, JobType jobType, String name, String role, String photoUrl) {
-        if (this.credits == null) {
-            this.credits = new HashMap<>();
-        }
-        this.credits.put(name, jobType);
-    }
-
-    @Override
-    public void addCollection(String name, String id) {
-        if (StringUtils.isNotBlank(name)) {
-            if (this.collections == null) {
-                this.collections = new HashMap<>(1);
-            }
-            this.collections.put(name,  id);
-        }
-    }
-
-    @Override
     public void addAward(String event, String category, int year) {
         // TODO Auto-generated method stub
     }
@@ -274,6 +186,18 @@ public class MovieMock implements IMovie {
     @Override
     public void addAward(String event, String category, int year, boolean won, boolean nominated) {
         // TODO Auto-generated method stub
+    }    
+
+    public void addSeason(ISeason season) {
+        if (this.seasons == null) {
+            this.seasons = new ArrayList<>();
+        }
+        this.seasons.add(season);
+    }
+    
+    @Override
+    public Collection<ISeason> getSeasons() {
+        return this.seasons;
     }
 
     @Override

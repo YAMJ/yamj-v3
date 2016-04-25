@@ -44,10 +44,10 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.metadata.PersonName;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.IdMap;
+import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("imdbScanner")

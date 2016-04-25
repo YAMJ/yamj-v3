@@ -45,7 +45,7 @@ import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.plugin.api.artwork.*;
-import org.yamj.plugin.api.type.ImageType;
+import org.yamj.plugin.api.model.type.ImageType;
 import ro.fortsoft.pf4j.PluginManager;
 
 @Service("artworkScannerService")
@@ -81,8 +81,6 @@ public class ArtworkScannerService implements IQueueProcessService {
     @Autowired
     private ImdbArtworkScanner imdbArtworkScanner;
     @Autowired
-    private TheMovieDbArtworkScanner theMovieDbArtworkScanner;
-    @Autowired
     private TheTVDbArtworkScanner theTVDbArtworkScanner;
     
     @PostConstruct
@@ -90,7 +88,6 @@ public class ArtworkScannerService implements IQueueProcessService {
         LOG.debug("Initialize artwork scanner");
         this.registerArtworkScanner(fanartTvScanner);
         this.registerArtworkScanner(imdbArtworkScanner);
-        this.registerArtworkScanner(theMovieDbArtworkScanner);
         this.registerArtworkScanner(theTVDbArtworkScanner);
         
         // add movie artwork scanner to artwork scanner service
@@ -104,6 +101,13 @@ public class ArtworkScannerService implements IQueueProcessService {
         for (SeriesArtworkScanner seriesArtworkScanner : pluginManager.getExtensions(SeriesArtworkScanner.class)) {
             seriesArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
             PluginSeriesArtworkScanner scanner = new PluginSeriesArtworkScanner(seriesArtworkScanner);
+            this.registerArtworkScanner(scanner);
+        }
+
+        // add boxed set artwork scanner to artwork scanner service
+        for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
+            boxedSetArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
+            PluginBoxedSetArtworkScanner scanner = new PluginBoxedSetArtworkScanner(boxedSetArtworkScanner);
             this.registerArtworkScanner(scanner);
         }
 

@@ -26,7 +26,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.type.ImageType;
+import org.yamj.plugin.api.model.type.ImageType;
 
 public class ArtworkDTO {
 
@@ -80,16 +80,18 @@ public class ArtworkDTO {
         return languageCode;
     }
 
-    public void setLanguageCode(String languageCode) {
+    public ArtworkDTO setLanguageCode(String languageCode) {
         this.languageCode = languageCode;
+        return this;
     }
 
     public int getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public ArtworkDTO setRating(int rating) {
         this.rating = rating;
+        return this;
     }
 
     @Override

@@ -48,7 +48,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.attachment.AttachmentScannerService;
-import org.yamj.plugin.api.type.ImageType;
+import org.yamj.plugin.api.model.type.ImageType;
 
 @Service("fileStorageService")
 public class FileStorageService {

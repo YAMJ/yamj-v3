@@ -44,8 +44,8 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ResolutionType;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.plugin.api.type.JobType;
-import org.yamj.plugin.api.type.ParticipationType;
+import org.yamj.plugin.api.model.type.JobType;
+import org.yamj.plugin.api.model.type.ParticipationType;
 
 @Repository("apiDao")
 public class ApiDao extends HibernateDao {

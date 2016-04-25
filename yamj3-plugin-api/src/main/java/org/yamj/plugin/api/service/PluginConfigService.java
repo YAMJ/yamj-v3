@@ -25,7 +25,7 @@ package org.yamj.plugin.api.service;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import org.yamj.plugin.api.type.JobType;
+import org.yamj.plugin.api.model.type.JobType;
 
 public interface PluginConfigService {
 

@@ -27,9 +27,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.IPerson;
 import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.metadata.PersonName;
+import org.yamj.plugin.api.model.IPerson;
 
 public class WrapperPerson implements IPerson {
 

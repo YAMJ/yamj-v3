@@ -22,6 +22,7 @@
  */
 package org.yamj.plugin.api.metadata;
 
+import org.yamj.plugin.api.model.IPerson;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface PersonScanner extends MetadataScanner, ExtensionPoint {

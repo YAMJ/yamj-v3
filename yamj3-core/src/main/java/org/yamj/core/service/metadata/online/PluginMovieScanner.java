@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.various.IdentifierService;
-import org.yamj.plugin.api.metadata.IdMap;
 import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.model.IdMap;
 
 public class PluginMovieScanner implements IMovieScanner {
 

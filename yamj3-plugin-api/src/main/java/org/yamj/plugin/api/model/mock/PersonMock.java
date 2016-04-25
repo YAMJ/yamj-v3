@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata.mock;
+package org.yamj.plugin.api.model.mock;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.plugin.api.metadata.IPerson;
+import org.yamj.plugin.api.model.IPerson;
 
 public class PersonMock implements IPerson {
 
