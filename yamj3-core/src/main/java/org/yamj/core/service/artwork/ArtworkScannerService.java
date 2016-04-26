@@ -79,14 +79,11 @@ public class ArtworkScannerService implements IQueueProcessService {
     private PluginManager pluginManager;
     @Autowired
     private ImdbArtworkScanner imdbArtworkScanner;
-    @Autowired
-    private TheTVDbArtworkScanner theTVDbArtworkScanner;
     
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork scanner");
         this.registerArtworkScanner(imdbArtworkScanner);
-        this.registerArtworkScanner(theTVDbArtworkScanner);
         
         // add movie artwork scanner to artwork scanner service
         for (MovieArtworkScanner movieArtworkScanner : pluginManager.getExtensions(MovieArtworkScanner.class)) {

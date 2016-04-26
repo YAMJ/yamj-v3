@@ -24,7 +24,6 @@
         <hsqldb.version>2.3.3</hsqldb.version>
         <h2.version>1.4.191</h2.version>
         <!-- api versions -->
-        <thetvdbapi.version>1.8</thetvdbapi.version>
         <imdbapi.version>1.5-SNAPSHOT</imdbapi.version>
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <rottentomatoesapi.version>1.6-SNAPSHOT</rottentomatoesapi.version>
@@ -170,11 +169,6 @@
             <scope>test</scope>
         </dependency>
         <!-- APIs -->
-        <dependency>
-            <groupId>com.omertron</groupId>
-            <artifactId>thetvdbapi</artifactId>
-            <version>${thetvdbapi.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.moviejukebox</groupId>
             <artifactId>api-imdb</artifactId>

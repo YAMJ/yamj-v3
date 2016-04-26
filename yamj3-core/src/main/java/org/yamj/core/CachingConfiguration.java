@@ -43,7 +43,6 @@ public class CachingConfiguration implements CachingConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CachingConfiguration.class);
 
-    private static final String TMDB_ARTWORK = "tmdbArtworkCache";
     private static final String ATTACHMENTS = "attachmentCache";
     private static final int TTL_10_MINUTES = 600;
     private static final int TTL_30_MINUTES = 1800;
@@ -55,14 +54,10 @@ public class CachingConfiguration implements CachingConfigurer {
             new net.sf.ehcache.config.Configuration()
                 // default cache
                 .defaultCache(cacheConfig("default", 100, TTL_10_MINUTES))
+                .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 
                 // API caches
-                .cache(cacheConfig(CachingNames.API_TVDB, 500, TTL_30_MINUTES))
-                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, TTL_30_MINUTES))
                 .cache(cacheConfig(CachingNames.API_IMDB, 500, TTL_30_MINUTES))
-                .cache(cacheConfig(CachingNames.API_FANARTTV, 500, TTL_30_MINUTES))
-                .cache(cacheConfig(TMDB_ARTWORK, 100, TTL_30_MINUTES))
-                .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 
                 // caches for database objects
                 .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, TTL_ONE_DAY))
@@ -124,11 +119,6 @@ public class CachingConfiguration implements CachingConfigurer {
             .persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE))
             .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
             .statistics(false);
-    }
-
-    @Bean
-    public Cache tmdbArtworkCache() {
-        return cacheManager().getCache(TMDB_ARTWORK);
     }
 
     @Bean
