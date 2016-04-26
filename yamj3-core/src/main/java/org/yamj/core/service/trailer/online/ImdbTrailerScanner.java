@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import static org.yamj.plugin.api.service.Constants.SOURCE_IMDB;
+import static org.yamj.plugin.api.Constants.SOURCE_IMDB;
 
 import com.omertron.imdbapi.model.ImdbEncodingFormat;
 import com.omertron.imdbapi.model.ImdbMovieDetails;

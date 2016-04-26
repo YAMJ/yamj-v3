@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.service;
+package org.yamj.plugin.api.tools;
 
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;

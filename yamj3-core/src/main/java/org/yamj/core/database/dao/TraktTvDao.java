@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import static org.yamj.plugin.api.service.Constants.*;
+import static org.yamj.plugin.api.Constants.*;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;

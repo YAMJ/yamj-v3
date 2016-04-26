@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.file;
 
-import static org.yamj.plugin.api.service.Constants.UTF8;
+import static org.yamj.plugin.api.Constants.UTF8;
 
 import java.io.*;
 import java.nio.channels.FileChannel;

@@ -22,7 +22,7 @@
  */
 package org.yamj.core.web.apis;
 
-import static org.yamj.plugin.api.service.Constants.ALL;
+import static org.yamj.plugin.api.Constants.ALL;
 
 import java.io.IOException;
 import java.util.Locale;

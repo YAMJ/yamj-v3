@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.plugin.api.service.Constants;
+import org.yamj.plugin.api.Constants;
 
 public class SearchEngineTools {
 
