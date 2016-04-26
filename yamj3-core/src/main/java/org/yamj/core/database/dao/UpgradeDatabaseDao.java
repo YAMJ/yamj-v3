@@ -160,6 +160,14 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
 
         currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.uncredited'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.faceless'")
+        .executeUpdate();
+
+        currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.language'")
         .executeUpdate();
 
@@ -168,19 +176,35 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
 
         currentSession()
-        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.uncredited'")
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='thetvdb.language'")
         .executeUpdate();
 
         currentSession()
-        .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.faceless'")
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='thetvdb.country'")
         .executeUpdate();
-        
+
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='fanarttv.language'")
         .executeUpdate();
 
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='fanarttv.country'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='trakttv.language'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='trakttv.country'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='imdb.language'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='imdb.country'")
         .executeUpdate();
     }
 }
