@@ -174,5 +174,13 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key='yamj3.castcrew.skip.faceless'")
         .executeUpdate();
+        
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='fanarttv.language'")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("DELETE FROM configuration WHERE config_key='fanarttv.country'")
+        .executeUpdate();
     }
 }

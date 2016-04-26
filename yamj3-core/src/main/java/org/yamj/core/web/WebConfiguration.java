@@ -22,7 +22,6 @@
  */
 package org.yamj.core.web;
 
-import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
@@ -92,12 +91,6 @@ public class WebConfiguration  {
 
     @Value("${APIKEY.tvdb}")
     private String theTVDBApiKey;
-
-    @Value("${APIKEY.fanarttv.apiKey}")
-    private String fanartTvApiKey;
-
-    @Value("${APIKEY.fanarttv.clientKey}")
-    private String fanartTvApiClientKey;
 
     @Value("${APIKEY.rottentomatoes}")
     private String rottenTomatoesApiKey;
@@ -191,12 +184,6 @@ public class WebConfiguration  {
     public TheTVDBApi theTvDbApi() {
         LOG.trace("Initialize TheTVDBApi");
         return new TheTVDBApi(theTVDBApiKey, poolingHttpClient());
-    }
-
-    @Bean
-    public FanartTvApi fanartTvApi() throws Exception {
-        LOG.trace("Initialize FanartTvApi");
-        return new FanartTvApi(fanartTvApiKey, fanartTvApiClientKey, poolingHttpClient());
     }
 
     @Bean
