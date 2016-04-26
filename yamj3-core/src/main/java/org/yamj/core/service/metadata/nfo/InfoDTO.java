@@ -30,10 +30,10 @@ import org.yamj.plugin.api.model.IdMap;
 
 public final class InfoDTO implements IdMap {
 
+    private final Map<String, String> ids;
     private boolean changed = false;
     private boolean tvShow = false;
     private Set<String> skippedScans = new HashSet<>(0);
-    private Map<String, String> ids = new HashMap<>(2);
     private Map<String, Integer> setInfos = new HashMap<>(2);
     private Map<String, String> certificationInfos = new HashMap<>(1);
     private Set<CreditDTO> credits = new LinkedHashSet<>(10);
@@ -59,7 +59,8 @@ public final class InfoDTO implements IdMap {
     private String company;
     private String onlineScanner;
 
-    public InfoDTO(boolean tvShow) {
+    public InfoDTO(Map<String,String> ids, boolean tvShow) {
+        this.ids = ids;
         this.tvShow = tvShow;
     }
 
@@ -95,10 +96,6 @@ public final class InfoDTO implements IdMap {
     @Override
     public String getId(String sourceDb) {
         return ids.get(sourceDb);
-    }
-    
-    public void setIds(Map<String, String> ids) {
-        this.ids = ids;
     }
 
     @Override

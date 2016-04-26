@@ -71,8 +71,7 @@ public class NfoScannerService {
         LOG.info("Scanning NFO data for movie '{}'", videoData.getIdentifier());
         
         // create an info DTO for movie
-        InfoDTO infoDTO = new InfoDTO(false);
-        infoDTO.setIds(videoData.getIdMap());
+        InfoDTO infoDTO = new InfoDTO(videoData.getIdMap(), false);
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);
@@ -229,8 +228,7 @@ public class NfoScannerService {
         LOG.info("Scanning NFO data for series '{}'", series.getIdentifier());
         
         // create an info DTO for TV show
-        InfoDTO infoDTO = new InfoDTO(true);
-        infoDTO.setIds(series.getIdMap());
+        InfoDTO infoDTO = new InfoDTO(series.getIdMap(), true);
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);

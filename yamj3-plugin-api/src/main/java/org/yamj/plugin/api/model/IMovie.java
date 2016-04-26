@@ -24,12 +24,9 @@ package org.yamj.plugin.api.model;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 import org.yamj.plugin.api.model.type.JobType;
 
 public interface IMovie {
-
-    Map<String,String> getIds();
     
     String getId(String source);
     

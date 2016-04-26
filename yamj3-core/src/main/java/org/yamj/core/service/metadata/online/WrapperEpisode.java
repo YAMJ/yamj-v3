@@ -23,7 +23,6 @@
 package org.yamj.core.service.metadata.online;
 
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
@@ -57,11 +56,6 @@ public class WrapperEpisode implements IEpisode {
         return videoData.getEpisode();
     }
 
-    @Override
-    public Map<String,String> getIds() {
-        return videoData.getIdMap();
-    }
-    
     @Override
     public String getId(String source) {
         return videoData.getSourceDbId(source);

@@ -23,12 +23,9 @@
 package org.yamj.plugin.api.model;
 
 import java.util.Collection;
-import java.util.Map;
 
 public interface ISeries {
 
-    Map<String,String> getIds();
-    
     String getId(String source);
     
     void addId(String source, String id);

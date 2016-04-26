@@ -53,7 +53,6 @@ public class SeriesMock implements ISeries {
         this.ids = ids;
     }
 
-    @Override
     public Map<String,String> getIds() {
         return ids;
     }

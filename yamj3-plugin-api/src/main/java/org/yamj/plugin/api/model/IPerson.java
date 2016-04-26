@@ -23,11 +23,8 @@
 package org.yamj.plugin.api.model;
 
 import java.util.Date;
-import java.util.Map;
 
 public interface IPerson {
-
-    Map<String,String> getIds();
     
     String getId(String source);
     

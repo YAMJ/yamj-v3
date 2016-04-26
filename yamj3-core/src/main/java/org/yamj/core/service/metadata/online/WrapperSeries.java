@@ -53,11 +53,6 @@ public class WrapperSeries implements ISeries {
     public void setScannerName(String scannerName) {
         this.scannerName = scannerName;
     }
-
-    @Override
-    public Map<String,String> getIds() {
-        return series.getIdMap();
-    }
     
     @Override
     public String getId(String source) {

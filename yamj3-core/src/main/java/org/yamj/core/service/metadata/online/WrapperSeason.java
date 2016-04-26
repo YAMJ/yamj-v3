@@ -22,7 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
@@ -55,11 +57,6 @@ public class WrapperSeason implements ISeason {
     @Override
     public int getNumber() {
         return season.getSeason();
-    }
-
-    @Override
-    public Map<String,String> getIds() {
-        return season.getIdMap();
     }
     
     @Override

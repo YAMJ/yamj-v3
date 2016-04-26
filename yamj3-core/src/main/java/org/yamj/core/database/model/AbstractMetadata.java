@@ -32,8 +32,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
  * Abstract implementation of an metadata object.
  */
 @MappedSuperclass
-public abstract class AbstractMetadata extends AbstractScannable
-        implements IMetadata {
+public abstract class AbstractMetadata extends AbstractScannable implements IMetadata {
 
     private static final long serialVersionUID = -556558470067852056L;
     

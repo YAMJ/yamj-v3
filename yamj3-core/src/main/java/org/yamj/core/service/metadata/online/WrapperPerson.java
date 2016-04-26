@@ -23,7 +23,6 @@
 package org.yamj.core.service.metadata.online;
 
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
@@ -42,11 +41,6 @@ public class WrapperPerson implements IPerson {
 
     public void setScannerName(String actualSource) {
         this.scannerName = actualSource;
-    }
-
-    @Override
-    public Map<String,String> getIds() {
-        return person.getIdMap();
     }
     
     @Override

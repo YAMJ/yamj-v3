@@ -23,13 +23,10 @@
 package org.yamj.plugin.api.model;
 
 import java.util.Collection;
-import java.util.Map;
 
 public interface ISeason {
 
     int getNumber();
-
-    Map<String,String> getIds();
     
     String getId(String source);
     

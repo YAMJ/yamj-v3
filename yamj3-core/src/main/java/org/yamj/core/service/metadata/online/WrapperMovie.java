@@ -48,11 +48,6 @@ public class WrapperMovie implements IMovie {
     public void setScannerName(String scannerName) {
         this.scannerName = scannerName;
     }
-
-    @Override
-    public Map<String,String> getIds() {
-        return videoData.getIdMap();
-    }
     
     @Override
     public String getId(String source) {
