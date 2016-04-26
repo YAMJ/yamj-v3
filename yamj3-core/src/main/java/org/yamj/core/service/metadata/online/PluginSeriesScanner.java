@@ -62,9 +62,7 @@ public class PluginSeriesScanner implements ISeriesScanner {
     }
 
     private String getSeriesId(WrapperSeries wrapper, boolean throwTempError) {
-        String seriesId = seriesScanner.getSeriesId(wrapper, throwTempError);
-        wrapper.addId(getScannerName(), seriesId);
-        return seriesId;
+        return seriesScanner.getSeriesId(wrapper, throwTempError);
     }
 
     @Override

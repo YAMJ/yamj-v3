@@ -62,9 +62,7 @@ public class PluginMovieScanner implements IMovieScanner {
     }
 
     private String getMovieId(WrapperMovie wrapper, boolean throwTempError) {
-        String movieId = movieScanner.getMovieId(wrapper, throwTempError);
-        wrapper.addId(getScannerName(), movieId);
-        return movieId;
+        return movieScanner.getMovieId(wrapper, throwTempError);
     }
 
     @Override

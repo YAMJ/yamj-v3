@@ -55,9 +55,7 @@ public class PluginPersonScanner implements IPersonScanner {
     }
 
     private String getPersonId(WrapperPerson wrapper, boolean throwTempError) {
-        String personId = personScanner.getPersonId(wrapper, throwTempError);
-        wrapper.addId(getScannerName(), personId);
-        return personId;
+        return personScanner.getPersonId(wrapper, throwTempError);
     }
 
     @Override
