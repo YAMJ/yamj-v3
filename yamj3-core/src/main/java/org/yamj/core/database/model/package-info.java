@@ -31,6 +31,8 @@
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.model.type.ParticipationType")}),
     @TypeDef(name = "imageType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.model.type.ImageType")}),
+    @TypeDef(name = "containerType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.model.type.ContainerType")}),
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
     @TypeDef(name = "overrideFlag", typeClass = EnumStringUserType.class,
@@ -39,8 +41,6 @@
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")}),
     @TypeDef(name = "intervalType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.IntervalType")}),
-    @TypeDef(name = "containerType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ContainerType")}),
     @TypeDef(name = "scalingType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ScalingType")})
 })

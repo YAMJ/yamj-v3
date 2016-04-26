@@ -20,16 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.model;
 
-import org.yamj.plugin.api.OnlineScanner;
-import org.yamj.plugin.api.model.IPerson;
+import org.yamj.plugin.api.model.type.ContainerType;
 
-public interface PersonScanner extends OnlineScanner {
+public interface ITrailer {
+
+    ContainerType getContainerType();
     
-    boolean isValidPersonId(String personId);
-
-    String getPersonId(IPerson person, boolean throwTempError);
-
-    boolean scanPerson(IPerson person, boolean throwTempError);
+    String getUrl();
+    
+    String getHasCode();
 }

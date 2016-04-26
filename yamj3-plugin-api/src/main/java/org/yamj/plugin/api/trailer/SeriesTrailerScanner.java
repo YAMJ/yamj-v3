@@ -20,14 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.trailer;
 
-import org.yamj.plugin.api.model.IdMap;
+import java.util.List;
+import org.yamj.plugin.api.OnlineScanner;
+import org.yamj.plugin.api.model.ISeries;
 
 
-public interface NfoIdScanner {
-
-    String getScannerName();
+public interface SeriesTrailerScanner extends OnlineScanner {
     
-    boolean scanNFO(String nfoContent, IdMap idMap);
+    List<TrailerDTO> scanForTrailer(ISeries series);
 }

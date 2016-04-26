@@ -20,14 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api;
 
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.plugin.api.service.PluginConfigService;
 import org.yamj.plugin.api.service.PluginLocaleService;
 import org.yamj.plugin.api.service.PluginMetadataService;
+import ro.fortsoft.pf4j.ExtensionPoint;
 
-public interface MetadataScanner {
+public interface OnlineScanner extends ExtensionPoint {
 
     String getScannerName();
 

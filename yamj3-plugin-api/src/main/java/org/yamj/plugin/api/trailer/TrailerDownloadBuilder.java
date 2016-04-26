@@ -20,16 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.artwork;
+package org.yamj.plugin.api.trailer;
 
 import org.yamj.api.common.http.CommonHttpClient;
-import org.yamj.plugin.api.service.PluginConfigService;
-import org.yamj.plugin.api.service.PluginLocaleService;
-import org.yamj.plugin.api.service.PluginMetadataService;
+import org.yamj.plugin.api.model.ITrailer;
+import ro.fortsoft.pf4j.ExtensionPoint;
 
-public interface ArtworkScanner {
+public interface TrailerDownloadBuilder extends ExtensionPoint {
 
     String getScannerName();
 
-    void init(PluginConfigService configService, PluginMetadataService metadataService, PluginLocaleService localeService, CommonHttpClient httpClient);
+    void init(CommonHttpClient httpClient);
+
+    TrailerDownloadDTO buildTrailerDownload(ITrailer trailer);
 }

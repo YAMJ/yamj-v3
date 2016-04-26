@@ -23,9 +23,10 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IPerson;
 
-public interface PersonArtworkScanner extends ArtworkScanner {
+public interface PersonArtworkScanner extends OnlineScanner {
 
     List<ArtworkDTO> getPhotos(IPerson person);
 }

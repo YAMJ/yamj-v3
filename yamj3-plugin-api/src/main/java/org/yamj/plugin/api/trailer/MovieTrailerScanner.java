@@ -20,16 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.trailer;
 
+import java.util.List;
 import org.yamj.plugin.api.OnlineScanner;
-import org.yamj.plugin.api.model.IPerson;
+import org.yamj.plugin.api.model.IMovie;
 
-public interface PersonScanner extends OnlineScanner {
+public interface MovieTrailerScanner extends OnlineScanner {
     
-    boolean isValidPersonId(String personId);
-
-    String getPersonId(IPerson person, boolean throwTempError);
-
-    boolean scanPerson(IPerson person, boolean throwTempError);
+    List<TrailerDTO> scanForTrailer(IMovie movie);
 }

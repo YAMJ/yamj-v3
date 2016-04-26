@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.TrailerDTO;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 public class TrailersLandScannerTest extends AbstractTest {
 

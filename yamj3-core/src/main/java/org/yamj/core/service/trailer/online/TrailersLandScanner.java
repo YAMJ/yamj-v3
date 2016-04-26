@@ -39,8 +39,8 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.TrailerDTO;
-import org.yamj.core.database.model.type.ContainerType;
+import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 @Service("trailersLandScanner")
 public class TrailersLandScanner implements IMovieTrailerScanner {

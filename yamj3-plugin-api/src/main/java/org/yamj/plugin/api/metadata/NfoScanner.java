@@ -23,13 +23,9 @@
 package org.yamj.plugin.api.metadata;
 
 import org.yamj.plugin.api.OnlineScanner;
-import org.yamj.plugin.api.model.IPerson;
+import org.yamj.plugin.api.model.IdMap;
 
-public interface PersonScanner extends OnlineScanner {
-    
-    boolean isValidPersonId(String personId);
+public interface NfoScanner extends OnlineScanner {
 
-    String getPersonId(IPerson person, boolean throwTempError);
-
-    boolean scanPerson(IPerson person, boolean throwTempError);
+    boolean scanNFO(String nfoContent, IdMap idMap);
 }

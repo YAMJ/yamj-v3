@@ -35,10 +35,10 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.trailer.online.*;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 @Service("trailerScannerService")
 public class TrailerScannerService implements IQueueProcessService {

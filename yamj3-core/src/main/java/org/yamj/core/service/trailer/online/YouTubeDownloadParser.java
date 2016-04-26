@@ -38,8 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
-import org.yamj.core.database.model.type.ContainerType;
-import org.yamj.core.service.trailer.TrailerDownloadDTO;
+import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDownloadDTO;
 import org.yamj.plugin.api.web.HTMLTools;
 
 @Service("youTubeDownloadParser")

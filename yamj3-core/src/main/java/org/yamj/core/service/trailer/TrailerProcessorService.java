@@ -32,13 +32,14 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.trailer.online.YouTubeDownloadParser;
+import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDownloadDTO;
 
 @Service("trailerProcessorService")
 public class TrailerProcessorService implements IQueueProcessService {

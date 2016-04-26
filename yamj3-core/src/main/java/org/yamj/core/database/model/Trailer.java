@@ -35,7 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
-import org.yamj.core.database.model.type.ContainerType;
+import org.yamj.plugin.api.model.type.ContainerType;
 
 @NamedQueries({    
     @NamedQuery(name = Trailer.QUERY_REQUIRED,

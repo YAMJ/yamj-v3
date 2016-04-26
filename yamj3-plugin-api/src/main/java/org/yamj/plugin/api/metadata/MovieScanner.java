@@ -23,9 +23,8 @@
 package org.yamj.plugin.api.metadata;
 
 import org.yamj.plugin.api.model.IMovie;
-import ro.fortsoft.pf4j.ExtensionPoint;
 
-public interface MovieScanner extends MetadataScanner, NfoIdScanner, ExtensionPoint {
+public interface MovieScanner extends NfoScanner {
     
     boolean isValidMovieId(String movieId);
     

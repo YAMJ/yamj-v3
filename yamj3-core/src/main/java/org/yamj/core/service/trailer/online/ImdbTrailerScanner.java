@@ -35,10 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.TrailerDTO;
-import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.web.apis.ImdbApiWrapper;
+import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 @Service("imdbTrailerScanner")
 public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerScanner {

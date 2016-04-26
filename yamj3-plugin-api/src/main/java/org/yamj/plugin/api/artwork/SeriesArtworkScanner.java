@@ -23,11 +23,12 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IEpisode;
 import org.yamj.plugin.api.model.ISeason;
 import org.yamj.plugin.api.model.ISeries;
 
-public interface SeriesArtworkScanner extends ArtworkScanner {
+public interface SeriesArtworkScanner extends OnlineScanner {
 
     List<ArtworkDTO> getPosters(ISeason season);
 

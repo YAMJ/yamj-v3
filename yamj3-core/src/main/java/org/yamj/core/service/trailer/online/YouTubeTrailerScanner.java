@@ -43,8 +43,8 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.TrailerDTO;
-import org.yamj.core.database.model.type.ContainerType;
+import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 @Service("youTubeTrailerScanner")
 public class YouTubeTrailerScanner implements IMovieTrailerScanner {

@@ -23,9 +23,10 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IBoxedSet;
 
-public interface BoxedSetArtworkScanner extends ArtworkScanner {
+public interface BoxedSetArtworkScanner extends OnlineScanner {
 
     List<ArtworkDTO> getPosters(IBoxedSet boxedSet);
 

@@ -20,10 +20,10 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.dto;
+package org.yamj.plugin.api.trailer;
 
 import org.apache.commons.lang3.builder.*;
-import org.yamj.core.database.model.type.ContainerType;
+import org.yamj.plugin.api.model.type.ContainerType;
 
 public final class TrailerDTO {
 

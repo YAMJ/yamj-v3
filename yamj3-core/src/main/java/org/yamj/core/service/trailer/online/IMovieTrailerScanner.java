@@ -24,7 +24,7 @@ package org.yamj.core.service.trailer.online;
 
 import java.util.List;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.TrailerDTO;
+import org.yamj.plugin.api.trailer.TrailerDTO;
 
 public interface IMovieTrailerScanner extends ITrailerScanner {
 

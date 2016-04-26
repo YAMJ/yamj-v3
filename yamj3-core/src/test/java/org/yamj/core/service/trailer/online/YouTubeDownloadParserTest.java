@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.AbstractTest;
-import org.yamj.core.service.trailer.TrailerDownloadDTO;
+import org.yamj.plugin.api.trailer.TrailerDownloadDTO;
 
 public class YouTubeDownloadParserTest extends AbstractTest {
 
