@@ -34,10 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Service("imdbArtworkScanner")
 public class ImdbArtworkScanner implements IMovieArtworkScanner, IPersonArtworkScanner {

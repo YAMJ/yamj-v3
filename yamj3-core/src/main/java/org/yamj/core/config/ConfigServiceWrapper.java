@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.service.PluginConfigService;
 

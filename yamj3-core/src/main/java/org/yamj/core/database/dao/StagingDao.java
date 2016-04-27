@@ -36,10 +36,10 @@ import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.service.file.FileTools;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Transactional
 @Repository("stagingDao")

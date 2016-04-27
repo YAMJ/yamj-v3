@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.type;
+package org.yamj.plugin.api.model.type;
 
 public enum ArtworkType {
 

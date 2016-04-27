@@ -38,7 +38,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @NamedQueries({    
     @NamedQuery(name = Artwork.QUERY_REQUIRED,

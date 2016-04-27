@@ -27,8 +27,8 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 public class ImdbArtworkScannerTest extends AbstractTest {
 

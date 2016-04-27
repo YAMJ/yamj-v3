@@ -42,7 +42,6 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
@@ -52,6 +51,7 @@ import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.WatchedDTO;
 import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.Constants;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
 /**

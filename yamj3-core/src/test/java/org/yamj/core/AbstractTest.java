@@ -32,8 +32,8 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public abstract class AbstractTest extends AbstractJUnit4SpringContextTests {

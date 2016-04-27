@@ -24,7 +24,7 @@ package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 public final class QueueDTO {
 

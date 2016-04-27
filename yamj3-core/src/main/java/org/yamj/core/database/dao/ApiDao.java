@@ -40,10 +40,10 @@ import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ResolutionType;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.model.type.ParticipationType;
 

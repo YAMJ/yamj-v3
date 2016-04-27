@@ -25,8 +25,8 @@ package org.yamj.core.api.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiArtworkProfileDTO extends AbstractApiIdentifiableDTO {

@@ -47,10 +47,10 @@ import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.GenreXmlTools;
 import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {

@@ -39,10 +39,10 @@ import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Transactional
 @Repository("metadataDao")

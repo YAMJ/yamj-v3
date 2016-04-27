@@ -30,9 +30,9 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 public final class ArtworkStorageTools {
 

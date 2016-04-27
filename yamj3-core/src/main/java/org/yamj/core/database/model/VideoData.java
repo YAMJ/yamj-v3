@@ -48,9 +48,9 @@ import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @NamedQueries({
     @NamedQuery(name = VideoData.QUERY_REQUIRED,

@@ -33,7 +33,6 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
@@ -42,6 +41,7 @@ import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
 @Service("artworkScannerService")

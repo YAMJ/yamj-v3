@@ -41,7 +41,6 @@ import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.ArtworkProfile;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -50,6 +49,7 @@ import org.yamj.core.service.artwork.ArtworkProcessorService;
 import org.yamj.core.service.artwork.ArtworkUploadService;
 import org.yamj.core.service.artwork.ImageDTO;
 import org.yamj.core.service.file.FileStorageService;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @RestController
 @RequestMapping(value = "/api/artwork", produces = "application/json; charset=utf-8")

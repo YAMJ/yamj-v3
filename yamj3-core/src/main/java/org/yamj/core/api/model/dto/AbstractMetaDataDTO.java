@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @JsonInclude(Include.NON_DEFAULT)
 public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {

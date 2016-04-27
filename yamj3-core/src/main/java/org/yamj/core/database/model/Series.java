@@ -46,8 +46,8 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @NamedQueries({
     @NamedQuery(name = Series.QUERY_REQUIRED,

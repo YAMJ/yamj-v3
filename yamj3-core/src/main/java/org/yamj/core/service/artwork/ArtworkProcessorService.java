@@ -46,7 +46,6 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
@@ -54,6 +53,7 @@ import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Service("artworkProcessorService")
 @DependsOn("artworkInitialization")

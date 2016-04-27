@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 /**
  *

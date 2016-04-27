@@ -37,12 +37,12 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
 @Service("artworkUploadService")

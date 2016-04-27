@@ -34,7 +34,7 @@
     @TypeDef(name = "containerType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.model.type.ContainerType")}),
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.plugin.api.model.type.ArtworkType")}),
     @TypeDef(name = "overrideFlag", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.OverrideFlag")}),
     @TypeDef(name = "fileType", typeClass = EnumStringUserType.class,

@@ -30,9 +30,9 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.ArtworkProfile;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.plugin.api.model.type.ArtworkType;
 
 /**
  * Just used for initialization of artwork profiles at startup.

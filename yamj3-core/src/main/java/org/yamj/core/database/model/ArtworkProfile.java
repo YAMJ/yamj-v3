@@ -29,8 +29,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ScalingType;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
 @NamedQueries({

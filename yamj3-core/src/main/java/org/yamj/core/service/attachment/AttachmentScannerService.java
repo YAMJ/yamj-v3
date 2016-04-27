@@ -37,9 +37,9 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.various.StagingService;
+import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
 /**
