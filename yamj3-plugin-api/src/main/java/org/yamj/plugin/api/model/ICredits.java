@@ -26,8 +26,6 @@ import org.yamj.plugin.api.model.type.JobType;
 
 public interface ICredits {
     
-    String getId(String source);
-    
     void addCredit(JobType jobType, String name);
 
     void addCredit(JobType jobType, String name, String role);

@@ -27,7 +27,9 @@ import java.util.Date;
 public interface IEpisode extends ICredits {
 
     int getNumber();
-    
+
+    String getId(String source);
+
     void addId(String source, String id);
 
     String getTitle();
