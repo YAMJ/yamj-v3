@@ -22,10 +22,9 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IPerson;
 
-public interface PersonScanner extends OnlineScanner {
+public interface PersonScanner extends MetadataScanner {
     
     boolean isValidPersonId(String personId);
 

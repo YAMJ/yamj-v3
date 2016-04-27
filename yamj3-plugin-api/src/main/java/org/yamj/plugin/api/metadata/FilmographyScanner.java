@@ -23,10 +23,9 @@
 package org.yamj.plugin.api.metadata;
 
 import java.util.List;
-import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IPerson;
 
-public interface FilmographyScanner extends OnlineScanner {
+public interface FilmographyScanner extends MetadataScanner {
     
     boolean isValidPersonId(String personId);
 

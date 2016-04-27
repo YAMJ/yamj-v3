@@ -22,9 +22,9 @@
  */
 package org.yamj.plugin.api.metadata;
 
-import org.yamj.plugin.api.model.IdMap;
+import org.yamj.plugin.api.OnlineScanner;
 
-public interface NfoScanner extends MetadataScanner {
+public interface MetadataScanner extends OnlineScanner {
 
-    boolean scanNFO(String nfoContent, IdMap idMap);
+    // just a marker interface
 }

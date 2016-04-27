@@ -23,10 +23,9 @@
 package org.yamj.plugin.api.artwork;
 
 import java.util.List;
-import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IMovie;
 
-public interface MovieArtworkScanner extends OnlineScanner {
+public interface MovieArtworkScanner extends ArtworkScanner {
 
     List<ArtworkDTO> getPosters(IMovie movie);
 

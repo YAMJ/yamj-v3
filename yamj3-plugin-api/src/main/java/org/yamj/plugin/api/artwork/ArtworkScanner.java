@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.metadata;
+package org.yamj.plugin.api.artwork;
 
-import org.yamj.plugin.api.model.IdMap;
+import org.yamj.plugin.api.OnlineScanner;
 
-public interface NfoScanner extends MetadataScanner {
+public interface ArtworkScanner extends OnlineScanner {
 
-    boolean scanNFO(String nfoContent, IdMap idMap);
+    // just a marker interface
 }
