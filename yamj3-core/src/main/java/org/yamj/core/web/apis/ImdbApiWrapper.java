@@ -153,18 +153,6 @@ public class ImdbApiWrapper {
             return null;
         }
     }
-    
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
-    public List<ImdbImage> getTitlePhotos(String imdbId, Locale locale) {
-        List<ImdbImage> titlePhotos = null;
-        try {
-            titlePhotos = imdbApi.getTitlePhotos(imdbId, locale);
-        } catch (ImdbException ex) {
-            LOG.error("Failed to get title photos using IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace(API_ERROR, ex);
-        }
-        return (titlePhotos == null ? new ArrayList<ImdbImage>(0) : titlePhotos);
-    }
 
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}", unless="#result==null")
     public Map<Integer,List<ImdbEpisodeDTO>> getTitleEpisodes(String imdbId, Locale locale) {

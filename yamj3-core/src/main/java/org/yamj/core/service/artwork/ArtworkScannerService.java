@@ -23,7 +23,6 @@
 package org.yamj.core.service.artwork;
 
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +35,12 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
-import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
-import org.yamj.plugin.api.artwork.ArtworkDTO;
+import org.yamj.plugin.api.artwork.*;
+import org.yamj.plugin.api.model.*;
+import org.yamj.plugin.api.model.mock.*;
 import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
@@ -50,10 +50,10 @@ public class ArtworkScannerService implements IQueueProcessService {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
     private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
     
-    private final HashMap<String, IMovieArtworkScanner> registeredMovieArtworkScanner = new HashMap<>();
-    private final HashMap<String, ISeriesArtworkScanner> registeredSeriesArtworkScanner = new HashMap<>();
-    private final HashMap<String, IPersonArtworkScanner> registeredPersonArtworkScanner = new HashMap<>();
-    private final HashMap<String, IBoxedSetArtworkScanner> registeredBoxedSetArtworkScanner = new HashMap<>();
+    private final HashMap<String, MovieArtworkScanner> registeredMovieArtworkScanner = new HashMap<>();
+    private final HashMap<String, SeriesArtworkScanner> registeredSeriesArtworkScanner = new HashMap<>();
+    private final HashMap<String, PersonArtworkScanner> registeredPersonArtworkScanner = new HashMap<>();
+    private final HashMap<String, BoxedSetArtworkScanner> registeredBoxedSetArtworkScanner = new HashMap<>();
     
     @Autowired
     private ArtworkLocatorService artworkLocatorService;
@@ -63,32 +63,24 @@ public class ArtworkScannerService implements IQueueProcessService {
     private AttachmentScannerService attachmentScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
-    @Autowired
-    private ImdbArtworkScanner imdbArtworkScanner;
     
-    @PostConstruct
-    public void init() {
-        LOG.debug("Initialize artwork scanner");
-        this.registerArtworkScanner(imdbArtworkScanner);
-    }
-    
-    public void registerArtworkScanner(IArtworkScanner artworkScanner) {
+    public void registerArtworkScanner(ArtworkScanner artworkScanner) {
         final String scannerName = artworkScanner.getScannerName().toLowerCase();
-        if (artworkScanner instanceof IMovieArtworkScanner) {
+        if (artworkScanner instanceof MovieArtworkScanner) {
             LOG.trace("Registered movie artwork scanner: {}", scannerName);
-            registeredMovieArtworkScanner.put(scannerName, (IMovieArtworkScanner)artworkScanner);
+            registeredMovieArtworkScanner.put(scannerName, (MovieArtworkScanner)artworkScanner);
         }
-        if (artworkScanner instanceof ISeriesArtworkScanner) {
+        if (artworkScanner instanceof SeriesArtworkScanner) {
             LOG.trace("Registered series artwork scanner: {}", scannerName);
-            registeredSeriesArtworkScanner.put(scannerName, (ISeriesArtworkScanner)artworkScanner);
+            registeredSeriesArtworkScanner.put(scannerName, (SeriesArtworkScanner)artworkScanner);
         }
-        if (artworkScanner instanceof IBoxedSetArtworkScanner) {
+        if (artworkScanner instanceof BoxedSetArtworkScanner) {
             LOG.trace("Registered boxed set artwork scanner: {}", scannerName);
-            registeredBoxedSetArtworkScanner.put(scannerName, (IBoxedSetArtworkScanner)artworkScanner);
+            registeredBoxedSetArtworkScanner.put(scannerName, (BoxedSetArtworkScanner)artworkScanner);
         }
-        if (artworkScanner instanceof IPersonArtworkScanner) {
+        if (artworkScanner instanceof PersonArtworkScanner) {
             LOG.trace("Registered person artwork scanner: {}", scannerName);
-            registeredPersonArtworkScanner.put(scannerName, (IPersonArtworkScanner)artworkScanner);
+            registeredPersonArtworkScanner.put(scannerName, (PersonArtworkScanner)artworkScanner);
         }
     }
 
@@ -197,9 +189,9 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.boxset.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
-                IBoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
+                BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(artwork.getBoxedSet());
+                posters = scanner.getPosters(buildBoxedSet(artwork.getBoxedSet()));
                 if (CollectionUtils.isNotEmpty(posters)) {
                     break;
                 }
@@ -209,9 +201,9 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.movie.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.movie.priorities", registeredMovieArtworkScanner.keySet())) {
-                IMovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
+                MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(artwork.getVideoData());
+                posters = scanner.getPosters(buildMovie(artwork.getVideoData()));
                 if (CollectionUtils.isNotEmpty(posters)) {
                     break;
                 }
@@ -221,12 +213,12 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.tvshow.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
-                ISeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
+                SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 if (artwork.getSeries() != null) {
-                    posters = scanner.getPosters(artwork.getSeries());
+                    posters = scanner.getPosters(buildSeries(artwork.getSeries()));
                 } else {
-                    posters = scanner.getPosters(artwork.getSeason());
+                    posters = scanner.getPosters(buildSeason(artwork.getSeason()));
                 }
                 if (CollectionUtils.isNotEmpty(posters)) {
                     break;
@@ -299,9 +291,9 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.boxset.maxResults", 5);
             
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
-                IBoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
+                BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(artwork.getBoxedSet());
+                fanarts = scanner.getFanarts(buildBoxedSet(artwork.getBoxedSet()));
                 if (CollectionUtils.isNotEmpty(fanarts)) {
                     break;
                 }
@@ -311,9 +303,9 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.movie.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.movie.priorities", registeredMovieArtworkScanner.keySet())) {
-                IMovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
+                MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(artwork.getVideoData());
+                fanarts = scanner.getFanarts(buildMovie(artwork.getVideoData()));
                 if (CollectionUtils.isNotEmpty(fanarts)) {
                     break;
                 }
@@ -323,12 +315,12 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.tvshow.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
-                ISeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
+                SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 if (artwork.getSeries() != null) {
-                    fanarts = scanner.getFanarts(artwork.getSeries());
+                    fanarts = scanner.getFanarts(buildSeries(artwork.getSeries()));
                 } else {
-                    fanarts = scanner.getFanarts(artwork.getSeason());
+                    fanarts = scanner.getFanarts(buildSeason(artwork.getSeason()));
                 }
                 if (CollectionUtils.isNotEmpty(fanarts)) {
                     break;
@@ -399,9 +391,9 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.boxset.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
-                IBoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
+                BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                banners = scanner.getBanners(artwork.getBoxedSet());
+                banners = scanner.getBanners(buildBoxedSet(artwork.getBoxedSet()));
                 if (CollectionUtils.isNotEmpty(banners)) {
                     break;
                 }
@@ -411,12 +403,12 @@ public class ArtworkScannerService implements IQueueProcessService {
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.tvshow.maxResults", 5);
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
-                ISeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
+                SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 if (artwork.getSeries() != null) {
-                    banners = scanner.getBanners(artwork.getSeries());
+                    banners = scanner.getBanners(buildSeries(artwork.getSeries()));
                 } else {
-                    banners = scanner.getBanners(artwork.getSeason());
+                    banners = scanner.getBanners(buildSeason(artwork.getSeason()));
                 }
                 if (CollectionUtils.isNotEmpty(banners)) {
                     break;
@@ -500,9 +492,9 @@ public class ArtworkScannerService implements IQueueProcessService {
         List<ArtworkDTO> videoimages = Collections.emptyList();
         
         for (String prio : determinePriorities("yamj3.artwork.scanner.videoimage.priorities", registeredSeriesArtworkScanner.keySet())) {
-            ISeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
+            SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
             LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-            videoimages = scanner.getVideoImages(videoData);
+            videoimages = scanner.getVideoImages(buildEpisode(videoData));
             if (CollectionUtils.isNotEmpty(videoimages)) {
                 break;
             }
@@ -553,11 +545,12 @@ public class ArtworkScannerService implements IQueueProcessService {
 
         LOG.debug("Scan online for photo: {}", artwork);
         List<ArtworkDTO> photos = null;
-
+        IPerson iPerson = buildPerson(person);
+        
         for (String prio : determinePriorities("yamj3.artwork.scanner.photo.priorities", registeredPersonArtworkScanner.keySet())) {
-            IPersonArtworkScanner scanner = registeredPersonArtworkScanner.get(prio);
+            PersonArtworkScanner scanner = registeredPersonArtworkScanner.get(prio);
             LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
-            photos = scanner.getPhotos(person);
+            photos = scanner.getPhotos(iPerson);
             if (CollectionUtils.isNotEmpty(photos)) {
                 break;
             }
@@ -646,4 +639,50 @@ public class ArtworkScannerService implements IQueueProcessService {
         LOG.trace("{} --> {}", configkey, result);
         return result;
     }
+
+    private static IMovie buildMovie(VideoData videoData) {
+        MovieMock mock = new MovieMock(videoData.getIdMap());
+        mock.setTitle(videoData.getTitle());
+        mock.setOriginalTitle(videoData.getTitleOriginal());
+        mock.setYear(videoData.getPublicationYear());
+        return mock;
+    }
+
+    private static ISeries buildSeries(Series series) {
+        SeriesMock mock = new SeriesMock(series.getIdMap());
+        mock.setTitle(series.getTitle());
+        mock.setOriginalTitle(series.getTitleOriginal());
+        mock.setStartYear(series.getStartYear());
+        mock.setEndYear(series.getEndYear());
+        return mock;
+    }
+
+    private static ISeason buildSeason(Season season) {
+        SeasonMock mock = new SeasonMock(season.getSeason(), season.getIdMap());
+        mock.setTitle(season.getTitle());
+        mock.setOriginalTitle(season.getTitleOriginal());
+        mock.setYear(season.getPublicationYear());
+        mock.setSeries(buildSeries(season.getSeries()));
+        return mock;
+    }
+
+    private static IEpisode buildEpisode(VideoData videoData) {
+        EpisodeMock mock = new EpisodeMock(videoData.getEpisode(), videoData.getIdMap());
+        mock.setTitle(videoData.getTitle());
+        mock.setOriginalTitle(videoData.getTitleOriginal());
+        mock.setSeason(buildSeason(videoData.getSeason()));
+        return mock;
+    }
+    
+    private static IPerson buildPerson(Person person) {
+        PersonMock mock = new PersonMock(person.getIdMap());
+        mock.setName(person.getName());
+        return mock;
+    } 
+    
+    private static IBoxedSet buildBoxedSet(BoxedSet boxedSet) {
+        BoxedSetMock mock = new BoxedSetMock(boxedSet.getIdMap());
+        mock.setName(boxedSet.getName());
+        return mock;
+    } 
 }

@@ -33,7 +33,6 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.artwork.ArtworkInitialization;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.*;
@@ -102,31 +101,26 @@ public class PluginExtensionInitialization {
         // add movie artwork scanner to artwork scanner service
         for (MovieArtworkScanner movieArtworkScanner : pluginManager.getExtensions(MovieArtworkScanner.class)) {
             initExtensionPoint(movieArtworkScanner);
-            PluginMovieArtworkScanner scanner = new PluginMovieArtworkScanner(movieArtworkScanner);
-            artworkScannerService.registerArtworkScanner(scanner);
+            artworkScannerService.registerArtworkScanner(movieArtworkScanner);
         }
         
         // add series artwork scanner to artwork scanner service
         for (SeriesArtworkScanner seriesArtworkScanner : pluginManager.getExtensions(SeriesArtworkScanner.class)) {
             initExtensionPoint(seriesArtworkScanner);
-            PluginSeriesArtworkScanner scanner = new PluginSeriesArtworkScanner(seriesArtworkScanner);
-            artworkScannerService.registerArtworkScanner(scanner);
-        }
-
-        // add boxed set artwork scanner to artwork scanner service
-        for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
-            initExtensionPoint(boxedSetArtworkScanner);
-            PluginBoxedSetArtworkScanner scanner = new PluginBoxedSetArtworkScanner(boxedSetArtworkScanner);
-            artworkScannerService.registerArtworkScanner(scanner);
+            artworkScannerService.registerArtworkScanner(seriesArtworkScanner);
         }
 
         // add person artwork scanner to artwork scanner service
         for (PersonArtworkScanner personArtworkScanner : pluginManager.getExtensions(PersonArtworkScanner.class)) {
             initExtensionPoint(personArtworkScanner);
-            PluginPersonArtworkScanner scanner = new PluginPersonArtworkScanner(personArtworkScanner);
-            artworkScannerService.registerArtworkScanner(scanner);
+            artworkScannerService.registerArtworkScanner(personArtworkScanner);
         }
-        
+
+        // add boxed set artwork scanner to artwork scanner service
+        for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
+            initExtensionPoint(boxedSetArtworkScanner);
+            artworkScannerService.registerArtworkScanner(boxedSetArtworkScanner);
+        }
     }
     
     private void initExtensionPoint(ExtensionPoint extensionPoint) {
