@@ -22,9 +22,9 @@
  */
 package org.yamj.plugin.api;
 
-import ro.fortsoft.pf4j.ExtensionPoint;
+import org.yamj.api.common.http.CommonHttpClient;
 
-public interface OnlineScanner extends ExtensionPoint {
+public interface NeedsHttpClient {
 
-    String getScannerName();
+    void setHttpClient(CommonHttpClient httpClient);
 }

@@ -22,9 +22,9 @@
  */
 package org.yamj.plugin.api;
 
-import ro.fortsoft.pf4j.ExtensionPoint;
+import org.yamj.plugin.api.service.PluginLocaleService;
 
-public interface OnlineScanner extends ExtensionPoint {
+public interface NeedsLocaleService {
 
-    String getScannerName();
+    void setLocaleService(PluginLocaleService localeService);
 }

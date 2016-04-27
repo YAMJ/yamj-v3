@@ -27,24 +27,20 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
-import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.various.IdentifierService;
-import org.yamj.plugin.api.metadata.*;
+import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.PersonScanner;
+import org.yamj.plugin.api.metadata.SeriesScanner;
 import org.yamj.plugin.api.service.PluginMetadataService;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
-import ro.fortsoft.pf4j.PluginManager;
 
 @Service("onlineScannerService")
-@DependsOn("pluginManager")
 public class OnlineScannerService implements PluginMetadataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnlineScannerService.class);
@@ -62,48 +58,12 @@ public class OnlineScannerService implements PluginMetadataService {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
-    private LocaleService localeService;
-    @Autowired
-    private PoolingHttpClient poolingHttpClient;
-    @Autowired
-    private PluginManager pluginManager;
-    @Autowired
-    private IdentifierService identifierService;
-    @Autowired
     private ImdbScanner imdbScanner;
     
     @PostConstruct
     public void init() {
         LOG.debug("Initialize online scanner");
         this.registerMetadataScanner(imdbScanner);
-        
-        // add movie scanner to online scanner service
-        for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
-            movieScanner.init(configServiceWrapper, this, localeService, poolingHttpClient);
-            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService, identifierService);
-            this.registerMetadataScanner(scanner);
-        }
-        
-        // add series scanner to online scanner service
-        for (SeriesScanner seriesScanner : pluginManager.getExtensions(SeriesScanner.class)) {
-            seriesScanner.init(configServiceWrapper, this, localeService, poolingHttpClient);
-            PluginSeriesScanner scanner = new PluginSeriesScanner(seriesScanner, localeService, identifierService);
-            this.registerMetadataScanner(scanner);
-        }
-
-        // add person scanner to online scanner service
-        for (PersonScanner personScanner : pluginManager.getExtensions(PersonScanner.class)) {
-            personScanner.init(configServiceWrapper, this, localeService, poolingHttpClient);
-            PluginPersonScanner scanner = new PluginPersonScanner(personScanner);
-            this.registerMetadataScanner(scanner);
-        }
-
-        // add filmography scanner to online scanner service
-        for (FilmographyScanner filmographyScanner : pluginManager.getExtensions(FilmographyScanner.class)) {
-            filmographyScanner.init(configServiceWrapper, this, localeService, poolingHttpClient);
-            PluginFilmographyScanner scanner = new PluginFilmographyScanner(filmographyScanner, localeService);
-            this.registerMetadataScanner(scanner);
-        }
     }
 
     /**
@@ -111,7 +71,7 @@ public class OnlineScannerService implements PluginMetadataService {
      *
      * @param metadataScanner
      */
-    private void registerMetadataScanner(IMetadataScanner metadataScanner) {
+    public void registerMetadataScanner(IMetadataScanner metadataScanner) {
         final String scannerName =  metadataScanner.getScannerName().toLowerCase();
         
         if (metadataScanner instanceof IMovieScanner) {

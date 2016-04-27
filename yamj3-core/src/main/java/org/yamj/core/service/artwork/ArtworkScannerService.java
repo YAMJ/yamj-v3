@@ -28,12 +28,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
-import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -44,13 +41,10 @@ import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.plugin.api.artwork.*;
+import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.model.type.ImageType;
-import ro.fortsoft.pf4j.PluginManager;
 
 @Service("artworkScannerService")
-@DependsOn("onlineScannerService")
 public class ArtworkScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
@@ -62,8 +56,6 @@ public class ArtworkScannerService implements IQueueProcessService {
     private final HashMap<String, IBoxedSetArtworkScanner> registeredBoxedSetArtworkScanner = new HashMap<>();
     
     @Autowired
-    private OnlineScannerService onlineScannerService;
-    @Autowired
     private ArtworkLocatorService artworkLocatorService;
     @Autowired
     private ArtworkStorageService artworkStorageService;
@@ -72,49 +64,15 @@ public class ArtworkScannerService implements IQueueProcessService {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
-    private LocaleService localeService;
-    @Autowired
-    private PoolingHttpClient poolingHttpClient;
-    @Autowired
-    private PluginManager pluginManager;
-    @Autowired
     private ImdbArtworkScanner imdbArtworkScanner;
     
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork scanner");
         this.registerArtworkScanner(imdbArtworkScanner);
-        
-        // add movie artwork scanner to artwork scanner service
-        for (MovieArtworkScanner movieArtworkScanner : pluginManager.getExtensions(MovieArtworkScanner.class)) {
-            movieArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginMovieArtworkScanner scanner = new PluginMovieArtworkScanner(movieArtworkScanner);
-            this.registerArtworkScanner(scanner);
-        }
-        
-        // add series artwork scanner to artwork scanner service
-        for (SeriesArtworkScanner seriesArtworkScanner : pluginManager.getExtensions(SeriesArtworkScanner.class)) {
-            seriesArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginSeriesArtworkScanner scanner = new PluginSeriesArtworkScanner(seriesArtworkScanner);
-            this.registerArtworkScanner(scanner);
-        }
-
-        // add boxed set artwork scanner to artwork scanner service
-        for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
-            boxedSetArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginBoxedSetArtworkScanner scanner = new PluginBoxedSetArtworkScanner(boxedSetArtworkScanner);
-            this.registerArtworkScanner(scanner);
-        }
-
-        // add person artwork scanner to artwork scanner service
-        for (PersonArtworkScanner personArtworkScanner : pluginManager.getExtensions(PersonArtworkScanner.class)) {
-            personArtworkScanner.init(configServiceWrapper, onlineScannerService, localeService, poolingHttpClient);
-            PluginPersonArtworkScanner scanner = new PluginPersonArtworkScanner(personArtworkScanner);
-            this.registerArtworkScanner(scanner);
-        }
     }
     
-    private void registerArtworkScanner(IArtworkScanner artworkScanner) {
+    public void registerArtworkScanner(IArtworkScanner artworkScanner) {
         final String scannerName = artworkScanner.getScannerName().toLowerCase();
         if (artworkScanner instanceof IMovieArtworkScanner) {
             LOG.trace("Registered movie artwork scanner: {}", scannerName);
