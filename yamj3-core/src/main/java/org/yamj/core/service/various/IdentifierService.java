@@ -34,8 +34,9 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.tools.PersonName;
+import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.metadata.PersonName;
 import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.transliteration.Transliterator;
 import ro.fortsoft.pf4j.PluginManager;
@@ -108,7 +109,6 @@ public class IdentifierService {
         return result;
     }
     
-    @Deprecated
     public CreditDTO createCredit(final String source, final JobType jobType, final String name) {
         return createCredit(source, null, jobType, name);
     }
@@ -126,7 +126,7 @@ public class IdentifierService {
         }
 
         CreditDTO credit = new CreditDTO(source, sourceId, jobType, identifier, trimmedName);
-        PersonName personName = MetadataTools.splitFullName(trimmedName);
+        PersonName personName = YamjTools.splitFullName(trimmedName);
         credit.setFirstName(personName.getFirstName());
         credit.setLastName(personName.getLastName());
         return credit;

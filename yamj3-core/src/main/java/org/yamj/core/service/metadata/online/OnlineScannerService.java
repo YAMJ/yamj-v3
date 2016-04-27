@@ -23,7 +23,6 @@
 package org.yamj.core.service.metadata.online;
 
 import java.util.*;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +31,11 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import org.yamj.core.service.various.IdentifierService;
+import org.yamj.plugin.api.metadata.*;
 import org.yamj.plugin.api.service.PluginMetadataService;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
@@ -50,45 +49,41 @@ public class OnlineScannerService implements PluginMetadataService {
     public static final Set<String> FILMOGRAPHY_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.filmography", "tmdb");
     private static final String SCANNING_ERROR = "Scanning error";
     
-    private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
-    private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
-    private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<>();
-    private final HashMap<String, IFilmographyScanner> registeredFilmographyScanner = new HashMap<>();
+    private final HashMap<String, PluginMovieScanner> registeredMovieScanner = new HashMap<>();
+    private final HashMap<String, PluginSeriesScanner> registeredSeriesScanner = new HashMap<>();
+    private final HashMap<String, PluginPersonScanner> registeredPersonScanner = new HashMap<>();
+    private final HashMap<String, PluginFilmographyScanner> registeredFilmographyScanner = new HashMap<>();
 
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
-    private ImdbScanner imdbScanner;
-    
-    @PostConstruct
-    public void init() {
-        LOG.debug("Initialize online scanner");
-        this.registerMetadataScanner(imdbScanner);
-    }
+    private LocaleService localeService;
+    @Autowired
+    private IdentifierService identifierService;
 
     /**
      * Register a metadata scanner
      *
      * @param metadataScanner
      */
-    public void registerMetadataScanner(IMetadataScanner metadataScanner) {
+    public void registerMetadataScanner(MetadataScanner metadataScanner) {
         final String scannerName =  metadataScanner.getScannerName().toLowerCase();
         
-        if (metadataScanner instanceof IMovieScanner) {
+        if (metadataScanner instanceof MovieScanner) {
             LOG.trace("Registered movie scanner: {}", scannerName);
-            registeredMovieScanner.put(scannerName, (IMovieScanner)metadataScanner);
+            registeredMovieScanner.put(scannerName, new PluginMovieScanner((MovieScanner)metadataScanner));
         }
-        if (metadataScanner instanceof ISeriesScanner) {
+        if (metadataScanner instanceof SeriesScanner) {
             LOG.trace("Registered series scanner: {}", scannerName);
-            registeredSeriesScanner.put(scannerName, (ISeriesScanner)metadataScanner);
+            registeredSeriesScanner.put(scannerName, new PluginSeriesScanner((SeriesScanner)metadataScanner));
         }
-        if (metadataScanner instanceof IPersonScanner) {
+        if (metadataScanner instanceof PersonScanner) {
             LOG.trace("Registered person scanner: {}", scannerName);
-            registeredPersonScanner.put(scannerName, (IPersonScanner)metadataScanner);
+            registeredPersonScanner.put(scannerName, new PluginPersonScanner((PersonScanner)metadataScanner));
         }
-        if (metadataScanner instanceof IFilmographyScanner) {
+        if (metadataScanner instanceof FilmographyScanner) {
             LOG.trace("Registered filmography scanner: {}", scannerName);
-            registeredFilmographyScanner.put(scannerName, (IFilmographyScanner)metadataScanner);
+            registeredFilmographyScanner.put(scannerName, new PluginFilmographyScanner((FilmographyScanner)metadataScanner, localeService));
         }
     }
     
@@ -107,13 +102,14 @@ public class OnlineScannerService implements PluginMetadataService {
         
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", false);
         final boolean throwTempError = configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+        final WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
         ScanResult scanResult = null;
-        
+                        
     	loop: for (String scanner : MOVIE_SCANNER) {
     	    // holds the inner scan result
     	    ScanResult innerResult = ScanResult.NO_RESULT;
     	    
-    		IMovieScanner movieScanner = registeredMovieScanner.get(scanner);
+    		PluginMovieScanner movieScanner = registeredMovieScanner.get(scanner);
             if (movieScanner == null) {
                 LOG.error("Movie scanner '{}' not registered", scanner);
             } else {
@@ -124,7 +120,7 @@ public class OnlineScannerService implements PluginMetadataService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                        innerResult = movieScanner.scanMovie(videoData, throwTempError);
+                        innerResult = movieScanner.scanMovie(wrapper, throwTempError);
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
@@ -193,13 +189,14 @@ public class OnlineScannerService implements PluginMetadataService {
         
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", false);
         final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+        final WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
 		ScanResult scanResult = null;
 
     	loop: for (String scanner : SERIES_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
-    		ISeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
+    		PluginSeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
             if (seriesScanner == null) {
                 LOG.error("Series scanner '{}' not registered", scanner);
             } else {
@@ -210,7 +207,7 @@ public class OnlineScannerService implements PluginMetadataService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                        innerResult = seriesScanner.scanSeries(series, throwTempError);
+                        innerResult = seriesScanner.scanSeries(wrapper, throwTempError);
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
@@ -292,13 +289,14 @@ public class OnlineScannerService implements PluginMetadataService {
         
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", false);
         final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+        final WrapperPerson wrapper = new WrapperPerson(person);
     	ScanResult scanResult = null;
         
     	loop: for (String scanner : PERSON_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
-    		IPersonScanner personScanner = registeredPersonScanner.get(scanner);
+    		PluginPersonScanner personScanner = registeredPersonScanner.get(scanner);
             if (personScanner == null) {
                 LOG.error("Person scanner '{}' not registered", scanner);
             } else {
@@ -309,7 +307,7 @@ public class OnlineScannerService implements PluginMetadataService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
-                        innerResult = personScanner.scanPerson(person, throwTempError);
+                        innerResult = personScanner.scanPerson(wrapper, throwTempError);
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
@@ -380,13 +378,14 @@ public class OnlineScannerService implements PluginMetadataService {
         }
 
         final boolean throwTempError = configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+        final WrapperPerson wrapper = new WrapperPerson(person);
         ScanResult scanResult = null;
 
         for (String scanner : FILMOGRAPHY_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.ERROR;
             
-            IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
+            PluginFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
             if (filmographyScanner == null) {
                 LOG.error("Filmography scanner '{}' not registered", scanner);
             } else {
@@ -397,7 +396,7 @@ public class OnlineScannerService implements PluginMetadataService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                        innerResult = filmographyScanner.scanFilmography(person, throwTempError);
+                        innerResult = filmographyScanner.scanFilmography(wrapper, throwTempError);
                     }
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
@@ -454,7 +453,7 @@ public class OnlineScannerService implements PluginMetadataService {
     }
 
     public boolean scanNFO(String nfoContent, InfoDTO dto) {
-        INfoScanner nfoScanner = null;
+        NfoScanner nfoScanner = null;
         if (dto.isTvShow()) {
             Iterator<String> iter = SERIES_SCANNER.iterator();
             if (iter.hasNext()) nfoScanner = this.registeredSeriesScanner.get(iter.next());
@@ -471,14 +470,14 @@ public class OnlineScannerService implements PluginMetadataService {
         }
         
         if (autodetect && !foundInfo) {
-            Set<INfoScanner> nfoScanners = new HashSet<>();
+            Set<NfoScanner> nfoScanners = new HashSet<>();
             if (dto.isTvShow()) {
                 nfoScanners.addAll(this.registeredSeriesScanner.values());
             } else {
                 nfoScanners.addAll(this.registeredMovieScanner.values());
             }
             
-            for (INfoScanner autodetectScanner : nfoScanners) {
+            for (NfoScanner autodetectScanner : nfoScanners) {
                 foundInfo = autodetectScanner.scanNFO(nfoContent, dto);
                 if (foundInfo) {
                     // set auto-detected scanner
@@ -517,28 +516,22 @@ public class OnlineScannerService implements PluginMetadataService {
 
     @Override
     public MovieScanner getMovieScanner(String source) {
-        IMovieScanner movieScanner = registeredMovieScanner.get(source);
-        if (movieScanner instanceof PluginMovieScanner) {
-            return ((PluginMovieScanner)movieScanner).getMovieScanner();
-        }
-        return null;
+        PluginMovieScanner pluginScanner = registeredMovieScanner.get(source);
+        if (pluginScanner == null) return null;
+        return pluginScanner.getMovieScanner();
     }
 
     @Override
     public SeriesScanner getSeriesScanner(String source) {
-        ISeriesScanner seriesScanner = registeredSeriesScanner.get(source);
-        if (seriesScanner instanceof PluginSeriesScanner) {
-            return ((PluginSeriesScanner)seriesScanner).getSeriesScanner();
-        }
-        return null;
+        PluginSeriesScanner pluginScanner = registeredSeriesScanner.get(source);
+        if (pluginScanner == null) return null;
+        return pluginScanner.getSeriesScanner();
     }
 
     @Override
     public PersonScanner getPersonScanner(String source) {
-        IPersonScanner personScanner = registeredPersonScanner.get(source);
-        if (personScanner instanceof PluginPersonScanner) {
-            return ((PluginPersonScanner)personScanner).getPersonScanner();
-        }
-        return null;
+        PluginPersonScanner pluginScanner = registeredPersonScanner.get(source);
+        if (pluginScanner == null) return null;
+        return pluginScanner.getPersonScanner();
     }
 }

@@ -20,13 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.plugin.api.trailer;
 
-import org.yamj.core.database.model.VideoData;
+import org.yamj.plugin.api.OnlineScanner;
 
-public interface IMovieScanner extends INfoScanner {
+public interface TrailerScanner extends OnlineScanner {
 
-    String getMovieId(VideoData videoData);
-
-    ScanResult scanMovie(VideoData videoData, boolean throwTempError);
+    // just a marker interface
 }

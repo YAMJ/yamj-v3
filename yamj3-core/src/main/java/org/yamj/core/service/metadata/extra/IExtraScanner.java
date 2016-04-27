@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.extra;
 
-import org.yamj.core.service.metadata.online.IOnlineScanner;
+import org.yamj.core.service.metadata.IOnlineScanner;
 
 public interface IExtraScanner extends IOnlineScanner {
 

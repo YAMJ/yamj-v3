@@ -30,12 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Person;
 import org.yamj.plugin.api.metadata.FilmographyDTO;
 import org.yamj.plugin.api.metadata.FilmographyScanner;
+import org.yamj.plugin.api.metadata.MetadataScanner;
 import org.yamj.plugin.api.model.type.ParticipationType;
 
-public class PluginFilmographyScanner implements IFilmographyScanner {
+public class PluginFilmographyScanner implements MetadataScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginFilmographyScanner.class);
     private final FilmographyScanner filmographyScanner;
@@ -51,30 +51,28 @@ public class PluginFilmographyScanner implements IFilmographyScanner {
         return filmographyScanner.getScannerName();
     }
     
-    @Override
-    public ScanResult scanFilmography(Person person, boolean throwTempError) {
-        // create person wrapper
-        WrapperPerson wrapper = new WrapperPerson(person);
+    public ScanResult scanFilmography(WrapperPerson wrapper, boolean throwTempError) {
+        // set actual scanner
         wrapper.setScannerName(filmographyScanner.getScannerName());
 
         // get the person id
         String personId = filmographyScanner.getPersonId(wrapper, throwTempError);
         if (!filmographyScanner.isValidPersonId(personId)) {
-            LOG.debug("{} id not available '{}'", getScannerName(), person.getName());
+            LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getName());
             return ScanResult.MISSING_ID;
         }
 
         // get filmography
         List<FilmographyDTO> filmography = filmographyScanner.scanFilmography(personId, throwTempError);
         if (filmography == null || filmography.isEmpty()) {
-            LOG.trace("No {} filmography for person '{}'", getScannerName(), person.getName());
+            LOG.trace("No {} filmography for person '{}'", getScannerName(), wrapper.getName());
             return ScanResult.NO_RESULT;
         }
         
         Set<FilmParticipation> newFilmography = new HashSet<>();
         for (FilmographyDTO dto : filmography) {
             FilmParticipation filmo = new FilmParticipation();
-            filmo.setPerson(person);
+            filmo.setPerson(wrapper.getPerson());
             filmo.setSourceDb(getScannerName());
             filmo.setSourceDbId(dto.getId());
             filmo.setJobType(dto.getJobType());
@@ -95,7 +93,7 @@ public class PluginFilmographyScanner implements IFilmographyScanner {
             newFilmography.add(filmo);
         }
         
-        person.setNewFilmography(newFilmography);
+        wrapper.getPerson().setNewFilmography(newFilmography);
         
         return ScanResult.OK;
     }

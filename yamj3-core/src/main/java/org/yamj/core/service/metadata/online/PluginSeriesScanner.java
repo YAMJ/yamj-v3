@@ -24,23 +24,17 @@ package org.yamj.core.service.metadata.online;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.service.various.IdentifierService;
+import org.yamj.plugin.api.metadata.NfoScanner;
 import org.yamj.plugin.api.metadata.SeriesScanner;
 import org.yamj.plugin.api.model.IdMap;
 
-public class PluginSeriesScanner implements ISeriesScanner {
+public class PluginSeriesScanner implements NfoScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginSeriesScanner.class);
     private final SeriesScanner seriesScanner;
-    private final LocaleService localeService;
-    private final IdentifierService identifierService;
 
-    public PluginSeriesScanner(SeriesScanner seriesScanner, LocaleService localeService, IdentifierService identifierService) {
+    public PluginSeriesScanner(SeriesScanner seriesScanner) {
         this.seriesScanner = seriesScanner;
-        this.localeService = localeService;
-        this.identifierService = identifierService;
     }
     
     public SeriesScanner getSeriesScanner() {
@@ -52,10 +46,8 @@ public class PluginSeriesScanner implements ISeriesScanner {
         return seriesScanner.getScannerName();
     }
     
-    @Override
-    public String getSeriesId(Series series) {
-        // create series wrapper
-        WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
+    public String getSeriesId(WrapperSeries wrapper) {
+        // set actual scanner
         wrapper.setScannerName(seriesScanner.getScannerName());
         
         return getSeriesId(wrapper, false);
@@ -65,10 +57,8 @@ public class PluginSeriesScanner implements ISeriesScanner {
         return seriesScanner.getSeriesId(wrapper, throwTempError);
     }
 
-    @Override
-    public ScanResult scanSeries(Series series, boolean throwTempError) {
-        // create series wrapper
-        WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
+    public ScanResult scanSeries(WrapperSeries wrapper, boolean throwTempError) {
+        // set actual scanner
         wrapper.setScannerName(seriesScanner.getScannerName());
 
         String seriesId = getSeriesId(wrapper, throwTempError);

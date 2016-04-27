@@ -24,23 +24,17 @@ package org.yamj.core.service.metadata.online;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.metadata.MovieScanner;
+import org.yamj.plugin.api.metadata.NfoScanner;
 import org.yamj.plugin.api.model.IdMap;
 
-public class PluginMovieScanner implements IMovieScanner {
+public class PluginMovieScanner implements NfoScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginMovieScanner.class);
     private final MovieScanner movieScanner;
-    private final LocaleService localeService;
-    private final IdentifierService identifierService;
     
-    public PluginMovieScanner(MovieScanner movieScanner, LocaleService localeService, IdentifierService identifierService) {
+    public PluginMovieScanner(MovieScanner movieScanner) {
         this.movieScanner = movieScanner;
-        this.localeService = localeService;
-        this.identifierService = identifierService;
     }
     
     public MovieScanner getMovieScanner() {
@@ -52,12 +46,8 @@ public class PluginMovieScanner implements IMovieScanner {
         return movieScanner.getScannerName();
     }
     
-    @Override
-    public String getMovieId(VideoData videoData) {
-        // create movie wrapper
-        WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
+    public String getMovieId(WrapperMovie wrapper) {
         wrapper.setScannerName(movieScanner.getScannerName());
-        
         return getMovieId(wrapper, false);
     }
 
@@ -65,12 +55,8 @@ public class PluginMovieScanner implements IMovieScanner {
         return movieScanner.getMovieId(wrapper, throwTempError);
     }
 
-    @Override
-    public ScanResult scanMovie(VideoData videoData, boolean throwTempError) {
-        // create movie wrapper
-        WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
+    public ScanResult scanMovie(WrapperMovie wrapper, boolean throwTempError) {
         wrapper.setScannerName(movieScanner.getScannerName());
-
         String movieId = getMovieId(wrapper, throwTempError);
         if (!movieScanner.isValidMovieId(movieId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getTitle());

@@ -38,7 +38,6 @@ public final class MetadataTools {
 
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
-    private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|zu|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
     private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
     private static final String MPPA_RATED = "Rated";
@@ -334,32 +333,6 @@ public final class MetadataTools {
         return mpaaCertification.trim();
     }
 
-    public static PersonName splitFullName(String fullName) {
-        PersonName personName = new PersonName(fullName);
-        
-        try {
-            String[] result = StringUtils.split(fullName, ' ');
-            if (result == null || result.length == 0) {
-                // nothing to do
-            } else if (result.length == 1) {
-                personName.setFirstName(result[0]);
-            } else if (result.length == 2) {
-                personName.setFirstName(result[0]);
-                personName.setLastName(result[1]);
-            } else {
-                Matcher m = LASTNAME_PATTERN.matcher(fullName);
-                if (m.matches()) {
-                    personName.setFirstName(m.group(1));
-                    personName.setLastName(m.group(2));
-                }
-            }
-        } catch (Exception ex) {
-            LOG.trace("Error splitting full person name: " + fullName, ex);
-        }
-        
-        return personName;
-    }
-    
     public static String fixScannedValue(final String value) {
         return StringUtils.replace(value, "\"", "'");
     }

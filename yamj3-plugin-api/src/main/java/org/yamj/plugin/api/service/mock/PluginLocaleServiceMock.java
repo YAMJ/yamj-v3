@@ -29,9 +29,19 @@ import org.yamj.plugin.api.service.PluginLocaleService;
 
 public class PluginLocaleServiceMock implements PluginLocaleService {
 
+    private final Locale locale;
+    
+    public PluginLocaleServiceMock() {
+        this.locale = Locale.getDefault();
+    }
+
+    public PluginLocaleServiceMock(Locale locale) {
+        this.locale = locale;
+    }
+
     @Override
     public Locale getLocale() {
-        return Locale.getDefault();
+        return locale;
     }
     
     @Override

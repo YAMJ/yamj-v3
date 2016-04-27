@@ -26,8 +26,8 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.metadata.MetadataTools;
-import org.yamj.plugin.api.metadata.PersonName;
+import org.yamj.core.tools.PersonName;
+import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.model.IPerson;
 
 public class WrapperPerson implements IPerson {
@@ -39,6 +39,10 @@ public class WrapperPerson implements IPerson {
         this.person = person;
     }
 
+    protected Person getPerson() {
+        return person;
+    }
+    
     public void setScannerName(String actualSource) {
         this.scannerName = actualSource;
     }
@@ -64,7 +68,7 @@ public class WrapperPerson implements IPerson {
 
     @Override
     public void setName(String name) {
-        PersonName personName = MetadataTools.splitFullName(name);
+        PersonName personName = YamjTools.splitFullName(name);
         if (OverrideTools.checkOverwriteName(person, scannerName)) {
             person.setName(personName.getName(), scannerName);
         }

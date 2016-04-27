@@ -23,10 +23,9 @@
 package org.yamj.plugin.api.trailer;
 
 import java.util.List;
-import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IMovie;
 
-public interface MovieTrailerScanner extends OnlineScanner {
+public interface MovieTrailerScanner extends TrailerScanner {
     
     List<TrailerDTO> scanForTrailer(IMovie movie);
 }

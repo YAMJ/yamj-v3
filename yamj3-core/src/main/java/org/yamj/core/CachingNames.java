@@ -24,8 +24,6 @@ package org.yamj.core;
 
 public final class CachingNames {
 
-    public static final String API_IMDB = "api_imdb";
-    
     public static final String DB_GENRE = "db_genre";
     public static final String DB_STUDIO = "db_studio";
     public static final String DB_COUNTRY = "db_country";

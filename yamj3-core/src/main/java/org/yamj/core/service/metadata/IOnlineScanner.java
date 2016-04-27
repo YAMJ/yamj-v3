@@ -20,13 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata;
 
-import org.yamj.core.database.model.Series;
+public interface IOnlineScanner {
 
-public interface ISeriesScanner extends INfoScanner {
-
-    String getSeriesId(Series series);
-
-    ScanResult scanSeries(Series series, boolean throwTempError);
+    String getScannerName();
 }

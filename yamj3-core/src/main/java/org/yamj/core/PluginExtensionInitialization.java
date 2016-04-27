@@ -33,7 +33,7 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.artwork.ArtworkInitialization;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.*;
 import org.yamj.plugin.api.artwork.*;
@@ -71,29 +71,25 @@ public class PluginExtensionInitialization {
         // add movie scanner to online scanner service
         for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
             initExtensionPoint(movieScanner);
-            PluginMovieScanner scanner = new PluginMovieScanner(movieScanner, localeService, identifierService);
-            onlineScannerService.registerMetadataScanner(scanner);
+            onlineScannerService.registerMetadataScanner(movieScanner);
         }
         
         // add series scanner to online scanner service
         for (SeriesScanner seriesScanner : pluginManager.getExtensions(SeriesScanner.class)) {
             initExtensionPoint(seriesScanner);
-            PluginSeriesScanner scanner = new PluginSeriesScanner(seriesScanner, localeService, identifierService);
-            onlineScannerService.registerMetadataScanner(scanner);
+            onlineScannerService.registerMetadataScanner(seriesScanner);
         }
 
         // add person scanner to online scanner service
         for (PersonScanner personScanner : pluginManager.getExtensions(PersonScanner.class)) {
             initExtensionPoint(personScanner);
-            PluginPersonScanner scanner = new PluginPersonScanner(personScanner);
-            onlineScannerService.registerMetadataScanner(scanner);
+            onlineScannerService.registerMetadataScanner(personScanner);
         }
 
         // add filmography scanner to online scanner service
         for (FilmographyScanner filmographyScanner : pluginManager.getExtensions(FilmographyScanner.class)) {
             initExtensionPoint(filmographyScanner);
-            PluginFilmographyScanner scanner = new PluginFilmographyScanner(filmographyScanner, localeService);
-            onlineScannerService.registerMetadataScanner(scanner);
+            onlineScannerService.registerMetadataScanner(filmographyScanner);
         }
         
         // ARTWORK

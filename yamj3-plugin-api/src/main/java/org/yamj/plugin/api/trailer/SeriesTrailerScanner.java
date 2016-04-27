@@ -23,11 +23,9 @@
 package org.yamj.plugin.api.trailer;
 
 import java.util.List;
-import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.ISeries;
 
-
-public interface SeriesTrailerScanner extends OnlineScanner {
+public interface SeriesTrailerScanner extends TrailerScanner {
     
     List<TrailerDTO> scanForTrailer(ISeries series);
 }

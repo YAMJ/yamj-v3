@@ -22,7 +22,6 @@
  */
 package org.yamj.core.web;
 
-import com.omertron.imdbapi.ImdbApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -174,12 +173,6 @@ public class WebConfiguration  {
         }
         
         return wrapper;
-    }
-
-    @Bean
-    public ImdbApi imdbApi() {
-        LOG.trace("Initialize ImdbApi");
-        return new ImdbApi(poolingHttpClient());
     }
 
     @Bean

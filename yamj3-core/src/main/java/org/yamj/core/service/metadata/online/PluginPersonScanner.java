@@ -24,10 +24,10 @@ package org.yamj.core.service.metadata.online;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.core.database.model.Person;
+import org.yamj.plugin.api.metadata.MetadataScanner;
 import org.yamj.plugin.api.metadata.PersonScanner;
 
-public class PluginPersonScanner implements IPersonScanner {
+public class PluginPersonScanner implements MetadataScanner {
 
     private final Logger LOG = LoggerFactory.getLogger(PluginPersonScanner.class);
     private final PersonScanner personScanner;
@@ -45,10 +45,8 @@ public class PluginPersonScanner implements IPersonScanner {
         return personScanner.getScannerName();
     }
     
-    @Override
-    public String getPersonId(Person person) {
-        // create person wrapper
-        WrapperPerson wrapper = new WrapperPerson(person);
+    public String getPersonId(WrapperPerson wrapper) {
+        // set actual scanner
         wrapper.setScannerName(personScanner.getScannerName());
         
         return getPersonId(wrapper, false);
@@ -58,10 +56,8 @@ public class PluginPersonScanner implements IPersonScanner {
         return personScanner.getPersonId(wrapper, throwTempError);
     }
 
-    @Override
-    public ScanResult scanPerson(Person person, boolean throwTempError) {
-        // create person wrapper
-        WrapperPerson wrapper = new WrapperPerson(person);
+    public ScanResult scanPerson(WrapperPerson wrapper, boolean throwTempError) {
+        // set actual scanner
         wrapper.setScannerName(personScanner.getScannerName());
 
         final String personId = getPersonId(wrapper, throwTempError);

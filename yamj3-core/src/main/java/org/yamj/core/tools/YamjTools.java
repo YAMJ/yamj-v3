@@ -25,7 +25,11 @@ package org.yamj.core.tools;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.AbstractMetadata;
@@ -33,6 +37,8 @@ import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
 
 public final class YamjTools {
+
+    private static final Logger LOG = LoggerFactory.getLogger(YamjTools.class);
 
     private static final long KB = 1024;
     private static final long MB = KB * KB;
@@ -42,6 +48,7 @@ public final class YamjTools {
     private static final DecimalFormat FILESIZE_FORMAT_0;
     private static final DecimalFormat FILESIZE_FORMAT_1;
     private static final DecimalFormat FILESIZE_FORMAT_2;
+    private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|zu|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
 
     static {
         // Populate the charReplacementMap
@@ -202,6 +209,32 @@ public final class YamjTools {
         return watched;
     }
 
+    public static PersonName splitFullName(String fullName) {
+        PersonName personName = new PersonName(fullName);
+        
+        try {
+            String[] result = StringUtils.split(fullName, ' ');
+            if (result == null || result.length == 0) {
+                // nothing to do
+            } else if (result.length == 1) {
+                personName.setFirstName(result[0]);
+            } else if (result.length == 2) {
+                personName.setFirstName(result[0]);
+                personName.setLastName(result[1]);
+            } else {
+                Matcher m = LASTNAME_PATTERN.matcher(fullName);
+                if (m.matches()) {
+                    personName.setFirstName(m.group(1));
+                    personName.setLastName(m.group(2));
+                }
+            }
+        } catch (Exception ex) {
+            LOG.trace("Error splitting full person name: " + fullName, ex);
+        }
+        
+        return personName;
+    }
+    
     /**
      * Set the sort title.
      *

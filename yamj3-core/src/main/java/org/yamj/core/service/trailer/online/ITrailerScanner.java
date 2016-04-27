@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import org.yamj.core.service.metadata.online.IOnlineScanner;
+import org.yamj.core.service.metadata.IOnlineScanner;
 
 public interface ITrailerScanner extends IOnlineScanner {
     
