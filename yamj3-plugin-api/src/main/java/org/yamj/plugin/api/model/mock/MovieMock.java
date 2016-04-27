@@ -48,7 +48,7 @@ public class MovieMock implements IMovie {
     private Map<String,String> certifications;
     private Map<String, JobType> credits;
     private Map<String,String> collections;
-    private int topRank;
+    private int topRank = -1;
     
     public MovieMock() {
         this.ids = new HashMap<>(1);

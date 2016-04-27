@@ -53,14 +53,11 @@ public class TrailerScannerService implements IQueueProcessService {
     @Autowired
     private TrailerStorageService trailerStorageService;
     @Autowired
-    private TrailersLandScanner trailersLandScanner;
-    @Autowired
     private YouTubeTrailerScanner youTubeTrailerScanner;
 
     @PostConstruct
     public void init() {
         LOG.trace("Initialize trailer scanner");
-        this.registerTrailerScanner(trailersLandScanner);
         this.registerTrailerScanner(youTubeTrailerScanner);
     }
 
