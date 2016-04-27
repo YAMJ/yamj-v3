@@ -187,11 +187,12 @@ public class ArtworkScannerService implements IQueueProcessService {
         if (artwork.getBoxedSet() != null) {
             // CASE: boxed set poster
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.boxset.maxResults", 5);
+            IBoxedSet iBoxedSet = buildBoxedSet(artwork.getBoxedSet());
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(buildBoxedSet(artwork.getBoxedSet()));
+                posters = scanner.getPosters(iBoxedSet);
                 if (CollectionUtils.isNotEmpty(posters)) {
                     break;
                 }
@@ -199,11 +200,12 @@ public class ArtworkScannerService implements IQueueProcessService {
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
             // CASE: movie poster
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.movie.maxResults", 5);
+            IMovie iMovie = buildMovie(artwork.getVideoData());
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(buildMovie(artwork.getVideoData()));
+                posters = scanner.getPosters(iMovie);
                 if (CollectionUtils.isNotEmpty(posters)) {
                     break;
                 }
@@ -289,11 +291,12 @@ public class ArtworkScannerService implements IQueueProcessService {
         if (artwork.getBoxedSet() != null) {
             // CASE: boxed set fanart
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.boxset.maxResults", 5);
+            IBoxedSet iBoxedSet = buildBoxedSet(artwork.getBoxedSet());
             
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(buildBoxedSet(artwork.getBoxedSet()));
+                fanarts = scanner.getFanarts(iBoxedSet);
                 if (CollectionUtils.isNotEmpty(fanarts)) {
                     break;
                 }
@@ -301,11 +304,12 @@ public class ArtworkScannerService implements IQueueProcessService {
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
             // CASE: movie fanart
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.movie.maxResults", 5);
+            IMovie iMovie = buildMovie(artwork.getVideoData());
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(buildMovie(artwork.getVideoData()));
+                fanarts = scanner.getFanarts(iMovie);
                 if (CollectionUtils.isNotEmpty(fanarts)) {
                     break;
                 }
@@ -389,11 +393,12 @@ public class ArtworkScannerService implements IQueueProcessService {
         if (artwork.getBoxedSet() != null) {
             // CASE: boxed set banner
             maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.boxset.maxResults", 5);
+            IBoxedSet iBoxedSet = buildBoxedSet(artwork.getBoxedSet());
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                banners = scanner.getBanners(buildBoxedSet(artwork.getBoxedSet()));
+                banners = scanner.getBanners(iBoxedSet);
                 if (CollectionUtils.isNotEmpty(banners)) {
                     break;
                 }
