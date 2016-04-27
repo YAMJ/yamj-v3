@@ -22,12 +22,8 @@
  */
 package org.yamj.plugin.api.model;
 
-import java.util.Map;
-
 public interface IBoxedSet {
 
-    Map<String,String> getIds();
-    
     String getId(String source);
 
     String getName();

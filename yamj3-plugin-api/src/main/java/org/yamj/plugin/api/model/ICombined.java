@@ -24,15 +24,35 @@ package org.yamj.plugin.api.model;
 
 import java.util.Collection;
 
-public interface ISeries extends ICombined {
+public interface ICombined {
+    
+    String getId(String source);
+    
+    void addId(String source, String id);
 
-    int getStartYear();
+    String getTitle();
 
-    void setStartYear(int startYear);
+    void setTitle(String title);
 
-    int getEndYear();
+    String getOriginalTitle();
 
-    void setEndYear(int endYear);
+    void setOriginalTitle(String originalTitle);
 
-    Collection<ISeason> getSeasons(); 
+    void setPlot(String plot);
+
+    void setOutline(String outline);
+
+    void setRating(int rating);
+
+    void setStudios(Collection<String> studios);
+
+    void setGenres(Collection<String> genres);
+
+    void setCountries(Collection<String> countries);
+
+    void addCertification(String country, String certificate);
+    
+    void addAward(String event, String category, int year);
+
+    void addAward(String event, String category, int year, boolean won, boolean nominated);
 }

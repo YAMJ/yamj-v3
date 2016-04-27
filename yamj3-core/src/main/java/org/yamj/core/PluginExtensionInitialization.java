@@ -136,11 +136,11 @@ public class PluginExtensionInitialization {
         if (extensionPoint instanceof NeedsLocaleService) {
             ((NeedsLocaleService)extensionPoint).setLocaleService(localeService);
         }
-        if (extensionPoint instanceof NeedsHttpClient) {
-            ((NeedsHttpClient)extensionPoint).setHttpClient(poolingHttpClient);
-        }
         if (extensionPoint instanceof NeedsMetadataService) {
             ((NeedsMetadataService)extensionPoint).setMetadataService(onlineScannerService);
+        }
+        if (extensionPoint instanceof NeedsHttpClient) {
+            ((NeedsHttpClient)extensionPoint).setHttpClient(poolingHttpClient);
         }
     }
 }

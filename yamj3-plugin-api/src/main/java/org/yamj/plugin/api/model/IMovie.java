@@ -22,31 +22,13 @@
  */
 package org.yamj.plugin.api.model;
 
-import java.util.Collection;
 import java.util.Date;
-import org.yamj.plugin.api.model.type.JobType;
 
-public interface IMovie {
+public interface IMovie extends ICombined, ICredits {
     
-    String getId(String source);
-    
-    void addId(String source, String id);
-
-    String getTitle();
-
-    void setTitle(String title);
-
-    String getOriginalTitle();
-
-    void setOriginalTitle(String originalTitle);
-
     int getYear();
 
     void setYear(int year);
-
-    void setPlot(String plot);
-
-    void setOutline(String outline);
 
     void setTagline(String tagline);
 
@@ -54,35 +36,5 @@ public interface IMovie {
 
     void setRelease(String country, Date releaseDate);
 
-    void setRating(int rating);
-
-    void setStudios(Collection<String> studios);
-
-    void setGenres(Collection<String> genres);
-
-    void setCountries(Collection<String> countries);
-
-    void addCertification(String country, String certificate);
-
-    void addCredit(JobType jobType, String name);
-
-    void addCredit(JobType jobType, String name, String role);
-
-    void addCredit(JobType jobType, String name, String role, boolean voiceRole);
-
-    void addCredit(JobType jobType, String name, String role, String photoUrl);
-
-    void addCredit(String id, JobType jobType, String name);
-
-    void addCredit(String id, JobType jobType, String name, String role);
-
-    void addCredit(String id, JobType jobType, String name, String role, boolean voiceRole);
-
-    void addCredit(String id, JobType jobType, String name, String role, String photoUrl);
-
     void addCollection(String name, String id);
-    
-    void addAward(String event, String category, int year);
-
-    void addAward(String event, String category, int year, boolean won, boolean nominated);
 }

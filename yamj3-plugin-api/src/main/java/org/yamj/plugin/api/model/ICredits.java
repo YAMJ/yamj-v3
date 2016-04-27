@@ -22,17 +22,23 @@
  */
 package org.yamj.plugin.api.model;
 
-import java.util.Collection;
+import org.yamj.plugin.api.model.type.JobType;
 
-public interface ISeries extends ICombined {
+public interface ICredits {
+    
+    void addCredit(JobType jobType, String name);
 
-    int getStartYear();
+    void addCredit(JobType jobType, String name, String role);
 
-    void setStartYear(int startYear);
+    void addCredit(JobType jobType, String name, String role, boolean voiceRole);
 
-    int getEndYear();
+    void addCredit(JobType jobType, String name, String role, String photoUrl);
 
-    void setEndYear(int endYear);
+    void addCredit(String id, JobType jobType, String name);
 
-    Collection<ISeason> getSeasons(); 
+    void addCredit(String id, JobType jobType, String name, String role);
+
+    void addCredit(String id, JobType jobType, String name, String role, boolean voiceRole);
+
+    void addCredit(String id, JobType jobType, String name, String role, String photoUrl);
 }

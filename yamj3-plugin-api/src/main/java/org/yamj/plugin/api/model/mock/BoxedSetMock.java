@@ -41,7 +41,6 @@ public class BoxedSetMock implements IBoxedSet {
         this.ids = ids;
     }
 
-    @Override
     public Map<String,String> getIds() {
         return ids;
     }

@@ -23,9 +23,8 @@
 package org.yamj.plugin.api.model;
 
 import java.util.Date;
-import org.yamj.plugin.api.model.type.JobType;
 
-public interface IEpisode {
+public interface IEpisode extends ICredits {
 
     int getNumber();
     
@@ -54,22 +53,6 @@ public interface IEpisode {
     void setRelease(String country, Date releaseDate);
 
     void setRating(int rating);
-
-    void addCredit(JobType jobType, String name);
-
-    void addCredit(JobType jobType, String name, String role);
-
-    void addCredit(JobType jobType, String name, String role, boolean voiceRole);
-
-    void addCredit(JobType jobType, String name, String role, String photoUrl);
-
-    void addCredit(String id, JobType jobType, String name);
-
-    void addCredit(String id, JobType jobType, String name, String role);
-
-    void addCredit(String id, JobType jobType, String name, String role, boolean voiceRole);
-
-    void addCredit(String id, JobType jobType, String name, String role, String photoUrl);
     
     boolean isDone();
     
