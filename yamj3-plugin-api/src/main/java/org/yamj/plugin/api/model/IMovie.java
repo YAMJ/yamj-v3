@@ -37,4 +37,6 @@ public interface IMovie extends ICombined, ICredits {
     void setRelease(String country, Date releaseDate);
 
     void addCollection(String name, String id);
+    
+    void setTopRank(int topRank);
 }

@@ -158,7 +158,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // check type change
         if (!"feature".equals(movieDetails.getType())) {
-            return ScanResult.TYPE_CHANGE;
+            return ScanResult.ERROR;
         }
         
         // movie details XML is still needed for some parts
@@ -286,7 +286,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         
         // check type change
         if (!"tv_series".equals(movieDetails.getType())) {
-            return ScanResult.TYPE_CHANGE;
+            return ScanResult.ERROR;
         }
 
         // movie details XML is still needed for some parts

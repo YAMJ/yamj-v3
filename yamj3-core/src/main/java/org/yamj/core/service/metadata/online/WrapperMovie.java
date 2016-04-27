@@ -239,4 +239,9 @@ public class WrapperMovie implements IMovie {
     public void addAward(String event, String category, int year, boolean won, boolean nominated) {
         videoData.addAwardDTO(scannerName, event, category, year, won, nominated);
     }
+
+    @Override
+    public void setTopRank(int topRank) {
+        videoData.setTopRank(topRank);
+    }
 }

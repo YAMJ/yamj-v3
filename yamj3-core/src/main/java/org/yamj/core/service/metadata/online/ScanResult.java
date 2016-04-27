@@ -25,7 +25,6 @@ package org.yamj.core.service.metadata.online;
 public enum ScanResult {
 
     MISSING_ID,  // ID is missing
-    TYPE_CHANGE, // different type: movie versus TV show
     ERROR,       // scanning error
     SKIPPED,     // skipped scan (by settings or NFO)
     RETRY,       // scan should be retried

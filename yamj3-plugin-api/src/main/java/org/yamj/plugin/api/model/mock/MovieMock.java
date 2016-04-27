@@ -48,6 +48,7 @@ public class MovieMock implements IMovie {
     private Map<String,String> certifications;
     private Map<String, JobType> credits;
     private Map<String,String> collections;
+    private int topRank;
     
     public MovieMock() {
         this.ids = new HashMap<>(1);
@@ -269,6 +270,17 @@ public class MovieMock implements IMovie {
         return credits;
     }
 
+    public int getTopRank() {
+        return topRank;
+    }
+    
+    @Override
+    public void setTopRank(int topRank) {
+        if (topRank > 0) {
+            this.topRank = topRank;
+        }
+    }
+    
     @Override
     public void addAward(String event, String category, int year) {
         // TODO Auto-generated method stub
