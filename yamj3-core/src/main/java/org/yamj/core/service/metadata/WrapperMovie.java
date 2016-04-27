@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class WrapperMovie implements IMovie {
         this.localeService = localeService;
         this.identifierService = identifierService;
     }
-
+   
     public void setScannerName(String scannerName) {
         this.scannerName = scannerName;
     }

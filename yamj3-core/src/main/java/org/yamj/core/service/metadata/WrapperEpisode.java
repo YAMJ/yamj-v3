@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata;
 
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
@@ -118,7 +118,7 @@ public class WrapperEpisode implements IEpisode {
     @Override
     public void setQuote(String quote) {
         if (OverrideTools.checkOverwriteQuote(videoData, getScannerName())) {
-            videoData.setTagline(quote, getScannerName());
+            videoData.setQuote(quote, getScannerName());
         }
     }
 

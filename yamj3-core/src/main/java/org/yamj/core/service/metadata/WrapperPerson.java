@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata;
 
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +39,7 @@ public class WrapperPerson implements IPerson {
         this.person = person;
     }
 
-    protected Person getPerson() {
+    public Person getPerson() {
         return person;
     }
     

@@ -33,6 +33,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
+import org.yamj.core.service.metadata.extra.ExtraScannerService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;

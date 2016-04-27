@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata;
+package org.yamj.core.service.metadata.extra;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,9 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.metadata.extra.IExtraMovieScanner;
-import org.yamj.core.service.metadata.extra.IExtraScanner;
-import org.yamj.core.service.metadata.extra.IExtraSeriesScanner;
 
 @Service("extraScannerService")
 public class ExtraScannerService {

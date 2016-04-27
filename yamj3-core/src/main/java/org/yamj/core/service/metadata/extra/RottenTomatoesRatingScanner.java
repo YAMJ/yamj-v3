@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.metadata.ExtraScannerService;
 
 @Service("rottenTomatoesRatingScanner")
 public class RottenTomatoesRatingScanner implements IExtraMovieScanner {

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.service.metadata.WrapperPerson;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

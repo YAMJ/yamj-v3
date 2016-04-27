@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.metadata.ExtraScannerService;
 import org.yamj.core.service.trakttv.TraktTvService;
 import org.yamj.plugin.api.metadata.MetadataTools;
 

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.service.metadata.WrapperMovie;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.plugin.api.metadata.MovieScanner;
