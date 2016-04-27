@@ -51,7 +51,9 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.plugin.api.YamjPlugin;
+import org.yamj.plugin.api.NeedsConfigService;
+import org.yamj.plugin.api.NeedsHttpClient;
+import org.yamj.plugin.api.NeedsLocaleService;
 import ro.fortsoft.pf4j.*;
 
 @Configuration
@@ -158,7 +160,7 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
     }
 
     @Bean(destroyMethod="stopPlugins")
-    @DependsOn({"configServiceWrapper", "poolingHttpClient"})
+    @DependsOn({"configServiceWrapper", "localeService", "poolingHttpClient"})
     public PluginManager pluginManager() {
         final String yamjHome = System.getProperty("yamj3.home", ".");
         File pluginsDir = new File (yamjHome + "/plugins");
@@ -167,13 +169,17 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         PluginManager pluginManager = new DefaultPluginManager(pluginsDir);
         pluginManager.loadPlugins();
         
-        // set service within PlugIns
-        for (PluginWrapper wrapper : pluginManager.getPlugins()) {
+        // set services within PlugIns
+        for (PluginWrapper wrapper : pluginManager.getResolvedPlugins()) {
             Plugin plugin = wrapper.getPlugin();
-            if (plugin instanceof YamjPlugin) {
-                YamjPlugin yamjPlugin = (YamjPlugin)plugin;
-                yamjPlugin.setConfigService(configServiceWrapper);
-                yamjPlugin.setHttpClient(poolingHttpClient);
+            if (plugin instanceof NeedsConfigService) {
+                ((NeedsConfigService)plugin).setConfigService(configServiceWrapper);
+            }
+            if (plugin instanceof NeedsLocaleService) {
+                ((NeedsLocaleService)plugin).setLocaleService(localeService);
+            }
+            if (plugin instanceof NeedsHttpClient) {
+                ((NeedsHttpClient)plugin).setHttpClient(poolingHttpClient);
             }
         }
 
