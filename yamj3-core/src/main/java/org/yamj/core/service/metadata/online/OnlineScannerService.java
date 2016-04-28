@@ -22,10 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.WrapperMovie;
-import org.yamj.core.service.metadata.WrapperPerson;
-import org.yamj.core.service.metadata.WrapperSeries;
-
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +33,9 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
+import org.yamj.core.service.metadata.WrapperMovie;
+import org.yamj.core.service.metadata.WrapperPerson;
+import org.yamj.core.service.metadata.WrapperSeries;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.metadata.*;
@@ -115,7 +114,7 @@ public class OnlineScannerService implements PluginMetadataService {
     	    
     		PluginMovieScanner movieScanner = registeredMovieScanner.get(scanner);
             if (movieScanner == null) {
-                LOG.error("Movie scanner '{}' not registered", scanner);
+                LOG.warn("Movie scanner {} not registered", scanner);
             } else {
                 // scan video data
                 try {
@@ -202,7 +201,7 @@ public class OnlineScannerService implements PluginMetadataService {
             
     		PluginSeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
             if (seriesScanner == null) {
-                LOG.error("Series scanner '{}' not registered", scanner);
+                LOG.warn("Series scanner {} not registered", scanner);
             } else {
                 // scan series
                 try {
@@ -302,7 +301,7 @@ public class OnlineScannerService implements PluginMetadataService {
             
     		PluginPersonScanner personScanner = registeredPersonScanner.get(scanner);
             if (personScanner == null) {
-                LOG.error("Person scanner '{}' not registered", scanner);
+                LOG.warn("Person scanner {} not registered", scanner);
             } else {
                 // scan person data
                 try {
@@ -391,7 +390,7 @@ public class OnlineScannerService implements PluginMetadataService {
             
             PluginFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
             if (filmographyScanner == null) {
-                LOG.error("Filmography scanner '{}' not registered", scanner);
+                LOG.warn("Filmography scanner {} not registered", scanner);
             } else {
                 // scan filmography
                 try {

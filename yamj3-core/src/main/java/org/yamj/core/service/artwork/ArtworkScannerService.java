@@ -191,10 +191,14 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(iBoxedSet);
-                if (CollectionUtils.isNotEmpty(posters)) {
-                    break;
+                if (scanner == null) {
+                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                } else {
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    posters = scanner.getPosters(iBoxedSet);
+                    if (CollectionUtils.isNotEmpty(posters)) {
+                        break;
+                    }
                 }
             }
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
@@ -204,10 +208,14 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                posters = scanner.getPosters(iMovie);
-                if (CollectionUtils.isNotEmpty(posters)) {
-                    break;
+                if (scanner == null) {
+                    LOG.warn("Movie artwork scanner {} not registered", prio);
+                } else {
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    posters = scanner.getPosters(iMovie);
+                    if (CollectionUtils.isNotEmpty(posters)) {
+                        break;
+                    }
                 }
             }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
@@ -216,14 +224,18 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                if (artwork.getSeries() != null) {
-                    posters = scanner.getPosters(buildSeries(artwork.getSeries()));
+                if (scanner == null) {
+                    LOG.warn("Series artwork scanner {} not registered", prio);
                 } else {
-                    posters = scanner.getPosters(buildSeason(artwork.getSeason()));
-                }
-                if (CollectionUtils.isNotEmpty(posters)) {
-                    break;
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    if (artwork.getSeries() != null) {
+                        posters = scanner.getPosters(buildSeries(artwork.getSeries()));
+                    } else {
+                        posters = scanner.getPosters(buildSeason(artwork.getSeason()));
+                    }
+                    if (CollectionUtils.isNotEmpty(posters)) {
+                        break;
+                    }
                 }
             }
         }
@@ -295,10 +307,14 @@ public class ArtworkScannerService implements IQueueProcessService {
             
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(iBoxedSet);
-                if (CollectionUtils.isNotEmpty(fanarts)) {
-                    break;
+                if (scanner == null) {
+                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                } else {
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    fanarts = scanner.getFanarts(iBoxedSet);
+                    if (CollectionUtils.isNotEmpty(fanarts)) {
+                        break;
+                    }
                 }
             }
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
@@ -308,10 +324,14 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                fanarts = scanner.getFanarts(iMovie);
-                if (CollectionUtils.isNotEmpty(fanarts)) {
-                    break;
+                if (scanner == null) {
+                    LOG.warn("Movie artwork scanner {} not registered", prio);
+                } else {
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    fanarts = scanner.getFanarts(iMovie);
+                    if (CollectionUtils.isNotEmpty(fanarts)) {
+                        break;
+                    }
                 }
             }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
@@ -320,14 +340,18 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                if (artwork.getSeries() != null) {
-                    fanarts = scanner.getFanarts(buildSeries(artwork.getSeries()));
+                if (scanner == null) {
+                    LOG.warn("Series artwork scanner {} not registered", prio);
                 } else {
-                    fanarts = scanner.getFanarts(buildSeason(artwork.getSeason()));
-                }
-                if (CollectionUtils.isNotEmpty(fanarts)) {
-                    break;
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    if (artwork.getSeries() != null) {
+                        fanarts = scanner.getFanarts(buildSeries(artwork.getSeries()));
+                    } else {
+                        fanarts = scanner.getFanarts(buildSeason(artwork.getSeason()));
+                    }
+                    if (CollectionUtils.isNotEmpty(fanarts)) {
+                        break;
+                    }
                 }
             }
         }
@@ -397,10 +421,14 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                banners = scanner.getBanners(iBoxedSet);
-                if (CollectionUtils.isNotEmpty(banners)) {
-                    break;
+                if (scanner == null) {
+                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                } else {
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    banners = scanner.getBanners(iBoxedSet);
+                    if (CollectionUtils.isNotEmpty(banners)) {
+                        break;
+                    }
                 }
             }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
@@ -409,14 +437,18 @@ public class ArtworkScannerService implements IQueueProcessService {
 
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                if (artwork.getSeries() != null) {
-                    banners = scanner.getBanners(buildSeries(artwork.getSeries()));
+                if (scanner == null) {
+                    LOG.warn("Series artwork scanner {} not registered", prio);
                 } else {
-                    banners = scanner.getBanners(buildSeason(artwork.getSeason()));
-                }
-                if (CollectionUtils.isNotEmpty(banners)) {
-                    break;
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                    if (artwork.getSeries() != null) {
+                        banners = scanner.getBanners(buildSeries(artwork.getSeries()));
+                    } else {
+                        banners = scanner.getBanners(buildSeason(artwork.getSeason()));
+                    }
+                    if (CollectionUtils.isNotEmpty(banners)) {
+                        break;
+                    }
                 }
             }
         }
@@ -498,10 +530,14 @@ public class ArtworkScannerService implements IQueueProcessService {
         
         for (String prio : determinePriorities("yamj3.artwork.scanner.videoimage.priorities", registeredSeriesArtworkScanner.keySet())) {
             SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
-            LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-            videoimages = scanner.getVideoImages(buildEpisode(videoData));
-            if (CollectionUtils.isNotEmpty(videoimages)) {
-                break;
+            if (scanner == null) {
+                LOG.warn("Series artwork scanner {} not registered", prio);
+            } else {
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
+                videoimages = scanner.getVideoImages(buildEpisode(videoData));
+                if (CollectionUtils.isNotEmpty(videoimages)) {
+                    break;
+                }
             }
         }
 
@@ -554,10 +590,14 @@ public class ArtworkScannerService implements IQueueProcessService {
         
         for (String prio : determinePriorities("yamj3.artwork.scanner.photo.priorities", registeredPersonArtworkScanner.keySet())) {
             PersonArtworkScanner scanner = registeredPersonArtworkScanner.get(prio);
-            LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
-            photos = scanner.getPhotos(iPerson);
-            if (CollectionUtils.isNotEmpty(photos)) {
-                break;
+            if (scanner == null) {
+                LOG.warn("Person artwork scanner {} not registered", prio);
+            } else {
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
+                photos = scanner.getPhotos(iPerson);
+                if (CollectionUtils.isNotEmpty(photos)) {
+                    break;
+                }
             }
         }
 

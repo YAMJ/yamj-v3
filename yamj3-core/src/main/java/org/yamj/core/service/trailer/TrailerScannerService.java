@@ -143,15 +143,15 @@ public class TrailerScannerService implements IQueueProcessService {
         List<TrailerDTO> trailerDTOs = null;
         loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", "youtube")) {
             MovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
-            if (scanner != null) {
+            if (scanner == null) {
+                LOG.warn("Movie trailer scanner {} not registerd", prio);
+            } else {
                 LOG.debug("Scanning movie trailers for '{}' using {}", videoData.getTitle(), scanner.getScannerName());
                 wrapper.setScannerName(scanner.getScannerName());
                 trailerDTOs = scanner.scanForTrailer(wrapper);
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break loop;
                 }
-            } else {
-                LOG.warn("Desired movie trailer scanner {} not registerd", prio);
             }
         }
 
@@ -207,15 +207,15 @@ public class TrailerScannerService implements IQueueProcessService {
         List<TrailerDTO> trailerDTOs = Collections.emptyList();
         for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", "youtube")) {
             SeriesTrailerScanner scanner = registeredSeriesTrailerScanner.get(prio);
-            if (scanner != null) {
+            if (scanner == null) {
+                LOG.warn("Series trailer scanner {} not registerd", prio);
+            } else {
                 LOG.debug("Scanning series trailers for '{}' using {}", series.getTitle(), scanner.getScannerName());
                 wrapper.setScannerName(scanner.getScannerName());
                 trailerDTOs = scanner.scanForTrailer(wrapper);
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break;
                 }
-            } else {
-                LOG.warn("Desired series trailer scanner {} not registerd", prio);
             }
         }
 
