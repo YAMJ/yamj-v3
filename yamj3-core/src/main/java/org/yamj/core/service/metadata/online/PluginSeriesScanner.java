@@ -22,10 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.WrapperSeries;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.service.metadata.WrapperSeries;
 import org.yamj.plugin.api.metadata.NfoScanner;
 import org.yamj.plugin.api.metadata.SeriesScanner;
 import org.yamj.plugin.api.model.IdMap;
@@ -47,23 +46,13 @@ public class PluginSeriesScanner implements NfoScanner {
     public String getScannerName() {
         return seriesScanner.getScannerName();
     }
-    
-    public String getSeriesId(WrapperSeries wrapper) {
-        // set actual scanner
-        wrapper.setScannerName(seriesScanner.getScannerName());
-        
-        return getSeriesId(wrapper, false);
-    }
-
-    private String getSeriesId(WrapperSeries wrapper, boolean throwTempError) {
-        return seriesScanner.getSeriesId(wrapper, throwTempError);
-    }
 
     public ScanResult scanSeries(WrapperSeries wrapper, boolean throwTempError) {
         // set actual scanner
         wrapper.setScannerName(seriesScanner.getScannerName());
 
-        String seriesId = getSeriesId(wrapper, throwTempError);
+        // get the series id
+        String seriesId = seriesScanner.getSeriesId(wrapper, throwTempError);
         if (!seriesScanner.isValidSeriesId(seriesId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getTitle());
             return ScanResult.MISSING_ID;

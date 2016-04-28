@@ -20,26 +20,41 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.trailer.online;
+package org.yamj.plugin.api.model.mock;
 
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.yamj.core.AbstractTest;
-import org.yamj.plugin.api.trailer.TrailerDownloadDTO;
+import org.yamj.plugin.api.model.ITrailer;
+import org.yamj.plugin.api.model.type.ContainerType;
 
-public class YouTubeDownloadParserTest extends AbstractTest {
+public class TrailerMock implements ITrailer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(YouTubeDownloadParserTest.class);
-    
-    @Autowired
-    private YouTubeDownloadParser youTubeDownloadParser;
+    private ContainerType container;
+    private String url;
+    private String hashCode;
 
-    @Test
-    public void testMovieTrailers() {
-        String videoId = "d1_JBMrrYw8";
-        TrailerDownloadDTO dto = youTubeDownloadParser.extract(videoId);
-        LOG.info("YouTube trailer download: {}", dto);
+    @Override
+    public ContainerType getContainer() {
+        return container;
+    }
+
+    public void setContainer(ContainerType container) {
+        this.container = container;
+    }
+
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    @Override
+    public String getHashCode() {
+        return hashCode;
+    }
+
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
     }
 }

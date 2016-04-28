@@ -34,15 +34,20 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.artwork.ArtworkInitialization;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.service.trailer.TrailerProcessorService;
+import org.yamj.core.service.trailer.TrailerScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.*;
 import org.yamj.plugin.api.artwork.*;
 import org.yamj.plugin.api.metadata.*;
+import org.yamj.plugin.api.trailer.MovieTrailerScanner;
+import org.yamj.plugin.api.trailer.SeriesTrailerScanner;
+import org.yamj.plugin.api.trailer.TrailerDownloadBuilder;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginManager;
 
 @Component("pluginInitialization")
-@DependsOn({"localeService", "identifierService", "onlineScannerService", "artworkScannerService"})
+@DependsOn({"localeService", "identifierService", "onlineScannerService", "artworkScannerService", "trailerScannerService", "trailerProcessorService"})
 public class PluginExtensionInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
@@ -61,6 +66,10 @@ public class PluginExtensionInitialization {
     private OnlineScannerService onlineScannerService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
+    @Autowired
+    private TrailerScannerService trailerScannerService;
+    @Autowired
+    private TrailerProcessorService trailerProcessorService;
     
     @PostConstruct
     public void init() {
@@ -116,6 +125,26 @@ public class PluginExtensionInitialization {
         for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
             initExtensionPoint(boxedSetArtworkScanner);
             artworkScannerService.registerArtworkScanner(boxedSetArtworkScanner);
+        }
+        
+        // TRAILER
+        
+        // add movie trailer scanner to trailer scanner service
+        for (MovieTrailerScanner movieTrailerScanner : pluginManager.getExtensions(MovieTrailerScanner.class)) {
+            initExtensionPoint(movieTrailerScanner);
+            trailerScannerService.registerTrailerScanner(movieTrailerScanner);
+        }
+
+        // add series trailer scanner to trailer scanner service
+        for (SeriesTrailerScanner seriesTrailerScanner : pluginManager.getExtensions(SeriesTrailerScanner.class)) {
+            initExtensionPoint(seriesTrailerScanner);
+            trailerScannerService.registerTrailerScanner(seriesTrailerScanner);
+        }
+
+        // add download builder to trailer processor service
+        for (TrailerDownloadBuilder downloadBuilder : pluginManager.getExtensions(TrailerDownloadBuilder.class)) {
+            initExtensionPoint(downloadBuilder);
+            trailerProcessorService.registerTrailerDownloadBuilder(downloadBuilder);
         }
     }
     

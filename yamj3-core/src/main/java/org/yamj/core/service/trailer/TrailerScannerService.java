@@ -23,7 +23,7 @@
 package org.yamj.core.service.trailer;
 
 import java.util.*;
-import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,44 +31,43 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
-import org.yamj.core.service.trailer.online.*;
-import org.yamj.plugin.api.trailer.TrailerDTO;
+import org.yamj.core.service.metadata.WrapperMovie;
+import org.yamj.core.service.metadata.WrapperSeries;
+import org.yamj.core.service.various.IdentifierService;
+import org.yamj.plugin.api.trailer.*;
 
 @Service("trailerScannerService")
 public class TrailerScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerScannerService.class);
     
-    private final HashMap<String, IMovieTrailerScanner> registeredMovieTrailerScanner = new HashMap<>();
-    private final HashMap<String, ISeriesTrailerScanner> registeredSeriesTrailerScanner = new HashMap<>();
+    private final HashMap<String, MovieTrailerScanner> registeredMovieTrailerScanner = new HashMap<>();
+    private final HashMap<String, SeriesTrailerScanner> registeredSeriesTrailerScanner = new HashMap<>();
     
     @Autowired
     private ConfigService configService;
     @Autowired
-    private TrailerStorageService trailerStorageService;
+    private LocaleService localeService;
     @Autowired
-    private YouTubeTrailerScanner youTubeTrailerScanner;
+    private IdentifierService identifierService;
+    @Autowired
+    private TrailerStorageService trailerStorageService;
 
-    @PostConstruct
-    public void init() {
-        LOG.trace("Initialize trailer scanner");
-        this.registerTrailerScanner(youTubeTrailerScanner);
-    }
-
-    private void registerTrailerScanner(ITrailerScanner trailersScanner) {
-        if (trailersScanner instanceof IMovieTrailerScanner) {
+    public void registerTrailerScanner(TrailerScanner trailersScanner) {
+        if (trailersScanner instanceof MovieTrailerScanner) {
             LOG.trace("Registered movie trailer scanner: {}", trailersScanner.getScannerName().toLowerCase());
-            registeredMovieTrailerScanner.put(trailersScanner.getScannerName().toLowerCase(), (IMovieTrailerScanner)trailersScanner);
+            registeredMovieTrailerScanner.put(trailersScanner.getScannerName().toLowerCase(), (MovieTrailerScanner)trailersScanner);
         }
-        if (trailersScanner instanceof ISeriesTrailerScanner) {
+        if (trailersScanner instanceof SeriesTrailerScanner) {
             LOG.trace("Registered series trailer scanner: {}", trailersScanner.getScannerName().toLowerCase());
-            registeredSeriesTrailerScanner.put(trailersScanner.getScannerName().toLowerCase(), (ISeriesTrailerScanner)trailersScanner);
+            registeredSeriesTrailerScanner.put(trailersScanner.getScannerName().toLowerCase(), (SeriesTrailerScanner)trailersScanner);
         }
     }
 
@@ -139,14 +138,16 @@ public class TrailerScannerService implements IQueueProcessService {
         }
 
         LOG.trace("Scan online for trailer of movie {}-'{}'", videoData.getId(), videoData.getTitle());
+        final WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
 
         List<TrailerDTO> trailerDTOs = null;
-        loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
-            IMovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
+        loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", "youtube")) {
+            MovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
             if (scanner != null) {
                 LOG.debug("Scanning movie trailers for '{}' using {}", videoData.getTitle(), scanner.getScannerName());
-                trailerDTOs = scanner.getTrailers(videoData);
-                if (!trailerDTOs.isEmpty()) {
+                wrapper.setScannerName(scanner.getScannerName());
+                trailerDTOs = scanner.scanForTrailer(wrapper);
+                if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break loop;
                 }
             } else {
@@ -201,14 +202,16 @@ public class TrailerScannerService implements IQueueProcessService {
         }
 
         LOG.trace("Scan online for trailer of series {}-'{}'", series.getId(), series.getTitle());
-
+        final WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
+        
         List<TrailerDTO> trailerDTOs = Collections.emptyList();
-        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
-            ISeriesTrailerScanner scanner = registeredSeriesTrailerScanner.get(prio);
+        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", "youtube")) {
+            SeriesTrailerScanner scanner = registeredSeriesTrailerScanner.get(prio);
             if (scanner != null) {
                 LOG.debug("Scanning series trailers for '{}' using {}", series.getTitle(), scanner.getScannerName());
-                trailerDTOs = scanner.getTrailers(series);
-                if (!trailerDTOs.isEmpty()) {
+                wrapper.setScannerName(scanner.getScannerName());
+                trailerDTOs = scanner.scanForTrailer(wrapper);
+                if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break;
                 }
             } else {
@@ -216,7 +219,7 @@ public class TrailerScannerService implements IQueueProcessService {
             }
         }
 
-        if (trailerDTOs.isEmpty()) {
+        if (trailerDTOs == null || trailerDTOs.isEmpty()) {
             LOG.info("No trailers found for series {}-'{}'", series.getId(), series.getTitle());
             return;
         }

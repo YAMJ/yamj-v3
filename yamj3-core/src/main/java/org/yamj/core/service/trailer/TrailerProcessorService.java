@@ -24,6 +24,7 @@ package org.yamj.core.service.trailer;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,22 +38,27 @@ import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.trailer.online.YouTubeDownloadParser;
 import org.yamj.plugin.api.model.type.ContainerType;
+import org.yamj.plugin.api.trailer.TrailerDownloadBuilder;
 import org.yamj.plugin.api.trailer.TrailerDownloadDTO;
 
 @Service("trailerProcessorService")
 public class TrailerProcessorService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerProcessorService.class);
-    
+
+    private final HashMap<String, TrailerDownloadBuilder> registeredDownloadBuilder = new HashMap<>();
+
     @Autowired
     private TrailerStorageService trailerStorageService;
     @Autowired
     private FileStorageService fileStorageService;
-    @Autowired
-    private YouTubeDownloadParser youTubeDownloadParser;
     
+    public void registerTrailerDownloadBuilder(TrailerDownloadBuilder downloadBuilder) {
+        LOG.trace("Registered trailer download builder: {}", downloadBuilder.getScannerName().toLowerCase());
+        registeredDownloadBuilder.put(downloadBuilder.getScannerName().toLowerCase(), downloadBuilder);
+    }
+
     @Override
     public void processQueueElement(QueueDTO queueElement) {
         // get required trailer
@@ -72,17 +78,19 @@ public class TrailerProcessorService implements IQueueProcessService {
             return;
         }
 
+        final TrailerDownloadBuilder downloadBuilder = this.registeredDownloadBuilder.get(trailer.getSource().toLowerCase());
+
         TrailerDownloadDTO dto = null;
-        if ("youtube".equalsIgnoreCase(trailer.getSource())) {
-            // NOTE: for YouTube the hash code is the video ID
-            dto = youTubeDownloadParser.extract(trailer.getHashCode());
-        } else {
+        if (downloadBuilder == null) {
             try {
                 // defaults to MP4 and URL
                 dto = new TrailerDownloadDTO(trailer.getContainer(), new URL(trailer.getUrl()));
             } catch (Exception e) {
                 LOG.warn("Malformed URL: {}", trailer.getUrl());
             }
+        } else {
+            // build download dto by source scanner
+            dto = downloadBuilder.buildTrailerDownload(trailer);
         }
         
         if (dto == null) {

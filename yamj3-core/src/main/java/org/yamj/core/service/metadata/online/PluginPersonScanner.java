@@ -22,10 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.WrapperPerson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.service.metadata.WrapperPerson;
 import org.yamj.plugin.api.metadata.MetadataScanner;
 import org.yamj.plugin.api.metadata.PersonScanner;
 
@@ -46,23 +45,13 @@ public class PluginPersonScanner implements MetadataScanner {
     public String getScannerName() {
         return personScanner.getScannerName();
     }
-    
-    public String getPersonId(WrapperPerson wrapper) {
-        // set actual scanner
-        wrapper.setScannerName(personScanner.getScannerName());
-        
-        return getPersonId(wrapper, false);
-    }
-
-    private String getPersonId(WrapperPerson wrapper, boolean throwTempError) {
-        return personScanner.getPersonId(wrapper, throwTempError);
-    }
 
     public ScanResult scanPerson(WrapperPerson wrapper, boolean throwTempError) {
         // set actual scanner
         wrapper.setScannerName(personScanner.getScannerName());
 
-        final String personId = getPersonId(wrapper, throwTempError);
+        // get the person id
+        String personId = personScanner.getPersonId(wrapper, throwTempError);
         if (!personScanner.isValidPersonId(personId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getName());
             return ScanResult.MISSING_ID;

@@ -22,10 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.WrapperMovie;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.service.metadata.WrapperMovie;
 import org.yamj.plugin.api.metadata.MovieScanner;
 import org.yamj.plugin.api.metadata.NfoScanner;
 import org.yamj.plugin.api.model.IdMap;
@@ -48,18 +47,12 @@ public class PluginMovieScanner implements NfoScanner {
         return movieScanner.getScannerName();
     }
     
-    public String getMovieId(WrapperMovie wrapper) {
-        wrapper.setScannerName(movieScanner.getScannerName());
-        return getMovieId(wrapper, false);
-    }
-
-    private String getMovieId(WrapperMovie wrapper, boolean throwTempError) {
-        return movieScanner.getMovieId(wrapper, throwTempError);
-    }
-
     public ScanResult scanMovie(WrapperMovie wrapper, boolean throwTempError) {
+        // set actual scanner
         wrapper.setScannerName(movieScanner.getScannerName());
-        String movieId = getMovieId(wrapper, throwTempError);
+
+        // get the movie id
+        String movieId = movieScanner.getMovieId(wrapper, throwTempError);
         if (!movieScanner.isValidMovieId(movieId)) {
             LOG.debug("{} id not available '{}'", getScannerName(), wrapper.getTitle());
             return ScanResult.MISSING_ID;

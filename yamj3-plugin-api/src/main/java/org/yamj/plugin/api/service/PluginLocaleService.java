@@ -28,7 +28,11 @@ import java.util.Set;
 public interface PluginLocaleService {
 
     Locale getLocale();
-    
+
+    String getDisplayCountry(String inLanguage, String countryCode);
+
+    String getDisplayLanguage(String inLanguage, String languageCode);
+
     String findCountryCode(String country);
     
     String findLanguageCode(String language);

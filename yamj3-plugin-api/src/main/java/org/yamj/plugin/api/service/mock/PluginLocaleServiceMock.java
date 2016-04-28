@@ -63,4 +63,14 @@ public class PluginLocaleServiceMock implements PluginLocaleService {
     public Set<String> getCertificationCountryCodes(Locale locale) {
         return Collections.emptySet();
     }
+
+    @Override
+    public String getDisplayCountry(String inLanguage, String countryCode) {
+        return countryCode;
+    }
+
+    @Override
+    public String getDisplayLanguage(String inLanguage, String languageCode) {
+        return languageCode;
+    }
 }

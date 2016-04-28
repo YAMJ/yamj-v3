@@ -26,9 +26,9 @@ import org.yamj.plugin.api.model.type.ContainerType;
 
 public interface ITrailer {
 
-    ContainerType getContainerType();
+    ContainerType getContainer();
     
     String getUrl();
     
-    String getHasCode();
+    String getHashCode();
 }

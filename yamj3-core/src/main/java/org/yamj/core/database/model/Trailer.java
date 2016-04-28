@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.yamj.plugin.api.model.ITrailer;
 import org.yamj.plugin.api.model.type.ContainerType;
 
 @NamedQueries({    
@@ -67,7 +68,7 @@ import org.yamj.plugin.api.model.type.ContainerType;
        uniqueConstraints = @UniqueConstraint(name = "UIX_TRAILER_NATURALID", columnNames = {"videodata_id", "series_id", "source", "hash_code"}),
        indexes = {@Index(name = "IX_TRAILER_STATUS", columnList = "status")}
 )
-public class Trailer extends AbstractStatefulPrev {
+public class Trailer extends AbstractStatefulPrev implements ITrailer {
 
     private static final long serialVersionUID = -7853145730427742811L;
     public static final String QUERY_REQUIRED = "trailer.required";
@@ -151,6 +152,7 @@ public class Trailer extends AbstractStatefulPrev {
         this.source = source;
     }
 
+    @Override
     public String getHashCode() {
         return hashCode;
     }
@@ -159,6 +161,7 @@ public class Trailer extends AbstractStatefulPrev {
         this.hashCode = hashCode;
     }
 
+    @Override
     public String getUrl() {
         return url;
     }
@@ -167,6 +170,7 @@ public class Trailer extends AbstractStatefulPrev {
         this.url = url;
     }
 
+    @Override
     public ContainerType getContainer() {
         return container;
     }

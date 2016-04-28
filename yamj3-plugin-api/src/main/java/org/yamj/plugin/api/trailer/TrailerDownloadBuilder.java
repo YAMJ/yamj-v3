@@ -22,15 +22,12 @@
  */
 package org.yamj.plugin.api.trailer;
 
-import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.plugin.api.model.ITrailer;
 import ro.fortsoft.pf4j.ExtensionPoint;
 
 public interface TrailerDownloadBuilder extends ExtensionPoint {
 
     String getScannerName();
-
-    void init(CommonHttpClient httpClient);
 
     TrailerDownloadDTO buildTrailerDownload(ITrailer trailer);
 }

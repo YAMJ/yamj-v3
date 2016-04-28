@@ -321,6 +321,7 @@ public class LocaleService implements PluginLocaleService {
         return new Locale(language, country);            
     }
 
+    @Override
     public String getDisplayLanguage(final String inLanguage, final String languageCode) { //NOSONAR
         if (languageCode == null) {
             return null;
@@ -355,6 +356,7 @@ public class LocaleService implements PluginLocaleService {
         return languageCode;
     }
 
+    @Override
     public String getDisplayCountry(final String inLanguage, final String countryCode) { //NOSONAR
         if (countryCode == null) {
             return null;
