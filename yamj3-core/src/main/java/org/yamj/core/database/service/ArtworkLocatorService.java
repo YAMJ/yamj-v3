@@ -271,8 +271,6 @@ public class ArtworkLocatorService {
 
     private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
         final Map<String,Object> params = new HashMap<>();
-        System.err.println(directories);
-        System.err.println(artworkNames);
         params.put("directories", directories);
         params.put("artworkNames", artworkNames);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_ARTWORK_FILES, params);
