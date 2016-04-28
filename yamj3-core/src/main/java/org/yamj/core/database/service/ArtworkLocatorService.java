@@ -99,12 +99,15 @@ public class ArtworkLocatorService {
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
         // search in parent directories for season specific artwork names
-        artworkNames.clear();
-        addNameWithTokens(artworkNames, seasonNr, tokens);
-        artworks.addAll(findArtworkStageFiles(FileTools.getParentDirectories(directories), artworkNames));
-
-        // find artwork in possible given artwork folder
-        artworks.addAll(searchInArtworkFolder(artworkType, videoFiles, tokens));
+        Set<StageDirectory> parentDirectories = FileTools.getParentDirectories(directories);
+        if (parentDirectories.size() > 0) {
+            artworkNames.clear();
+            addNameWithTokens(artworkNames, seasonNr, tokens);
+            artworks.addAll(findArtworkStageFiles(parentDirectories, artworkNames));
+    
+            // find artwork in possible given artwork folder
+            artworks.addAll(searchInArtworkFolder(artworkType, videoFiles, tokens));
+        }
         
         LOG.debug("Found {} local {}s for season {}", artworks.size(), artworkType.toString().toLowerCase(), season.getIdentifier());
         return artworks;
@@ -130,20 +133,23 @@ public class ArtworkLocatorService {
 
         // extend artwork names for parent folder specific series names
         Set<StageDirectory> parentDirectories = FileTools.getParentDirectories(directories);
-        artworkNames.addAll(tokens);
-        for (StageDirectory parent : parentDirectories) {
-            final String directoryName = StringEscapeUtils.escapeSql(parent.getDirectoryName().toLowerCase());
-            switch (artworkType) {
-            case POSTER:
-                artworkNames.add(directoryName);
-                //$FALL-THROUGH$
-            default:
-                addNameWithTokens(artworkNames, directoryName, tokens);
-                break;
+        if (parentDirectories.size() > 0) {
+            artworkNames.addAll(tokens);
+            for (StageDirectory parent : parentDirectories) {
+                final String directoryName = StringEscapeUtils.escapeSql(parent.getDirectoryName().toLowerCase());
+                switch (artworkType) {
+                case POSTER:
+                    artworkNames.add(directoryName);
+                    //$FALL-THROUGH$
+                default:
+                    addNameWithTokens(artworkNames, directoryName, tokens);
+                    break;
+                }
             }
+            
+            // search series specific names in parent directory of video files
+            artworks.addAll(findArtworkStageFiles(parentDirectories, artworkNames));
         }
-        // search series specific names in parent directory of video files
-        artworks.addAll(findArtworkStageFiles(parentDirectories, artworkNames));
         
         LOG.debug("Found {} local {}s for series {}", artworks.size(), artworkType.toString().toLowerCase(), series.getIdentifier());
         return artworks;
@@ -265,6 +271,8 @@ public class ArtworkLocatorService {
 
     private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
         final Map<String,Object> params = new HashMap<>();
+        System.err.println(directories);
+        System.err.println(artworkNames);
         params.put("directories", directories);
         params.put("artworkNames", artworkNames);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_ARTWORK_FILES, params);
