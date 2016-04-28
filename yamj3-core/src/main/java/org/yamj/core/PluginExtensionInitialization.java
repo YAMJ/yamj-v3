@@ -39,13 +39,11 @@ import org.yamj.core.service.trailer.TrailerProcessorService;
 import org.yamj.core.service.trailer.TrailerScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.*;
-import org.yamj.plugin.api.artwork.*;
-import org.yamj.plugin.api.extras.MovieExtrasScanner;
-import org.yamj.plugin.api.extras.SeriesExtrasScanner;
-import org.yamj.plugin.api.metadata.*;
-import org.yamj.plugin.api.trailer.MovieTrailerScanner;
-import org.yamj.plugin.api.trailer.SeriesTrailerScanner;
+import org.yamj.plugin.api.artwork.ArtworkScanner;
+import org.yamj.plugin.api.extras.ExtrasScanner;
+import org.yamj.plugin.api.metadata.MetadataScanner;
 import org.yamj.plugin.api.trailer.TrailerDownloadBuilder;
+import org.yamj.plugin.api.trailer.TrailerScanner;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -81,87 +79,26 @@ public class PluginExtensionInitialization {
     public void init() {
         LOG.debug("Initialize plugin extensions");
         
-        // METADATA
-        
-        // add movie scanner to online scanner service
-        for (MovieScanner movieScanner : pluginManager.getExtensions(MovieScanner.class)) {
-            initExtensionPoint(movieScanner);
-            onlineScannerService.registerMetadataScanner(movieScanner);
+        for (MetadataScanner metadataScanner : pluginManager.getExtensions(MetadataScanner.class)) {
+            initExtensionPoint(metadataScanner);
+            onlineScannerService.registerMetadataScanner(metadataScanner);
         }
         
-        // add series scanner to online scanner service
-        for (SeriesScanner seriesScanner : pluginManager.getExtensions(SeriesScanner.class)) {
-            initExtensionPoint(seriesScanner);
-            onlineScannerService.registerMetadataScanner(seriesScanner);
+        for (ExtrasScanner extrasScanner : pluginManager.getExtensions(ExtrasScanner.class)) {
+            initExtensionPoint(extrasScanner);
+            extrasScannerService.registerExtraScanner(extrasScanner);
         }
 
-        // add person scanner to online scanner service
-        for (PersonScanner personScanner : pluginManager.getExtensions(PersonScanner.class)) {
-            initExtensionPoint(personScanner);
-            onlineScannerService.registerMetadataScanner(personScanner);
+        for (ArtworkScanner artworkScanner : pluginManager.getExtensions(ArtworkScanner.class)) {
+            initExtensionPoint(artworkScanner);
+            artworkScannerService.registerArtworkScanner(artworkScanner);
         }
 
-        // add filmography scanner to online scanner service
-        for (FilmographyScanner filmographyScanner : pluginManager.getExtensions(FilmographyScanner.class)) {
-            initExtensionPoint(filmographyScanner);
-            onlineScannerService.registerMetadataScanner(filmographyScanner);
+        for (TrailerScanner trailerScanner : pluginManager.getExtensions(TrailerScanner.class)) {
+            initExtensionPoint(trailerScanner);
+            trailerScannerService.registerTrailerScanner(trailerScanner);
         }
 
-        // EXTRAS
-        
-        // add movie extras scanner to extras scanner service
-        for (MovieExtrasScanner movieExtrasScanner : pluginManager.getExtensions(MovieExtrasScanner.class)) {
-            initExtensionPoint(movieExtrasScanner);
-            extrasScannerService.registerExtraScanner(movieExtrasScanner);
-        }
-        
-        // add series extras scanner to extras scanner service
-        for (SeriesExtrasScanner seriesExtrasScanner : pluginManager.getExtensions(SeriesExtrasScanner.class)) {
-            initExtensionPoint(seriesExtrasScanner);
-            extrasScannerService.registerExtraScanner(seriesExtrasScanner);
-        }
-
-        // ARTWORK
-        
-        // add movie artwork scanner to artwork scanner service
-        for (MovieArtworkScanner movieArtworkScanner : pluginManager.getExtensions(MovieArtworkScanner.class)) {
-            initExtensionPoint(movieArtworkScanner);
-            artworkScannerService.registerArtworkScanner(movieArtworkScanner);
-        }
-        
-        // add series artwork scanner to artwork scanner service
-        for (SeriesArtworkScanner seriesArtworkScanner : pluginManager.getExtensions(SeriesArtworkScanner.class)) {
-            initExtensionPoint(seriesArtworkScanner);
-            artworkScannerService.registerArtworkScanner(seriesArtworkScanner);
-        }
-
-        // add person artwork scanner to artwork scanner service
-        for (PersonArtworkScanner personArtworkScanner : pluginManager.getExtensions(PersonArtworkScanner.class)) {
-            initExtensionPoint(personArtworkScanner);
-            artworkScannerService.registerArtworkScanner(personArtworkScanner);
-        }
-
-        // add boxed set artwork scanner to artwork scanner service
-        for (BoxedSetArtworkScanner boxedSetArtworkScanner : pluginManager.getExtensions(BoxedSetArtworkScanner.class)) {
-            initExtensionPoint(boxedSetArtworkScanner);
-            artworkScannerService.registerArtworkScanner(boxedSetArtworkScanner);
-        }
-        
-        // TRAILER
-        
-        // add movie trailer scanner to trailer scanner service
-        for (MovieTrailerScanner movieTrailerScanner : pluginManager.getExtensions(MovieTrailerScanner.class)) {
-            initExtensionPoint(movieTrailerScanner);
-            trailerScannerService.registerTrailerScanner(movieTrailerScanner);
-        }
-
-        // add series trailer scanner to trailer scanner service
-        for (SeriesTrailerScanner seriesTrailerScanner : pluginManager.getExtensions(SeriesTrailerScanner.class)) {
-            initExtensionPoint(seriesTrailerScanner);
-            trailerScannerService.registerTrailerScanner(seriesTrailerScanner);
-        }
-
-        // add download builder to trailer processor service
         for (TrailerDownloadBuilder downloadBuilder : pluginManager.getExtensions(TrailerDownloadBuilder.class)) {
             initExtensionPoint(downloadBuilder);
             trailerProcessorService.registerTrailerDownloadBuilder(downloadBuilder);
