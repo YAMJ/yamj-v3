@@ -67,11 +67,11 @@ public class ExtrasScannerService {
      */
     public void registerExtraScanner(ExtrasScanner extrasScanner) {
         if (extrasScanner instanceof MovieExtrasScanner) {
-            LOG.trace("Registered extra scanner: {}", extrasScanner.getScannerName().toLowerCase());
+            LOG.trace("Registered movie extras scanner: {}", extrasScanner.getScannerName().toLowerCase());
             registeredMovieExtrasScanner.add((MovieExtrasScanner)extrasScanner);
         }
         if (extrasScanner instanceof SeriesExtrasScanner) {
-            LOG.trace("Registered series scanner: {}", extrasScanner.getScannerName().toLowerCase());
+            LOG.trace("Registered series extras scanner: {}", extrasScanner.getScannerName().toLowerCase());
             registeredSeriesExtrasScanner.add((SeriesExtrasScanner)extrasScanner);
         }
     }
