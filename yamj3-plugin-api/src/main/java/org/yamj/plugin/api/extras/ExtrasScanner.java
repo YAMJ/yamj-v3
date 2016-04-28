@@ -20,11 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.extra;
+package org.yamj.plugin.api.extras;
 
-import org.yamj.core.service.metadata.IOnlineScanner;
+import org.yamj.plugin.api.OnlineScanner;
 
-public interface IExtraScanner extends IOnlineScanner {
+public interface ExtrasScanner extends OnlineScanner {
 
     public boolean isEnabled(); 
 }

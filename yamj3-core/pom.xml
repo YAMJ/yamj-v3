@@ -166,11 +166,6 @@
         </dependency>
         <!-- APIs -->
         <dependency>
-            <groupId>com.omertron</groupId>
-            <artifactId>rottentomatoesapi</artifactId>
-            <version>${rottentomatoesapi.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.yamj</groupId>
             <artifactId>api-trakttv</artifactId>
             <version>${trakttvapi.version}</version>

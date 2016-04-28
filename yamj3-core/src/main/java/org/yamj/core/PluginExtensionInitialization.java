@@ -33,12 +33,15 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.artwork.ArtworkInitialization;
 import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.service.metadata.extras.ExtrasScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.trailer.TrailerProcessorService;
 import org.yamj.core.service.trailer.TrailerScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.*;
 import org.yamj.plugin.api.artwork.*;
+import org.yamj.plugin.api.extras.MovieExtrasScanner;
+import org.yamj.plugin.api.extras.SeriesExtrasScanner;
 import org.yamj.plugin.api.metadata.*;
 import org.yamj.plugin.api.trailer.MovieTrailerScanner;
 import org.yamj.plugin.api.trailer.SeriesTrailerScanner;
@@ -46,8 +49,9 @@ import org.yamj.plugin.api.trailer.TrailerDownloadBuilder;
 import ro.fortsoft.pf4j.ExtensionPoint;
 import ro.fortsoft.pf4j.PluginManager;
 
-@Component("pluginInitialization")
-@DependsOn({"localeService", "identifierService", "onlineScannerService", "artworkScannerService", "trailerScannerService", "trailerProcessorService"})
+@Component("pluginExtensionInitialization")
+@DependsOn({"localeService", "identifierService", "onlineScannerService", "extrasScannerService", 
+            "artworkScannerService", "trailerScannerService", "trailerProcessorService"})
 public class PluginExtensionInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
@@ -70,6 +74,8 @@ public class PluginExtensionInitialization {
     private TrailerScannerService trailerScannerService;
     @Autowired
     private TrailerProcessorService trailerProcessorService;
+    @Autowired
+    private ExtrasScannerService extrasScannerService;
     
     @PostConstruct
     public void init() {
@@ -100,7 +106,21 @@ public class PluginExtensionInitialization {
             initExtensionPoint(filmographyScanner);
             onlineScannerService.registerMetadataScanner(filmographyScanner);
         }
+
+        // EXTRAS
         
+        // add movie extras scanner to extras scanner service
+        for (MovieExtrasScanner movieExtrasScanner : pluginManager.getExtensions(MovieExtrasScanner.class)) {
+            initExtensionPoint(movieExtrasScanner);
+            extrasScannerService.registerExtraScanner(movieExtrasScanner);
+        }
+        
+        // add series extras scanner to extras scanner service
+        for (SeriesExtrasScanner seriesExtrasScanner : pluginManager.getExtensions(SeriesExtrasScanner.class)) {
+            initExtensionPoint(seriesExtrasScanner);
+            extrasScannerService.registerExtraScanner(seriesExtrasScanner);
+        }
+
         // ARTWORK
         
         // add movie artwork scanner to artwork scanner service

@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.extra;
+package org.yamj.core.service.metadata.extras;
 
 import static org.yamj.plugin.api.Constants.*;
 
@@ -30,21 +30,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.trakttv.TraktTvService;
+import org.yamj.plugin.api.extras.MovieExtrasScanner;
+import org.yamj.plugin.api.extras.SeriesExtrasScanner;
 import org.yamj.plugin.api.metadata.MetadataTools;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.ISeries;
 
 @Service("traktTvIdScanner")
-public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner {
+public class TraktTvIdScanner implements MovieExtrasScanner, SeriesExtrasScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TraktTvIdScanner.class);
     private static final int NO_ID = -1;
 
     @Autowired
     private TraktTvService traktTvService;
-    @Autowired
-    private ExtraScannerService extraScannerService;
     
     private boolean enabled;
     
@@ -54,9 +54,6 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
 
         // can be a global property cause set in static properties
         enabled = traktTvService.isSynchronizationEnabled();
-
-        // register this scanner
-        extraScannerService.registerExtraScanner(this);
     }
     
     @Override
@@ -70,100 +67,100 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
     }
 
     @Override
-    public void scanMovie(VideoData videoData) {
-        int traktId = NumberUtils.toInt(videoData.getSourceDbId(SOURCE_TRAKTTV), NO_ID);
+    public void scanExtras(IMovie movie) {
+        int traktId = NumberUtils.toInt(movie.getId(SOURCE_TRAKTTV), NO_ID);
         if (traktId > NO_ID) {
             // nothing to do anymore cause Trakt.TV id already present
             return;
         }
 
-        LOG.trace("Search for Trakt.TV movie ID: {}", videoData.getIdentifier());
+        LOG.trace("Search for Trakt.TV movie ID: {}", movie.getTitle());
         
         // try IMDB id
-        Integer found = traktTvService.searchMovieIdByIMDB(videoData.getSourceDbId(SOURCE_IMDB));
+        Integer found = traktTvService.searchMovieIdByIMDB(movie.getId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
 
         // try TheMovieDB id
-        found = traktTvService.searchMovieIdByTMDB(videoData.getSourceDbId(SOURCE_TMDB));
+        found = traktTvService.searchMovieIdByTMDB(movie.getId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(videoData.getTitle(), videoData.getTitleOriginal())) {
-            found = traktTvService.searchMovieByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear());
+        if (MetadataTools.isOriginalTitleScannable(movie.getTitle(), movie.getOriginalTitle())) {
+            found = traktTvService.searchMovieByTitleAndYear(movie.getOriginalTitle(), movie.getYear());
             if (found != null && found.intValue() > NO_ID) {
-                videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+                movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
                 // nothing to do anymore cause Trakt.TV id found
                 return;
             }
         }
         
         // search by title if still not found
-        found = traktTvService.searchMovieByTitleAndYear(videoData.getTitle(), videoData.getYear());
+        found = traktTvService.searchMovieByTitleAndYear(movie.getTitle(), movie.getYear());
         if (found != null && found.intValue() > NO_ID) {
-            videoData.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
 
         // no Trakt.TV ID found at this point
-        LOG.info("No Trakt.TV ID found for movie '{}'-{}", videoData.getTitle(), videoData.getPublicationYear());
+        LOG.info("No Trakt.TV ID found for movie '{}'-{}", movie.getTitle(), movie.getYear());
     }
 
     @Override
-    public void scanSeries(Series series) {
-        int traktId = NumberUtils.toInt(series.getSourceDbId(SOURCE_TRAKTTV), NO_ID);
+    public void scanExtras(ISeries series) {
+        int traktId = NumberUtils.toInt(series.getId(SOURCE_TRAKTTV), NO_ID);
         if (traktId > NO_ID) {
             // nothing to do anymore cause Trakt.TV id already present
             return;
         }
 
-        LOG.trace("Search for Trakt.TV series ID: {}", series.getIdentifier());
+        LOG.trace("Search for Trakt.TV series ID: {}", series.getTitle());
 
         // try TheTVDb id
-        Integer found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVDB));
+        Integer found = traktTvService.searchShowIdByTVDB(series.getId(SOURCE_TVDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
 
         // try TVRage id
-        found = traktTvService.searchShowIdByTVDB(series.getSourceDbId(SOURCE_TVRAGE));
+        found = traktTvService.searchShowIdByTVDB(series.getId(SOURCE_TVRAGE));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
 
         // try IMDB id
-        found = traktTvService.searchShowIdByIMDB(series.getSourceDbId(SOURCE_IMDB));
+        found = traktTvService.searchShowIdByIMDB(series.getId(SOURCE_IMDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
 
         // try TheMovieDB id
-        found = traktTvService.searchShowIdByTMDB(series.getSourceDbId(SOURCE_TMDB));
+        found = traktTvService.searchShowIdByTMDB(series.getId(SOURCE_TMDB));
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(series.getTitle(), series.getTitleOriginal())) {
-            found = traktTvService.searchShowByTitleAndYear(series.getTitleOriginal(), series.getStartYear());
+        if (MetadataTools.isOriginalTitleScannable(series.getTitle(), series.getOriginalTitle())) {
+            found = traktTvService.searchShowByTitleAndYear(series.getOriginalTitle(), series.getStartYear());
             if (found != null && found.intValue() > NO_ID) {
-                series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+                series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
                 // nothing to do anymore cause Trakt.TV id found
                 return;
             }
@@ -172,7 +169,7 @@ public class TraktTvIdScanner implements IExtraMovieScanner, IExtraSeriesScanner
         // search by title if still not found
         found = traktTvService.searchShowByTitleAndYear(series.getTitle(), series.getStartYear());
         if (found != null && found.intValue() > NO_ID) {
-            series.setSourceDbId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
+            series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
             // nothing to do anymore cause Trakt.TV id found
             return;
         }

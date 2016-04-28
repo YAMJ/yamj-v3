@@ -22,7 +22,6 @@
  */
 package org.yamj.core.web;
 
-import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -86,9 +85,6 @@ public class WebConfiguration  {
 
     @Value("${yamj3.http.maxDownloadSlots:null}")
     private String maxDownloadSlots;
-
-    @Value("${APIKEY.rottentomatoes}")
-    private String rottenTomatoesApiKey;
 
     @Value("${trakttv.client.id:'unknown'}")
     private String traktTvClientId;
@@ -173,12 +169,6 @@ public class WebConfiguration  {
         }
         
         return wrapper;
-    }
-
-    @Bean
-    public RottenTomatoesApi rottenTomatoesApi() throws Exception {
-        LOG.trace("Initialize RottenTomatoesApi");
-        return new RottenTomatoesApi(rottenTomatoesApiKey, poolingHttpClient());
     }
 
     @Bean

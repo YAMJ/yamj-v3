@@ -33,7 +33,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
-import org.yamj.core.service.metadata.extra.ExtraScannerService;
+import org.yamj.core.service.metadata.extras.ExtrasScannerService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;
@@ -51,7 +51,7 @@ public class MetadataScannerService implements IQueueProcessService {
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
-    private ExtraScannerService extraScannerService;
+    private ExtrasScannerService extrasScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
 
@@ -87,8 +87,8 @@ public class MetadataScannerService implements IQueueProcessService {
         // online scanning
         this.onlineScannerService.scanMovie(videoData);
 
-        // extra scanning
-        this.extraScannerService.scanMovie(videoData);
+        // extras scanning
+        this.extrasScannerService.scanMovie(videoData);
 
         // reset sort title
         YamjTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
@@ -135,8 +135,8 @@ public class MetadataScannerService implements IQueueProcessService {
         // online scanning
         this.onlineScannerService.scanSeries(series);
 
-        // extra scanning
-        this.extraScannerService.scanSeries(series);
+        // extras scanning
+        this.extrasScannerService.scanSeries(series);
 
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
