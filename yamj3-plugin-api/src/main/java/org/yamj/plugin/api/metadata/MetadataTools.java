@@ -386,7 +386,13 @@ public final class MetadataTools {
      * @return
      */
     public static boolean isVoiceRole(final String role) {
-        return StringUtils.indexOfIgnoreCase(role, "(voice") != -1;
+        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
+        if (idx >= 0) return true;
+        idx = StringUtils.indexOfIgnoreCase(role, "(Sprechrolle");
+        if (idx >= 0) return true;
+
+        // everything else
+        return false;
     }
 
     /**
@@ -406,7 +412,13 @@ public final class MetadataTools {
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
-        
+
+        // (Sprechrolle)
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(Sprechrolle");
+        if (idx > 0) {
+            newRole = newRole.substring(0, idx);
+        }
+
         // (as ... = alternate name
         idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
         if (idx > 0) {

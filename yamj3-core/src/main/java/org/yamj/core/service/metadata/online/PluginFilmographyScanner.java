@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.WrapperPerson;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,10 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.FilmParticipation;
+import org.yamj.core.service.metadata.WrapperPerson;
 import org.yamj.plugin.api.metadata.FilmographyDTO;
 import org.yamj.plugin.api.metadata.FilmographyScanner;
 import org.yamj.plugin.api.metadata.MetadataScanner;
-import org.yamj.plugin.api.model.type.ParticipationType;
 
 public class PluginFilmographyScanner implements MetadataScanner {
 
@@ -79,14 +77,8 @@ public class PluginFilmographyScanner implements MetadataScanner {
             filmo.setSourceDbId(dto.getId());
             filmo.setJobType(dto.getJobType());
             filmo.setParticipationType(dto.getParticipationType());
-            
-            if (ParticipationType.SERIES.equals(dto.getParticipationType())) {
-                filmo.setYear(dto.getYear());
-                filmo.setYearEnd(dto.getYearEnd());
-            } else {
-                filmo.setYear(dto.getYear());
-            }
-            
+            filmo.setYear(dto.getYear());
+            filmo.setYearEnd(dto.getYearEnd());
             filmo.setTitle(dto.getTitle());
             filmo.setTitleOriginal(StringUtils.trimToNull(dto.getOriginalTitle()));
             filmo.setDescription(StringUtils.trimToNull(dto.getDescription()));
