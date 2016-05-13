@@ -40,7 +40,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @NamedQueries({
     @NamedQuery(name = Season.QUERY_IDS_RECHECK,
-        query = "SELECT sea.id FROM Season sea WHERE sea.status not in ('NEW','UPDATED') AND (sea.lastScanned is null or sea.lastScanned<=:compareDate)"
+        query = "SELECT sea.id FROM Season sea WHERE sea.status not in ('NEW','UPDATED') AND (sea.lastScanned is null or sea.lastScanned<=:compareDate) ORDER BY sea.lastScanned"
     ),
     @NamedQuery(name = Season.UPDATE_STATUS_RECHECK,
         query = "UPDATE Season sea SET sea.status='UPDATED' WHERE sea.id in (:idList)"

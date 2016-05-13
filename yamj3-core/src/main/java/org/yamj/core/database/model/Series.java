@@ -57,7 +57,7 @@ import org.yamj.plugin.api.model.type.ArtworkType;
         query = "FROM Series ser LEFT OUTER JOIN FETCH ser.trailers t LEFT OUTER JOIN FETCH t.stageFile s WHERE ser.id = :id"
     ),
     @NamedQuery(name = Series.QUERY_IDS_RECHECK,
-        query = "SELECT ser.id FROM Series ser WHERE ser.status not in ('NEW','UPDATED') AND (ser.lastScanned is null or ser.lastScanned<=:compareDate)"
+        query = "SELECT ser.id FROM Series ser WHERE ser.status not in ('NEW','UPDATED') AND (ser.lastScanned is null or ser.lastScanned<=:compareDate) ORDER BY ser.lastScanned"
     ),
     @NamedQuery(name = Series.UPDATE_RESCAN_ALL,
         query = "UPDATE Series SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"

@@ -79,10 +79,10 @@ import org.yamj.plugin.api.model.type.ArtworkType;
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
     ),
     @NamedQuery(name = VideoData.QUERY_IDS_RECHECK_MOVIE,
-        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode<0"
+        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode<0 ORDER BY vd.lastScanned"
     ),
     @NamedQuery(name = VideoData.QUERY_IDS_RECHECK_EPISODE,
-        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode>=0"
+        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode>=0 ORDER BY vd.lastScanned"
     ),
     @NamedQuery(name = VideoData.UPDATE_RESCAN_ALL,
         query = "UPDATE VideoData SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
