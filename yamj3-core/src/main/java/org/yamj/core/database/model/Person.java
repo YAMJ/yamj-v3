@@ -52,6 +52,9 @@ import org.yamj.plugin.api.metadata.MetadataTools;
     @NamedQuery(name = Person.QUERY_ORPHANS,
         query = "SELECT p.id FROM Person p WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)"
     ),
+    @NamedQuery(name = Person.QUERY_IDS_RECHECK,
+        query = "SELECT p.id FROM Person p WHERE p.status not in ('NEW','UPDATED') AND (p.lastScanned is null or p.lastScanned<=:compareDate)"
+    ),
     @NamedQuery(name = Person.UPDATE_RESCAN_ALL,
         query = "UPDATE Person SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
@@ -59,8 +62,7 @@ import org.yamj.plugin.api.metadata.MetadataTools;
         query = "UPDATE Person SET status=:status WHERE id=:id"
     ),
     @NamedQuery(name = Person.UPDATE_STATUS_RECHECK,
-        query = "UPDATE Person p set p.status='UPDATED',p.filmographyStatus='NEW' "+
-                "WHERE p.status not in ('NEW','UPDATED') AND (p.lastScanned is null or p.lastScanned<=:compareDate)"
+        query = "UPDATE Person p SET p.status='UPDATED',p.filmographyStatus='NEW' WHERE p.id in (:idList)"
     ),
     @NamedQuery(name = Person.UPDATE_FILMOGRAPHY_STATUS,
         query = "UPDATE Person SET filmographyStatus=:status WHERE id=:id"
@@ -92,6 +94,7 @@ public class Person extends AbstractScannable {
     private static final long serialVersionUID = 660066902996412843L;
     public static final String QUERY_REQUIRED = "person.required";
     public static final String QUERY_ORPHANS = "person.orphans";
+    public static final String QUERY_IDS_RECHECK = "person.ids.forRecheck";
     public static final String UPDATE_RESCAN_ALL = "person.rescanAll";
     public static final String UPDATE_STATUS = "person.updateStatus";
     public static final String UPDATE_STATUS_RECHECK = "person.updateStatus.forRecheck";

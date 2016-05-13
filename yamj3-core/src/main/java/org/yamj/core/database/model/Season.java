@@ -39,9 +39,11 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @NamedQueries({
+    @NamedQuery(name = Season.QUERY_IDS_RECHECK,
+        query = "SELECT sea.id FROM Season sea WHERE sea.status not in ('NEW','UPDATED') AND (sea.lastScanned is null or sea.lastScanned<=:compareDate)"
+    ),
     @NamedQuery(name = Season.UPDATE_STATUS_RECHECK,
-        query = "UPDATE Season sea SET sea.status='UPDATED' WHERE sea.status not in ('NEW','UPDATED') "+
-                "AND (sea.lastScanned is null or sea.lastScanned<=:compareDate)"
+        query = "UPDATE Season sea SET sea.status='UPDATED' WHERE sea.id in (:idList)"
     ),
     @NamedQuery(name = Season.UPDATE_RESCAN_ALL,
         query = "UPDATE Season SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
@@ -60,6 +62,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
+    public static final String QUERY_IDS_RECHECK = "season.ids.forRecheck";
     public static final String UPDATE_STATUS_RECHECK = "season.updateStatus.forRecheck";
     public static final String UPDATE_RESCAN_ALL = "season.rescanAll";
     
