@@ -482,7 +482,12 @@ public final class MetadataTools {
                 if (newRole.indexOf('(') < 0) return newRole;
             }
         }
-        
+
+        // archive footage
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(archive footage");
+        if (idx >= 0) {
+            return newRole.substring(0, idx);
+        }
         return newRole;
     }
         
