@@ -387,6 +387,22 @@ public abstract class HibernateDao {
     }
 
     /**
+     * Find list of entities by named parameters using a named query.
+     *
+     * @param queryName the name of the query
+     * @param params the named parameters
+     * @param maxResults the maximal amount of entities to fetch
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List namedQueryByNamedParameters(String queryName, Map<String, Object> params, int maxResults) {
+        Query query = currentSession().getNamedQuery(queryName).setCacheable(true);
+        applyNamedParameters(query, params);
+        query.setMaxResults(maxResults);
+        return query.list();
+    }
+
+    /**
      * Execute an update statement with a named query.
      *
      * @param queryName the name of the query

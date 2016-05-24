@@ -63,6 +63,13 @@ public class UpgradeDatabaseService {
 
         LOG.trace("Run patches for database type {}", databaseType);
 
+        // fix roles (same for all database types)
+        try {
+            upgradeDatabaseDao.fixRoles();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'fixRoles' for database type "+databaseType, ex);
+        }
+
         // delete orphan configuration entries (same for all database types)
         try {
             upgradeDatabaseDao.deleteOrphanConfigs();

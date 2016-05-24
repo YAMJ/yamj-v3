@@ -386,7 +386,13 @@ public final class MetadataTools {
      * @return
      */
     public static boolean isVoiceRole(final String role) {
-        return StringUtils.indexOfIgnoreCase(role, "(voice") != -1;
+        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
+        if (idx >= 0) return true;
+        idx = StringUtils.indexOfIgnoreCase(role, "(Sprechrolle");
+        if (idx >= 0) return true;
+
+        // everything else
+        return false;
     }
 
     /**
@@ -400,33 +406,12 @@ public final class MetadataTools {
         if (newRole == null) {
             return null;
         }
-    
-        // (voice)
-        int idx = StringUtils.indexOfIgnoreCase(newRole, "(voice");
-        if (idx > 0) {
-            newRole = newRole.substring(0, idx);
-        }
         
-        // (as ... = alternate name
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
-        if (idx > 0) {
-            newRole = newRole.substring(0, idx);
-        }
-        
-        // uncredited cast member
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
-        if (idx > 0) {
-            newRole = newRole.substring(0, idx);
-        }
-        
-        // season marker
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
-        if (idx > 0) {
-            newRole = newRole.substring(0, idx);
-        }
-    
+        // remove markers
+        newRole = removeRoleMarkers(newRole);
+
         // double characters
-        idx = StringUtils.indexOf(newRole, "/");
+        int idx = StringUtils.indexOf(newRole, "/");
         if (idx > 0) {
             List<String> characters = Arrays.asList(newRole.split("/"));
             newRole = StringUtils.join(characters.toArray(), " / ");
@@ -435,6 +420,74 @@ public final class MetadataTools {
         newRole = fixScannedValue(newRole);
         newRole = newRole.replaceAll("( )+", " ").trim();
         
+        return StringUtils.trimToNull(newRole);
+    }
+    
+    private static String removeRoleMarkers(final String role) {
+        if (role.indexOf('(') < 0 ) {
+            return role;
+        }
+        
+        // holds the new role
+        String newRole = role;
+
+        // voice roles
+        int idx = StringUtils.indexOfIgnoreCase(newRole, "(voice");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(Sprechrolle");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+
+        // alternate names
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(aka ");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+
+        // uncredited cast member
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(non crédité");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+
+        // season marker
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
+        if (idx >= 0) {
+            newRole = newRole.substring(0, idx);
+            if (newRole.indexOf('(') < 0) return newRole;
+        }
+
+        // episode markers
+        for (int i = 1; i <= 10; i++) {
+            idx = StringUtils.indexOfIgnoreCase(newRole, "("+i+" episode");
+            if (idx >= 0) {
+                newRole = newRole.substring(0, idx);
+                if (newRole.indexOf('(') < 0) return newRole;
+            }
+        }
+
+        // archive footage
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(archive footage");
+        if (idx >= 0) {
+            return newRole.substring(0, idx);
+        }
         return newRole;
     }
         

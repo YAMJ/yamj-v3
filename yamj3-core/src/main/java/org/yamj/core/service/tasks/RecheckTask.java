@@ -65,19 +65,28 @@ public class RecheckTask implements ITask {
         LOG.debug("Execute recheck task");
         final long startTime = System.currentTimeMillis();
 
-        int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 45);
-        if (this.metadataStorageService.recheckMovie(new DateTime().minusDays(recheck).toDate())) {
-            metadataScanScheduler.triggerScanVideo();
+        int limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.movie.maxLimit", 50));
+        if (limit > 0) {
+            int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 60);
+            if (metadataStorageService.recheckMovie(new DateTime().minusDays(recheck).toDate(), limit)) {
+                metadataScanScheduler.triggerScanVideo();
+            }
         }
 
-        recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 45);
-        if (this.metadataStorageService.recheckTvShow(new DateTime().minusDays(recheck).toDate())) {
-            metadataScanScheduler.triggerScanVideo();
+        limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.tvshow.maxLimit", 20));
+        if (limit > 0) {
+            int recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 60);
+            if (metadataStorageService.recheckTvShow(new DateTime().minusDays(recheck).toDate(), limit)) {
+                metadataScanScheduler.triggerScanVideo();
+            }
         }
 
-        recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
-        if (this.metadataStorageService.recheckPerson(new DateTime().minusDays(recheck).toDate())) {
-            metadataScanScheduler.triggerScanPeople();
+        limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.person.maxLimit", 100));
+        if (limit > 0) {
+            int recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
+            if (metadataStorageService.recheckPerson(new DateTime().minusDays(recheck).toDate(), limit)) {
+                metadataScanScheduler.triggerScanPeople();
+            }
         }
 
         LOG.debug("Finished recheck task after {} ms", System.currentTimeMillis()-startTime);

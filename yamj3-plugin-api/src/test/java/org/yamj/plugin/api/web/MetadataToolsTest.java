@@ -20,9 +20,22 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata;
+package org.yamj.plugin.api.web;
 
-public interface IOnlineScanner {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-    String getScannerName();
+import org.junit.Test;
+import org.yamj.plugin.api.metadata.MetadataTools;
+
+public class MetadataToolsTest {
+
+    @Test
+    public void cleanRole() {
+        assertEquals("Matthew", MetadataTools.cleanRole("Matthew (voice"));
+        assertEquals("Matthew", MetadataTools.cleanRole("Matthew (uncredited"));
+        assertEquals("Matthew", MetadataTools.cleanRole("Matthew (2 episodes"));
+        assertEquals("Matthew", MetadataTools.cleanRole("Matthew (5 episodes, 2011) (voice)"));
+        assertNull(MetadataTools.cleanRole("(voice)"));
+    }
 }

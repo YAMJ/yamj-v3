@@ -64,6 +64,7 @@ public class MetadataStorageService {
     private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock(true);
     private static final ReentrantLock BOXSET_STORAGE_LOCK = new ReentrantLock(true);
     private static final String COMPARE_DATE = "compareDate";
+    private static final String ID_LIST = "idList";
     
     @Autowired
     private CommonDao commonDao;
@@ -852,23 +853,58 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public boolean recheckMovie(Date compareDate) {
+    public boolean recheckMovie(Date compareDate, int limit) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
-        return this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK_MOVIE, params)>0;
+        List<Long> idList = this.commonDao.namedQueryByNamedParameters(VideoData.QUERY_IDS_RECHECK_MOVIE, params, limit);
+        if (idList.isEmpty()) {
+            return false;
+        }
+
+        LOG.debug("Found {} movies for recheck", idList.size());
+        params = Collections.singletonMap(ID_LIST, (Object)idList);
+        return this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK, params)>0;
     }
 
     @Transactional
-    public boolean recheckTvShow(Date compareDate) {
-        Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
-        int updated = this.commonDao.executeUpdate(Series.UPDATE_STATUS_RECHECK, params);
-        updated += this.commonDao.executeUpdate(Season.UPDATE_STATUS_RECHECK, params);
-        updated += this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK_EPISODE, params);
+    public boolean recheckTvShow(Date compareDate, int limit) {
+        final Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
+        int updated = 0;
+        
+        List<Long> idList = this.commonDao.namedQueryByNamedParameters(Series.QUERY_IDS_RECHECK, params, limit);
+        if (idList.size() > 0 ) {
+            LOG.debug("Found {} series for recheck", idList.size());
+            Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
+            updated += this.commonDao.executeUpdate(Series.UPDATE_STATUS_RECHECK, updateParams);
+        }
+
+        idList = this.commonDao.namedQueryByNamedParameters(Season.QUERY_IDS_RECHECK, params, limit);
+        if (idList.size() > 0 ) {
+            LOG.debug("Found {} seasons for recheck", idList.size());
+            Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
+            updated += this.commonDao.executeUpdate(Season.UPDATE_STATUS_RECHECK, updateParams);
+        }
+
+        idList = this.commonDao.namedQueryByNamedParameters(VideoData.QUERY_IDS_RECHECK_EPISODE, params, limit);
+        if (idList.size() > 0 ) {
+            LOG.debug("Found {} episodes for recheck", idList.size());
+            Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
+            updated += this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK, updateParams);
+        }
+
+        // return if something has updated
         return updated > 0;
     }
 
     @Transactional
-    public boolean recheckPerson(Date compareDate) {
+    public boolean recheckPerson(Date compareDate, int limit) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
+        List<Long> idList = this.commonDao.namedQueryByNamedParameters(Person.QUERY_IDS_RECHECK, params, limit);
+        if (idList.isEmpty()) {
+            return false;
+        }
+
+        LOG.debug("Found {} persons for recheck", idList.size());
+        params = Collections.singletonMap(ID_LIST, (Object)idList);
         return this.commonDao.executeUpdate(Person.UPDATE_STATUS_RECHECK, params)>0;
     }
 

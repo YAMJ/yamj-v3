@@ -78,19 +78,20 @@ import org.yamj.plugin.api.model.type.ArtworkType;
     @NamedQuery(name = VideoData.QUERY_FIND_VIDEOS_FOR_PERSON,
         query = "SELECT distinct vd FROM VideoData vd JOIN vd.credits credit WHERE credit.castCrewPK.person.id=:id"
     ),
+    @NamedQuery(name = VideoData.QUERY_IDS_RECHECK_MOVIE,
+        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode<0 ORDER BY vd.lastScanned"
+    ),
+    @NamedQuery(name = VideoData.QUERY_IDS_RECHECK_EPISODE,
+        query = "SELECT vd.id FROM VideoData vd WHERE vd.status not in ('NEW','UPDATED') AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode>=0 ORDER BY vd.lastScanned"
+    ),
     @NamedQuery(name = VideoData.UPDATE_RESCAN_ALL,
         query = "UPDATE VideoData SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
     ),
     @NamedQuery(name = VideoData.UPDATE_STATUS,
         query = "UPDATE VideoData SET status=:status WHERE id=:id"
     ),
-    @NamedQuery(name = VideoData.UPDATE_STATUS_RECHECK_MOVIE,
-        query = "UPDATE VideoData vd SET vd.status='UPDATED' WHERE vd.status not in ('NEW','UPDATED') "+
-                "AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode<0"
-    ),
-    @NamedQuery(name = VideoData.UPDATE_STATUS_RECHECK_EPISODE,
-        query = "UPDATE VideoData vd SET vd.status='UPDATED' WHERE vd.status not in ('NEW','UPDATED') "+
-                "AND (vd.lastScanned is null or vd.lastScanned<=:compareDate) AND vd.episode>=0"
+    @NamedQuery(name = VideoData.UPDATE_STATUS_RECHECK,
+        query = "UPDATE VideoData vd SET vd.status='UPDATED' WHERE vd.id in (:idList)"
     ),
     @NamedQuery(name = VideoData.UPDATE_TRAILER_STATUS,
         query = "UPDATE VideoData SET trailerStatus=:status WHERE id=:id"
@@ -161,10 +162,11 @@ public class VideoData extends AbstractMetadata {
     public static final String QUERY_FIND_VIDEOS_FOR_NFO_BY_NAME_AND_LIBRARY = "videoData.findVideoDatasForNFO.byNameAndLibrary";
     public static final String QUERY_FIND_VIDEOS_FOR_NFO_BY_DIRECTORIES = "videoData.findVideoDatasForNFO.byDirectories";
     public static final String QUERY_FIND_VIDEOS_FOR_PERSON = "videoData.findVideoDatas.forPerson";
+    public static final String QUERY_IDS_RECHECK_MOVIE = "videoData.ids.forMovieRecheck";
+    public static final String QUERY_IDS_RECHECK_EPISODE = "videoData.ids.forEpisodeRecheck";
     public static final String UPDATE_RESCAN_ALL = "videoData.rescanAll";
     public static final String UPDATE_STATUS = "videoData.updateStatus";
-    public static final String UPDATE_STATUS_RECHECK_MOVIE ="videoData.updateStatus.forMovieRecheck";
-    public static final String UPDATE_STATUS_RECHECK_EPISODE ="videoData.updateStatus.forEpisodeRecheck";
+    public static final String UPDATE_STATUS_RECHECK ="videoData.updateStatus.forRecheck";
     public static final String UPDATE_TRAILER_STATUS = "videoData.updateTrailerStatus";
     public static final String QUERY_EPISODES_OF_MEDIAFILE = "videoData.episodesOfMediaFile";
     public static final String QUERY_TRAKTTV_MOVIES = "videoData.trakttv.movies";

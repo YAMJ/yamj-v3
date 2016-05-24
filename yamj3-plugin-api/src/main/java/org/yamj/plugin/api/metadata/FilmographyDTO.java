@@ -120,7 +120,9 @@ public class FilmographyDTO {
     }
 
     public FilmographyDTO setYear(int year) {
-        this.year = year;
+        if (year > 0) {
+            this.year = year;
+        }
         return this;
     }
 
@@ -129,7 +131,9 @@ public class FilmographyDTO {
     }
 
     public FilmographyDTO setYearEnd(int yearEnd) {
-        this.yearEnd = yearEnd;
+        if (yearEnd > 0) {
+            this.yearEnd = yearEnd;
+        }
         return this;
     }
 
