@@ -20,13 +20,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--  database versions -->
-        <mysql.version>5.1.38</mysql.version>
-        <hsqldb.version>2.3.3</hsqldb.version>
+        <mysql.version>5.1.39</mysql.version>
+        <hsqldb.version>2.3.4</hsqldb.version>
         <h2.version>1.4.191</h2.version>
         <!-- api versions -->
         <trakttvapi.version>1.0-SNAPSHOT</trakttvapi.version>
         <rottentomatoesapi.version>1.6-SNAPSHOT</rottentomatoesapi.version>
-        <httpclient.version>4.5.1</httpclient.version>
+        <httpclient.version>4.5.2</httpclient.version>
     </properties>
 
     <dependencies>
