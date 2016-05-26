@@ -32,10 +32,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 @NamedQueries({    
+    @NamedQuery(name = StageDirectory.QUERY_ROOT_DIRECTORIES,
+        query = "SELECT sd.id from StageDirectory sd WHERE sd.parentDirectory is null"
+    ),
     @NamedQuery(name = StageDirectory.QUERY_VIDEO_DIRECTORIES_FOR_SERIES,
         query = "SELECT distinct sd from StageDirectory sd JOIN sd.stageFiles sf JOIN sf.mediaFile mf JOIN mf.videoDatas vd JOIN vd.season sea "+
-                "JOIN sea.series ser WHERE ser.id=:id AND mf.extra=:extra AND sf.status != 'DELETED' and sf.status != 'DUPLICATE'"
-    )
+            "JOIN sea.series ser WHERE ser.id=:id AND mf.extra=:extra AND sf.status != 'DELETED' and sf.status != 'DUPLICATE'"
+    )    
 })
 
 @Entity
@@ -45,6 +48,7 @@ import org.hibernate.annotations.NaturalId;
 public class StageDirectory extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 1706389732909764283L;
+    public static final String QUERY_ROOT_DIRECTORIES = "stageDirectory.rootDirectories";
     public static final String QUERY_VIDEO_DIRECTORIES_FOR_SERIES = "stageDirectory.videoDirectories.forSeries";
     
     @NaturalId

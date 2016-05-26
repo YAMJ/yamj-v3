@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.tasks;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -71,7 +72,11 @@ public class StagingSanityTask implements ITask {
         final long startTime = System.currentTimeMillis();
 
         try {
-            List<Long> stageFileIds = this.stagingService.findNotExistingStageFiles();
+            List<Long> stageFileIds = new ArrayList<>();
+            for (Long rootId : this.stagingService.getRootDirectories()) {
+                stageFileIds.addAll(this.stagingService.findNotExistingStageFiles(rootId));
+            }
+            
             if (stageFileIds.size() > 0) {
                 LOG.info("Found {} not existing stage files", stageFileIds.size());
                 this.stagingService.markStageFilesAsDeleted(stageFileIds);

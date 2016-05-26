@@ -295,14 +295,17 @@ public class StagingService {
         return this.stagingDao.findVideoStageFiles(artwork);
     }
     
-    public List<Long> findNotExistingStageFiles() {
+    public List<Long> getRootDirectories() {
+        return this.stagingDao.getRootDirectories();
+    }
+    
+    @Transactional(readOnly = true, timeout = 600)
+    public List<Long> findNotExistingStageFiles(Long rootId) {
         List<Long> stageFileIds = new ArrayList<>();
         
-        // start from root directories
-        for (StageDirectory rootDir : stagingDao.getRootDirectories()) {
-            if (isRootExisting(rootDir)) {
-                checkDirectory(rootDir, stageFileIds);
-            }
+        StageDirectory rootDir = stagingDao.getById(StageDirectory.class, rootId);
+        if (isRootExisting(rootDir)) {
+            checkDirectory(rootDir, stageFileIds);
         }
         
         return stageFileIds;
@@ -334,6 +337,10 @@ public class StagingService {
     }
     
     private static boolean isRootExisting(StageDirectory rootDir) {
+        if (rootDir == null) {
+            return false;
+        }
+        
         try {
             File rootFile = new File(rootDir.getDirectoryPath());
             if (rootFile.isDirectory() && rootFile.exists() && rootFile.canRead() && rootFile.canExecute()) {

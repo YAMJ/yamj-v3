@@ -84,14 +84,10 @@ public class StagingDao extends HibernateDao {
                 .uniqueResult();
     }
 
-    public List<StageDirectory> getRootDirectories() {
-        return currentSession().createCriteria(StageDirectory.class)
-                .add(Restrictions.isNull("parentDirectory"))
-                .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .list();
+    public List<Long> getRootDirectories() {
+        return currentSession().getNamedQuery(StageDirectory.QUERY_ROOT_DIRECTORIES).list();
     }
-
+    
     public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
