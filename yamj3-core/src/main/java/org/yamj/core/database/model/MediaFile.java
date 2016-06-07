@@ -52,7 +52,9 @@ import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "mediafile",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_MEDIAFILE_NATURALID", columnNames = {"file_name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_MEDIAFILE_NATURALID", columnNames = {"file_name"}),
+        indexes = {
+            @Index(name = "IX_MEDIAFILE_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
 public class MediaFile extends AbstractStateful {

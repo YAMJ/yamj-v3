@@ -85,7 +85,8 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "stage_file",
        uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"}),
        indexes = {@Index(name = "IX_STAGEFILE_BASENAME", columnList = "base_name"),
-                  @Index(name = "IX_STAGEFILE_STATUS", columnList = "status")}
+                  @Index(name = "IX_STAGEFILE_STATUS", columnList = "status"),
+                  @Index(name = "IX_STAGEFILE_FILETYPE", columnList = "file_type")}
 )
 @SuppressWarnings("unused")
 public class StageFile extends AbstractStateful {
