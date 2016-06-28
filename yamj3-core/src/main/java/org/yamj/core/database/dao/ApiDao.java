@@ -2100,20 +2100,18 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private List<Studio> getStudiosForId(MetaDataType type, Long id) {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT s.id, s.name ");
-        sqlScalars.addToSql("FROM studio s ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s.id, s.name FROM studio s ");
         if (type == MetaDataType.SERIES) {
-            sqlScalars.addToSql("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=:id ");
+            sql.append("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=:id ");
         } else if (type == MetaDataType.SEASON) {
-            sqlScalars.addToSql("JOIN season sea ON sea.id = :id ");
-            sqlScalars.addToSql("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=sea.series_id ");
+            sql.append("JOIN season sea ON sea.id=:id JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=sea.series_id ");
         } else {
             // defaults to movie
-            sqlScalars.addToSql("JOIN videodata_studios vs ON s.id=vs.studio_id and vs.data_id=:id ");
+            sql.append("JOIN videodata_studios vs ON s.id=vs.studio_id and vs.data_id=:id ");
         }
-        sqlScalars.addToSql("ORDER BY name");
+        sql.append("ORDER BY name");
 
+        SqlScalars sqlScalars = new SqlScalars(sql);
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
