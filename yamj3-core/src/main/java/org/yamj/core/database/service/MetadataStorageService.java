@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,8 +89,11 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
-        List<VideoData> objects = metadataDao.namedQueryById(VideoData.QUERY_REQUIRED, id);
-        return DataAccessUtils.requiredUniqueResult(objects);
+        VideoData videoData = metadataDao.getById(VideoData.class, id);
+        if (videoData == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
+        return videoData;
     }
 
     @Transactional(readOnly = true)
@@ -101,8 +105,11 @@ public class MetadataStorageService {
     @Transactional(readOnly = true)
     @CachePut(value=CachingNames.DB_PERSON, key="#id")
     public Person getRequiredPerson(Long id) {
-        List<Person> objects = metadataDao.namedQueryById(Person.QUERY_REQUIRED, id);
-        return DataAccessUtils.requiredUniqueResult(objects);
+        Person person = metadataDao.getById(Person.class, id);
+        if (person == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
+        return person;
     }
 
     /**

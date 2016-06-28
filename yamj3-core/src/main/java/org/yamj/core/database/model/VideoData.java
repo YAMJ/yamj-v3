@@ -53,9 +53,6 @@ import org.yamj.plugin.api.artwork.ArtworkDTO;
 import org.yamj.plugin.api.model.type.ArtworkType;
 
 @NamedQueries({
-    @NamedQuery(name = VideoData.QUERY_REQUIRED,
-        query = "FROM VideoData vd WHERE vd.id = :id"
-    ),
     @NamedQuery(name = VideoData.QUERY_REQUIRED_FOR_TRAILER,
         query = "FROM VideoData vd LEFT OUTER JOIN FETCH vd.trailers t LEFT OUTER JOIN FETCH t.stageFile s WHERE vd.id = :id"
     ),
@@ -155,7 +152,6 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
-    public static final String QUERY_REQUIRED = "videoData.required";
     public static final String QUERY_REQUIRED_FOR_TRAILER = "videoData.required.forTrailer";
     public static final String QUERY_FIND_VIDEOS_FOR_NFO_BY_DIRECTORY = "videoData.findVideoDatasForNFO.byDirectory";
     public static final String QUERY_FIND_VIDEOS_FOR_NFO_BY_NAME_AND_DIRECTORY = "videoData.findVideoDatasForNFO.byNameAndDirectory";
