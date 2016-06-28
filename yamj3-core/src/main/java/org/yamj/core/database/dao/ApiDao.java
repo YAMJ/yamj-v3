@@ -211,40 +211,28 @@ public class ApiDao extends HibernateDao {
         }
 
         if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-            // Create and populate the ID list
-            Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
+            LOG.trace("Adding artwork to index videos");
+
+            // build the meta data maps for faster retrieval
+            Map<MetaDataType, List<Long>> metaDataIds = new EnumMap<>(MetaDataType.class);
             for (MetaDataType mdt : MetaDataType.values()) {
-                ids.put(mdt, new ArrayList());
+                metaDataIds.put(mdt, new ArrayList());
             }
-
-            Map<String, ApiVideoDTO> results = new HashMap<>();
-
+            Map<String, ApiVideoDTO> metaDataResults = new HashMap<>();
             for (ApiVideoDTO video : queryResults) {
-                // Add the item to the map for further processing
-                results.put(KeyMaker.makeKey(video), video);
-                // Add the ID to the list
-                ids.get(video.getVideoType()).add(video.getId());
+                // add the item to the map for further processing
+                metaDataResults.put(KeyMaker.makeKey(video), video);
+                // add the ID to the list
+                metaDataIds.get(video.getVideoType()).add(video.getId());
             }
-
-            boolean foundArtworkIds = false;    // Check to see that we have artwork to find
-            // Remove any blank entries
+            // remove any blank entries
             for (MetaDataType mdt : MetaDataType.values()) {
-                if (CollectionUtils.isEmpty(ids.get(mdt))) {
-                    ids.remove(mdt);
-                } else {
-                    // We've found an artwork, so we can continue
-                    foundArtworkIds = true;
+                if (CollectionUtils.isEmpty(metaDataIds.get(mdt))) {
+                    metaDataIds.remove(mdt);
                 }
             }
 
-            if (foundArtworkIds) {
-                LOG.trace("Found artwork to process, IDs: {}", ids);
-                addArtworks(ids, results, options);
-            } else {
-                LOG.trace("No artwork found to process, skipping.");
-            }
-        } else {
-            LOG.trace("Artwork not required, skipping.");
+            addArtworks(metaDataIds, metaDataResults, options);
         }
         
         return queryResults;
@@ -1003,110 +991,108 @@ public class ApiDao extends HibernateDao {
     /**
      * Search the list of IDs for artwork and add to the artworkList.
      *
-     * @param ids
+     * @param metaDataIds
      * @param artworkList
      * @param options
      */
-    private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, ApiVideoDTO> artworkList, OptionsIndexVideo options) {
+    private void addArtworks(Map<MetaDataType, List<Long>> metaDataIds, Map<String, ApiVideoDTO> artworkList, OptionsIndexVideo options) {
         Set<String> artworkRequired = options.getArtworkTypes();
         LOG.debug("Artwork required: {}", artworkRequired);
 
-        if (CollectionUtils.isNotEmpty(artworkRequired)) {
-            SqlScalars sqlScalars = new SqlScalars();
-            boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
-            boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
-            boolean hasSeason = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SEASON));
-            boolean hasEpisode = CollectionUtils.isNotEmpty(ids.get(MetaDataType.EPISODE));
+        SqlScalars sqlScalars = new SqlScalars();
+        boolean hasMovie = CollectionUtils.isNotEmpty(metaDataIds.get(MetaDataType.MOVIE));
+        boolean hasSeries = CollectionUtils.isNotEmpty(metaDataIds.get(MetaDataType.SERIES));
+        boolean hasSeason = CollectionUtils.isNotEmpty(metaDataIds.get(MetaDataType.SEASON));
+        boolean hasEpisode = CollectionUtils.isNotEmpty(metaDataIds.get(MetaDataType.EPISODE));
 
+        if (hasMovie) {
+            sqlScalars.addToSql("SELECT 'MOVIE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+            sqlScalars.addToSql("FROM videodata v, artwork a");
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
+            sqlScalars.addToSql("WHERE v.id=a.videodata_id");
+            sqlScalars.addToSql("AND v.episode<0");
+            sqlScalars.addToSql("AND v.id IN (:movielist)");
+            sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
+        }
+
+        if (hasSeries) {
             if (hasMovie) {
-                sqlScalars.addToSql("SELECT 'MOVIE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sqlScalars.addToSql("FROM videodata v, artwork a");
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-                sqlScalars.addToSql("WHERE v.id=a.videodata_id");
-                sqlScalars.addToSql("AND v.episode<0");
-                sqlScalars.addToSql("AND v.id IN (:movielist)");
-                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
-            }
-
-            if (hasMovie && hasSeries) {
                 sqlScalars.addToSql(SQL_UNION);
             }
 
-            if (hasSeries) {
-                sqlScalars.addToSql("SELECT 'SERIES' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sqlScalars.addToSql("FROM series s, artwork a");
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-                sqlScalars.addToSql("WHERE s.id=a.series_id");
-                sqlScalars.addToSql("AND s.id IN (:serieslist)");
-                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
-            }
+            sqlScalars.addToSql("SELECT 'SERIES' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+            sqlScalars.addToSql("FROM series s, artwork a");
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
+            sqlScalars.addToSql("WHERE s.id=a.series_id");
+            sqlScalars.addToSql("AND s.id IN (:serieslist)");
+            sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
+        }
 
-            if ((hasMovie || hasSeries) && hasSeason) {
+        if (hasSeason) {
+            if (hasMovie || hasSeries) {
                 sqlScalars.addToSql(SQL_UNION);
             }
 
-            if (hasSeason) {
-                sqlScalars.addToSql("SELECT 'SEASON' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sqlScalars.addToSql("FROM season s, artwork a");
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-                sqlScalars.addToSql("WHERE s.id=a.season_id");
-                sqlScalars.addToSql("AND s.id IN (:seasonlist)");
-                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
-            }
+            sqlScalars.addToSql("SELECT 'SEASON' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+            sqlScalars.addToSql("FROM season s, artwork a");
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
+            sqlScalars.addToSql("WHERE s.id=a.season_id");
+            sqlScalars.addToSql("AND s.id IN (:seasonlist)");
+            sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
+        }
 
-            if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
+        if (hasEpisode) {
+            if (hasMovie || hasSeries || hasSeason) {
                 sqlScalars.addToSql(SQL_UNION);
             }
 
-            if (hasEpisode) {
-                sqlScalars.addToSql("SELECT 'EPISODE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sqlScalars.addToSql("FROM videodata v, artwork a");
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
-                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-                sqlScalars.addToSql("WHERE v.id=a.videodata_id");
-                sqlScalars.addToSql("AND v.episode>-1");
-                sqlScalars.addToSql("AND v.id IN (:episodelist)");
-                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
-            }
+            sqlScalars.addToSql("SELECT 'EPISODE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+            sqlScalars.addToSql("FROM videodata v, artwork a");
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+            sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
+            sqlScalars.addToSql("WHERE v.id=a.videodata_id");
+            sqlScalars.addToSql("AND v.episode>-1");
+            sqlScalars.addToSql("AND v.id IN (:episodelist)");
+            sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
+        }
 
-            sqlScalars.addScalar(ID, LongType.INSTANCE);
-            sqlScalars.addScalar(SOURCE, StringType.INSTANCE);
-            sqlScalars.addScalar(ARTWORK_ID, LongType.INSTANCE);
-            sqlScalars.addScalar(LOCATED_ID, LongType.INSTANCE);
-            sqlScalars.addScalar(GENERATED_ID, LongType.INSTANCE);
-            sqlScalars.addScalar(ARTWORK_TYPE, StringType.INSTANCE);
-            sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
-            sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar(SOURCE, StringType.INSTANCE);
+        sqlScalars.addScalar(ARTWORK_ID, LongType.INSTANCE);
+        sqlScalars.addScalar(LOCATED_ID, LongType.INSTANCE);
+        sqlScalars.addScalar(GENERATED_ID, LongType.INSTANCE);
+        sqlScalars.addScalar(ARTWORK_TYPE, StringType.INSTANCE);
+        sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
+        sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
 
-            if (hasMovie) {
-                sqlScalars.addParameter("movielist", ids.get(MetaDataType.MOVIE));
-            }
+        if (hasMovie) {
+            sqlScalars.addParameter("movielist", metaDataIds.get(MetaDataType.MOVIE));
+        }
 
-            if (hasSeries) {
-                sqlScalars.addParameter("serieslist", ids.get(MetaDataType.SERIES));
-            }
+        if (hasSeries) {
+            sqlScalars.addParameter("serieslist", metaDataIds.get(MetaDataType.SERIES));
+        }
 
-            if (hasSeason) {
-                sqlScalars.addParameter("seasonlist", ids.get(MetaDataType.SEASON));
-            }
+        if (hasSeason) {
+            sqlScalars.addParameter("seasonlist", metaDataIds.get(MetaDataType.SEASON));
+        }
 
-            if (hasEpisode) {
-                sqlScalars.addParameter("episodelist", ids.get(MetaDataType.EPISODE));
-            }
+        if (hasEpisode) {
+            sqlScalars.addParameter("episodelist", metaDataIds.get(MetaDataType.EPISODE));
+        }
 
-            sqlScalars.addParameter("artworklist", artworkRequired);
+        sqlScalars.addParameter("artworklist", artworkRequired);
 
-            List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
+        List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
 
-            LOG.trace("Found {} artworks", results.size());
-            for (ApiArtworkDTO ia : results) {
-                final String key = KeyMaker.makeKey(ia);
-                LOG.trace("  {} = {}", key, ia.toString());
-                artworkList.get(key).addArtwork(ia);
-            }
+        LOG.trace("Found {} artworks", results.size());
+        for (ApiArtworkDTO ia : results) {
+            final String key = KeyMaker.makeKey(ia);
+            LOG.trace("  {} = {}", key, ia.toString());
+            artworkList.get(key).addArtwork(ia);
         }
     }
 
