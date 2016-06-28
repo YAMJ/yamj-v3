@@ -37,7 +37,6 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
 
-    private String key = null;
     private MetaDataType source;
     private Long artworkId;
     private Long locatedId;
@@ -199,28 +198,4 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
             this.source = MetaDataType.PERSON;
         }
     }
-
-    //<editor-fold defaultstate="collapsed" desc="Artwork key methods">
-    @JsonIgnore
-    public String key() {
-        if (this.key == null) {
-            this.key = makeKey(this.source, getId());
-        }
-        return key;
-    }
-
-    @JsonIgnore
-    public static String makeKey(ApiVideoDTO master) {
-        return makeKey(master.getVideoType(), master.getId());
-    }
-
-    @JsonIgnore
-    public static String makeKey(MetaDataType videoType, long id) {
-        StringBuilder key = new StringBuilder();
-        key.append(videoType.toString());
-        key.append("-");
-        key.append(id);
-        return key.toString();
-    }
-    //</editor-fold>
 }

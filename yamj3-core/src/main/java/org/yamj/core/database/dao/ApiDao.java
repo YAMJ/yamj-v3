@@ -221,7 +221,7 @@ public class ApiDao extends HibernateDao {
 
             for (ApiVideoDTO video : queryResults) {
                 // Add the item to the map for further processing
-                results.put(ApiArtworkDTO.makeKey(video), video);
+                results.put(KeyMaker.makeKey(video), video);
                 // Add the ID to the list
                 ids.get(video.getVideoType()).add(video.getId());
             }
@@ -1103,8 +1103,9 @@ public class ApiDao extends HibernateDao {
 
             LOG.trace("Found {} artworks", results.size());
             for (ApiArtworkDTO ia : results) {
-                LOG.trace("  {} = {}", ia.key(), ia.toString());
-                artworkList.get(ia.key()).addArtwork(ia);
+                final String key = KeyMaker.makeKey(ia);
+                LOG.trace("  {} = {}", key, ia.toString());
+                artworkList.get(key).addArtwork(ia);
             }
         }
     }
