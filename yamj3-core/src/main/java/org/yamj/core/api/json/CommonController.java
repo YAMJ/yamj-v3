@@ -62,8 +62,7 @@ public class CommonController {
     public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
         LOG.debug("Getting alphabetical list - Options: {}", options);
 
-        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
         return wrapper;
     }
@@ -241,8 +240,7 @@ public class CommonController {
     public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
-        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getGenres(wrapper));
         return wrapper;
     }
@@ -317,8 +315,7 @@ public class CommonController {
     public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting studio list - Options: {}", options);
 
-        ApiWrapperList<Studio> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<Studio> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getStudios(wrapper));
         return wrapper;
     }
@@ -332,10 +329,9 @@ public class CommonController {
    {
         LOG.debug("Getting countries for filename '{}'", filename);
 
-        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
         OptionsId options = new OptionsId();
         options.setLanguage(language);
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getCountryFilename(wrapper, filename));
         return wrapper;
     }
@@ -364,8 +360,7 @@ public class CommonController {
     public ApiWrapperList<ApiCountryDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting country list - Options: {}", options);
 
-        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getCountries(wrapper));
         return wrapper;
     }
@@ -376,8 +371,7 @@ public class CommonController {
     public ApiWrapperList<ApiAwardDTO> getAwards(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting award list - Options: {}", options);
 
-        ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
         return wrapper;
     }
@@ -388,8 +382,7 @@ public class CommonController {
     public ApiWrapperList<ApiCertificationDTO> getCertifications(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting certifications list - Options: {}", options);
 
-        ApiWrapperList<ApiCertificationDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiCertificationDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
         return wrapper;
     }
@@ -400,8 +393,7 @@ public class CommonController {
     public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting video sources list - Options: {}", options);
 
-        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
         return wrapper;
     }
@@ -412,8 +404,7 @@ public class CommonController {
     public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsRating options) {
         LOG.debug("Getting ratings list - Options: {}", options);
 
-        ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
         return wrapper;
     }
@@ -424,8 +415,7 @@ public class CommonController {
     public ApiWrapperList<ApiBoxedSetDTO> getBoxSets(@ModelAttribute("options") OptionsBoxedSet options) {
         LOG.debug("Getting boxset list - Options: {}", options);
 
-        ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
         return wrapper;
     }
@@ -434,8 +424,7 @@ public class CommonController {
     public ApiWrapperSingle<ApiBoxedSetDTO> getBoxSet(@ModelAttribute("options") OptionsBoxedSet options) {
         LOG.debug("Getting boxset - Options: {}", options);
 
-        ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<>();
-        wrapper.setOptions(options);
+        ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<>(options);
         wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
         return wrapper;
     }

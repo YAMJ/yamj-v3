@@ -80,12 +80,10 @@ public class JsonApiStorageService {
 
     
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
-    public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
-        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
+    public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper, OptionsIndexVideo options) {
         List<ApiVideoDTO> results = apiDao.getVideoList(wrapper, options);
         
         for (ApiVideoDTO video : results) {
-            // videosource, artwork
 
             if (options.hasDataItem(GENRE)) {
                 video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
@@ -151,8 +149,8 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
-    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        return apiDao.getPersonList(wrapper);
+    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper, OptionsId options) {
+        return apiDao.getPersonList(wrapper, options);
     }
 
     public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
@@ -363,8 +361,8 @@ public class JsonApiStorageService {
         return apiDao.getArtworkById(id);
     }
 
-    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper) {
-        return apiDao.getArtworkList(wrapper);
+    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper, OptionsIndexArtwork options) {
+        return apiDao.getArtworkList(wrapper, options);
     }
     //</editor-fold>
 
@@ -494,8 +492,7 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    public  List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
-        OptionsEpisode options = (OptionsEpisode)wrapper.getOptions();
+    public  List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper, OptionsEpisode options) {
         List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper, options);
         
         for (ApiEpisodeDTO episode : results) {
@@ -764,8 +761,7 @@ public class JsonApiStorageService {
         return apiDao.getJobCount(requiredJobs);
     }
 
-    public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
-        OptionsIdArtwork options = (OptionsIdArtwork)wrapper.getOptions();
+    public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper, OptionsIdArtwork options) {
         List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper, options);
         
         for (ApiSeriesInfoDTO series : results) {

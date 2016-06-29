@@ -133,15 +133,9 @@ public class ApiDao extends HibernateDao {
         // add additional parameters
         params.addScalarParameters(sqlScalars);
 
-        DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
-
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
-        if (queryResults.isEmpty()) {
-            LOG.debug("No results found to process for video list");
-            return queryResults;
-        }
 
-        if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+        if (!queryResults.isEmpty() && CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
             LOG.trace("Adding artwork to index videos");
 
             // build the meta data maps for faster retrieval
@@ -1032,8 +1026,7 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper, OptionsId options) {
         SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         
@@ -1399,8 +1392,8 @@ public class ApiDao extends HibernateDao {
         return results.get(0);
     }
 
-    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper) {
-        SqlScalars sqlScalars = getSqlArtwork((OptionsIndexArtwork) wrapper.getOptions());
+    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper, OptionsIndexArtwork options) {
+        SqlScalars sqlScalars = getSqlArtwork(options);
         return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, wrapper);
     }
 
@@ -2261,7 +2254,6 @@ public class ApiDao extends HibernateDao {
         }
 
         SqlScalars sqlScalars = new SqlScalars(sql);
-
         sqlScalars.addScalar(TYPE, StringType.INSTANCE);
         sqlScalars.addScalar("counter", LongType.INSTANCE);
         sqlScalars.addScalar(CREATE_TIMESTAMP, TimestampType.INSTANCE);

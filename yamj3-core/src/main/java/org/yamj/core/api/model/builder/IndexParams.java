@@ -50,7 +50,6 @@ public class IndexParams {
     private final OptionsIndexVideo options;
     private final Map<String, String> includes;
     private final Map<String, String> excludes;
-    private final List<DataItem> dataItems;
     private final Map<String, Object> parameters = new HashMap<>();
 
     private String ratingSource;
@@ -62,7 +61,6 @@ public class IndexParams {
         this.options = options;
         this.includes = options.splitIncludes();
         this.excludes = options.splitExcludes();
-        this.dataItems = options.splitDataItems();
     }
 
     public Set<MetaDataType> getMetaDataTypes() {
@@ -86,7 +84,7 @@ public class IndexParams {
     }
 
     public List<DataItem> getDataItems() {
-        return dataItems;
+        return options.splitDataItems();
     }
 
     // year check

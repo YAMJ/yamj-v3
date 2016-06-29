@@ -49,14 +49,12 @@ public class ConfigController {
             LOG.info("Getting configuration properties for '{}'", options.getConfig());
         }
 
-        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<>();
-
-        // If not mode is specified, make it exact
+        // if not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
             options.setMode("EXACT");
         }
-        
-        wrapper.setOptions(options);
+
+        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(configService.getConfigurations(options));
         return wrapper;
     }

@@ -60,8 +60,7 @@ public class VideoController {
      */
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiVideoDTO> getVideo(@PathVariable("type") String type, @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
-        wrapper.setOptions(options);
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>(options);
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (MetaDataType.MOVIE == metaDataType || MetaDataType.SEASON == metaDataType || MetaDataType.SERIES == metaDataType) {
@@ -71,6 +70,7 @@ public class VideoController {
             if (options.getId() > 0L) {
                 LOG.debug("Getting {} with ID {}", options.getType(), options.getId());
                 wrapper.setResult(jsonApiStorageService.getSingleVideo(wrapper));
+                LOG.debug("Got {} with ID {}: {}", options.getType(), options.getId(), wrapper.getQueryDuration());
             } else {
                 wrapper.setStatusInvalidId();
             }
@@ -230,14 +230,14 @@ public class VideoController {
      */
     @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
     public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {
-        ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<>(options);
         if (options.getId() > 0L) {
             LOG.debug("Getting series info for ID {}", options.getId());
             if (options.hasDataItem(DataItem.ARTWORK) && StringUtils.isBlank(options.getArtwork())) {
                 options.setArtwork(ALL);
             }
-            wrapper.setResults(jsonApiStorageService.getSeriesInfo(wrapper));
+            wrapper.setResults(jsonApiStorageService.getSeriesInfo(wrapper, options));
+            LOG.debug("Got series info for ID {}: {}", options.getId(), wrapper.getQueryDuration());
         } else {
             wrapper.setStatusInvalidId();
         }
@@ -257,9 +257,9 @@ public class VideoController {
                 options.getSeasonid() < 0L ? ALL : options.getSeasonid(),
                 options.getSeason() < 0L ? ALL : options.getSeason());
 
-        ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getEpisodeList(wrapper));
+        ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<>(options);
+        wrapper.setResults(jsonApiStorageService.getEpisodeList(wrapper, options));
+        LOG.debug("Got {} episodes: {}", wrapper.getCount(), wrapper.getQueryDuration());
         return wrapper;
     }
     
@@ -273,8 +273,7 @@ public class VideoController {
     public ApiWrapperList<ApiYearDecadeDTO> getYears(@ModelAttribute("options") OptionsMultiType options) {
         LOG.debug("Getting year list - Options: {}", options);
 
-        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getYears(wrapper));
         return wrapper;
         
@@ -290,8 +289,7 @@ public class VideoController {
     public ApiWrapperList<ApiYearDecadeDTO> getDecades(@ModelAttribute("options") OptionsMultiType options) {
         LOG.debug("Getting decade list - Options: {}", options);
 
-        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
+        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
         return wrapper;
     }

@@ -48,10 +48,9 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiPersonDTO> getPerson(@ModelAttribute("options") OptionsId options) {
-        ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
+        ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>(options);
         if (options.getId() > 0L) {
             LOG.trace("Getting person with ID {}", options.getId());
-            wrapper.setOptions(options);
             wrapper.setResult(jsonApiStorageService.getPerson(wrapper));
         } else {
             wrapper.setStatusInvalidId();
@@ -85,10 +84,9 @@ public class PersonController {
     }
 
     private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsId options) {
-        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>(options);
         if (options.getId() > 0L) {
             LOG.info("Getting person list for {} with ID {}", metaDataType, options.getId());
-            wrapper.setOptions(options);
             wrapper.setResults(jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper));
         } else {
             wrapper.setStatusInvalidId();

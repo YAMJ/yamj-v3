@@ -22,7 +22,6 @@
  */
 package org.yamj.core.api.wrapper;
 
-import org.joda.time.DateTime;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.IOptions;
 
@@ -52,15 +51,9 @@ public interface IApiWrapper {
 
     String getBaseTrailerUrl();
 
-    void setQueryTime(DateTime queryTime);
-
-    void setQueryEnd();
-
     void setStatusCheck(ApiStatus status);
 
     void setCount(int count);
-
-    void setOptions(IOptions options);
 
     void setTotalCount(int totalCount);
 }

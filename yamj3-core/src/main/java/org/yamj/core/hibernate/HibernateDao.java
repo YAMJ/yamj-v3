@@ -462,12 +462,12 @@ public abstract class HibernateDao {
             query.setResultTransformer(Transformers.aliasToBean(entityClass));
         }
 
-        // Add the scalars to the query
+        // add the scalars to the query
         sqlScalars.populateScalars(query);
 
         List<T> queryResults = query.list();
 
-        // If the wrapper is populated, then run the query to get the maximum results
+        // if the wrapper is populated, then run the query to get the maximum results
         if (wrapper != null) {
             wrapper.setTotalCount(queryResults.size());
 
@@ -481,7 +481,8 @@ public abstract class HibernateDao {
                 if (options.getMax() > 0) {
                     query.setMaxResults(options.getMax());
                 }
-                // This will get the trimmed list
+                
+                // this will get the trimmed list
                 queryResults = query.list();
             }
         }

@@ -83,9 +83,8 @@ public class ArtworkController {
     public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.debug("Artwork list - Options: {}", options);
         
-        ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper));
+        ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>(options);
+        wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper, options));
         return wrapper;
     }
 

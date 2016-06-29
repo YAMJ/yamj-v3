@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.collections.CollectionUtils;
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.options.IOptions;
 
 /**
  * Default wrapper for a list returned from the API
@@ -38,7 +39,11 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
     private Collection<T> results = Collections.emptyList();
 
     public ApiWrapperList() {
-        super();
+        super(null);
+    }
+
+    public ApiWrapperList(IOptions options) {
+        super(options);
     }
 
     public Collection<T> getResults() {

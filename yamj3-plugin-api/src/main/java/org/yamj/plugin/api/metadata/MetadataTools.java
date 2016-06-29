@@ -349,7 +349,7 @@ public final class MetadataTools {
             return null;
         }
 
-        return newPlot = newPlot.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
+        return newPlot.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
     }
     
     /**

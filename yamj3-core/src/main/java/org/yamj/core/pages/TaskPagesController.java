@@ -128,7 +128,7 @@ public class TaskPagesController extends AbstractPagesController {
             try {
                 Date nextExecution = DATEPICKER_FORMAT.parse(form.getNextExecDate());
                 executionTask.setNextExecution(nextExecution);
-            } catch (Exception e) {
+            } catch (Exception e) { // NOSONAR
                 errorMessage = "Invalid datetime provided";
             }
         }

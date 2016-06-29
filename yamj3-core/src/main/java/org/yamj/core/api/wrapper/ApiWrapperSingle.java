@@ -23,6 +23,7 @@
 package org.yamj.core.api.wrapper;
 
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.options.IOptions;
 
 /**
  * Default wrapper for a list returned from the API
@@ -35,7 +36,11 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
     private T result = null;
 
     public ApiWrapperSingle() {
-        super();
+        super(null);
+    }
+
+    public ApiWrapperSingle(IOptions options) {
+        super(options);
     }
 
     public T getResult() {

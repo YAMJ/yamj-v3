@@ -99,7 +99,7 @@ public final class FileTools {
              {
                 long p = 0, s = inChannel.size();
                 while (p < s) {
-                    p += inChannel.transferTo(p, 1024 * 1024, outChannel);
+                    p += inChannel.transferTo(p, 1024L * 1024L, outChannel);
                 }
                 
                 if (deleteSource) {

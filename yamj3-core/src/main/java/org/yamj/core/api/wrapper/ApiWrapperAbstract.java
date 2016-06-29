@@ -35,23 +35,24 @@ import org.yamj.core.api.options.IOptions;
  */
 public abstract class ApiWrapperAbstract implements IApiWrapper {
 
+    private final IOptions options;
+    private final String baseArtworkUrl;
+    private final String baseMediainfoUrl;
+    private final String basePhotoUrl;
+    private final String baseTrailerUrl;
     private int count = 0;
     private int totalCount = 0;
     private long queryDuration = 0L;
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = ApiStatus.OK;
-    private IOptions options = null;
-    private String baseArtworkUrl = "";
-    private String baseMediainfoUrl = "";
-    private String basePhotoUrl = "";
-    private String baseTrailerUrl = "";
 
-    public ApiWrapperAbstract() {
+    public ApiWrapperAbstract(IOptions options) {
+        this.options = options;
         YamjInfo yi = new YamjInfo(YamjInfoBuild.CORE);
-        baseArtworkUrl = yi.getBaseArtworkUrl();
-        baseMediainfoUrl = yi.getBaseMediainfoUrl();
-        basePhotoUrl = yi.getBasePhotoUrl();
-        baseTrailerUrl = yi.getBaseTrailerUrl();
+        this.baseArtworkUrl = yi.getBaseArtworkUrl();
+        this.baseMediainfoUrl = yi.getBaseMediainfoUrl();
+        this.basePhotoUrl = yi.getBasePhotoUrl();
+        this.baseTrailerUrl = yi.getBaseTrailerUrl();
     }
 
     @Override
@@ -104,17 +105,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
         return baseTrailerUrl;
     }
 
-    @Override
-    public void setQueryTime(DateTime queryTime) {
-        this.queryTime = queryTime;
-    }
-
-    @Override
-    public void setQueryEnd() {
-        DateTime duration = DateTime.now().minus(queryTime.getMillis());
-        this.queryDuration = duration.getMillis();
-    }
-
     /**
      * Set the status to a specific value
      *
@@ -124,7 +114,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
      */
     @Override
     public void setStatusCheck(ApiStatus status) {
-        setQueryEnd();
+        this.queryDuration = DateTime.now().minus(queryTime.getMillis()).getMillis();
         this.status = status;
     }
 
@@ -138,11 +128,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setCount(int count) {
         this.count = count;
-    }
-
-    @Override
-    public void setOptions(IOptions options) {
-        this.options = options;
     }
 
     @Override

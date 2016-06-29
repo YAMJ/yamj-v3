@@ -53,23 +53,21 @@ public class IndexController {
 
     @RequestMapping("/video")
     public ApiWrapperList<ApiVideoDTO> getVideoList(@ModelAttribute("options") OptionsIndexVideo options) {
-        LOG.debug("Video index - Options: {}", options);
+        LOG.debug("Video index: {}", options);
 
-        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getVideoList(wrapper));
-        LOG.debug("Retrieved video index in time: {}", wrapper.getQueryDuration());
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<>(options);
+        wrapper.setResults(jsonApiStorageService.getVideoList(wrapper, options));
+        LOG.debug("Got video index with {} entries: {}", wrapper.getCount(), wrapper.getQueryDuration());
         return wrapper;
     }
 
     @RequestMapping("/person")
     public ApiWrapperList<ApiPersonDTO> getPersonList(@ModelAttribute("options") OptionsId options) {
-        LOG.debug("Person index - Options: {}", options);
+        LOG.debug("Person index: {}", options);
 
-        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getPersonList(wrapper));
-        LOG.debug("Retrieved person index in time: {}", wrapper.getQueryDuration());
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>(options);
+        wrapper.setResults(jsonApiStorageService.getPersonList(wrapper, options));
+        LOG.debug("Got person index with {} entries: {}", wrapper.getCount(), wrapper.getQueryDuration());
         return wrapper;
     }
 

@@ -51,13 +51,12 @@ public class PlayerController {
      */
     @RequestMapping("/list")
     public ApiWrapperList<PlayerInfo> playerList(@ModelAttribute("player") OptionsPlayer options) {
-        ApiWrapperList<PlayerInfo> wrapper = new ApiWrapperList<>();
-
-        // If not mode is specified, make it exact
+        // if not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
             options.setMode("EXACT");
         }
-        wrapper.setOptions(options);
+
+        ApiWrapperList<PlayerInfo> wrapper = new ApiWrapperList<>(options);
         wrapper.setResults(jsonApiStorageService.getPlayerList(options));
         return wrapper;
     }
