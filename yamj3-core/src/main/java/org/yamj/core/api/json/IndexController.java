@@ -53,21 +53,23 @@ public class IndexController {
 
     @RequestMapping("/video")
     public ApiWrapperList<ApiVideoDTO> getVideoList(@ModelAttribute("options") OptionsIndexVideo options) {
-        LOG.debug("Video list - Options: {}", options);
+        LOG.debug("Video index - Options: {}", options);
 
         ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getVideoList(wrapper));
+        LOG.debug("Retrieved video index in time: {}", wrapper.getQueryDuration());
         return wrapper;
     }
 
     @RequestMapping("/person")
     public ApiWrapperList<ApiPersonDTO> getPersonList(@ModelAttribute("options") OptionsId options) {
-        LOG.debug("Person list - Options: {}", options);
+        LOG.debug("Person index - Options: {}", options);
 
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getPersonList(wrapper));
+        LOG.debug("Retrieved person index in time: {}", wrapper.getQueryDuration());
         return wrapper;
     }
 

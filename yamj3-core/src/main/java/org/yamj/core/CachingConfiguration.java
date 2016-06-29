@@ -22,6 +22,8 @@
  */
 package org.yamj.core;
 
+import static org.yamj.core.CachingNames.*;
+
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
@@ -46,6 +48,7 @@ public class CachingConfiguration implements CachingConfigurer {
     private static final String ATTACHMENTS = "attachmentCache";
     private static final int TTL_10_MINUTES = 600;
     private static final int TTL_ONE_DAY = 86400;
+    private static final int TTL_ONE_WEEK = TTL_ONE_DAY * 7;
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -56,16 +59,28 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 
                 // caches for database objects
-                .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_STUDIO, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_COUNTRY, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_CERTIFICATION, 100, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_PERSON, 500, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_BOXEDSET, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_AWARD, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_STAGEFILE, 100, 180))
-                .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_PROFILE, 50, TTL_ONE_DAY))
-                .cache(cacheConfigDatabase(CachingNames.DB_ARTWORK_IMAGE, 2000, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_GENRE, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_STUDIO, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_COUNTRY, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_CERTIFICATION, 100, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_PERSON, 2000, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_BOXEDSET, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_AWARD, 50, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_STAGEFILE, 100, 180))
+                .cache(cacheConfigDatabase(DB_ARTWORK_PROFILE, 30, TTL_ONE_DAY))
+                .cache(cacheConfigDatabase(DB_ARTWORK_IMAGE, 2000, TTL_ONE_DAY))
+                
+                // caches for API objects
+                .cache(cacheConfig(API_GENRES, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_STUDIOS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_COUNTRIES, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_CERTIFICATIONS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_EXTERNAL_IDS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_RATINGS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_AWARDS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_BOXEDSETS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_TRAILERS, 5000, TTL_ONE_WEEK))
+                .cache(cacheConfig(API_VIDEOSOURCE, 5000, TTL_ONE_WEEK))
             );
     }
 

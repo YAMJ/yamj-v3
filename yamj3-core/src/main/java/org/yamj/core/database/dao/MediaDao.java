@@ -44,8 +44,7 @@ public class MediaDao extends HibernateDao {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT mf.video_source as name ");
-        sqlScalars.addToSql("FROM mediafile mf ");
+        sqlScalars.addToSql("SELECT DISTINCT mf.video_source as name FROM mediafile mf ");
         
         if (options.getType() != null) {
             sqlScalars.addToSql("JOIN mediafile_videodata mv ON mf.id=mv.mediafile_id ");

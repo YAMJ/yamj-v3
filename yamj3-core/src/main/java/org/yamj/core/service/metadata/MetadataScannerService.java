@@ -100,6 +100,9 @@ public class MetadataScannerService implements IQueueProcessService {
             // update meta data in one transaction
             metadataStorageService.updateScannedMetaData(videoData);
 
+            // evict API caches
+            metadataStorageService.evictApiCaches(MetaDataType.MOVIE, videoData.getId());
+
             LOG.debug("Updated movie in database: {}-'{}'", id, videoData.getTitle());
         } catch (Exception error) {
             // NOTE: status will not be changed
@@ -155,6 +158,15 @@ public class MetadataScannerService implements IQueueProcessService {
             // update meta data in one transaction
             metadataStorageService.updateScannedMetaData(series);
 
+            // evict API caches
+            metadataStorageService.evictApiCaches(MetaDataType.SERIES, series.getId());
+            for (Season season : series.getSeasons()) {
+                metadataStorageService.evictApiCaches(MetaDataType.SEASON, season.getId());
+                for (VideoData videoData : season.getVideoDatas()) {
+                    metadataStorageService.evictApiCaches(MetaDataType.EPISODE, videoData.getId());
+                }
+            }
+                
             LOG.debug("Updated series in database: {}-'{}'", id, series.getTitle());
         } catch (Exception error) {
             // NOTE: status will not be changed

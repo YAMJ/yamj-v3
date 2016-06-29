@@ -89,10 +89,6 @@ public class IndexParams {
         return dataItems;
     }
 
-    public boolean hasDataItem(DataItem dataItem) {
-        return dataItems.contains(dataItem);
-    }
-
     // year check
     public boolean includeYear() {
         return includes.containsKey(YEAR);

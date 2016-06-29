@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.core.CachingNames.*;
 import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
 import java.util.*;
@@ -39,6 +40,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.CommonDao;
@@ -1130,4 +1132,10 @@ public class MetadataStorageService {
         person.setFilmographyStatus(StatusType.NEW);
         this.commonDao.updateEntity(person);
     }
+    
+    @SuppressWarnings("unused")
+    @CacheEvict(value={API_GENRES,API_STUDIOS,API_COUNTRIES,API_CERTIFICATIONS,API_EXTERNAL_IDS,API_RATINGS,API_AWARDS,API_BOXEDSETS,API_TRAILERS,API_VIDEOSOURCE}, key="{#type, #id}")
+    public void evictApiCaches(MetaDataType type, Long id) {
+        // just for evicting caches
+    }    
 }

@@ -22,10 +22,18 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.core.CachingNames.API_EXTERNAL_IDS;
+import static org.yamj.core.CachingNames.API_GENRES;
+import static org.yamj.core.api.model.builder.DataItem.*;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
@@ -34,9 +42,7 @@ import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.OptionsPlayer;
-import org.yamj.core.api.options.UpdatePerson;
-import org.yamj.core.api.options.UpdateVideo;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.LocaleService;
@@ -46,11 +52,13 @@ import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.model.type.JobType;
 
 @Service("jsonApiStorageService")
 @Transactional(readOnly = true)
 public class JsonApiStorageService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ApiDao.class);
     private static final String API_SOURCE = "api";
         
     @Autowired
@@ -73,12 +81,53 @@ public class JsonApiStorageService {
     
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
-        List<ApiVideoDTO> results = apiDao.getVideoList(wrapper);
+        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
+        List<ApiVideoDTO> results = apiDao.getVideoList(wrapper, options);
         
-        // localization
         for (ApiVideoDTO video : results) {
-            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
+            // videosource, artwork
+
+            if (options.hasDataItem(GENRE)) {
+                video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(STUDIO)) {
+                video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(COUNTRY)) {
+                video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
+                localizeCountries(video.getCountries(), options.getLanguage());
+            }
+            
+            if (options.hasDataItem(CERTIFICATION)) {
+                video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
+                localizeCertifications(video.getCertifications(), options.getLanguage());
+            }
+            
+            if (options.hasDataItem(RATING)) {
+                video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(AWARD)) {
+                video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
+            }
+            
+            if (options.hasDataItem(EXTERNALID)) {
+                video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
+            }
+            
+            if (options.hasDataItem(BOXSET)) {
+                video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
+            }
+            
+            if (options.hasDataItem(TRAILER) && (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType()))) {
+                video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
+            }
+            
+            if (options.hasDataItem(VIDEOSOURCE)) {
+                video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
+            }
         }
         
         return results;
@@ -421,6 +470,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=API_GENRES, allEntries=true)
     public boolean updateGenre(long id, String targetApi) {
         Genre genre = commonDao.getGenre(id);
         if (genre == null) {
@@ -432,6 +482,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=API_GENRES, allEntries=true)
     public boolean updateGenre(String name, String targetApi) {
         Genre genre = commonDao.getGenre(name);
         if (genre == null) {
@@ -444,26 +495,145 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     public  List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
-        List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper);
+        OptionsEpisode options = (OptionsEpisode)wrapper.getOptions();
+        List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper, options);
         
-        // localization
         for (ApiEpisodeDTO episode : results) {
-            localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
-            localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
+            if (options.hasDataItem(GENRE)) {
+                episode.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+            }
+
+            if (options.hasDataItem(STUDIO)) {
+                episode.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+            }
+            
+            if (options.hasDataItem(COUNTRY)) {
+                episode.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                localizeCountries(episode.getCountries(), options.getLanguage());
+            }
+            
+            if (options.hasDataItem(CERTIFICATION)) {
+                episode.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                localizeCertifications(episode.getCertifications(), options.getLanguage());
+            }
+            
+            if (options.hasDataItem(RATING)) {
+                episode.setRatings(apiDao.getRatingsForMetadata(MetaDataType.EPISODE, episode.getId()));
+            }
+
+            if (options.hasDataItem(AWARD)) {
+                episode.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+            }
+
+            if (options.hasDataItem(FILES)) {
+                episode.setFiles(apiDao.getFilesForMetadata(MetaDataType.EPISODE, episode.getId()));
+                localizeFiles(episode.getFiles(), options.getLanguage());
+            }
         }
         
+        if (MapUtils.isNotEmpty(options.splitJobs())) {
+            Set<String> jobs = options.getJobTypes();
+
+            for (ApiEpisodeDTO episode : results) {
+                List<ApiPersonDTO> cast = apiDao.getCastForMetadata(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), jobs);
+
+                // just add given amount for jobs to cast
+                Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
+                for (ApiPersonDTO entry : cast) {
+                    Integer amount = jobMap.get(entry.getJob());
+                    if (amount == null) {
+                        episode.addCast(entry);
+                    } else if (amount > 0) {
+                        episode.addCast(entry);
+                        amount--;
+                        jobMap.put(entry.getJob(), amount);
+                    }
+                }
+            }
+        } else if (options.isAllJobTypes()) {
+            for (ApiEpisodeDTO episode : results) {
+                episode.setCast(apiDao.getCastForMetadata(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), null));
+            }
+        }
+
         return results;
     }
 
     public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        ApiVideoDTO video = apiDao.getSingleVideo(wrapper);
+        OptionsIndexVideo options = (OptionsIndexVideo)wrapper.getOptions();
+        ApiVideoDTO video = apiDao.getSingleVideo(wrapper, options);
         
         if (video != null) {
-            // localization
-            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
-            localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
+            
+            if (options.hasDataItem(GENRE)) {
+                video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(STUDIO)) {
+                video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(COUNTRY)) {
+                video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
+                localizeCountries(video.getCountries(), options.getLanguage());
+            }
+
+            if (options.hasDataItem(CERTIFICATION)) {
+                video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
+                localizeCertifications(video.getCertifications(), options.getLanguage());
+            }
+
+            if (options.hasDataItem(RATING)) {
+                video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(AWARD)) {
+                video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(EXTERNALID)) {
+                video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(BOXSET)) {
+                video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(TRAILER) && (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType()))) {
+                video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(VIDEOSOURCE)) {
+                video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
+            }
+
+            if (options.hasDataItem(FILES)) {
+                video.setFiles(apiDao.getFilesForMetadata(video.getVideoType(), video.getId()));
+                localizeFiles(video.getFiles(), options.getLanguage());
+            }
+            
+            if (MapUtils.isNotEmpty(options.splitJobs())) {
+                Set<String> jobs = options.getJobTypes();
+                LOG.trace("Adding jobs for ID {}: {}", options.getId(), jobs);
+
+                List<ApiPersonDTO> cast = apiDao.getCastForMetadata(video.getVideoType(), video.getId(), options.splitDataItems(), jobs);
+
+                // just add given amount for jobs to cast
+                Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
+                for (ApiPersonDTO entry : cast) {
+                    Integer amount = jobMap.get(entry.getJob());
+                    if (amount == null) {
+                        video.addCast(entry);
+                    } else if (amount > 0) {
+                        video.addCast(entry);
+                        amount--;
+                        jobMap.put(entry.getJob(), amount);
+                    }
+                }
+            } else if (options.isAllJobTypes()) {
+                LOG.trace("Adding all jobs for ID {}", options.getId());
+                video.setCast(apiDao.getCastForMetadata(video.getVideoType(), video.getId(), options.splitDataItems(), null));
+            }
         }
 
         return video;
@@ -595,12 +765,36 @@ public class JsonApiStorageService {
     }
 
     public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
-        List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper);
+        OptionsIdArtwork options = (OptionsIdArtwork)wrapper.getOptions();
+        List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper, options);
         
-        // localization
         for (ApiSeriesInfoDTO series : results) {
-            localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
+
+            if (options.hasDataItem(GENRE)) {
+                series.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, series.getId()));
+            }
+
+            if (options.hasDataItem(STUDIO)) {
+                series.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, series.getId()));
+            }
+
+            if (options.hasDataItem(COUNTRY)) {
+                series.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, series.getId()));
+                localizeCountries(series.getCountries(), options.getLanguage());
+            }
+
+            if (options.hasDataItem(CERTIFICATION)) {
+                series.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, series.getId()));
+                localizeCertifications(series.getCertifications(), options.getLanguage());
+            }
+            
+            if (options.hasDataItem(RATING)) {
+                series.setRatings(apiDao.getRatingsForMetadata(MetaDataType.SERIES, series.getId()));
+            }
+
+            if (options.hasDataItem(AWARD)) {
+                series.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, series.getId()));
+            }
         }
         
         return results;
@@ -1000,6 +1194,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=API_EXTERNAL_IDS, key="{#type, #id}")
     public ApiStatus updateExternalId(MetaDataType type, Long id, String sourceDb, String sourceDbId) {
         // first check if source is known
         if (!onlineScannerService.isKnownScanner(type, sourceDb)) {

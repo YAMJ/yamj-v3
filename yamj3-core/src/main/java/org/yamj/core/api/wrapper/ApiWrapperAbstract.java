@@ -76,10 +76,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
 
     @Override
     public String getQueryDuration() {
-        StringBuilder dur = new StringBuilder();
-        dur.append(queryDuration);
-        dur.append("ms");
-        return dur.toString();
+        return queryDuration + "ms";
     }
 
     @Override

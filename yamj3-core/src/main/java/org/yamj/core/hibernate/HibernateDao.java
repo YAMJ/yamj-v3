@@ -430,6 +430,19 @@ public abstract class HibernateDao {
      *
      * Gets the options from the wrapper for start and max
      *
+     * @param entityClass
+     * @param sqlScalars
+     * @return
+     */
+    public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars) { //NOSONAR
+        return this.executeQueryWithTransform(entityClass, sqlScalars, null);
+    }
+
+    /**
+     * Execute a query to return the results
+     *
+     * Gets the options from the wrapper for start and max
+     *
      * Puts the total count returned from the query into the wrapper
      *
      * @param entityClass

@@ -29,12 +29,23 @@ public final class CachingNames {
     public static final String DB_COUNTRY = "db_country";
     public static final String DB_CERTIFICATION = "db_certification";
     public static final String DB_PERSON = "db_person";
-    public static final String DB_BOXEDSET = "db_boxedSet";
+    public static final String DB_BOXEDSET = "db_boxed_set";
     public static final String DB_AWARD = "db_award";
-    public static final String DB_STAGEFILE = "db_stageFile";
+    public static final String DB_STAGEFILE = "db_stagefile";
     public static final String DB_ARTWORK_PROFILE = "db_artwork_profile";
     public static final String DB_ARTWORK_IMAGE = "db_artwork_image";
 
+    public static final String API_GENRES = "api_genres";
+    public static final String API_STUDIOS = "api_studios";
+    public static final String API_COUNTRIES = "api_countries";
+    public static final String API_CERTIFICATIONS = "api_certifications";
+    public static final String API_EXTERNAL_IDS = "api_external_ids"; 
+    public static final String API_RATINGS = "api_ratings"; 
+    public static final String API_AWARDS = "api_awards"; 
+    public static final String API_BOXEDSETS = "api_boxsets"; 
+    public static final String API_TRAILERS = "api_trailers"; 
+    public static final String API_VIDEOSOURCE = "api_videosource"; 
+    
     private CachingNames() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
