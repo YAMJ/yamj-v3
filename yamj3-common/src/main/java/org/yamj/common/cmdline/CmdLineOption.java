@@ -327,29 +327,6 @@ public final class CmdLineOption {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("-");
-        sb.append(this.optionName);
-        sb.append(" ");
-        if (this.needsValue) {
-            sb.append("<");
-            sb.append(this.optionParameterName);
-            sb.append("> ");
-        } else if (this.optionParameterName != null) {
-            sb.append("[");
-            sb.append(this.optionParameterName);
-            sb.append("]");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Get the string representation.
-     *
-     * @param caller the command line parser calling this option
-     * @return the string representation
-     */
-    public String toString(final CmdLineParser caller) {
-        StringBuilder sb = new StringBuilder();
         sb.append(this.isRequired ? "<" : "[");
         sb.append("-");
         sb.append(this.optionName);

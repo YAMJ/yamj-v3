@@ -83,13 +83,13 @@ public class TrailerProcessorService implements IQueueProcessService {
         TrailerDownloadDTO dto = null;
         if (downloadBuilder == null) {
             try {
-                // defaults to MP4 and URL
+                // defaults to trailer container and URL
                 dto = new TrailerDownloadDTO(trailer.getContainer(), new URL(trailer.getUrl()));
-            } catch (Exception e) {
+            } catch (Exception e) { //NOSONAR
                 LOG.warn("Malformed URL: {}", trailer.getUrl());
             }
         } else {
-            // build download dto by source scanner
+            // build download DTO by source scanner
             dto = downloadBuilder.buildTrailerDownload(trailer);
         }
         
@@ -152,13 +152,10 @@ public class TrailerProcessorService implements IQueueProcessService {
         sb.append(".");
         
         // 3. extension
-        switch (container) {
-        case GP3:
+        if (ContainerType.GP3 == container) {
             sb.append("3gp");
-            break;
-        default:
+        } else {
             sb.append(container.name().toLowerCase());
-            break;
         }
         
         return sb.toString();

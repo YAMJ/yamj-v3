@@ -108,11 +108,11 @@ public class OnlineScannerService implements PluginMetadataService {
         final WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
         ScanResult scanResult = null;
                         
-    	loop: for (String scanner : MOVIE_SCANNER) {
-    	    // holds the inner scan result
-    	    ScanResult innerResult = ScanResult.NO_RESULT;
-    	    
-    		PluginMovieScanner movieScanner = registeredMovieScanner.get(scanner);
+        loop: for (String scanner : MOVIE_SCANNER) {
+            // holds the inner scan result
+            ScanResult innerResult = ScanResult.NO_RESULT;
+            
+            PluginMovieScanner movieScanner = registeredMovieScanner.get(scanner);
             if (movieScanner == null) {
                 LOG.warn("Movie scanner {} not registered", scanner);
             } else {
@@ -153,7 +153,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 // just set scan result to inner result if no scan result before
                 scanResult = (scanResult == null) ? innerResult : scanResult;
             }
-		}       
+        }       
         
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
@@ -193,13 +193,13 @@ public class OnlineScannerService implements PluginMetadataService {
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", false);
         final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         final WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
-		ScanResult scanResult = null;
+        ScanResult scanResult = null;
 
-    	loop: for (String scanner : SERIES_SCANNER) {
+        loop: for (String scanner : SERIES_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
-    		PluginSeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
+            PluginSeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
             if (seriesScanner == null) {
                 LOG.warn("Series scanner {} not registered", scanner);
             } else {
@@ -240,7 +240,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 // just set scan result to inner result if no scan result before
                 scanResult = (scanResult == null) ? innerResult : scanResult;
             }
-    	}
+        }
 
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
@@ -293,13 +293,13 @@ public class OnlineScannerService implements PluginMetadataService {
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", false);
         final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         final WrapperPerson wrapper = new WrapperPerson(person);
-    	ScanResult scanResult = null;
+        ScanResult scanResult = null;
         
-    	loop: for (String scanner : PERSON_SCANNER) {
+        for (String scanner : PERSON_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
-    		PluginPersonScanner personScanner = registeredPersonScanner.get(scanner);
+            PluginPersonScanner personScanner = registeredPersonScanner.get(scanner);
             if (personScanner == null) {
                 LOG.warn("Person scanner {} not registered", scanner);
             } else {
@@ -332,7 +332,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
                 if (!useAlternate) {
-                    break loop;
+                    break;
                 }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
@@ -340,7 +340,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 // just set scan result to inner result if no scan result before
                 scanResult = (scanResult == null) ? innerResult : scanResult;
             }
-		}
+        }
         
         // evaluate status
         if (ScanResult.OK.equals(scanResult)) {
@@ -426,8 +426,8 @@ public class OnlineScannerService implements PluginMetadataService {
                 // just set scan result to inner result if no scan result before
                 scanResult = (scanResult == null) ? innerResult : scanResult;
             }
-		}
-    	
+        }
+        
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person filmography {}-'{}', scanned OK", person.getId(), person.getName());
@@ -459,10 +459,14 @@ public class OnlineScannerService implements PluginMetadataService {
         NfoScanner nfoScanner = null;
         if (dto.isTvShow()) {
             Iterator<String> iter = SERIES_SCANNER.iterator();
-            if (iter.hasNext()) nfoScanner = this.registeredSeriesScanner.get(iter.next());
+            if (iter.hasNext()) {
+                nfoScanner = this.registeredSeriesScanner.get(iter.next());
+            }
         } else {
             Iterator<String> iter = MOVIE_SCANNER.iterator();
-            if (iter.hasNext()) nfoScanner = this.registeredMovieScanner.get(iter.next());
+            if (iter.hasNext()) {
+                nfoScanner = this.registeredMovieScanner.get(iter.next());
+            }
         }
 
         boolean autodetect = this.configServiceWrapper.getBooleanProperty("nfo.autodetect.scanner", false);
@@ -520,21 +524,18 @@ public class OnlineScannerService implements PluginMetadataService {
     @Override
     public MovieScanner getMovieScanner(String source) {
         PluginMovieScanner pluginScanner = registeredMovieScanner.get(source);
-        if (pluginScanner == null) return null;
-        return pluginScanner.getMovieScanner();
+        return pluginScanner == null ? null : pluginScanner.getMovieScanner();
     }
 
     @Override
     public SeriesScanner getSeriesScanner(String source) {
         PluginSeriesScanner pluginScanner = registeredSeriesScanner.get(source);
-        if (pluginScanner == null) return null;
-        return pluginScanner.getSeriesScanner();
+        return pluginScanner == null ? null : pluginScanner.getSeriesScanner();
     }
 
     @Override
     public PersonScanner getPersonScanner(String source) {
         PluginPersonScanner pluginScanner = registeredPersonScanner.get(source);
-        if (pluginScanner == null) return null;
-        return pluginScanner.getPersonScanner();
+        return pluginScanner == null ? null : pluginScanner.getPersonScanner();
     }
 }

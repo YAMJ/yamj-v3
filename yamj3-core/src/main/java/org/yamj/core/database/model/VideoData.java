@@ -908,11 +908,8 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCertificationInfo(String countryCode, String certificate) {
-        if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
-            // check if country code already present
-            if (!getCertificationInfos().containsKey(countryCode)) {
-                getCertificationInfos().put(countryCode, certificate);
-            }
+        if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate) && !getCertificationInfos().containsKey(countryCode)) {
+            getCertificationInfos().put(countryCode, certificate);
         }
     }
 

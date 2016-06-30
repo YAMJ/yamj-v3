@@ -58,7 +58,7 @@ public final class ArtworkTools {
                     hashCode = tmp.substring(0, index);
                 }
             }
-        } catch (Exception ignore) {
+        } catch (Exception ignore) { //NOSONAR
             // ignore any exception
         }
         

@@ -880,21 +880,21 @@ public class MetadataStorageService {
         int updated = 0;
         
         List<Long> idList = this.commonDao.namedQueryByNamedParameters(Series.QUERY_IDS_RECHECK, params, limit);
-        if (idList.size() > 0 ) {
+        if (!idList.isEmpty()) {
             LOG.debug("Found {} series for recheck", idList.size());
             Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
             updated += this.commonDao.executeUpdate(Series.UPDATE_STATUS_RECHECK, updateParams);
         }
 
         idList = this.commonDao.namedQueryByNamedParameters(Season.QUERY_IDS_RECHECK, params, limit);
-        if (idList.size() > 0 ) {
+        if (!idList.isEmpty()) {
             LOG.debug("Found {} seasons for recheck", idList.size());
             Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
             updated += this.commonDao.executeUpdate(Season.UPDATE_STATUS_RECHECK, updateParams);
         }
 
         idList = this.commonDao.namedQueryByNamedParameters(VideoData.QUERY_IDS_RECHECK_EPISODE, params, limit);
-        if (idList.size() > 0 ) {
+        if (!idList.isEmpty()) {
             LOG.debug("Found {} episodes for recheck", idList.size());
             Map<String,Object> updateParams = Collections.singletonMap(ID_LIST, (Object)idList);
             updated += this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK, updateParams);

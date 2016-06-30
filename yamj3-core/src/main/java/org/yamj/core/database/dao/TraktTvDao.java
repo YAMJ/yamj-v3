@@ -72,7 +72,9 @@ public class TraktTvDao extends HibernateDao {
             id = convertRowElementToLong(row[1]);
             
             List<Long> ids = result.get(key);
-            if (ids==null) ids = new ArrayList<>();
+            if (ids==null) {
+                ids = new ArrayList<>();
+            }
             ids.add(id);
             result.put(key, ids);
         }

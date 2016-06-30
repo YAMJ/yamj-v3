@@ -52,28 +52,28 @@ public abstract class AbstractTest extends AbstractJUnit4SpringContextTests {
     
     @SuppressWarnings("rawtypes")
     protected static void  logCredits(VideoData videoData, Class scannerClass) {
-        Logger LOG = LoggerFactory.getLogger(scannerClass);
-        LOG.info("VideoData {}: {} credits", videoData.getTitle(), videoData.getCreditDTOS().size());
+        Logger log = LoggerFactory.getLogger(scannerClass); //NOSONAR
+        log.info("VideoData {}: {} credits", videoData.getTitle(), videoData.getCreditDTOS().size());
         for (CreditDTO credit : videoData.getCreditDTOS()) {
-            LOG.info("{}: {} {}", credit.getJobType(), credit.getName(), (credit.getRole() == null)?null:"("+credit.getRole()+")");
+            log.info("{}: {} {}", credit.getJobType(), credit.getName(), (credit.getRole() == null)?null:"("+credit.getRole()+")");
         }
     }
 
     @SuppressWarnings("rawtypes")
     protected static void  logAwards(VideoData videoData, Class scannerClass) {
-        Logger LOG = LoggerFactory.getLogger(scannerClass);
-        LOG.info("VideoData {}: {} awards", videoData.getTitle(), videoData.getAwardDTOS().size());
+        Logger log = LoggerFactory.getLogger(scannerClass); //NOSONAR
+        log.info("VideoData {}: {} awards", videoData.getTitle(), videoData.getAwardDTOS().size());
         for (AwardDTO award : videoData.getAwardDTOS()) {
-            LOG.info("{} - {}: {} (won: {})", award.getEvent(), award.getCategory(), award.getYear(), award.isWon());
+            log.info("{} - {}: {} (won: {})", award.getEvent(), award.getCategory(), award.getYear(), award.isWon());
         }
     }
 
     @SuppressWarnings("rawtypes")
     protected static void logArtworks(ArtworkType type, List<ArtworkDTO> dtos, Class scannerClass) {
-        Logger LOG = LoggerFactory.getLogger(scannerClass);
+        Logger log = LoggerFactory.getLogger(scannerClass); //NOSONAR
         if (dtos != null) {
             for (ArtworkDTO dto : dtos) {
-                LOG.info("{}: {}", type, dto);
+                log.info("{}: {}", type, dto);
             }
         }
     }

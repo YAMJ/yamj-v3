@@ -449,7 +449,7 @@ public final class HTMLTools {
         }
         index += sectionStart.length();
         
-        int endIndex = (sectionEnd == null ? src.length() : src.indexOf(sectionEnd, index));
+        int endIndex = sectionEnd == null ? src.length() : src.indexOf(sectionEnd, index);
         if (endIndex == -1) {
             return tags;
         }
@@ -538,7 +538,7 @@ public final class HTMLTools {
             }
             subString = subString.substring(0, endIndex);
             return HTMLTools.decodeHtml(subString.trim());
-        } catch (Exception error) {
+        } catch (Exception ex) { //NOSONAR
             return StringUtils.EMPTY;
         }
     }

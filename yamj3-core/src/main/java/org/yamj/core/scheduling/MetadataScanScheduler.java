@@ -140,7 +140,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
                             task.setNextExecution(LocalDateTime.fromDateFields(task.getNextExecution()).minusYears(2).toDate());
                             this.executionTaskStorageService.updateEntity(task);                            
                         }
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // ignore any exception
                     }
                     

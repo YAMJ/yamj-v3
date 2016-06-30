@@ -37,7 +37,7 @@ import org.yamj.plugin.api.metadata.MetadataScanner;
 
 public class PluginFilmographyScanner implements MetadataScanner {
 
-    private final Logger LOG = LoggerFactory.getLogger(PluginFilmographyScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginFilmographyScanner.class);
     private final FilmographyScanner filmographyScanner;
     private final LocaleService localeService;
     

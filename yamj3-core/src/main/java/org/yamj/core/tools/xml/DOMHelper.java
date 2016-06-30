@@ -160,11 +160,7 @@ public final class DOMHelper {
     public static Document getDocFromString(String docString) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         InputSource is = new InputSource(new StringReader(docString));
-        DocumentBuilder db;
-
-        db = dbf.newDocumentBuilder();
-        Document doc = db.parse(is);
-        return doc;
+        return dbf.newDocumentBuilder().parse(is);
     }
 
     /**

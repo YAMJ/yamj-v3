@@ -57,7 +57,7 @@ public class FilenameScanner {
     private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)|\\s+((?:e[0-9]+)+)");
     private static final Pattern SEASON_PATTERN = PatternUtils.ipatt("s{0,1}([0-9]+)(\\s|\\.)??[ex-]");
     private static final Pattern EPISODE_PATTERN = PatternUtils.ipatt("[ex]\\s??([0-9]+)");
-	
+    
     // Last 4 digits or last 4 digits in parenthesis
     private static final Pattern MOVIE_YEAR_PATTERN = PatternUtils.patt("\\({0,1}(\\d{4})(?:/|\\\\|\\||-){0,1}(I*)\\){0,1}$");
     // One or more '.[]_ '
@@ -385,7 +385,7 @@ public class FilenameScanner {
         processTitle(dto);
     }
 
-	/**
+    /**
      * Process the Season and Episodes
      *
      * @param dto
@@ -399,7 +399,7 @@ public class FilenameScanner {
             // Default season for tv show like "my tv E05 - title"
             String sseason = "01";
             if (smatcher.find()) {
-            	sseason = smatcher.group(1);
+                sseason = smatcher.group(1);
             }
        
             int season = Integer.parseInt(sseason);

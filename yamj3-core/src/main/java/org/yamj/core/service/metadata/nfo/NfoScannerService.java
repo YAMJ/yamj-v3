@@ -152,11 +152,9 @@ public class NfoScannerService {
                 videoData.setCountryCodes(infoDTO.getCountryCodes(), SCANNER_ID);
             }
 
-            if (StringUtils.isNotBlank(infoDTO.getCompany())) {
-                if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-                    Set<String> studioNames = Collections.singleton(infoDTO.getCompany());
-                    videoData.setStudioNames(studioNames, SCANNER_ID);
-                }
+            if (StringUtils.isNotBlank(infoDTO.getCompany()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+                Set<String> studioNames = Collections.singleton(infoDTO.getCompany());
+                videoData.setStudioNames(studioNames, SCANNER_ID);
             }
 
             // add certifications
@@ -389,7 +387,7 @@ public class NfoScannerService {
                     // mark stage file with error
                     stageFile.setStatus(StatusType.ERROR);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {
+                } catch (Exception ignore) { //NOSONAR
                     // error can be ignored cause will be done in next run
                 }
             }

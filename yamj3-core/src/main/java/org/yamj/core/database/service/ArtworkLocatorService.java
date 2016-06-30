@@ -100,7 +100,7 @@ public class ArtworkLocatorService {
 
         // search in parent directories for season specific artwork names
         Set<StageDirectory> parentDirectories = FileTools.getParentDirectories(directories);
-        if (parentDirectories.size() > 0) {
+        if (!parentDirectories.isEmpty()) {
             artworkNames.clear();
             addNameWithTokens(artworkNames, seasonNr, tokens);
             artworks.addAll(findArtworkStageFiles(parentDirectories, artworkNames));
@@ -133,18 +133,15 @@ public class ArtworkLocatorService {
 
         // extend artwork names for parent folder specific series names
         Set<StageDirectory> parentDirectories = FileTools.getParentDirectories(directories);
-        if (parentDirectories.size() > 0) {
+        if (!parentDirectories.isEmpty()) {
             artworkNames.addAll(tokens);
             for (StageDirectory parent : parentDirectories) {
                 final String directoryName = StringEscapeUtils.escapeSql(parent.getDirectoryName().toLowerCase());
-                switch (artworkType) {
-                case POSTER:
+
+                if (ArtworkType.POSTER == artworkType) {
                     artworkNames.add(directoryName);
-                    //$FALL-THROUGH$
-                default:
-                    addNameWithTokens(artworkNames, directoryName, tokens);
-                    break;
                 }
+                addNameWithTokens(artworkNames, directoryName, tokens);
             }
             
             // search series specific names in parent directory of video files
@@ -179,16 +176,12 @@ public class ArtworkLocatorService {
             final String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
             final String fileName = StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase());
             
-            switch (artworkType) {
-            case POSTER:
+            if (ArtworkType.POSTER == artworkType) {
                 artworkNames.add(fileName);
                 artworkNames.add(directoryName);
-                //$FALL-THROUGH$
-            default:
-                addNameWithTokens(artworkNames, fileName, tokens);
-                addNameWithTokens(artworkNames, directoryName, tokens);
-                break;
             }
+            addNameWithTokens(artworkNames, fileName, tokens);
+            addNameWithTokens(artworkNames, directoryName, tokens);
         }
         return artworkNames;
     }
@@ -199,13 +192,10 @@ public class ArtworkLocatorService {
         for (StageFile videoFile : videoFiles) {
             final String fileName = StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase());
             
-            switch (artworkType) {
-            case POSTER:
+            if (ArtworkType.POSTER == artworkType) {
                 artworkNames.add(fileName);
-                //$FALL-THROUGH$
-            default:
-                addNameWithTokens(artworkNames, fileName, tokens);
             }
+            addNameWithTokens(artworkNames, fileName, tokens);
         }
         return artworkNames;
     }

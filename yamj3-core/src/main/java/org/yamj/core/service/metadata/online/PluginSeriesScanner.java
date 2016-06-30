@@ -31,7 +31,7 @@ import org.yamj.plugin.api.model.IdMap;
 
 public class PluginSeriesScanner implements NfoScanner {
 
-    private final Logger LOG = LoggerFactory.getLogger(PluginSeriesScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginSeriesScanner.class);
     private final SeriesScanner seriesScanner;
 
     public PluginSeriesScanner(SeriesScanner seriesScanner) {

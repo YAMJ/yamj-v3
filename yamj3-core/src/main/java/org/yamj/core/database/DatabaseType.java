@@ -27,4 +27,8 @@ public final class DatabaseType {
     public static final String MYSQL = "mysql"; 
     public static final String HSQL = "hsql"; 
     public static final String H2 = "h2"; 
+
+    private DatabaseType() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 }

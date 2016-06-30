@@ -45,7 +45,7 @@ public final class InfoEpisodeDTO {
     private Date watchedDate; 
 
     public boolean isValid() {
-        return ((this.season >= 0) && (this.episode >= 0));
+        return season >= 0 && episode >= 0;
     }
 
     public boolean isSameEpisode(int season, int episode) {

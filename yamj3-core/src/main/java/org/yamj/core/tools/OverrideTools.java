@@ -229,7 +229,7 @@ public final class OverrideTools {
                 } else if (scannable instanceof Person) {
                     index = PERSON_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
                 }
-            } catch (Exception ignore) {
+            } catch (Exception ignore) { //NOSONAR
                 // ignore this error
             }
 
@@ -332,119 +332,119 @@ public final class OverrideTools {
     }
 
     public static boolean checkOverwriteGenres(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.GENRES, source)) return false;
+        if (skipCheck(metadata, OverrideFlag.GENRES, source)) return false; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.GENRES, source);
     }
 
     public static boolean checkOverwriteStudios(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.STUDIOS, source)) return false;
+        if (skipCheck(metadata, OverrideFlag.STUDIOS, source)) return false; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.STUDIOS, source);
     }
 
     public static boolean checkOverwriteCountries(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.COUNTRIES, source)) return false;
+        if (skipCheck(metadata, OverrideFlag.COUNTRIES, source)) return false; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.COUNTRIES, source);
     }
 
     public static boolean checkOverwriteOriginalTitle(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.ORIGINALTITLE, source)) return false;
-        if (StringUtils.isEmpty(metadata.getTitleOriginal())) return true;
+        if (skipCheck(metadata, OverrideFlag.ORIGINALTITLE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(metadata.getTitleOriginal())) return true; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.ORIGINALTITLE, source);
     }
 
     public static boolean checkOverwriteOutline(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.OUTLINE, source)) return false;
-        if (StringUtils.isEmpty(metadata.getOutline())) return true;
+        if (skipCheck(metadata, OverrideFlag.OUTLINE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(metadata.getOutline())) return true; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.OUTLINE, source);
     }
 
     public static boolean checkOverwritePlot(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.PLOT, source)) return false;
-        if (StringUtils.isEmpty(metadata.getPlot())) return true;
+        if (skipCheck(metadata, OverrideFlag.PLOT, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(metadata.getPlot())) return true; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.PLOT, source);
     }
 
     public static boolean checkOverwriteQuote(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.QUOTE, source)) return false;
-        if (StringUtils.isEmpty(videoData.getQuote())) return true;
+        if (skipCheck(videoData, OverrideFlag.QUOTE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(videoData.getQuote())) return true; //NOSONAR
         return checkOverwrite(videoData, OverrideFlag.QUOTE, source);
     }
 
     public static boolean checkOverwriteReleaseDate(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.RELEASEDATE, source)) return false;
-        if (videoData.getReleaseDate() == null) return true;
+        if (skipCheck(videoData, OverrideFlag.RELEASEDATE, source)) return false; //NOSONAR
+        if (videoData.getReleaseDate() == null) return true; //NOSONAR
         return checkOverwrite(videoData, OverrideFlag.RELEASEDATE, source);
     }
 
     public static boolean checkOverwriteTagline(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.TAGLINE, source)) return false;
-        if (StringUtils.isEmpty(videoData.getTagline())) return true;
+        if (skipCheck(videoData, OverrideFlag.TAGLINE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(videoData.getTagline())) return true; //NOSONAR
         return checkOverwrite(videoData, OverrideFlag.TAGLINE, source);
     }
 
     public static boolean checkOverwriteTitle(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.TITLE, source)) return false;
-        if (StringUtils.isEmpty(metadata.getTitle())) return true;
+        if (skipCheck(metadata, OverrideFlag.TITLE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(metadata.getTitle())) return true; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.TITLE, source);
     }
 
     public static boolean checkOverwriteYear(AbstractMetadata metadata, String source) {
-        if (skipCheck(metadata, OverrideFlag.YEAR, source)) return false;
-        if (metadata.getYear() <= 0) return true;
+        if (skipCheck(metadata, OverrideFlag.YEAR, source)) return false; //NOSONAR
+        if (metadata.getYear() <= 0) return true; //NOSONAR
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);
     }
     
     public static boolean checkOverwriteName(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.NAME, source)) return false;
-        if (person.getName() == null) return true;
+        if (skipCheck(person, OverrideFlag.NAME, source)) return false; //NOSONAR
+        if (person.getName() == null) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.NAME, source);
     }
 
     public static boolean checkOverwriteFirstName(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.FIRSTNAME, source)) return false;
-        if (StringUtils.isBlank(person.getFirstName())) return true;
+        if (skipCheck(person, OverrideFlag.FIRSTNAME, source)) return false; //NOSONAR
+        if (StringUtils.isBlank(person.getFirstName())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.FIRSTNAME, source);
     }
 
     public static boolean checkOverwriteLastName(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.LASTNAME, source)) return false;
-        if (StringUtils.isBlank(person.getLastName())) return true;
+        if (skipCheck(person, OverrideFlag.LASTNAME, source)) return false; //NOSONAR
+        if (StringUtils.isBlank(person.getLastName())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.LASTNAME, source);
     }
 
     public static boolean checkOverwriteBirthDay(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.BIRTHDAY, source)) return false;
-        if (person.getBirthDay() == null) return true;
+        if (skipCheck(person, OverrideFlag.BIRTHDAY, source)) return false; //NOSONAR
+        if (person.getBirthDay() == null) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.BIRTHDAY, source);
     }
 
     public static boolean checkOverwriteBirthPlace(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.BIRTHPLACE, source)) return false;
-        if (StringUtils.isEmpty(person.getBirthPlace())) return true;
+        if (skipCheck(person, OverrideFlag.BIRTHPLACE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(person.getBirthPlace())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.BIRTHPLACE, source);
     }
 
     public static boolean checkOverwriteBirthName(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.BIRTHNAME, source)) return false;
-        if (StringUtils.isEmpty(person.getBirthName())) return true;
+        if (skipCheck(person, OverrideFlag.BIRTHNAME, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(person.getBirthName())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.BIRTHNAME, source);
     }
 
     public static boolean checkOverwriteDeathDay(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.DEATHDAY, source)) return false;
-        if (person.getDeathDay() == null) return true;
+        if (skipCheck(person, OverrideFlag.DEATHDAY, source)) return false; //NOSONAR
+        if (person.getDeathDay() == null) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.DEATHDAY, source);
     }
 
     public static boolean checkOverwriteDeathPlace(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.DEATHPLACE, source)) return false;
-        if (StringUtils.isEmpty(person.getDeathPlace())) return true;
+        if (skipCheck(person, OverrideFlag.DEATHPLACE, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(person.getDeathPlace())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.DEATHPLACE, source);
     }
 
     public static boolean checkOverwriteBiography(Person person, String source) {
-        if (skipCheck(person, OverrideFlag.BIOGRAPHY, source)) return false;
-        if (StringUtils.isEmpty(person.getBiography())) return true;
+        if (skipCheck(person, OverrideFlag.BIOGRAPHY, source)) return false; //NOSONAR
+        if (StringUtils.isEmpty(person.getBiography())) return true; //NOSONAR
         return checkOverwrite(person, OverrideFlag.BIOGRAPHY, source);
     }
 }

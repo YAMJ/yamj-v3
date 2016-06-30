@@ -209,7 +209,7 @@ public final class MetadataTools {
         try {
             parsedDate = DateTime.parse(dateToParse, config).toDate();
             LOG.trace("Converted date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) { //NOSONAR
             LOG.debug("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
         }
         return parsedDate;

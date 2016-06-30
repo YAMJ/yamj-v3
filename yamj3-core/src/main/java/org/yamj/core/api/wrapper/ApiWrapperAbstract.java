@@ -24,7 +24,6 @@ package org.yamj.core.api.wrapper;
 
 import org.joda.time.DateTime;
 import org.yamj.common.model.YamjInfo;
-import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.IOptions;
@@ -48,7 +47,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
 
     public ApiWrapperAbstract(IOptions options) {
         this.options = options;
-        YamjInfo yi = new YamjInfo(YamjInfoBuild.CORE);
+        YamjInfo yi = YamjInfo.getCoreInfo();
         this.baseArtworkUrl = yi.getBaseArtworkUrl();
         this.baseMediainfoUrl = yi.getBaseMediainfoUrl();
         this.basePhotoUrl = yi.getBasePhotoUrl();

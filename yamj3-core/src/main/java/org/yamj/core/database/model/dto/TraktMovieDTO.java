@@ -113,7 +113,7 @@ public class TraktMovieDTO {
     }
 
     public boolean isValid() {
-        return (getTrakt() != null || getImdb() != null || getTmdb() != null);
+        return getTrakt() != null || getImdb() != null || getTmdb() != null;
     }
 
     @Override

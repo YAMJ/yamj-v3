@@ -52,6 +52,9 @@ import org.yamj.common.type.MetaDataType;
 public class YamjInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(YamjInfo.class);
+    private static final String UNKNOWN = "UNKNOWN";
+    private static YamjInfo CORE_INFO = null;
+    
     // Project properties/information
     private String projectName;
     private String projectVersion;
@@ -79,6 +82,13 @@ public class YamjInfo {
     private String baseTrailerUrl;
     private String skinDir;
 
+    public static YamjInfo getCoreInfo() {
+        if (CORE_INFO == null) {
+            CORE_INFO = new YamjInfo(YamjInfoBuild.CORE);
+        }
+        return CORE_INFO;
+    }
+    
     @SuppressWarnings("unused")
     private YamjInfo() {
         this(YamjInfoBuild.COMMON);
@@ -323,13 +333,13 @@ public class YamjInfo {
                 this.databaseName = "HSQL: InProc Server";
                 this.databaseIp = "localhost";
             }   else {
-                this.databaseName = "UNKNOWN";
-                this.databaseIp = "UNKNOWN";
+                this.databaseName = UNKNOWN;
+                this.databaseIp = UNKNOWN;
             }
         } catch (Exception ex) {
             LOG.warn("Failed to determine database name", ex);
-            this.databaseName = "UNKNOWN";
-            this.databaseIp = "UNKNOWN";
+            this.databaseName = UNKNOWN;
+            this.databaseIp = UNKNOWN;
         }
     }
 

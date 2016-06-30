@@ -141,7 +141,7 @@ public class TrailerScannerService implements IQueueProcessService {
         final WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
 
         List<TrailerDTO> trailerDTOs = null;
-        loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", "youtube")) {
+        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", "youtube")) {
             MovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
             if (scanner == null) {
                 LOG.warn("Movie trailer scanner {} not registerd", prio);
@@ -150,7 +150,7 @@ public class TrailerScannerService implements IQueueProcessService {
                 wrapper.setScannerName(scanner.getScannerName());
                 trailerDTOs = scanner.scanForTrailer(wrapper);
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
-                    break loop;
+                    break;
                 }
             }
         }

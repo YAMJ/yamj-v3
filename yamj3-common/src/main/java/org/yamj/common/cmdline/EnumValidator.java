@@ -61,8 +61,7 @@ public class EnumValidator extends OptionValidator {
             }
 
             if (!result) {
-                throw new CmdLineException("Parameter " + parsedOption.getValue() + " is not valid for option '"
-                        + parsedOption.getParent().toString(cmdlineParser) + "'");
+                throw new CmdLineException("Parameter " + parsedOption.getValue() + " is not valid for option '" + parsedOption.getParent() + "'");
             }
         } catch (final NullPointerException npe) {
             throw new CmdLineException("NULL value passed", npe);

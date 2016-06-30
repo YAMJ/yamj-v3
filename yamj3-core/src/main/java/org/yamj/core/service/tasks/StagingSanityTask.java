@@ -77,7 +77,7 @@ public class StagingSanityTask implements ITask {
                 stageFileIds.addAll(this.stagingService.findNotExistingStageFiles(rootId));
             }
             
-            if (stageFileIds.size() > 0) {
+            if (!stageFileIds.isEmpty()) {
                 LOG.info("Found {} not existing stage files", stageFileIds.size());
                 this.stagingService.markStageFilesAsDeleted(stageFileIds);
 

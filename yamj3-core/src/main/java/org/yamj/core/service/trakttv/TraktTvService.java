@@ -101,13 +101,13 @@ public class TraktTvService {
     }
 
     public boolean isSynchronizationEnabled() {
-        return (collectionEnabled || pushEnabled || pullEnabled);
+        return collectionEnabled || pushEnabled || pullEnabled;
     }
     
     public boolean isExpired() {
         // check expiration date
         final Date expirationDate = configService.getDateProperty(TRAKTTV_EXPIRATION);
-        return (expirationDate == null || expirationDate.getTime() < System.currentTimeMillis());
+        return expirationDate == null || expirationDate.getTime() < System.currentTimeMillis();
     }
 
     public TraktTvInfo getTraktTvInfo() {
@@ -477,7 +477,7 @@ public class TraktTvService {
 
     private boolean syncCollectedMovies(List<SyncMovie> syncMovies) {
         boolean noError = true;
-        if (syncMovies.size() > 0) {
+        if (!syncMovies.isEmpty()) {
             try {
                 this.traktTvApi.syncService().addItemsToCollection(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
@@ -642,7 +642,7 @@ public class TraktTvService {
         boolean noError = true;
         for (TrackedMovie movie : filteredMovies) {
             final Set<Long> updateable = getUpdateableMovies(movie.getMovie().getIds(), allMovieIds);
-            if (updateable.size() > 0) {
+            if (!updateable.isEmpty()) {
                 try {
                     final String traktTvId = movie.getMovie().getIds().trakt().toString();
                     final Date lastWatched = movie.getLastWatchedAt().withMillisOfSecond(0).toDate();
@@ -666,15 +666,21 @@ public class TraktTvService {
         Set<Long> updateable = new HashSet<>();
         if (movieIds.trakt() != null) {
             List<Long> i = updatedMovies.get(SOURCE_TRAKTTV+"#"+movieIds.trakt());
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (movieIds.imdb() != null) {
             List<Long> i = updatedMovies.get(SOURCE_IMDB+"#"+movieIds.imdb());
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (movieIds.tmdb() != null) {
             List<Long> i = updatedMovies.get(SOURCE_TMDB+"#"+movieIds.tmdb());
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         return updateable;
     }
@@ -729,7 +735,7 @@ public class TraktTvService {
         boolean noError = true;
         for (WatchedEpisode episode : watchedEpisodes) {
             final Set<Long> updateable = getUpdateableEpisodes(episode.getIds(), episode.getSeason(), episode.getEpisode(), allEpisodeIds);
-            if (updateable.size() > 0) {
+            if (!updateable.isEmpty()) {
                 try {
                     this.traktTvStorageService.updateWatched(episode.getLastWatched(), updateable);
                 } catch (Exception ex) {
@@ -751,7 +757,9 @@ public class TraktTvService {
         Set<Long> updateable = new HashSet<>();
         if (showIds.trakt() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TRAKTTV+"#"+showIds.trakt()+"#"+season+"#"+episode);
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (showIds.tvdb() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TVDB+"#"+showIds.tvdb()+"#"+season+"#"+episode);
@@ -759,15 +767,21 @@ public class TraktTvService {
         }
         if (showIds.tvRage() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TVRAGE+"#"+showIds.tvRage()+"#"+season+"#"+episode);
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (showIds.imdb() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_IMDB+"#"+showIds.imdb()+"#"+season+"#"+episode);
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (showIds.tmdb() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TMDB+"#"+showIds.tmdb()+"#"+season+"#"+episode);
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         return updateable;
     }
@@ -814,7 +828,7 @@ public class TraktTvService {
 
     private boolean syncWatchedMovies(List<SyncMovie> syncMovies) {
         boolean noError = true;
-        if (syncMovies.size() > 0) {
+        if (!syncMovies.isEmpty()) {
             try {
                 this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
@@ -867,7 +881,7 @@ public class TraktTvService {
 
     private boolean syncWatchedShows(List<SyncShow> syncShows) {
         boolean noError = true;
-        if (syncShows.size() > 0) {
+        if (!syncShows.isEmpty()) {
             try {
                 this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
             } catch (Exception ex) {

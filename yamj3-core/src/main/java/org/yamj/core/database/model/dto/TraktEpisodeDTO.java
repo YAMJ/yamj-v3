@@ -63,6 +63,6 @@ public class TraktEpisodeDTO extends TraktMovieDTO {
 
     @Override
     public boolean isValid() {
-        return (super.isValid() || getTvdb() != null || getTvRage() != null);
+        return super.isValid() || getTvdb() != null || getTvRage() != null;
     }
 }

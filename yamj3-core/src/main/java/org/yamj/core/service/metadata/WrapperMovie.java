@@ -160,7 +160,9 @@ public class WrapperMovie implements IMovie {
             final Set<String> countryCodes = new HashSet<>(countries.size());
             for (String country : countries) {
                 final String countryCode = localeService.findCountryCode(country);
-                if (countryCode != null) countryCodes.add(countryCode);
+                if (countryCode != null) {
+                    countryCodes.add(countryCode);
+                }
             }
             videoData.setCountryCodes(countryCodes, scannerName);
         }

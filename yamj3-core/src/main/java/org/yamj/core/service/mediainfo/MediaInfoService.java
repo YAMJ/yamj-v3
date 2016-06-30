@@ -150,14 +150,14 @@ public class MediaInfoService implements IQueueProcessService {
         // check if stage file can be read by MediaInfo
         boolean scannable = FileTools.isFileScannable(stageFile);
         if (scannable && !this.isActivated) {
-        	LOG.debug("MediaInfo not activate for scanning video file '{}'", stageFile.getFullPath());
-        	mediaFile.setStatus(StatusType.INVALID);
+            LOG.debug("MediaInfo not activate for scanning video file '{}'", stageFile.getFullPath());
+            mediaFile.setStatus(StatusType.INVALID);
             mediaStorageService.updateMediaFile(mediaFile);
-        	// nothing to do anymore
-        	return;
+            // nothing to do anymore
+            return;
         } else if (!scannable && StringUtils.isBlank(stageFile.getContent())) {
             LOG.debug("Video file '{}' is not scannable", stageFile.getFullPath());
-        	mediaFile.setStatus(StatusType.INVALID);
+            mediaFile.setStatus(StatusType.INVALID);
             mediaStorageService.updateMediaFile(mediaFile);
             // nothing to do anymore
             return;

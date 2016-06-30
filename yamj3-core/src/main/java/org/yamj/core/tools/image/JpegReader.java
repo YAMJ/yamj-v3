@@ -84,7 +84,7 @@ public class JpegReader {
     
                 try {
                     image = reader.read(0);
-                } catch (CMMException | IIOException ex) {
+                } catch (CMMException | IIOException ex) { //NOSONAR
                     image = readImageCmyk(file, reader);
                 } finally {
                     reader.dispose();
@@ -123,13 +123,7 @@ public class JpegReader {
             }
 
             image = convertCmykToRgb(raster, profile);
-        } catch (IOException ex) {
-            LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
-            image = null;
-        } catch (ImageReadException ex) {
-            LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
-            image = null;
-        } catch (CMMException ex) {
+        } catch (Exception ex) { //NOSONAR
             LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
             image = null;
         }

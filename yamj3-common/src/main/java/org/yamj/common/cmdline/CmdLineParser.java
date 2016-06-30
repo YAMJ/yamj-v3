@@ -22,11 +22,7 @@
  */
 package org.yamj.common.cmdline;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The command line parser.
@@ -67,7 +63,7 @@ public final class CmdLineParser {
      *
      * @param options the command line options to add
      */
-    public void addOptions(final CmdLineOption options[]) {
+    public void addOptions(final CmdLineOption[] options) {
         this.options.addAll(Arrays.asList(options));
     }
 
@@ -147,7 +143,7 @@ public final class CmdLineParser {
      * @param args the arguments to parse
      * @throws CmdLineException if an option is invalid
      */
-    public void parse(final String args[]) throws CmdLineException {
+    public void parse(final String[] args) throws CmdLineException {
         for (CmdLineOption option : this.options) {
             int index = findOption(args, option);
             if (index == -1 && option.isRequired()) {
@@ -225,7 +221,7 @@ public final class CmdLineParser {
      * @param option the option to find
      * @return the arguments index of the found option
      */
-    private static int findOption(final String args[], final CmdLineOption option) {
+    private static int findOption(final String[] args, final CmdLineOption option) {
         int result = -1;
         for (int i = 0; i < args.length && result == -1; i++) {
             if (args[i].equals("-" + option.getName())) {
@@ -245,7 +241,7 @@ public final class CmdLineParser {
         final StringBuilder sb = new StringBuilder("\n\nAvailable Options: \n\n");
         for (CmdLineOption option : this.options) {
             sb.append("    ");
-            sb.append(option.toString(this));
+            sb.append(option.toString());
             sb.append(" => ");
             sb.append(option.getDescription());
             sb.append("\n");

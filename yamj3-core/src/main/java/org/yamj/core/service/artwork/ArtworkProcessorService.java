@@ -306,7 +306,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                 // located image must be cached
                 return null;
             }
-        } catch (IncorrectResultSizeDataAccessException ex) {
+        } catch (IncorrectResultSizeDataAccessException ex) { //NOSONAR
             // no located image found
             return null;
         }

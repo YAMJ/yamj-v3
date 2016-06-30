@@ -154,7 +154,7 @@ public final class PlayerTools {
     private static List<String> scanForPlayers(String baseIpAddress, int port, int scanStart, int scanEnd, int timeout) {
         List<String> playerList = new ArrayList<>();
 
-        for (int i = (scanStart < 1 ? 1 : scanStart); i <= (scanEnd > 255 ? 255 : scanEnd); i++) {
+        for (int i = Math.max(1,scanStart); i <= Math.min(255, scanEnd); i++) {
             try (Socket mySocket = new Socket()) {
                 String ipToScan = baseIpAddress + i;
                 LOG.debug("Scanning {}", ipToScan);
@@ -275,9 +275,7 @@ public final class PlayerTools {
         try {
             HttpGet httpGet = new HttpGet(url);
             httpGet.addHeader(HttpHeaders.ACCEPT, "application/xml");
-            final DigestedResponse response = DigestedResponseReader.requestContent(HTTP, httpGet, UTF8);
-
-            return response;
+            return DigestedResponseReader.requestContent(HTTP, httpGet, UTF8);
         } catch (IOException ex) {
             LOG.warn("Error retrieving URL: {}", url, ex);
             return null;

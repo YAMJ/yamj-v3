@@ -346,7 +346,7 @@ public class StagingService {
             if (rootFile.isDirectory() && rootFile.exists() && rootFile.canRead() && rootFile.canExecute()) {
                 return true;
             }
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             // ignore any error
         }
         return false;

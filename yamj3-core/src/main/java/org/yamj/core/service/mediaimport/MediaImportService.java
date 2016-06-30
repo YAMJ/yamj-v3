@@ -846,7 +846,7 @@ public class MediaImportService {
             artworkType = ArtworkType.VIDEOIMAGE;
             metaDataTypes = EnumSet.of(MetaDataType.EPISODE);
             
-        } else if (fileBaseName.equals("movie") || isSpecialImage(fileBaseName, "movie", tokensPoster)) {
+        } else if ("movie".equals(fileBaseName) || isSpecialImage(fileBaseName, "movie", tokensPoster)) {
             // this is a generic movie poster
             generic = true;
             artworkType = ArtworkType.POSTER;
@@ -864,7 +864,7 @@ public class MediaImportService {
             artworkType = ArtworkType.BANNER;
             metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
 
-        } else if (fileBaseName.equals("season") || isSpecialImage(fileBaseName, "season", tokensPoster)) {
+        } else if ("season".equals(fileBaseName) || isSpecialImage(fileBaseName, "season", tokensPoster)) {
             // this is a generic season poster
             generic = true;
             artworkType = ArtworkType.POSTER;
@@ -882,9 +882,9 @@ public class MediaImportService {
             artworkType = ArtworkType.BANNER;
             metaDataTypes = EnumSet.of(MetaDataType.SEASON);
 
-        } else if (fileBaseName.equals("show") || isSpecialImage(fileBaseName, "season", tokensPoster) ||
-                   fileBaseName.equals("series") || isSpecialImage(fileBaseName, "series", tokensPoster) ||
-                   fileBaseName.equals("season-all") || isSpecialImage(fileBaseName, "season-all", tokensPoster))
+        } else if ("show".equals(fileBaseName) || isSpecialImage(fileBaseName, "season", tokensPoster) ||
+                   "series".equals(fileBaseName) || isSpecialImage(fileBaseName, "series", tokensPoster) ||
+                   "season-all".equals(fileBaseName) || isSpecialImage(fileBaseName, "season-all", tokensPoster))
         {
             // this is a generic series poster
             generic = true;

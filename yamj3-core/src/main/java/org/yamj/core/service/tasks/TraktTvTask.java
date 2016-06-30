@@ -72,12 +72,10 @@ public class TraktTvTask implements ITask {
         LOG.debug("Execute Trakt.TV task");
         final long startTime = System.currentTimeMillis();
 
-        if (traktTvService.isExpired()) {
-            if (!traktTvService.refreshWhenExpired()) {
-                // refresh failed, to nothing can be done now
-                // --> new authorization should be done
-                return;
-            }
+        if (traktTvService.isExpired() && !traktTvService.refreshWhenExpired()) {
+            // refresh failed, to nothing can be done now
+            // --> new authorization should be done
+            return;
         }
 
         // 1. collect

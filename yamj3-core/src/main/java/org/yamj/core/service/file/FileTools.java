@@ -274,7 +274,7 @@ public final class FileTools {
             File file = new File(stageFile.getFullPath());
             final boolean exists = file.exists();
             final boolean canRead = file.canRead();
-            readable = (exists && canRead);
+            readable = exists && canRead;
             LOG.trace("File '{}' exists: {}", stageFile.getFullPath(), exists);
             LOG.trace("File '{}' readable: {}", stageFile.getFullPath(), canRead);
         } catch (Exception e) {
@@ -289,7 +289,7 @@ public final class FileTools {
             File file = new File(stageDirectory.getDirectoryPath());
             final boolean exists = file.exists();
             final boolean canRead = file.canRead();
-            readable = (exists && canRead);
+            readable = exists && canRead;
             LOG.trace("Directory '{}' exists: {}", stageDirectory.getDirectoryPath(), exists);
             LOG.trace("Directory '{}' readable: {}", stageDirectory.getDirectoryPath(), canRead);
         } catch (Exception e) {
