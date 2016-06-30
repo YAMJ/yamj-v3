@@ -27,6 +27,7 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiCertificationDTO;
 
 @NamedQueries({    
     @NamedQuery(name = Certification.QUERY_GET,
@@ -38,8 +39,34 @@ import org.hibernate.annotations.NaturalId;
     @NamedNativeQuery(name = Certification.DELETE_ORPHANS,
         query = "DELETE FROM certification WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) "+
                 "AND not exists (select 1 from series_certifications sc where sc.cert_id=id)"
+    ),
+    @NamedNativeQuery(name = "metadata.certification.series", resultSetMapping="metadata.certification",
+        query = "SELECT c.id, c.country_code as countryCode, c.certificate FROM certification c "+
+                "JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=:id "+
+                "ORDER BY country_code, certificate"
+    ),
+    @NamedNativeQuery(name = "metadata.certification.season", resultSetMapping="metadata.certification",
+        query = "SELECT c.id, c.country_code as countryCode, c.certificate FROM certification c "+
+                "JOIN season sea ON sea.id=:id JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=sea.series_id "+
+                "ORDER BY country_code, certificate"
+    ),
+    @NamedNativeQuery(name = "metadata.certification.movie", resultSetMapping="metadata.certification",
+        query = "SELECT c.id, c.country_code as countryCode, c.certificate FROM certification c "+
+                "JOIN videodata_certifications vc ON c.id=vc.cert_id and vc.data_id=:id "+
+                "ORDER BY country_code, certificate"
     )
 })
+
+@SqlResultSetMapping(name="metadata.certification", classes={
+    @ConstructorResult(
+        targetClass=ApiCertificationDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="countryCode", type=String.class),
+             @ColumnResult(name="certificate", type=String.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "certification",

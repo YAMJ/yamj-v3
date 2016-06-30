@@ -32,7 +32,16 @@ import org.hibernate.annotations.NaturalId;
     @NamedNativeQuery(name = Studio.DELETE_ORPHANS,
         query = "DELETE FROM studio WHERE not exists (select 1 from videodata_studios vs where vs.studio_id=id) "+
                 "AND not exists (select 1 from series_studios ss where ss.studio_id=id)"
-    )
+    ),
+    @NamedNativeQuery(name = "metadata.studio.series", resultClass = Studio.class,
+        query = "SELECT s.id, s.name FROM studio s JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=:id ORDER BY name"
+    ),
+    @NamedNativeQuery(name = "metadata.studio.season", resultClass = Studio.class,
+        query = "SELECT s.id, s.name FROM studio s JOIN season sea ON sea.id=:id JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=sea.series_id ORDER BY name"
+    ),
+    @NamedNativeQuery(name = "metadata.studio.movie", resultClass = Studio.class,
+        query = "SELECT s.id, s.name FROM studio s JOIN videodata_studios vs ON s.id=vs.studio_id and vs.data_id=:id ORDER BY name"
+    )    
 })
 
 @Entity

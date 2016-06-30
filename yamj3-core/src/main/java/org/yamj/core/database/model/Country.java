@@ -27,13 +27,36 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiCountryDTO;
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = Country.DELETE_ORPHANS,
         query = "DELETE FROM country WHERE not exists (select 1 from videodata_countries vc where vc.country_id=id) "+
                 "AND not exists (select 1 from series_countries sc where sc.country_id=id)"
+    ),
+    @NamedNativeQuery(name = "metadata.country.series", resultSetMapping="metadata.country",
+        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+                "JOIN series_countries sc ON c.id=sc.country_id and sc.series_id=:id "
+    ),
+    @NamedNativeQuery(name = "metadata.country.season", resultSetMapping="metadata.country",
+        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+                "JOIN season sea ON sea.id=:id JOIN series_countries sc ON c.id=sc.country_id and sc.series_id=sea.series_id "
+    ),
+    @NamedNativeQuery(name = "metadata.country.movie", resultSetMapping="metadata.country",
+        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+                "JOIN videodata_countries vc ON c.id=vc.country_id and vc.data_id=:id "
     )
 })
+
+@SqlResultSetMapping(name="metadata.country", classes={
+    @ConstructorResult(
+        targetClass=ApiCountryDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="countryCode", type=String.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "country",

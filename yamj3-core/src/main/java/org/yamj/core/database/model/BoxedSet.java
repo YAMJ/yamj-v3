@@ -29,12 +29,47 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
 
 @NamedQueries({    
     @NamedQuery(name = BoxedSet.QUERY_ORPHANS,
         query = "SELECT b.id FROM BoxedSet b WHERE not exists (select 1 from BoxedSetOrder o where o.boxedSet=b)"
     )
 })
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = "metadata.boxedset.series", resultSetMapping="metadata.boxedset",
+        query = "SELECT bs.id, bs.name,(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount "+
+                "FROM boxed_set bs JOIN boxed_set_order bo ON bs.id=bo.boxedset_id "+
+                "WHERE bo.series_id=:id GROUP BY bs.id, bs.name"
+    ),
+    @NamedNativeQuery(name = "metadata.boxedset.season", resultSetMapping="metadata.boxedset",
+        query = "SELECT bs.id, bs.name,(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount "+
+                "FROM boxed_set bs JOIN boxed_set_order bo ON bs.id=bo.boxedset_id "+
+                "JOIN season sea ON sea.series_id=bo.series_id AND sea.id=:id GROUP BY bs.id, bs.name"
+    ),
+    @NamedNativeQuery(name = "metadata.boxedset.episode", resultSetMapping="metadata.boxedset",
+        query = "SELECT bs.id, bs.name,(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount "+
+                "FROM boxed_set bs JOIN boxed_set_order bo ON bs.id=bo.boxedset_id "+
+                "JOIN season sea ON sea.series_id=bo.series_id JOIN videodata vd ON vd.season_id=sea.id AND vd.id=:id GROUP BY bs.id, bs.name"
+    ),
+    @NamedNativeQuery(name = "metadata.boxedset.movie", resultSetMapping="metadata.boxedset",
+        query = "SELECT bs.id, bs.name,(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount "+
+                "FROM boxed_set bs JOIN boxed_set_order bo ON bs.id=bo.boxedset_id "+
+                "WHERE bo.videodata_id=:id GROUP BY bs.id, bs.name"
+    )
+})
+
+@SqlResultSetMapping(name="metadata.boxedset", classes={
+    @ConstructorResult(
+        targetClass=ApiBoxedSetDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="name", type=String.class),
+             @ColumnResult(name="memberCount", type=Integer.class),
+        }
+    )}
+)
 
 @Entity
 @Table(name = "boxed_set",
@@ -44,7 +79,7 @@ import org.hibernate.annotations.NaturalId;
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
-    public static final String QUERY_ORPHANS = "boxedSet.orphans";
+    public static final String QUERY_ORPHANS = "boxedset.orphans";
     
     @NaturalId
     @Column(name = "identifier", length = 100, nullable = false)

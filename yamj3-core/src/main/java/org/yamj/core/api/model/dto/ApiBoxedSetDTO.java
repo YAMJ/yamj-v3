@@ -32,6 +32,14 @@ import java.util.List;
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiBoxedSetDTO extends AbstractMetaDataDTO {
 
+    public ApiBoxedSetDTO() {}
+    
+    public ApiBoxedSetDTO(Long id, String name, Integer memberCount) {
+        super(id);
+        this.name = name;
+        this.memberCount = memberCount;
+    }
+    
     private String name;
     private Integer memberCount;
     private List<ApiBoxedSetMemberDTO> members;

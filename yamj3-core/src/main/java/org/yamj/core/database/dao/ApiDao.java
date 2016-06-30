@@ -28,6 +28,7 @@ import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Query;
 import org.hibernate.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,6 @@ public class ApiDao extends HibernateDao {
     private static final String ARTWORK_ID = "artworkId";
     private static final String LOCATED_ID = "locatedId";
     private static final String GENERATED_ID = "generatedId";
-    private static final String COUNTRY_CODE = "countryCode";
     private static final String MULTIPLE = "Multiple";
     private static final String CREATE_TIMESTAMP = "createTimestamp";
     private static final String UPDATE_TIMESTAMP = "updateTimestamp";
@@ -1803,23 +1803,12 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_STUDIOS, key="{#type, #id}")
     public List<Studio> getStudiosForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT s.id, s.name FROM studio s ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("JOIN season sea ON sea.id=:id JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=sea.series_id ");
-        } else {
-            // defaults to movie
-            sql.append("JOIN videodata_studios vs ON s.id=vs.studio_id and vs.data_id=:id ");
+        if (type == MetaDataType.EPISODE) {
+            return Collections.emptyList();
         }
-        sql.append("ORDER BY name");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar(NAME, StringType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(Studio.class, sqlScalars);
+        
+        Query query = currentSession().getNamedQuery("metadata.studio."+type.name().toLowerCase());
+        return query.setParameter(ID, id).list();
     }
     
     /**
@@ -1831,25 +1820,12 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_COUNTRIES, key="{#type, #id}")
     public List<ApiCountryDTO> getCountriesForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT c.id, c.country_code as countryCode ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("FROM series_countries sc, country c ");
-            sql.append("WHERE sc.series_id=:id AND sc.country_id=c.id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("FROM season sea, series_countries sc, country c ");
-            sql.append("WHERE sea.id=:id AND sc.series_id=sea.series_id AND sc.country_id=c.id ");
-        } else {
-            // defaults to movie
-            sql.append("FROM videodata_countries vc, country c ");
-            sql.append("WHERE vc.data_id=:id AND vc.country_id=c.id ");
+        if (type == MetaDataType.EPISODE) {
+            return Collections.emptyList();
         }
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar(COUNTRY_CODE, StringType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars);
+        
+        Query query = currentSession().getNamedQuery("metadata.country."+type.name().toLowerCase());
+        return query.setParameter(ID, id).list();
     }
 
     /**
@@ -1861,25 +1837,12 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_CERTIFICATIONS, key="{#type, #id}")
     public List<ApiCertificationDTO> getCertificationsForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT c.id, c.country_code as countryCode, c.certificate FROM certification c ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("JOIN season sea ON sea.id = :id ");
-            sql.append("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=sea.series_id ");
-        } else {
-            // defaults to movie
-            sql.append("JOIN videodata_certifications vc ON c.id=vc.cert_id and vc.data_id=:id ");
+        if (type == MetaDataType.EPISODE) {
+            return Collections.emptyList();
         }
-        sql.append("ORDER BY country_code, certificate");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar(COUNTRY_CODE, StringType.INSTANCE);
-        sqlScalars.addScalar("certificate", StringType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars);
+        
+        Query query = currentSession().getNamedQuery("metadata.certification."+type.name().toLowerCase());
+        return query.setParameter(ID, id).list();
     }
 
     /**
@@ -2385,27 +2348,8 @@ public class ApiDao extends HibernateDao {
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
     @Cacheable(value=API_BOXEDSETS, key="{#type, #id}")
     public List<ApiBoxedSetDTO> getBoxedSetsForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT bs.id, bs.name,(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount ");
-        sql.append("FROM boxed_set bs JOIN boxed_set_order bo ON bs.id=bo.boxedset_id ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("WHERE bo.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("JOIN season sea ON sea.series_id=bo.series_id AND sea.id=:id ");
-        } else if (type == MetaDataType.EPISODE) {
-            sql.append("JOIN season sea ON sea.series_id=bo.series_id JOIN videodata vd ON vd.season_id=sea.id AND vd.id=:id ");
-        } else {
-            // defaults to movie
-            sql.append("WHERE bo.videodata_id=:id ");
-        }
-        sql.append("GROUP BY bs.id, bs.name");
-        
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar(NAME, StringType.INSTANCE);
-        sqlScalars.addScalar("memberCount", IntegerType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars);
+        Query query = currentSession().getNamedQuery("metadata.boxedset."+type.name().toLowerCase());
+        return query.setParameter(ID, id).list();
     }
 
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {

@@ -29,7 +29,14 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class ApiCertificationDTO extends ApiCountryDTO {
 
     private String certificate;
+
+    public ApiCertificationDTO() {}
     
+    public ApiCertificationDTO(Long id, String countryCode, String certificate) {
+        super(id, countryCode);
+        this.certificate = certificate;
+    }
+
     public String getCertificate() {
         return certificate;
     }

@@ -38,6 +38,12 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
     private String outline;
     private Boolean watched;
 
+    public AbstractMetaDataDTO() {}
+    
+    public AbstractMetaDataDTO(Long id) {
+        super(id);
+    }
+    
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public final String getTitle() {

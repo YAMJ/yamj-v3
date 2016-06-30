@@ -29,6 +29,12 @@ public class AbstractApiIdentifiableDTO extends AbstractApiDTO {
 
     private Long id;
 
+    public AbstractApiIdentifiableDTO() {}
+    
+    public AbstractApiIdentifiableDTO(Long id) {
+        this.id = id;
+    }
+    
     public final Long getId() {
         return id;
     }
