@@ -28,6 +28,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -47,7 +49,21 @@ import org.yamj.core.database.model.type.OverrideFlag;
     ),
     @NamedQuery(name = Season.UPDATE_RESCAN_ALL,
         query = "UPDATE Season SET status='UPDATED' WHERE status not in ('NEW','UPDATED')"
+    )
+})
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = "metadata.rating.season", resultSetMapping="metadata.rating",
+        query = "SELECT r1.rating, r1.sourcedb AS source, 2 AS sorting "+
+                "FROM series_ratings r1, season sea WHERE sea.id=:id AND sea.series_id=r1.series_id UNION "+
+                "SELECT round(grouped.average) AS rating, 'combined' AS source, 1 AS sorting FROM "+
+                "  (SELECT avg(r2.rating) as average FROM series_ratings r2, season sea WHERE sea.id=:id AND sea.series_id=r2.series_id) AS grouped "+
+                "WHERE grouped.average is not null ORDER BY sorting, source"
     ),
+    @NamedNativeQuery(name = "metadata.externalid.season", resultSetMapping="metadata.externalid",
+        query = "SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped "+
+                "FROM season_ids ids WHERE ids.season_id=:id"
+    )    
 })
 
 @Entity

@@ -73,7 +73,12 @@ import org.yamj.plugin.api.metadata.MetadataTools;
     ),
     @NamedNativeQuery(name = Person.QUERY_FILMOGRAPHY_QUEUE,
         query = "SELECT p.id,'FILMOGRAPHY' as metatype,(case when p.update_timestamp is null then p.create_timestamp else p.update_timestamp end) as maxdate "+
-                "FROM person p WHERE p.status='DONE' and (p.filmography_status is null or p.filmography_status in ('NEW','UPDATED'))  ORDER BY maxdate ASC"
+                "FROM person p WHERE p.status='DONE' and (p.filmography_status is null or p.filmography_status in ('NEW','UPDATED')) ORDER BY maxdate ASC"
+    ),
+    @NamedNativeQuery(name = "metadata.externalid.person", resultSetMapping="metadata.externalid",
+        query = "SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+                "coalesce(p.skip_scan_api,'') like concat('%',ids.sourcedb,'%') as skipped "+
+                "FROM person p, person_ids ids WHERE p.id=:id AND ids.person_id=p.id AND p.status NOT IN ('DELETED','INVALID','DUPLICATE')"
     )
 })
 

@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.model.dto;
 
+
 /**
  * @author Stuart
  */
@@ -30,6 +31,15 @@ public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
     private String externalId;
     private String sourcedb;
     private boolean skipped;
+    
+    public ApiExternalIdDTO() {}
+    
+    public ApiExternalIdDTO(Long id, String externalId, String sourcedb, Boolean skipped) {
+        super(id);
+        this.externalId = externalId;
+        this.sourcedb = sourcedb;
+        this.skipped = skipped;
+    }
     
     public String getExternalId() {
         return externalId;

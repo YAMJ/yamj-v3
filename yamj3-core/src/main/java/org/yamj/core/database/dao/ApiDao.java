@@ -1803,12 +1803,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_STUDIOS, key="{#type, #id}")
     public List<Studio> getStudiosForMetadata(MetaDataType type, Long id) {
-        if (type == MetaDataType.EPISODE) {
-            return Collections.emptyList();
-        }
-        
-        Query query = currentSession().getNamedQuery("metadata.studio."+type.name().toLowerCase());
-        return query.setParameter(ID, id).list();
+        return currentSession().getNamedQuery("metadata.studio."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
     
     /**
@@ -1820,12 +1815,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_COUNTRIES, key="{#type, #id}")
     public List<ApiCountryDTO> getCountriesForMetadata(MetaDataType type, Long id) {
-        if (type == MetaDataType.EPISODE) {
-            return Collections.emptyList();
-        }
-        
-        Query query = currentSession().getNamedQuery("metadata.country."+type.name().toLowerCase());
-        return query.setParameter(ID, id).list();
+        return currentSession().getNamedQuery("metadata.country."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
 
     /**
@@ -1837,12 +1827,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_CERTIFICATIONS, key="{#type, #id}")
     public List<ApiCertificationDTO> getCertificationsForMetadata(MetaDataType type, Long id) {
-        if (type == MetaDataType.EPISODE) {
-            return Collections.emptyList();
-        }
-        
-        Query query = currentSession().getNamedQuery("metadata.certification."+type.name().toLowerCase());
-        return query.setParameter(ID, id).list();
+        return currentSession().getNamedQuery("metadata.certification."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
 
     /**
@@ -1854,36 +1839,14 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_RATINGS, key="{#type, #id}")
     public List<ApiRatingDTO> getRatingsForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT r1.rating, r1.sourcedb AS source, 2 AS sorting ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("FROM series_ratings r1 WHERE r1.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("FROM series_ratings r1, season sea WHERE sea.id=:id AND sea.series_id=r1.series_id ");
+        Query query;
+        if (MetaDataType.EPISODE == type) {
+            // same as for movie
+            query = currentSession().getNamedQuery("metadata.rating.movie");
         } else {
-            // defaults to movie
-            sql.append("FROM videodata_ratings r1 WHERE r1.videodata_id=:id ");
+            query = currentSession().getNamedQuery("metadata.rating."+type.name().toLowerCase());
         }
-        // combined rating
-        sql.append(SQL_UNION);
-        sql.append("SELECT round(grouped.average) AS rating, 'combined' AS source, 1 AS sorting FROM ");
-        sql.append("(SELECT avg(r2.rating) as average ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("FROM series_ratings r2 WHERE r2.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("FROM series_ratings r2, season sea WHERE sea.id=:id AND sea.series_id=r2.series_id ");
-        } else {
-            // defaults to movie
-            sql.append("FROM videodata_ratings r2 WHERE r2.videodata_id=:id ");
-        }
-        sql.append(") AS grouped ");
-        sql.append("WHERE grouped.average is not null ORDER BY sorting, source");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(SOURCE, StringType.INSTANCE);
-        sqlScalars.addScalar("rating", IntegerType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars);
+        return query.setParameter(ID, id).list();
     }
 
     /**
@@ -1926,33 +1889,14 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_EXTERNAL_IDS, key="{#type, #id}")
     public List<ApiExternalIdDTO> getExternalIdsForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder();
-
-        if (type == MetaDataType.SERIES) {
-            sql.append("SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
-            sql.append("concat(coalesce(ser.skip_scan_api,''),';',coalesce(ser.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped ");
-            sql.append("FROM series ser, series_ids ids WHERE ser.id=:id AND ids.series_id=ser.id");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped ");
-            sql.append("FROM season_ids ids WHERE ids.season_id=:id");
-        } else if (type == MetaDataType.PERSON) {
-            sql.append("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
-            sql.append("coalesce(p.skip_scan_api,'') like concat('%',ids.sourcedb,'%') as skipped");
-            sql.append("FROM person p, person_ids ids WHERE p.id=:id AND ids.person_id=p.id AND p.status"+SQL_IGNORE_STATUS_SET);
+        Query query;
+        if (MetaDataType.EPISODE == type) {
+            // same as for movie
+            query = currentSession().getNamedQuery("metadata.externalid.movie");
         } else {
-            sql.append("SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
-            sql.append("concat(coalesce(vd.skip_scan_api,''),';',coalesce(vd.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped ");
-            sql.append("FROM videodata vd, videodata_ids ids WHERE vd.id=:id AND ids.videodata_id=vd.id");
+            query = currentSession().getNamedQuery("metadata.externalid."+type.name().toLowerCase());
         }
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("externalId", StringType.INSTANCE);
-        sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
-        sqlScalars.addScalar("skipped", BooleanType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-        
-        return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars);
+        return query.setParameter(ID, id).list();
     }
 
     /**
@@ -2348,8 +2292,7 @@ public class ApiDao extends HibernateDao {
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
     @Cacheable(value=API_BOXEDSETS, key="{#type, #id}")
     public List<ApiBoxedSetDTO> getBoxedSetsForMetadata(MetaDataType type, Long id) {
-        Query query = currentSession().getNamedQuery("metadata.boxedset."+type.name().toLowerCase());
-        return query.setParameter(ID, id).list();
+        return currentSession().getNamedQuery("metadata.boxedset."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
 
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {

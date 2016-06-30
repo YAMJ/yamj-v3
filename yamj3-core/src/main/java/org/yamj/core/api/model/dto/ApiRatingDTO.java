@@ -35,6 +35,13 @@ public class ApiRatingDTO {
     private String source;
     private Integer rating;
 
+    public ApiRatingDTO() {}
+    
+    public ApiRatingDTO(String source, Integer rating) {
+        this.source = source;
+        this.rating = rating;
+    }
+    
     public String getType() {
         return type;
     }

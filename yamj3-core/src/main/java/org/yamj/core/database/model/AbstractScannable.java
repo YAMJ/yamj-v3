@@ -30,11 +30,25 @@ import javax.persistence.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiExternalIdDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 /**
  * Abstract implementation of a scannable object.
  */
+
+@SqlResultSetMapping(name="metadata.externalid", classes={
+    @ConstructorResult(
+        targetClass=ApiExternalIdDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="externalId", type=String.class),
+             @ColumnResult(name="sourcedb", type=String.class),
+             @ColumnResult(name="skipped", type=Boolean.class)
+        }
+    )}
+)
+
 @MappedSuperclass
 public abstract class AbstractScannable extends AbstractStateful implements IScannable {
 

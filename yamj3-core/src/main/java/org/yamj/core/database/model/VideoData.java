@@ -92,8 +92,7 @@ import org.yamj.plugin.api.model.type.ArtworkType;
     ),
     @NamedQuery(name = VideoData.UPDATE_TRAILER_STATUS,
         query = "UPDATE VideoData SET trailerStatus=:status WHERE id=:id"
-    ),
-    
+    )
 })
 
 @NamedNativeQueries({    
@@ -137,7 +136,19 @@ import org.yamj.plugin.api.model.type.ArtworkType;
                 "WHERE ((vd.create_timestamp>=:checkDate or (vd.update_timestamp is not null and vd.update_timestamp>=:checkDate)) OR "+
                 "       not exists (select 1 from series_ids sid2 where ser.id=sid2.series_id and sid2.sourcedb='trakttv')) "+
                 "GROUP BY vd.id, sid.sourcedb, sid.sourcedb_id, sea.season, vd.episode, vd.identifier, ser.title, ser.title_original, ser.start_year"
-    )
+    ),
+    @NamedNativeQuery(name = "metadata.rating.movie", resultSetMapping="metadata.rating",
+        query = "SELECT r1.rating, r1.sourcedb AS source, 2 AS sorting "+
+                "FROM videodata_ratings r1 WHERE r1.videodata_id=:id UNION "+
+                "SELECT round(grouped.average) AS rating, 'combined' AS source, 1 AS sorting FROM "+
+                "  (SELECT avg(r2.rating) as average FROM videodata_ratings r2 WHERE r2.videodata_id=:id) AS grouped "+
+                "WHERE grouped.average is not null ORDER BY sorting, source"
+    ),
+    @NamedNativeQuery(name = "metadata.externalid.movie", resultSetMapping="metadata.externalid",
+        query = "SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+                "concat(coalesce(vd.skip_scan_api,''),';',coalesce(vd.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped "+
+                "FROM videodata vd, videodata_ids ids WHERE vd.id=:id AND ids.videodata_id=vd.id"
+    )    
 })
 
 @Entity

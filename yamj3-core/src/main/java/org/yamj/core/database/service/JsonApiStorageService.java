@@ -85,31 +85,36 @@ public class JsonApiStorageService {
         
         for (ApiVideoDTO video : results) {
 
-            if (options.hasDataItem(GENRE)) {
-                video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
-            }
+            if (MetaDataType.EPISODE != video.getVideoType()) {
+                // not for episodes
 
-            if (options.hasDataItem(STUDIO)) {
-                video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
-            }
+                if (options.hasDataItem(GENRE)) {
+                    video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+                }
 
-            if (options.hasDataItem(COUNTRY)) {
-                video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
-                localizeCountries(video.getCountries(), options.getLanguage());
-            }
+                if (options.hasDataItem(STUDIO)) {
+                    video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
+                }
+
+                if (options.hasDataItem(COUNTRY)) {
+                    video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
+                    localizeCountries(video.getCountries(), options.getLanguage());
+                }
             
-            if (options.hasDataItem(CERTIFICATION)) {
-                video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
-                localizeCertifications(video.getCertifications(), options.getLanguage());
+                if (options.hasDataItem(CERTIFICATION)) {
+                    video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
+                    localizeCertifications(video.getCertifications(), options.getLanguage());
+                }
+
+                if (options.hasDataItem(AWARD)) {
+                    video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
+                }
             }
             
             if (options.hasDataItem(RATING)) {
                 video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
             }
 
-            if (options.hasDataItem(AWARD)) {
-                video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
-            }
             
             if (options.hasDataItem(EXTERNALID)) {
                 video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));

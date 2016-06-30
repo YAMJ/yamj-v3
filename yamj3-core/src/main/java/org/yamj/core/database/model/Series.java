@@ -80,7 +80,19 @@ import org.yamj.plugin.api.model.type.ArtworkType;
                 "SELECT DISTINCT ser.id,'SERIES' as mediatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
                 "FROM series ser, season sea, videodata vd WHERE ser.id=sea.series_id and sea.id=vd.season_id and (ser.status in ('NEW','UPDATED') "+
                 "or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) or  (ser.status='DONE' and vd.status in ('NEW','UPDATED'))) "
-    )
+    ),
+    @NamedNativeQuery(name = "metadata.rating.series", resultSetMapping="metadata.rating",
+        query = "SELECT r1.rating, r1.sourcedb AS source, 2 AS sorting "+
+                "FROM series_ratings r1 WHERE r1.series_id=:id UNION "+
+                "SELECT round(grouped.average) AS rating, 'combined' AS source, 1 AS sorting FROM "+
+                "  (SELECT avg(r2.rating) as average FROM series_ratings r2 WHERE r2.series_id=:id) AS grouped "+
+                "WHERE grouped.average is not null ORDER BY sorting, source"
+    ),
+    @NamedNativeQuery(name = "metadata.externalid.series", resultSetMapping="metadata.externalid",
+        query = "SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+                "concat(coalesce(ser.skip_scan_api,''),';',coalesce(ser.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped "+
+                "FROM series ser, series_ids ids WHERE ser.id=:id AND ids.series_id=ser.id"
+    )    
 })
 
 @Entity
