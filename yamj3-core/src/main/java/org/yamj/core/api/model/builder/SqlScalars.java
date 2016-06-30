@@ -22,12 +22,9 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.hibernate.type.BasicType;
 
 /**
@@ -38,32 +35,15 @@ import org.hibernate.type.BasicType;
 public final class SqlScalars {
 
     private StringBuilder sql;
-    private Map<String, BasicType> scalars;
-    private final Map<String, Object> parameters;
-    private SQLQuery query = null;
+    private final Map<String, BasicType> scalars = new HashMap<>();
+    private final Map<String, Object> parameters = new HashMap<>();
 
     public SqlScalars() {
         this.sql = new StringBuilder();
-        this.scalars = new HashMap<>();
-        this.parameters = new HashMap<>();
     }
 
     public SqlScalars(StringBuilder sql) {
-        this.sql = sql;
-        this.scalars = new HashMap<>();
-        this.parameters = new HashMap<>();
-    }
-
-    public SqlScalars(String sql) {
         setSql(sql);
-        this.scalars = new HashMap<>();
-        this.parameters = new HashMap<>();
-    }
-
-    public SqlScalars(StringBuilder sql, Map<String, BasicType> scalars) {
-        this.sql = sql;
-        this.scalars = scalars;
-        this.parameters = new HashMap<>();
     }
 
     /**
@@ -73,15 +53,6 @@ public final class SqlScalars {
      */
     public void setSql(StringBuilder sql) {
         this.sql = sql;
-    }
-
-    /**
-     * Set the SQL using a string
-     *
-     * @param sql
-     */
-    public void setSql(String sql) {
-        this.sql = new StringBuilder(sql);
     }
 
     /**
@@ -108,29 +79,12 @@ public final class SqlScalars {
     }
 
     /**
-     * Get the SQL as a query using the session
+     * Get the parameters for the query
      *
-     * @param session
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public SQLQuery createSqlQuery(Session session) {
-        if (this.query == null) {
-            this.query = session.createSQLQuery(getSql());
-            // Add parameters
-            if (parameters != null) {
-                for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                    if (entry.getValue() instanceof Collection) {
-                        query.setParameterList(entry.getKey(), (Collection) entry.getValue());
-                    } else if (entry.getValue() instanceof Object[]) {
-                        query.setParameterList(entry.getKey(), (Object[]) entry.getValue());
-                    } else {
-                        query.setParameter(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-        }
-        return this.query;
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
     /**
@@ -144,39 +98,12 @@ public final class SqlScalars {
     }
 
     /**
-     * Clear the SQL
-     */
-    public void clear() {
-        sql = new StringBuilder();
-        parameters.clear();
-        scalars.clear();
-    }
-
-    /**
      * Get the scalars for the query
      *
      * @return
      */
     public Map<String, BasicType> getScalars() {
         return scalars;
-    }
-
-    /**
-     * Set the scalars for the query
-     *
-     * @param scalars
-     */
-    public void setScalars(Map<String, BasicType> scalars) {
-        this.scalars = scalars;
-    }
-
-    /**
-     * Add a scalar with a default type
-     *
-     * @param scalar
-     */
-    public void addScalar(String scalar) {
-        this.scalars.put(scalar, null);
     }
 
     /**
@@ -187,24 +114,5 @@ public final class SqlScalars {
      */
     public void addScalar(String scalar, BasicType type) {
         this.scalars.put(scalar, type);
-    }
-
-    /**
-     * Add the scalars to the query
-     *
-     * @param query
-     */
-    public void populateScalars(SQLQuery query) {
-        if (scalars != null && !scalars.isEmpty()) {
-            for (Map.Entry<String, BasicType> entry : scalars.entrySet()) {
-                if (entry.getValue() == null) {
-                    // Use the default scalar for that entry
-                    query.addScalar(entry.getKey());
-                } else {
-                    // Use the passed scalar type
-                    query.addScalar(entry.getKey(), entry.getValue());
-                }
-            }
-        }
     }
 }

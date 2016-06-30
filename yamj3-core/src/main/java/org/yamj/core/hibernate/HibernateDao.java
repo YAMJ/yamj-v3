@@ -34,6 +34,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.hibernate.type.BasicType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.IOptions;
@@ -450,9 +451,33 @@ public abstract class HibernateDao {
      * @param wrapper
      * @return
      */
+    @SuppressWarnings("rawtypes")
     public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars, IApiWrapper wrapper) { //NOSONAR
-        SQLQuery query = sqlScalars.createSqlQuery(currentSession());
+        
+        SQLQuery query = currentSession().createSQLQuery(sqlScalars.getSql());
         query.setReadOnly(true).setCacheable(true);
+        
+        // add parameters
+        for (Map.Entry<String, Object> entry : sqlScalars.getParameters().entrySet()) {
+            if (entry.getValue() instanceof Collection) {
+                query.setParameterList(entry.getKey(), (Collection) entry.getValue());
+            } else if (entry.getValue() instanceof Object[]) {
+                query.setParameterList(entry.getKey(), (Object[]) entry.getValue());
+            } else {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // populate scalars
+        for (Map.Entry<String, BasicType> entry : sqlScalars.getScalars().entrySet()) {
+            if (entry.getValue() == null) {
+                // use the default scalar for that entry
+                query.addScalar(entry.getKey());
+            } else {
+                // use the passed scalar type
+                query.addScalar(entry.getKey(), entry.getValue());
+            }
+        }
 
         if (entityClass.equals(String.class) || entityClass.equals(Long.class) || entityClass.equals(Integer.class)) {
             // no transformer needed
@@ -462,16 +487,14 @@ public abstract class HibernateDao {
             query.setResultTransformer(Transformers.aliasToBean(entityClass));
         }
 
-        // add the scalars to the query
-        sqlScalars.populateScalars(query);
-
+        // run query
         List<T> queryResults = query.list();
 
         // if the wrapper is populated, then run the query to get the maximum results
         if (wrapper != null) {
             wrapper.setTotalCount(queryResults.size());
 
-            // If there is a start or max set, we will need to re-run the query after setting the options
+            // if there is a start or max set, we will need to re-run the query after setting the options
             IOptions options = wrapper.getOptions();
             if (options != null && (options.getStart() > 0 || options.getMax() > 0)) {
                 if (options.getStart() > 0) {
