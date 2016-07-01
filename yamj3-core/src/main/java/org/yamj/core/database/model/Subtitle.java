@@ -26,11 +26,35 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.yamj.core.api.model.dto.ApiSubtitleDTO;
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = Subtitle.QUERY_METADATA, resultSetMapping = "metadata.subtitle",
+        query = "SELECT st.format, st.language_code, st.default_flag, st.forced_flag, sf.full_path, st.counter "+
+                "FROM subtitle st LEFT OUTER JOIN stage_file sf ON sf.id=st.stagefile_id AND sf.status NOT IN ('DELETED','INVALID','DUPLICATE') "+
+                "WHERE st.mediafile_id=:id ORDER BY sf.full_path DESC, st.counter ASC"
+    )
+})
+
+@SqlResultSetMapping(name = "metadata.subtitle", classes={
+    @ConstructorResult(
+        targetClass=ApiSubtitleDTO.class,
+        columns={
+             @ColumnResult(name="format", type=String.class),
+             @ColumnResult(name="language_code", type=String.class),
+             @ColumnResult(name="default_flag", type=Boolean.class),
+             @ColumnResult(name="forced_flag", type=Boolean.class),
+             @ColumnResult(name="full_path", type=String.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "subtitle",
@@ -39,6 +63,7 @@ import org.hibernate.annotations.*;
 public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
+    public static final String QUERY_METADATA = "subtitle.metadata";
 
     @NaturalId
     @ManyToOne(fetch = FetchType.EAGER)

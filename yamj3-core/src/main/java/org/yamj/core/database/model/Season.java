@@ -61,7 +61,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
                 "WHERE grouped.average is not null ORDER BY sorting, source"
     ),
     @NamedNativeQuery(name = "metadata.externalid.season", resultSetMapping="metadata.externalid",
-        query = "SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped "+
+        query = "SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb, 0 as skipped "+
                 "FROM season_ids ids WHERE ids.season_id=:id"
     )    
 })

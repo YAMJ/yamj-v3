@@ -69,7 +69,7 @@ public class VideoController {
 
             if (options.getId() > 0L) {
                 LOG.debug("Getting {} with ID {}", options.getType(), options.getId());
-                wrapper.setResult(jsonApiStorageService.getSingleVideo(wrapper));
+                wrapper.setResult(jsonApiStorageService.getSingleVideo(wrapper, options));
                 LOG.debug("Got {} with ID {}: {}", options.getType(), options.getId(), wrapper.getQueryDuration());
             } else {
                 wrapper.setStatusInvalidId();

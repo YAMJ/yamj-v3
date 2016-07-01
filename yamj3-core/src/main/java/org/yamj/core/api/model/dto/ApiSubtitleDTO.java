@@ -28,8 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Information on the physical file for the API
- *
- * @author Stuart
  */
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiSubtitleDTO extends AbstractApiDTO {
@@ -42,6 +40,18 @@ public class ApiSubtitleDTO extends AbstractApiDTO {
     private Boolean forcedFlag;
     private String filePath;
 
+    public ApiSubtitleDTO() {
+        // empty constructor
+    }
+    
+    public ApiSubtitleDTO(String format, String languageCode, Boolean defaultFlag, Boolean forcedFlag, String filePath) {
+        this.format = format;
+        this.languageCode = languageCode;
+        this.defaultFlag = defaultFlag;
+        this.forcedFlag = forcedFlag;
+        this.filePath = filePath;
+    }
+    
     public String getType() {
         return type;
     }

@@ -1044,8 +1044,7 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper, OptionsId options) {
         SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         
@@ -1679,8 +1678,8 @@ public class ApiDao extends HibernateDao {
 
         List<ApiFileDTO> results = executeQueryWithTransform(ApiFileDTO.class, sqlScalars);
         for (ApiFileDTO file : results) {
-            file.setAudioCodecs(this.getAudioCodecs(file.getId()));
-            file.setSubtitles(this.getSubtitles(file.getId()));
+            file.setAudioCodecs(currentSession().getNamedQuery(AudioCodec.QUERY_METADATA).setParameter(ID, file.getId()).list());
+            file.setSubtitles(currentSession().getNamedQuery(Subtitle.QUERY_METADATA).setParameter(ID, file.getId()).list());
         }
         return results;
     }
@@ -1694,66 +1693,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_TRAILERS, key="{#type, #id}")
     public List<ApiTrailerDTO> getTrailersForMetadata(MetaDataType type, Long id) {
-        // build the SQL statement
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT t.id, t.title, t.url, t.source, t.hash_code as hashCode, t.cache_dir as cacheDir, t.cache_filename as cacheFilename FROM trailer t ");
-
-        if (type == MetaDataType.SERIES) {
-            sql.append("WHERE t.series_id=:id ");
-        } else {
-            sql.append("WHERE t.videodata_id=:id ");
-        }
-        sql.append("and t.status");
-        sql.append(SQL_IGNORE_STATUS_SET);
-        sql.append("order by t.id ");
-        
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
-        sqlScalars.addScalar("url", StringType.INSTANCE);
-        sqlScalars.addScalar(SOURCE, StringType.INSTANCE);
-        sqlScalars.addScalar("hashCode", StringType.INSTANCE);
-        sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
-        sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiTrailerDTO.class, sqlScalars);
-    }
-
-    private List<ApiAudioCodecDTO> getAudioCodecs(long mediaFileId) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ac.codec, ac.codec_format as codecFormat, ac.bitrate, ac.channels, ac.language_code as languageCode ");
-        sql.append("FROM audio_codec ac WHERE ac.mediafile_id=:id ORDER BY ac.counter ASC");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar("codec", StringType.INSTANCE);
-        sqlScalars.addScalar("codecFormat", StringType.INSTANCE);
-        sqlScalars.addScalar("bitrate", IntegerType.INSTANCE);
-        sqlScalars.addScalar("channels", IntegerType.INSTANCE);
-        sqlScalars.addScalar("languageCode", StringType.INSTANCE);
-        sqlScalars.addParameter(ID, mediaFileId);
-
-        return executeQueryWithTransform(ApiAudioCodecDTO.class, sqlScalars);
-    }
-
-    private List<ApiSubtitleDTO> getSubtitles(long mediaFileId) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT st.counter, st.format, st.language_code as languageCode, st.default_flag AS defaultFlag,");
-        sql.append("st.forced_flag AS forcedFlag, sf.full_path as filePath ");
-        sql.append("FROM subtitle st ");
-        sql.append("LEFT OUTER JOIN stage_file sf ON sf.id=st.stagefile_id AND sf.status" + SQL_IGNORE_STATUS_SET);
-        sql.append("WHERE st.mediafile_id=:id ");
-        sql.append("ORDER BY sf.full_path DESC, st.counter ASC");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar("format", StringType.INSTANCE);
-        sqlScalars.addScalar("languageCode", StringType.INSTANCE);
-        sqlScalars.addScalar("defaultFlag", BooleanType.INSTANCE);
-        sqlScalars.addScalar("forcedFlag", BooleanType.INSTANCE);
-        sqlScalars.addScalar("filePath", StringType.INSTANCE);
-        sqlScalars.addParameter(ID, mediaFileId);
-
-        return executeQueryWithTransform(ApiSubtitleDTO.class, sqlScalars);
+        return currentSession().getNamedQuery("metadata.trailer."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
 
     /**
@@ -1858,26 +1798,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_AWARDS, key="{#type, #id}")
     public List<ApiAwardDTO> getAwardsForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder("SELECT a.event, a.category, a.sourcedb as source, c.year, c.won, c.nominated ");
-        if (type == MetaDataType.SERIES) {
-            sql.append("FROM series_awards c JOIN award a ON c.award_id=a.id WHERE c.series_id=:id ");
-        } else if (type == MetaDataType.SEASON) {
-            sql.append("FROM series_awards c JOIN season sea ON c.series_id=sea.series_id JOIN award a ON c.award_id=a.id WHERE sea.id=:id ");
-        } else {
-            sql.append("FROM videodata_awards c JOIN award a ON c.award_id=a.id WHERE c.videodata_id=:id ");
-        }
-        sql.append("ORDER BY year, event");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar("event", StringType.INSTANCE);
-        sqlScalars.addScalar("category", StringType.INSTANCE);
-        sqlScalars.addScalar(SOURCE, StringType.INSTANCE);
-        sqlScalars.addScalar("year", IntegerType.INSTANCE);
-        sqlScalars.addScalar("won", BooleanType.INSTANCE);
-        sqlScalars.addScalar("nominated", BooleanType.INSTANCE);
-        sqlScalars.addParameter(ID, id);
-
-        return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars);
+        return currentSession().getNamedQuery("metadata.award."+type.name().toLowerCase()).setParameter(ID, id).list();
     }
 
     /**
@@ -2191,32 +2112,6 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("counter", LongType.INSTANCE);
 
         return executeQueryWithTransform(CountGeneric.class, sqlScalars);
-    }
-
-    public void statSeriesCount() {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS year FROM series s");
-
-        sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
-        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
-        sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
-
-        // Get the results
-        List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars);
-        if (!seriesResults.isEmpty()) {
-            // Set the default oldest and newest
-            ApiSeriesInfoDTO oldest = seriesResults.get(0);
-            ApiSeriesInfoDTO newest = seriesResults.get(0);
-
-            for (ApiSeriesInfoDTO series : seriesResults) {
-                if (series.getYear() > newest.getYear()) {
-                    newest = series;
-                }
-                if (series.getYear() < oldest.getYear()) {
-                    oldest = series;
-                }
-            }
-        }
     }
     //</editor-fold>
 

@@ -27,7 +27,37 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
 import org.yamj.core.database.model.AbstractIdentifiable;
+
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "metadata.award.series", resultSetMapping="metadata.award",
+        query = "SELECT a.event, a.category, a.sourcedb, c.year, c.won, c.nominated "+
+                "FROM series_awards c JOIN award a ON c.award_id=a.id WHERE c.series_id=:id ORDER BY year, event"
+    ),
+    @NamedNativeQuery(name = "metadata.award.season", resultSetMapping="metadata.award",
+        query = "SELECT a.event, a.category, a.sourcedb, c.year, c.won, c.nominated "+
+                "FROM series_awards c JOIN season sea ON c.series_id=sea.series_id JOIN award a ON c.award_id=a.id WHERE sea.id=:id ORDER BY year, event"
+    ),
+    @NamedNativeQuery(name = "metadata.award.movie", resultSetMapping="metadata.award",
+        query = "SELECT a.event, a.category, a.sourcedb, c.year, c.won, c.nominated "+
+                "FROM videodata_awards c JOIN award a ON c.award_id=a.id WHERE c.videodata_id=:id ORDER BY year, event"
+    )    
+})
+
+@SqlResultSetMapping(name="metadata.award", classes={
+    @ConstructorResult(
+        targetClass=ApiAwardDTO.class,
+        columns={
+             @ColumnResult(name="event", type=String.class),
+             @ColumnResult(name="category", type=String.class),
+             @ColumnResult(name="sourcedb", type=String.class),
+             @ColumnResult(name="year", type=Integer.class),
+             @ColumnResult(name="won", type=Boolean.class),
+             @ColumnResult(name="nominated", type=Boolean.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "award",

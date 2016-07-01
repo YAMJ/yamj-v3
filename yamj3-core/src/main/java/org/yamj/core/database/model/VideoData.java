@@ -145,7 +145,7 @@ import org.yamj.plugin.api.model.type.ArtworkType;
                 "WHERE grouped.average is not null ORDER BY sorting, source"
     ),
     @NamedNativeQuery(name = "metadata.externalid.movie", resultSetMapping="metadata.externalid",
-        query = "SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+        query = "SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb,"+
                 "concat(coalesce(vd.skip_scan_api,''),';',coalesce(vd.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped "+
                 "FROM videodata vd, videodata_ids ids WHERE vd.id=:id AND ids.videodata_id=vd.id"
     )    

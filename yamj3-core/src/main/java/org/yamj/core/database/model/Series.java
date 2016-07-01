@@ -89,7 +89,7 @@ import org.yamj.plugin.api.model.type.ArtworkType;
                 "WHERE grouped.average is not null ORDER BY sorting, source"
     ),
     @NamedNativeQuery(name = "metadata.externalid.series", resultSetMapping="metadata.externalid",
-        query = "SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+        query = "SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb,"+
                 "concat(coalesce(ser.skip_scan_api,''),';',coalesce(ser.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped "+
                 "FROM series ser, series_ids ids WHERE ser.id=:id AND ids.series_id=ser.id"
     )    

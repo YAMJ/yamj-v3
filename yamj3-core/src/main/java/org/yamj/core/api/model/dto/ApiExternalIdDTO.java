@@ -32,7 +32,9 @@ public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
     private String sourcedb;
     private boolean skipped;
     
-    public ApiExternalIdDTO() {}
+    public ApiExternalIdDTO() {
+        // empty constructor
+    }
     
     public ApiExternalIdDTO(Long id, String externalId, String sourcedb, Boolean skipped) {
         super(id);

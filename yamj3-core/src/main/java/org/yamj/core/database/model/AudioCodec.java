@@ -30,6 +30,27 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
+
+@NamedNativeQueries({    
+    @NamedNativeQuery(name = AudioCodec.QUERY_METADATA, resultSetMapping = "metadata.audiocodec",
+        query = "SELECT ac.codec, ac.codec_format, ac.bitrate, ac.channels, ac.language_code "+
+                "FROM audio_codec ac WHERE ac.mediafile_id=:id ORDER BY ac.counter ASC"
+    )
+})
+
+@SqlResultSetMapping(name="metadata.audiocodec", classes={
+    @ConstructorResult(
+        targetClass=ApiAudioCodecDTO.class,
+        columns={
+             @ColumnResult(name="codec", type=String.class),
+             @ColumnResult(name="codec_format", type=String.class),
+             @ColumnResult(name="bitrate", type=Integer.class),
+             @ColumnResult(name="channels", type=Integer.class),
+             @ColumnResult(name="language_code", type=String.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "audio_codec",
@@ -38,7 +59,8 @@ import org.hibernate.annotations.OnDeleteAction;
 public class AudioCodec extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
-
+    public static final String QUERY_METADATA = "audiocodec.metadata";
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mediafile_id", nullable = false, foreignKey = @ForeignKey(name = "FK_AUDIOCODEC_MEDIAFILE"))

@@ -34,7 +34,9 @@ public class ApiCountryDTO extends AbstractApiIdentifiableDTO {
     private String countryCode;
     private String country;
 
-    public ApiCountryDTO() {}
+    public ApiCountryDTO() {
+        // empty constructor
+    }
     
     public ApiCountryDTO(Long id, String countryCode) {
         super(id);

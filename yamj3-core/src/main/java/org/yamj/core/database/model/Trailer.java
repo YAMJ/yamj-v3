@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.yamj.core.api.model.dto.ApiTrailerDTO;
 import org.yamj.plugin.api.model.ITrailer;
 import org.yamj.plugin.api.model.type.ContainerType;
 
@@ -60,8 +61,31 @@ import org.yamj.plugin.api.model.type.ContainerType;
     @NamedNativeQuery(name = Trailer.QUERY_PROCESSING_QUEUE,
         query = "SELECT DISTINCT t.id,(case when t.update_timestamp is null then t.create_timestamp else t.update_timestamp end) as maxdate "+
                 "FROM trailer t WHERE t.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
+    ),
+    @NamedNativeQuery(name = "metadata.trailer.series", resultSetMapping = "metadata.trailer",
+        query = "SELECT t.id, t.title, t.url, t.source, t.hash_code, t.cache_dir, t.cache_filename FROM trailer t "+
+                "WHERE t.series_id=:id and t.status not in ('DELETED','INVALID','DUPLICATE') ORDER BY t.id"
+    ),
+    @NamedNativeQuery(name = "metadata.trailer.movie", resultSetMapping = "metadata.trailer",
+        query = "SELECT t.id, t.title, t.url, t.source, t.hash_code, t.cache_dir, t.cache_filename FROM trailer t "+
+                "WHERE t.videodata_id=:id and t.status not in ('DELETED','INVALID','DUPLICATE') ORDER BY t.id"
     )
 })
+
+@SqlResultSetMapping(name = "metadata.trailer", classes={
+    @ConstructorResult(
+        targetClass=ApiTrailerDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="title", type=String.class),
+             @ColumnResult(name="url", type=String.class),
+             @ColumnResult(name="source", type=String.class),
+             @ColumnResult(name="hash_code", type=String.class),
+             @ColumnResult(name="cache_dir", type=String.class),
+             @ColumnResult(name="cache_filename", type=String.class)
+        }
+    )}
+)
 
 @Entity
 @Table(name = "trailer",

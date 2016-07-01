@@ -76,7 +76,7 @@ import org.yamj.plugin.api.metadata.MetadataTools;
                 "FROM person p WHERE p.status='DONE' and (p.filmography_status is null or p.filmography_status in ('NEW','UPDATED')) ORDER BY maxdate ASC"
     ),
     @NamedNativeQuery(name = "metadata.externalid.person", resultSetMapping="metadata.externalid",
-        query = "SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,"+
+        query = "SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb,"+
                 "coalesce(p.skip_scan_api,'') like concat('%',ids.sourcedb,'%') as skipped "+
                 "FROM person p, person_ids ids WHERE p.id=:id AND ids.person_id=p.id AND p.status NOT IN ('DELETED','INVALID','DUPLICATE')"
     )

@@ -27,8 +27,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * Information on the physical file for the API
- *
- * @author Stuart
  */
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiAudioCodecDTO extends AbstractApiDTO {
@@ -40,6 +38,18 @@ public class ApiAudioCodecDTO extends AbstractApiDTO {
     private String languageCode;
     private String language;
 
+    public ApiAudioCodecDTO() {
+        // empty constructor
+    }
+    
+    public ApiAudioCodecDTO(String codec, String codecFormat, Integer bitrate, Integer channels, String languageCode) {
+        this.codec = codec;
+        this.codecFormat = codecFormat;
+        this.bitrate = bitrate;
+        this.channels = channels;
+        this.languageCode = languageCode;
+    }
+    
     public String getCodec() {
         return codec;
     }

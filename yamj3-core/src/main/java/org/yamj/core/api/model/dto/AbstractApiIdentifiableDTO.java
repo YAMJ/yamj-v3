@@ -29,7 +29,9 @@ public class AbstractApiIdentifiableDTO extends AbstractApiDTO {
 
     private Long id;
 
-    public AbstractApiIdentifiableDTO() {}
+    public AbstractApiIdentifiableDTO() {
+        // empty constructor
+    }
     
     public AbstractApiIdentifiableDTO(Long id) {
         this.id = id;

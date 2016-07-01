@@ -30,7 +30,9 @@ public class ApiCertificationDTO extends ApiCountryDTO {
 
     private String certificate;
 
-    public ApiCertificationDTO() {}
+    public ApiCertificationDTO() {
+        // empty constructor
+    }
     
     public ApiCertificationDTO(Long id, String countryCode, String certificate) {
         super(id, countryCode);

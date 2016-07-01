@@ -36,6 +36,19 @@ public class ApiAwardDTO {
     private boolean won;
     private boolean nominated;
     
+    public ApiAwardDTO() {
+        // empty constructor
+    }
+    
+    public ApiAwardDTO(String event, String category, String source, Integer year, Boolean won, Boolean nominated) {
+        this.event = event;
+        this.category = category;
+        this.source = source;
+        this.year = year;
+        this.won = won;
+        this.nominated = nominated;
+    }
+    
     public long getId() {
         return id;
     }

@@ -51,7 +51,7 @@ public class PersonController {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>(options);
         if (options.getId() > 0L) {
             LOG.trace("Getting person with ID {}", options.getId());
-            wrapper.setResult(jsonApiStorageService.getPerson(wrapper));
+            wrapper.setResult(jsonApiStorageService.getPerson(wrapper, options));
         } else {
             wrapper.setStatusInvalidId();
         }

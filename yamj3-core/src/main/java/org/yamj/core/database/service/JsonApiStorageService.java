@@ -137,17 +137,27 @@ public class JsonApiStorageService {
     }
 
     public CountTimestamp getCountTimestamp(MetaDataType type) {
-        CountTimestamp ct = null;
-        if (type.equals(MetaDataType.MOVIE)) {
-            ct = apiDao.getCountTimestamp(type, "videodata", "episode<0");
-        } else if (type.equals(MetaDataType.SERIES)) {
-            ct = apiDao.getCountTimestamp(type, "series", "");
-        } else if (type.equals(MetaDataType.SEASON)) {
-            ct = apiDao.getCountTimestamp(type, "season", "");
-        } else if (type.equals(MetaDataType.EPISODE)) {
-            ct = apiDao.getCountTimestamp(type, "videodata", "episode>=0");
-        } else if (type.equals(MetaDataType.PERSON)) {
-            ct = apiDao.getCountTimestamp(type, "person", "status != 'DELETED'");
+        CountTimestamp ct;
+        switch(type) {
+            case MOVIE:
+                ct = apiDao.getCountTimestamp(type, "videodata", "episode<0");
+                break;
+            case SERIES:
+                ct = apiDao.getCountTimestamp(type, "series", "");
+                break;
+            case SEASON:
+                ct = apiDao.getCountTimestamp(type, "season", "");
+                break;
+            case EPISODE:
+                ct = apiDao.getCountTimestamp(type, "videodata", "episode>=0");
+                break;
+            case PERSON:
+                ct = apiDao.getCountTimestamp(type, "person", "status != 'DELETED'");
+                break;
+            default:
+                ct = null;
+                break;
+                    
         }
         return ct;
     }
@@ -158,12 +168,12 @@ public class JsonApiStorageService {
         return apiDao.getPersonList(wrapper, options);
     }
 
-    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
-        ApiPersonDTO person = apiDao.getPerson(wrapper);
+    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper, OptionsId options) {
+        ApiPersonDTO person = apiDao.getPerson(wrapper, options);
         
         if (person != null) {
             for (ApiFilmographyDTO filmo : person.getFilmography()) {
-                String releaseCountry = localeService.getDisplayCountry(wrapper.getOptions().getLanguage(), filmo.getReleaseCountryCode());
+                String releaseCountry = localeService.getDisplayCountry(options.getLanguage(), filmo.getReleaseCountryCode());
                 filmo.setReleaseCountry(releaseCountry);
             }
         }
@@ -561,8 +571,7 @@ public class JsonApiStorageService {
         return results;
     }
 
-    public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        OptionsIndexVideo options = (OptionsIndexVideo)wrapper.getOptions();
+    public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper, OptionsIndexVideo options) {
         ApiVideoDTO video = apiDao.getSingleVideo(wrapper, options);
         
         if (video != null) {

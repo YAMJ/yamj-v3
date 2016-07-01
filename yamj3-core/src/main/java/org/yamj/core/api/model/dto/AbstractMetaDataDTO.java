@@ -38,7 +38,9 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
     private String outline;
     private Boolean watched;
 
-    public AbstractMetaDataDTO() {}
+    public AbstractMetaDataDTO() {
+        // empty constructor
+    }
     
     public AbstractMetaDataDTO(Long id) {
         super(id);

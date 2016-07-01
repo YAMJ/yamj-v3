@@ -43,6 +43,20 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
     @JsonIgnore
     private String cacheFilename;
     
+    public ApiTrailerDTO() {
+        // empty constructor
+    }
+    
+    public ApiTrailerDTO(Long id, String title, String url, String source, String hashCode, String cacheDir, String cacheFilename) {
+        super(id);
+        this.title = title;
+        this.url = url;
+        this.source = source;
+        this.hashCode = hashCode;
+        this.cacheDir = cacheDir;
+        this.cacheFilename = cacheFilename;
+    }
+    
     public String getUrl() {
         return url;
     }
