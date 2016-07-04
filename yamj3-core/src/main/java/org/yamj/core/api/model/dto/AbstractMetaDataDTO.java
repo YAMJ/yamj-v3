@@ -37,6 +37,7 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
     private String plot;
     private String outline;
     private Boolean watched;
+    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public AbstractMetaDataDTO() {
         // empty constructor
@@ -46,8 +47,6 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
         super(id);
     }
     
-    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
-
     public final String getTitle() {
         return title;
     }

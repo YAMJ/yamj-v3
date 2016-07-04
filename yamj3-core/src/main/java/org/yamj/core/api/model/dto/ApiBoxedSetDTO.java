@@ -32,7 +32,13 @@ import java.util.List;
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiBoxedSetDTO extends AbstractMetaDataDTO {
 
-    public ApiBoxedSetDTO() {}
+    private String name;
+    private Integer memberCount;
+    private List<ApiBoxedSetMemberDTO> members;
+
+    public ApiBoxedSetDTO() {
+        // empty constructor
+    }
     
     public ApiBoxedSetDTO(Long id, String name, Integer memberCount) {
         super(id);
@@ -40,10 +46,6 @@ public class ApiBoxedSetDTO extends AbstractMetaDataDTO {
         this.memberCount = memberCount;
     }
     
-    private String name;
-    private Integer memberCount;
-    private List<ApiBoxedSetMemberDTO> members;
-
     public String getName() {
         return name;
     }

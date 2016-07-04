@@ -91,22 +91,29 @@ public class VideoController {
      */
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.PUT)
     public ApiStatus updateVideo(@PathVariable("type") String type, @PathVariable("id") Long id, @RequestBody UpdateVideo update) {
+        
         if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
-
+        
         final MetaDataType metaDataType = MetaDataType.fromString(type);
+        final ApiStatus apiStatus;
         switch(metaDataType) {
             case MOVIE:
             case EPISODE:
-                return jsonApiStorageService.updateVideoData(id, update);
+                apiStatus = jsonApiStorageService.updateVideoData(id, update);
+                break;
             case SERIES:
-                return jsonApiStorageService.updateSeries(id, update);
+                apiStatus = jsonApiStorageService.updateSeries(id, update);
+                break;
             case SEASON:
-                return jsonApiStorageService.updateSeason(id, update);
+                apiStatus = jsonApiStorageService.updateSeason(id, update);
+                break;
             default:
-                return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
+                apiStatus = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
+                break;
         }
+        return apiStatus;
     }
 
     /**

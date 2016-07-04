@@ -82,13 +82,6 @@ public class YamjInfo {
     private String baseTrailerUrl;
     private String skinDir;
 
-    public static YamjInfo getCoreInfo() {
-        if (CORE_INFO == null) {
-            CORE_INFO = new YamjInfo(YamjInfoBuild.CORE);
-        }
-        return CORE_INFO;
-    }
-    
     @SuppressWarnings("unused")
     private YamjInfo() {
         this(YamjInfoBuild.COMMON);
@@ -130,6 +123,13 @@ public class YamjInfo {
         this.basePhotoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.photo", ""));
         this.baseTrailerUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.trailer", ""));
         this.skinDir = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.skins", "./skins/"));
+    }
+
+    public static YamjInfo getCoreInfo() {
+        if (CORE_INFO == null) {
+            CORE_INFO = new YamjInfo(YamjInfoBuild.CORE);
+        }
+        return CORE_INFO;
     }
 
     private void processPropertiesFile(String filename) {

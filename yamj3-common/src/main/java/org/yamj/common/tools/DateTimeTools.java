@@ -183,39 +183,33 @@ public final class DateTimeTools {
     public static int processRuntime(final String runtime) {
         // see if we can convert this to a number and assume it's correct if we can
         int returnValue = (int)NumberUtils.toFloat(runtime, -1f);
-        if (returnValue > 0) {
-            return returnValue;
+        if (returnValue <= 0) {
+            // this is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
+            Pattern hrmnPattern = Pattern.compile("(?i)(\\d+)(\\D*)(\\d*)(.*?)");
+    
+            Matcher matcher = hrmnPattern.matcher(runtime);
+            if (matcher.find()) {
+                String first = matcher.group(1);
+                String divide = matcher.group(2);
+                String second = matcher.group(3);
+    
+                if (StringUtils.isNotBlank(second)) {
+                    // assume that this is HH(text)MM
+                    returnValue =  (Integer.parseInt(first) * 60) + Integer.parseInt(second);
+                } else if (StringUtils.isBlank(divide)) {
+                    // no divider value, so assume this is a straight minute value
+                    returnValue = Integer.parseInt(first);
+                } else if (divide.toLowerCase().contains("h")) {
+                    // assume it is a form of "hours", so convert to minutes
+                    returnValue = Integer.parseInt(first) * 60;
+                } else {
+                    // assume it's a form of "minutes"
+                    returnValue = Integer.parseInt(first);
+                }
+            }
         }
         
-        // this is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
-        Pattern hrmnPattern = Pattern.compile("(?i)(\\d+)(\\D*)(\\d*)(.*?)");
-
-        Matcher matcher = hrmnPattern.matcher(runtime);
-        if (matcher.find()) {
-            String first = matcher.group(1);
-            String divide = matcher.group(2);
-            String second = matcher.group(3);
-
-            if (StringUtils.isNotBlank(second)) {
-                // assume that this is HH(text)MM
-                return (Integer.parseInt(first) * 60) + Integer.parseInt(second);
-            }
-
-            if (StringUtils.isBlank(divide)) {
-                // no divider value, so assume this is a straight minute value
-                return Integer.parseInt(first);
-            }
-
-            if (divide.toLowerCase().contains("h")) {
-                // assume it is a form of "hours", so convert to minutes
-                return Integer.parseInt(first) * 60;
-            }
-            
-            // assume it's a form of "minutes"
-            return Integer.parseInt(first);
-        }
-
-        return -1;
+        return returnValue;
     }
 
     /**

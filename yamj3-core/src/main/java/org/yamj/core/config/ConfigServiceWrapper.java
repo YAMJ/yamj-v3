@@ -167,14 +167,10 @@ public class ConfigServiceWrapper implements PluginConfigService {
         switch(artwork.getArtworkType()) {
         case BANNER:
             sb.append(".");
-            if (artwork.getSeason() != null) {
-                sb.append("tvshow.season");
-            } else {
-                sb.append("tvshow.series");
-            }
+            sb.append(artwork.getSeason() != null ? "tvshow.season" : "tvshow.series");
             break;
         case POSTER:
-        case FANART:
+        case FANART: //NOSONAR
             sb.append(".");
             if (artwork.getBoxedSet() != null) {
                 sb.append("boxset");
