@@ -22,16 +22,19 @@
  */
 package org.yamj.core.database.dao;
 
+import static org.hibernate.CacheMode.NORMAL;
+import static org.hibernate.ScrollMode.FORWARD_ONLY;
+import static org.yamj.common.type.StatusType.DELETED;
+import static org.yamj.common.type.StatusType.DONE;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Criteria;
-import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.hibernate.HibernateDao;
@@ -40,6 +43,9 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
 
+    // LITERALS
+    private static final String LITERAL_METADATA_TYPE = "metaDataType";
+    
     public List<ArtworkProfile> getAllArtworkProfiles() {
         return currentSession().getNamedQuery(ArtworkProfile.QUERY_GET_ALL)
                 .setReadOnly(true)
@@ -50,15 +56,15 @@ public class ArtworkDao extends HibernateDao {
     public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
         return currentSession().byNaturalId(ArtworkProfile.class)
                 .using("profileName", profileName)
-                .using("metaDataType", metaDataType)
-                .using("artworkType", artworkType)
+                .using(LITERAL_METADATA_TYPE, metaDataType)
+                .using(LITERAL_ARTWORK_TYPE, artworkType)
                 .load();
     }
 
     public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
         return currentSession().createCriteria(ArtworkProfile.class)
-                .add(Restrictions.eq("metaDataType", metaDataType))
-                .add(Restrictions.eq("artworkType", artworkType))
+                .add(Restrictions.eq(LITERAL_METADATA_TYPE, metaDataType))
+                .add(Restrictions.eq(LITERAL_ARTWORK_TYPE, artworkType))
                 .add(Restrictions.eq("preProcess", Boolean.TRUE))
                 .list();
     }
@@ -71,7 +77,7 @@ public class ArtworkDao extends HibernateDao {
         if (located.getStageFile() != null) {
             criteria.add(Restrictions.eq("stageFile", located.getStageFile()));
         } else {
-            criteria.add(Restrictions.eq("source", located.getSource()));
+            criteria.add(Restrictions.eq(LITERAL_SOURCE, located.getSource()));
             criteria.add(Restrictions.eq("url", located.getUrl()));
         }
         
@@ -87,26 +93,13 @@ public class ArtworkDao extends HibernateDao {
     }
     
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean scanPhoto) {
-        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
-        
-        try (ScrollableResults scroll = currentSession().getNamedQuery(Artwork.QUERY_SCANNING_QUEUE)
+        return currentSession().getNamedQuery(Artwork.QUERY_SCANNING_QUEUE)
+                .setString("personStatus", scanPhoto?DONE.name():"NONE")
                 .setReadOnly(true)
+                .setCacheable(true)
+                .setCacheMode(NORMAL)
                 .setMaxResults(maxResults)
-                .setString("personStatus", scanPhoto?StatusType.DONE.name():"NONE")
-                .scroll(ScrollMode.FORWARD_ONLY)
-            )
-        {
-            Object[] row;
-            while (scroll.next()) {
-                row = scroll.get();
-                
-                QueueDTO dto = new QueueDTO(convertRowElementToLong(row[0]));
-                dto.setArtworkType(convertRowElementToString(row[1]));
-                queueElements.add(dto);
-            }
-        }
-        
-        return queueElements;
+                .list();
     }
 
     public List<QueueDTO> getArtworkQueueForProcessing(final int maxResults) {
@@ -115,7 +108,7 @@ public class ArtworkDao extends HibernateDao {
         try (ScrollableResults scroll = currentSession().getNamedQuery(Artwork.QUERY_PROCESSING_QUEUE)
                 .setReadOnly(true)
                 .setMaxResults(maxResults)
-                .scroll(ScrollMode.FORWARD_ONLY)
+                .scroll(FORWARD_ONLY)
             )
         {
             Object[] row;
@@ -133,7 +126,7 @@ public class ArtworkDao extends HibernateDao {
 
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         return currentSession().createCriteria(Artwork.class)
-                .add(Restrictions.eq("artworkType", artworkType))
+                .add(Restrictions.eq(LITERAL_ARTWORK_TYPE, artworkType))
                 .createAlias("boxedSet", "bs")
                 .add(Restrictions.ilike("bs.name", boxedSetName))
                 .list();
@@ -157,10 +150,10 @@ public class ArtworkDao extends HibernateDao {
     
     public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
         return currentSession().createCriteria(ArtworkLocated.class)
-                .add(Restrictions.isNotNull("cacheFilename"))
-                .add(Restrictions.ne("status", StatusType.DELETED))
-                .add(Restrictions.gt("id", lastId))
-                .addOrder(Order.asc("id"))
+                .add(Restrictions.isNotNull(LITERAL_CACHE_FILENAME))
+                .add(Restrictions.ne(LITERAL_SOURCE, DELETED))
+                .add(Restrictions.gt(LITERAL_ID, lastId))
+                .addOrder(Order.asc(LITERAL_ID))
                 .setMaxResults(100)
                 .list();
     }
@@ -168,7 +161,7 @@ public class ArtworkDao extends HibernateDao {
     public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
         return currentSession().byNaturalId(ArtworkLocated.class)
                 .using("artwork", artwork)
-                .using("source", source)
+                .using(LITERAL_SOURCE, source)
                 .using("hashCode", hashCode)
                 .load();        
         

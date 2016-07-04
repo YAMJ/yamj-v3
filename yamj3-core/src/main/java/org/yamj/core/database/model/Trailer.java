@@ -52,15 +52,15 @@ import org.yamj.plugin.api.model.type.ContainerType;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = Trailer.QUERY_SCANNING_QUEUE,
+    @NamedNativeQuery(name = Trailer.QUERY_PROCESSING_QUEUE, resultSetMapping="id.queue",
+        query = "SELECT t.id,(case when t.update_timestamp is null then t.create_timestamp else t.update_timestamp end) as maxdate "+
+                "FROM trailer t WHERE t.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
+    ),
+    @NamedNativeQuery(name = Trailer.QUERY_SCANNING_QUEUE, resultSetMapping = "metadata.queue",
         query = "SELECT vd.id,'MOVIE' as metatype,(case when vd.update_timestamp is null then vd.create_timestamp else vd.update_timestamp end) as maxdate "+
                 "FROM videodata vd WHERE vd.trailer_status in ('NEW','UPDATED') and vd.status='DONE' and vd.episode<0 " +
                 "UNION SELECT ser.id,'SERIES' as metatype,(case when ser.update_timestamp is null then ser.create_timestamp else ser.update_timestamp end) as maxdate "+
                 "FROM series ser WHERE ser.trailer_status in ('NEW','UPDATED') and ser.status='DONE' ORDER BY maxdate ASC"
-    ),
-    @NamedNativeQuery(name = Trailer.QUERY_PROCESSING_QUEUE,
-        query = "SELECT DISTINCT t.id,(case when t.update_timestamp is null then t.create_timestamp else t.update_timestamp end) as maxdate "+
-                "FROM trailer t WHERE t.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
     ),
     @NamedNativeQuery(name = "metadata.trailer.series", resultSetMapping = "metadata.trailer",
         query = "SELECT t.id, t.title, t.url, t.source, t.hash_code, t.cache_dir, t.cache_filename FROM trailer t "+

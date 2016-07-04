@@ -22,6 +22,10 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import static org.yamj.common.type.MetaDataType.*;
+import static org.yamj.common.type.StatusType.*;
+import static org.yamj.plugin.api.model.type.ArtworkType.*;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -104,8 +108,8 @@ public class MediaImportService {
     private String photoFolderName;
     
     @Transactional(readOnly = true)
-    public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
-        return this.stagingDao.getNextStageFileId(fileType, statusTypes);
+    public Long getNextStageFileId(final FileType fileType) {
+        return this.stagingDao.getNextStageFileId(fileType, StatusType.NEW, StatusType.UPDATED);
     }
 
     @Transactional
@@ -125,12 +129,12 @@ public class MediaImportService {
 
             // just update media file
             MediaFile mediaFile = stageFile.getMediaFile();
-            mediaFile.setStatus(StatusType.UPDATED);
+            mediaFile.setStatus(UPDATED);
             mediaDao.updateEntity(mediaFile);
         }
 
         // mark stage file as done
-        stageFile.setStatus(StatusType.DONE);
+        stageFile.setStatus(DONE);
         stagingDao.updateEntity(stageFile);
     }
 
@@ -143,7 +147,7 @@ public class MediaImportService {
 
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
-            stageFile.setStatus(StatusType.DUPLICATE);
+            stageFile.setStatus(DUPLICATE);
             mediaDao.updateEntity(mediaFile);
             return;
         }
@@ -161,7 +165,7 @@ public class MediaImportService {
                 dto.setYear(-1);
             } else {
                 LOG.error("No valid title and year could be scanned from filename '{}'", stageFile.getFileName());
-                stageFile.setStatus(StatusType.ERROR);
+                stageFile.setStatus(ERROR);
                 mediaDao.updateEntity(stageFile);
                 return;
             }
@@ -170,7 +174,7 @@ public class MediaImportService {
             final String cleanTitle = this.identifierService.cleanIdentifier(dto.getTitle());
             if (StringUtils.isBlank(cleanTitle)) {
                 LOG.error("No valid clean title for  '{}' from filename '{}'", dto.getTitle(), stageFile.getFileName());
-                stageFile.setStatus(StatusType.ERROR);
+                stageFile.setStatus(ERROR);
                 mediaDao.updateEntity(stageFile);
                 return;
             }
@@ -194,7 +198,7 @@ public class MediaImportService {
         mediaFile.setCodec(dto.getVideoCodec());
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
-        mediaFile.setStatus(StatusType.NEW);
+        mediaFile.setStatus(NEW);
         mediaFile.setWatchedFile(maxWatchedFileDate != null, maxWatchedFileDate);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
@@ -218,10 +222,10 @@ public class MediaImportService {
                 videoData.setTitle(dto.getTitle(), SCANNER_ID);
                 videoData.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                 videoData.setPublicationYear(dto.getYear(), SCANNER_ID);
-                videoData.setStatus(StatusType.NEW);
+                videoData.setStatus(NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
-                videoData.setTrailerStatus(StatusType.NEW);
+                videoData.setTrailerStatus(NEW);
                 
                 // set watched if media file is NO extra
                 if (!mediaFile.isExtra()) {
@@ -236,15 +240,15 @@ public class MediaImportService {
 
                 // create new poster artwork entry
                 Artwork poster = new Artwork();
-                poster.setArtworkType(ArtworkType.POSTER);
-                poster.setStatus(StatusType.NEW);
+                poster.setArtworkType(POSTER);
+                poster.setStatus(NEW);
                 poster.setVideoData(videoData);
                 metadataDao.saveEntity(poster);
 
                 // create new fanart artwork entry
                 Artwork fanart = new Artwork();
-                fanart.setArtworkType(ArtworkType.FANART);
-                fanart.setStatus(StatusType.NEW);
+                fanart.setArtworkType(FANART);
+                fanart.setStatus(NEW);
                 fanart.setVideoData(videoData);
                 metadataDao.saveEntity(fanart);
 
@@ -299,8 +303,8 @@ public class MediaImportService {
                             series = new Series(seriesIdentifier, dto.getIdMap());
                             series.setTitle(dto.getTitle(), SCANNER_ID);
                             series.setTitleOriginal(dto.getTitle(), SCANNER_ID);
-                            series.setStatus(StatusType.NEW);
-                            series.setTrailerStatus(StatusType.NEW);
+                            series.setStatus(NEW);
+                            series.setTrailerStatus(NEW);
 
                             // set sort title
                             YamjTools.setSortTitle(series, prefixes);
@@ -310,22 +314,22 @@ public class MediaImportService {
 
                             // create new poster artwork entry
                             Artwork poster = new Artwork();
-                            poster.setArtworkType(ArtworkType.POSTER);
-                            poster.setStatus(StatusType.NEW);
+                            poster.setArtworkType(POSTER);
+                            poster.setStatus(NEW);
                             poster.setSeries(series);
                             metadataDao.saveEntity(poster);
 
                             // create new fanart artwork entry
                             Artwork fanart = new Artwork();
-                            fanart.setArtworkType(ArtworkType.FANART);
-                            fanart.setStatus(StatusType.NEW);
+                            fanart.setArtworkType(FANART);
+                            fanart.setStatus(NEW);
                             fanart.setSeries(series);
                             metadataDao.saveEntity(fanart);
 
                             // create new banner artwork entry
                             Artwork banner = new Artwork();
-                            banner.setArtworkType(ArtworkType.BANNER);
-                            banner.setStatus(StatusType.NEW);
+                            banner.setArtworkType(BANNER);
+                            banner.setStatus(NEW);
                             banner.setSeries(series);
                             metadataDao.saveEntity(banner);
                         }
@@ -352,7 +356,7 @@ public class MediaImportService {
                         season.setTitle(dto.getTitle(), SCANNER_ID);
                         season.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                         season.setSeries(series);
-                        season.setStatus(StatusType.NEW);
+                        season.setStatus(NEW);
 
                         // set sort title
                         YamjTools.setSortTitle(season, prefixes);
@@ -362,22 +366,22 @@ public class MediaImportService {
 
                         // create new poster artwork entry
                         Artwork poster = new Artwork();
-                        poster.setArtworkType(ArtworkType.POSTER);
-                        poster.setStatus(StatusType.NEW);
+                        poster.setArtworkType(POSTER);
+                        poster.setStatus(NEW);
                         poster.setSeason(season);
                         metadataDao.saveEntity(poster);
 
                         // create new fanart artwork entry
                         Artwork fanart = new Artwork();
-                        fanart.setArtworkType(ArtworkType.FANART);
-                        fanart.setStatus(StatusType.NEW);
+                        fanart.setArtworkType(FANART);
+                        fanart.setStatus(NEW);
                         fanart.setSeason(season);
                         metadataDao.saveEntity(fanart);
 
                         // create new banner artwork entry
                         Artwork banner = new Artwork();
-                        banner.setArtworkType(ArtworkType.BANNER);
-                        banner.setStatus(StatusType.NEW);
+                        banner.setArtworkType(BANNER);
+                        banner.setStatus(NEW);
                         banner.setSeason(season);
                         metadataDao.saveEntity(banner);
                     }
@@ -390,12 +394,12 @@ public class MediaImportService {
                         videoData.setTitle(dto.getTitle(), SCANNER_ID);
                         videoData.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                     }
-                    videoData.setStatus(StatusType.NEW);
+                    videoData.setStatus(NEW);
                     videoData.setSeason(season);
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
-                    videoData.setTrailerStatus(StatusType.NEW);
+                    videoData.setTrailerStatus(NEW);
 
                     // set sort title
                     YamjTools.setSortTitle(videoData, prefixes);
@@ -405,8 +409,8 @@ public class MediaImportService {
 
                     // create new videoimage artwork entry
                     Artwork videoimage = new Artwork();
-                    videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
-                    videoimage.setStatus(StatusType.NEW);
+                    videoimage.setArtworkType(VIDEOIMAGE);
+                    videoimage.setStatus(NEW);
                     videoimage.setVideoData(videoData);
                     metadataDao.saveEntity(videoimage);
 
@@ -465,9 +469,9 @@ public class MediaImportService {
 
             // change status for PRIO-1-NFO
             if (FileTools.isFileScannable(foundNfoFile)) {
-                foundNfoFile.setStatus(StatusType.DONE);
+                foundNfoFile.setStatus(DONE);
             } else {
-                foundNfoFile.setStatus(StatusType.INVALID);
+                foundNfoFile.setStatus(INVALID);
             }
             this.stagingDao.updateEntity(foundNfoFile);
         }
@@ -485,9 +489,9 @@ public class MediaImportService {
 
             // change status for PRIO-2-NFO
             if (FileTools.isFileScannable(nfoFile)) {
-                nfoFile.setStatus(StatusType.DONE);
+                nfoFile.setStatus(DONE);
             } else {
-                nfoFile.setStatus(StatusType.INVALID);
+                nfoFile.setStatus(INVALID);
             }
             this.stagingDao.updateEntity(nfoFile);
         }
@@ -594,7 +598,7 @@ public class MediaImportService {
 
             if (subtitleFile.isNotFound()) {
                 subtitleFile.getSubtitles().add(subtitle);
-                subtitleFile.setStatus(StatusType.DONE);
+                subtitleFile.setStatus(DONE);
                 this.stagingDao.updateEntity(subtitleFile);
             }
         }
@@ -604,7 +608,7 @@ public class MediaImportService {
     public void processingError(Long id) {
         StageFile stageFile = stagingDao.getById(StageFile.class, id);
         if (stageFile != null) {
-            stageFile.setStatus(StatusType.ERROR);
+            stageFile.setStatus(ERROR);
             stagingDao.updateEntity(stageFile);
         }
     }
@@ -617,7 +621,7 @@ public class MediaImportService {
         // check if NFO file can be scanned
         if (!FileTools.isFileScannable(stageFile)) {
             LOG.debug("NFO file {}-'{}' is not scannable", stageFile.getId(), stageFile.getFileName());
-            stageFile.setStatus(StatusType.INVALID);
+            stageFile.setStatus(INVALID);
             stagingDao.updateEntity(stageFile);
             // nothing to do anymore
             return;
@@ -626,29 +630,29 @@ public class MediaImportService {
         // process new NFO
         boolean found = processNfoFile(stageFile);
         if (found || CollectionUtils.isNotEmpty(stageFile.getNfoRelations())) {
-            stageFile.setStatus(StatusType.DONE);
+            stageFile.setStatus(DONE);
         } else {
-            stageFile.setStatus(StatusType.NOTFOUND);
+            stageFile.setStatus(NOTFOUND);
         }
         stagingDao.updateEntity(stageFile);
 
         for (NfoRelation nfoRelation : stageFile.getNfoRelations()) {
             VideoData videoData = nfoRelation.getNfoRelationPK().getVideoData();
             if (videoData.isMovie()) {
-                videoData.setStatus(StatusType.UPDATED);
+                videoData.setStatus(UPDATED);
                 stagingDao.updateEntity(videoData);
 
                 LOG.debug("Marked movied {}-'{}' as updated", videoData.getId(), videoData.getTitle());
             } else {
-                videoData.setStatus(StatusType.UPDATED);
+                videoData.setStatus(UPDATED);
                 stagingDao.updateEntity(videoData);
 
                 Season season = videoData.getSeason();
-                season.setStatus(StatusType.UPDATED);
+                season.setStatus(UPDATED);
                 stagingDao.updateEntity(videoData);
 
                 Series series = season.getSeries();
-                series.setStatus(StatusType.UPDATED);
+                series.setStatus(UPDATED);
                 stagingDao.updateEntity(series);
 
                 LOG.debug("Marked series {}-'{}' as updated", series.getId(), series.getTitle());
@@ -790,7 +794,7 @@ public class MediaImportService {
         // just update located artwork
         for (ArtworkLocated located : stageFile.getArtworkLocated()) {
             // mark located as updated
-            located.setStatus(StatusType.UPDATED);
+            located.setStatus(UPDATED);
             this.mediaDao.updateEntity(located);
             updated = true;
         }
@@ -800,9 +804,9 @@ public class MediaImportService {
 
         // update stage file
         if (found || updated) {
-            stageFile.setStatus(StatusType.DONE);
+            stageFile.setStatus(DONE);
         } else {
-            stageFile.setStatus(StatusType.NOTFOUND);
+            stageFile.setStatus(NOTFOUND);
         }
         stagingDao.updateEntity(stageFile);
     }
@@ -812,10 +816,10 @@ public class MediaImportService {
         final String fileBaseName = stageFile.getBaseName().toLowerCase();
         
         // get image tokens to regard
-        final List<String> tokensPoster = this.configServiceWrapper.getArtworkTokens(ArtworkType.POSTER);
-        final List<String> tokensFanart = this.configServiceWrapper.getArtworkTokens(ArtworkType.FANART);
-        final List<String> tokensBanner = this.configServiceWrapper.getArtworkTokens(ArtworkType.BANNER);
-        final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(ArtworkType.PHOTO);
+        final List<String> tokensPoster = this.configServiceWrapper.getArtworkTokens(POSTER);
+        final List<String> tokensFanart = this.configServiceWrapper.getArtworkTokens(FANART);
+        final List<String> tokensBanner = this.configServiceWrapper.getArtworkTokens(BANNER);
+        final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(PHOTO);
             
         // determine artwork type and metadataTypes to which image could be applied
         final boolean generic;
@@ -825,62 +829,62 @@ public class MediaImportService {
         if (tokensPoster.contains(fileBaseName)) {
             // determine a generic poster image which can match several metadata objects
             generic = true;
-            artworkType = ArtworkType.POSTER;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+            artworkType = POSTER;
+            metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
         } else if (tokensFanart.contains(fileBaseName)) {
             // determine a generic fanart image which can match several metadata objects
             generic = true;
-            artworkType = ArtworkType.FANART;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+            artworkType = FANART;
+            metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
         } else if (tokensBanner.contains(fileBaseName)) {
             // determine a generic banner image which can match several metadata objects
             generic = true;
-            artworkType = ArtworkType.BANNER;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+            artworkType = BANNER;
+            metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
         } else if (fileBaseName.indexOf(".videoimage") > 0) {
             // determined a video image of an episode
             generic = false;
-            artworkType = ArtworkType.VIDEOIMAGE;
-            metaDataTypes = EnumSet.of(MetaDataType.EPISODE);
+            artworkType = VIDEOIMAGE;
+            metaDataTypes = EnumSet.of(EPISODE);
             
         } else if ("movie".equals(fileBaseName) || isSpecialImage(fileBaseName, "movie", tokensPoster)) {
             // this is a generic movie poster
             generic = true;
-            artworkType = ArtworkType.POSTER;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
+            artworkType = POSTER;
+            metaDataTypes = EnumSet.of(MOVIE);
 
         } else if (fileBaseName.startsWith("movie") && isSpecialImage(fileBaseName, "movie", tokensFanart)) {
             // this is a generic movie fanart
             generic = true;
-            artworkType = ArtworkType.FANART;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
+            artworkType = FANART;
+            metaDataTypes = EnumSet.of(MOVIE);
 
         } else if (fileBaseName.startsWith("movie") && isSpecialImage(fileBaseName, "movie", tokensBanner)) {
             // this is a generic movie banner
             generic = true;
-            artworkType = ArtworkType.BANNER;
-            metaDataTypes = EnumSet.of(MetaDataType.MOVIE);
+            artworkType = BANNER;
+            metaDataTypes = EnumSet.of(MOVIE);
 
         } else if ("season".equals(fileBaseName) || isSpecialImage(fileBaseName, "season", tokensPoster)) {
             // this is a generic season poster
             generic = true;
-            artworkType = ArtworkType.POSTER;
-            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+            artworkType = POSTER;
+            metaDataTypes = EnumSet.of(SEASON);
 
         } else if (fileBaseName.startsWith("season") && isSpecialImage(fileBaseName, "season", tokensFanart)) {
             // this is a generic season fanart
             generic = true;
-            artworkType = ArtworkType.FANART;
-            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+            artworkType = FANART;
+            metaDataTypes = EnumSet.of(SEASON);
 
         } else if (fileBaseName.startsWith("season") && isSpecialImage(fileBaseName, "season", tokensBanner)) {
             // this is a generic season banner
             generic = true;
-            artworkType = ArtworkType.BANNER;
-            metaDataTypes = EnumSet.of(MetaDataType.SEASON);
+            artworkType = BANNER;
+            metaDataTypes = EnumSet.of(SEASON);
 
         } else if ("show".equals(fileBaseName) || isSpecialImage(fileBaseName, "season", tokensPoster) ||
                    "series".equals(fileBaseName) || isSpecialImage(fileBaseName, "series", tokensPoster) ||
@@ -888,8 +892,8 @@ public class MediaImportService {
         {
             // this is a generic series poster
             generic = true;
-            artworkType = ArtworkType.POSTER;
-            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+            artworkType = POSTER;
+            metaDataTypes = EnumSet.of(SERIES);
 
         } else if ((fileBaseName.startsWith("show") && isSpecialImage(fileBaseName, "show", tokensFanart)) ||
                    (fileBaseName.startsWith("series") && isSpecialImage(fileBaseName, "series", tokensFanart)) ||
@@ -897,8 +901,8 @@ public class MediaImportService {
         {
             // this is a generic series fanart
             generic = true;
-            artworkType = ArtworkType.FANART;
-            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+            artworkType = FANART;
+            metaDataTypes = EnumSet.of(SERIES);
 
         } else if ((fileBaseName.startsWith("show") && isSpecialImage(fileBaseName, "show", tokensBanner)) ||
                    (fileBaseName.startsWith("series") && isSpecialImage(fileBaseName, "series", tokensBanner)) ||
@@ -906,50 +910,50 @@ public class MediaImportService {
         {
             // this is a generic series banner
             generic = true;
-            artworkType = ArtworkType.BANNER;
-            metaDataTypes = EnumSet.of(MetaDataType.SERIES);
+            artworkType = BANNER;
+            metaDataTypes = EnumSet.of(SERIES);
             
         } else if (fileBaseName.startsWith("set_")) {
             // this is a set image
             generic = false;
-            metaDataTypes = EnumSet.of(MetaDataType.BOXSET);
+            metaDataTypes = EnumSet.of(BOXSET);
             
             // determine artwork type
             if (endsWithToken(fileBaseName, tokensFanart)) {
-                artworkType = ArtworkType.FANART;
+                artworkType = FANART;
             } else if (endsWithToken(fileBaseName, tokensBanner)) {
-                artworkType = ArtworkType.BANNER;
+                artworkType = BANNER;
             } else {
                 // everything else is a poster
-                artworkType = ArtworkType.POSTER;
+                artworkType = POSTER;
             }
             
         } else if (endsWithToken(fileBaseName, tokensFanart)) {
             // this is a fanart
-            artworkType = ArtworkType.FANART;
+            artworkType = FANART;
             
             if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensFanart))) {
                 // generic image if file name equals directory name
                 generic = true;
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+                metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
             } else {
                 generic = false;
                 // could just be applied to season or movie   
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
+                metaDataTypes = EnumSet.of(MOVIE, SEASON);
             }
 
         } else if (endsWithToken(fileBaseName, tokensBanner)) {
             // this is a banner
-            artworkType = ArtworkType.BANNER;
+            artworkType = BANNER;
             
             if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensBanner))) {
                 // generic image if file name equals directory name
                 generic = true;
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+                metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
             } else {
                 generic = false;
                 // could just be applied to season or movie   
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
+                metaDataTypes = EnumSet.of(MOVIE, SEASON);
             }
 
         } else {
@@ -959,19 +963,19 @@ public class MediaImportService {
             if (inPhotoFolder || endsWithToken(fileBaseName, tokensPhoto)) {
                 // this image determines a photo
                 generic = false;
-                artworkType = ArtworkType.PHOTO;
-                metaDataTypes = EnumSet.of(MetaDataType.PERSON);
+                artworkType = PHOTO;
+                metaDataTypes = EnumSet.of(PERSON);
             } else if (StringUtils.equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName(), stripToken(fileBaseName, tokensPoster))) {
                 // generic image if file name equals directory name
                 generic = true;
-                artworkType = ArtworkType.POSTER;
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON, MetaDataType.SERIES);
+                artworkType = POSTER;
+                metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
             } else {
                 // this image determines a poster
                 generic = false;
-                artworkType = ArtworkType.POSTER;
+                artworkType = POSTER;
                 // could just be applied to season or movie   
-                metaDataTypes = EnumSet.of(MetaDataType.MOVIE, MetaDataType.SEASON);
+                metaDataTypes = EnumSet.of(MOVIE, SEASON);
             }
         }
         
@@ -981,7 +985,7 @@ public class MediaImportService {
         final Collection<Artwork> artworks;
         int priority = 1;
         
-        if (metaDataTypes.contains(MetaDataType.PERSON)) {
+        if (metaDataTypes.contains(PERSON)) {
             // PERSON PHOTO
             final String stripped = stripToken(fileBaseName, tokensPhoto);
 
@@ -994,12 +998,12 @@ public class MediaImportService {
                 artworks = this.metadataDao.findPersonArtworks(identifier);
             }
             
-        } else if (metaDataTypes.contains(MetaDataType.BOXSET)) {
+        } else if (metaDataTypes.contains(BOXSET)) {
             // BOXSET IMAGE
             String boxedSetName = getBoxedSetName(fileBaseName);
             artworks = this.artworkDao.getBoxedSetArtwork(boxedSetName, artworkType);
             
-        } else if (metaDataTypes.contains(MetaDataType.EPISODE)) {
+        } else if (metaDataTypes.contains(EPISODE)) {
             // EPISODE IMAGE
             
             // get the episode part in case of files containing multiple episodes
@@ -1020,11 +1024,11 @@ public class MediaImportService {
         } else if (generic) {
             // GENERIC IMAGES
             
-            if (metaDataTypes.contains(MetaDataType.MOVIE) || metaDataTypes.contains(MetaDataType.SEASON)) {
+            if (metaDataTypes.contains(MOVIE) || metaDataTypes.contains(SEASON)) {
                 // generic select without base name which forces just to obey the directory
                 artworks = this.stagingDao.findMatchingArtworkForMovieOrSeason(artworkType, null, stageFile.getStageDirectory());
                 
-                if (metaDataTypes.contains(MetaDataType.SERIES)) {
+                if (metaDataTypes.contains(SERIES)) {
                     // additional for series:
                     // search artwork where image files are in sub directories
                     artworks.addAll(this.stagingDao.findMatchingArtworkForSeries(artworkType, stageFile.getStageDirectory(), true));
@@ -1093,9 +1097,9 @@ public class MediaImportService {
             if (!artwork.getArtworkLocated().contains(located)) {
 
                 if (FileTools.isFileReadable(stageFile)) {
-                    located.setStatus(StatusType.NEW);
+                    located.setStatus(NEW);
                 } else {
-                    located.setStatus(StatusType.INVALID);
+                    located.setStatus(INVALID);
                 }
 
                 this.mediaDao.saveEntity(located);
@@ -1170,7 +1174,7 @@ public class MediaImportService {
         }
 
         // update stage file
-        watchedFile.setStatus(StatusType.DONE);
+        watchedFile.setStatus(DONE);
         stagingDao.updateEntity(watchedFile);
     }
 
@@ -1208,9 +1212,9 @@ public class MediaImportService {
 
         // update stage file
         if (CollectionUtils.isEmpty(subtitleFile.getSubtitles())) {
-            subtitleFile.setStatus(StatusType.NOTFOUND);
+            subtitleFile.setStatus(NOTFOUND);
         } else {
-            subtitleFile.setStatus(StatusType.DONE);
+            subtitleFile.setStatus(DONE);
         }
         stagingDao.updateEntity(subtitleFile);
     }

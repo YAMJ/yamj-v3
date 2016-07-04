@@ -22,13 +22,16 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.common.type.StatusType.DONE;
+import static org.yamj.common.type.StatusType.ERROR;
+import static org.yamj.common.type.StatusType.NOTFOUND;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
@@ -74,7 +77,7 @@ public class TrailerStorageService {
     public void errorTrailer(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put("status", ERROR);
         commonDao.executeUpdate(Trailer.UPDATE_STATUS, params);
     }
 
@@ -82,7 +85,7 @@ public class TrailerStorageService {
     public void errorTrailerVideoData(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put("status", ERROR);
         commonDao.executeUpdate(VideoData.UPDATE_TRAILER_STATUS, params);
     }
 
@@ -90,7 +93,7 @@ public class TrailerStorageService {
     public void errorTrailerSeries(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put("status", ERROR);
         commonDao.executeUpdate(Series.UPDATE_TRAILER_STATUS, params);
     }
 
@@ -123,7 +126,7 @@ public class TrailerStorageService {
         for (Trailer trailer : trailers) {
             StageFile stageFile = trailer.getStageFile();
             if (stageFile != null && stageFile.isNotFound()) {
-                stageFile.setStatus(StatusType.DONE);
+                stageFile.setStatus(DONE);
                 this.commonDao.updateEntity(stageFile);
             }
         }
@@ -131,9 +134,9 @@ public class TrailerStorageService {
         // set status of video data
         videoData.setTrailerLastScanned(new Date());
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(videoData.getTrailers())) {
-            videoData.setTrailerStatus(StatusType.NOTFOUND);
+            videoData.setTrailerStatus(NOTFOUND);
         } else {
-            videoData.setTrailerStatus(StatusType.DONE);
+            videoData.setTrailerStatus(DONE);
         }
 
         // update artwork in database
@@ -164,7 +167,7 @@ public class TrailerStorageService {
         for (Trailer trailer : trailers) {
             StageFile stageFile = trailer.getStageFile();
             if (stageFile != null && stageFile.isNotFound()) {
-                stageFile.setStatus(StatusType.DONE);
+                stageFile.setStatus(DONE);
                 this.commonDao.updateEntity(stageFile);
             }
         }
@@ -172,9 +175,9 @@ public class TrailerStorageService {
         // set status of series
         series.setTrailerLastScanned(new Date());
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(series.getTrailers())) {
-            series.setTrailerStatus(StatusType.NOTFOUND);
+            series.setTrailerStatus(NOTFOUND);
         } else {
-            series.setTrailerStatus(StatusType.DONE);
+            series.setTrailerStatus(DONE);
         }
 
         // update artwork in database

@@ -24,55 +24,28 @@ package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.plugin.api.model.type.ArtworkType;
 
 public final class QueueDTO {
 
     private final Long id;
     private MetaDataType metadataType;
-    private ArtworkType artworkType;
     private Boolean locatedArtwork;
-
-    // GETTER and SETTER
 
     public QueueDTO(Long id) {
         this.id = id;
+    }
+
+    public QueueDTO(Long id, String metadataType) {
+        this.id = id;
+        this.metadataType = MetaDataType.fromString(metadataType);
     }
 
     public Long getId() {
         return id;
     }
 
-    public MetaDataType getMetadataType() {
-        return metadataType;
-    }
-
-    public void setMetadataType(String metadataType) {
-        setMetadataType(MetaDataType.fromString(metadataType));
-    }
-
-    public void setMetadataType(MetaDataType metadataType) {
-        this.metadataType = metadataType;
-    }
-
     public boolean isMetadataType(MetaDataType metadataType) {
         return this.metadataType == metadataType;
-    }
-
-    public ArtworkType getArtworkType() {
-        return artworkType;
-    }
-
-    public void setArtworkType(String artworkType) {
-        setArtworkType(ArtworkType.fromString(artworkType));
-    }
-
-    public void setArtworkType(ArtworkType artworkType) {
-        this.artworkType = artworkType;
-    }
-
-    public boolean isArtworkType(ArtworkType artworkType) {
-        return this.artworkType == artworkType;
     }
 
     public Boolean getLocatedArtwork() {
@@ -87,8 +60,7 @@ public final class QueueDTO {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(getId())
-                .append(getMetadataType())
-                .append(getArtworkType())
+                .append(this.metadataType)
                 .append(getLocatedArtwork())
                 .toHashCode();
     }
@@ -107,8 +79,7 @@ public final class QueueDTO {
         QueueDTO other = (QueueDTO)obj;
         return new EqualsBuilder()
             .append(getId(), other.getId())
-            .append(getMetadataType(), other.getMetadataType())
-            .append(getArtworkType(), other.getArtworkType())
+            .append(this.metadataType, other.metadataType)
             .append(getLocatedArtwork(), other.getLocatedArtwork())
             .isEquals();
     }

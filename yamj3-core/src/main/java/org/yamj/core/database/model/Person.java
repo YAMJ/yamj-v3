@@ -67,11 +67,11 @@ import org.yamj.plugin.api.metadata.MetadataTools;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = Person.QUERY_SCANNING_QUEUE,
+    @NamedNativeQuery(name = Person.QUERY_SCANNING_QUEUE, resultSetMapping = "metadata.queue",
         query = "SELECT p.id,'PERSON' as metatype,(case when p.update_timestamp is null then p.create_timestamp else p.update_timestamp end) as maxdate "+
                 "FROM person p WHERE p.status in ('NEW','UPDATED') ORDER BY maxdate ASC"
     ),
-    @NamedNativeQuery(name = Person.QUERY_FILMOGRAPHY_QUEUE,
+    @NamedNativeQuery(name = Person.QUERY_FILMOGRAPHY_QUEUE, resultSetMapping = "metadata.queue",
         query = "SELECT p.id,'FILMOGRAPHY' as metatype,(case when p.update_timestamp is null then p.create_timestamp else p.update_timestamp end) as maxdate "+
                 "FROM person p WHERE p.status='DONE' and (p.filmography_status is null or p.filmography_status in ('NEW','UPDATED')) ORDER BY maxdate ASC"
     ),

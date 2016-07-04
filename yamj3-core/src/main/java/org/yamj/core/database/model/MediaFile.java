@@ -44,7 +44,7 @@ import org.yamj.core.database.model.type.FileType;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = MediaFile.QUERY_QUEUE,
+    @NamedNativeQuery(name = MediaFile.QUERY_QUEUE, resultSetMapping="id.queue", 
         query = "SELECT mf.id, (case when mf.update_timestamp is null then mf.create_timestamp else mf.update_timestamp end) as maxdate " +
                 "FROM mediafile mf WHERE mf.status in ('NEW','UPDATED') ORDER BY maxdate asc"
     )

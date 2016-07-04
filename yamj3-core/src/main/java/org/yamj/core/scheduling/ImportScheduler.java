@@ -22,6 +22,8 @@
  */
 package org.yamj.core.scheduling;
 
+import static org.yamj.core.database.model.type.FileType.*;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -29,8 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
 import org.yamj.core.tools.ExceptionTools;
 
@@ -80,7 +80,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(VIDEO);
                 if (id != null) {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
@@ -122,7 +122,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(NFO);
                 if (id != null) {
                     LOG.trace("Process nfo stage file: {}", id);
                     mediaImportService.processNfo(id);
@@ -158,7 +158,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(IMAGE);
                 if (id != null) {
                     LOG.trace("Process image stage file: {}", id);
                     mediaImportService.processImage(id);
@@ -199,7 +199,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(FileType.WATCHED, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(WATCHED);
                 if (id != null) {
                     LOG.trace("Process watched stage file: {}", id);
                     mediaImportService.processWatched(id);
@@ -229,7 +229,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(FileType.SUBTITLE, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(SUBTITLE);
                 if (id != null) {
                     LOG.trace("Process subtitle stage file: {}", id);
                     mediaImportService.processSubtitle(id);

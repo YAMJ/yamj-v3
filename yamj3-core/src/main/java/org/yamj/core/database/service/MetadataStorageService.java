@@ -23,7 +23,6 @@
 package org.yamj.core.database.service;
 
 import static org.yamj.core.CachingNames.*;
-import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -650,7 +649,7 @@ public class MetadataStorageService {
             if (boxedSetOrder == null) {
                 BoxedSet boxedSet;
                 if (dto.getBoxedSetId() == null) {
-                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, dto.getIdentifier());
+                    boxedSet = commonDao.getBoxedSet(dto.getIdentifier());
                 } else {
                     boxedSet = commonDao.getBoxedSet(dto.getBoxedSetId());
                 }
@@ -690,7 +689,7 @@ public class MetadataStorageService {
             if (boxedSetOrder == null) {
                 BoxedSet boxedSet;
                 if (dto.getBoxedSetId() == null) {
-                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, dto.getIdentifier());
+                    boxedSet = commonDao.getBoxedSet(dto.getIdentifier());
                 } else {
                     boxedSet = commonDao.getBoxedSet(dto.getBoxedSetId());
                 }
@@ -739,7 +738,7 @@ public class MetadataStorageService {
                 // retrieve person
                 Person person;
                 if (dto.getPersonId() == null) {
-                    person = metadataDao.getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
+                    person = metadataDao.getPerson(dto.getIdentifier());
                 } else {
                     person = metadataDao.getCacheablePerson(dto.getPersonId());
                 }

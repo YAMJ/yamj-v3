@@ -23,15 +23,21 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.dto.QueueDTO;
 
 /**
  * Abstract implementation of a stateful object.
  */
+@SqlResultSetMapping(name="id.queue", classes={
+    @ConstructorResult(
+        targetClass=QueueDTO.class, 
+        columns={@ColumnResult(name="id", type=Long.class)}
+    )}
+)
+
 @MappedSuperclass
 public abstract class AbstractStateful extends AbstractAuditable implements Serializable {
 

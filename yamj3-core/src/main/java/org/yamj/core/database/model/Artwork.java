@@ -62,17 +62,17 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = Artwork.QUERY_SCANNING_QUEUE,
-        query = "SELECT DISTINCT art.id,art.artwork_type,(case when art.update_timestamp is null then art.create_timestamp else art.update_timestamp end) as maxdate "+
+    @NamedNativeQuery(name = Artwork.QUERY_SCANNING_QUEUE, resultSetMapping="id.queue",
+        query = "SELECT art.id,(case when art.update_timestamp is null then art.create_timestamp else art.update_timestamp end) as maxdate "+
                 "FROM artwork art LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id LEFT OUTER JOIN season sea ON sea.id=art.season_id "+
                 "LEFT OUTER JOIN series ser ON ser.id=art.series_id LEFT OUTER JOIN person p ON p.id=art.person_id "+
                 "WHERE art.status in ('NEW','UPDATED') AND (vd.status is null OR vd.status='DONE') AND (sea.status is null OR sea.status='DONE') "+
                 "AND (ser.status is null OR ser.status='DONE') AND (p.status is null OR p.status=:personStatus) ORDER BY maxdate ASC"
     ),
     @NamedNativeQuery(name = Artwork.QUERY_PROCESSING_QUEUE,
-        query = "SELECT DISTINCT loc1.id,1 as is_located,(case when loc1.update_timestamp is null then loc1.create_timestamp else loc1.update_timestamp end) as maxdate "+
+        query = "SELECT loc1.id,1 as is_located,(case when loc1.update_timestamp is null then loc1.create_timestamp else loc1.update_timestamp end) as maxdate "+
                 "FROM artwork_located loc1 WHERE loc1.status in ('NEW','UPDATED') UNION "+
-                "SELECT DISTINCT gen.id,0 as is_located,(case when gen.update_timestamp is null then gen.create_timestamp else gen.update_timestamp end) as maxdate "+
+                "SELECT gen.id,0 as is_located,(case when gen.update_timestamp is null then gen.create_timestamp else gen.update_timestamp end) as maxdate "+
                 "FROM artwork_generated gen JOIN artwork_located loc2 on loc2.id=gen.located_id and loc2.status='DONE' WHERE gen.status in ('NEW','UPDATED') "+
                 "ORDER BY maxdate ASC"
    )

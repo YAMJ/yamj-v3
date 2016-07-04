@@ -22,12 +22,13 @@
  */
 package org.yamj.core.service.metadata;
 
+import static org.yamj.common.type.MetaDataType.*;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -59,13 +60,13 @@ public class MetadataScannerService implements IQueueProcessService {
     public void processQueueElement(QueueDTO queueElement) {
         if (queueElement.getId() == null) {
             // nothing to do
-        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+        } else if (queueElement.isMetadataType(MOVIE)) {
             scanMovie(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(SERIES)) {
             scanSeries(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+        } else if (queueElement.isMetadataType(PERSON)) {
             scanPerson(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+        } else if (queueElement.isMetadataType(FILMOGRAPHY)) {
             scanFilmography(queueElement.getId());
         }
     }
@@ -101,7 +102,7 @@ public class MetadataScannerService implements IQueueProcessService {
             metadataStorageService.updateScannedMetaData(videoData);
 
             // evict API caches
-            metadataStorageService.evictApiCaches(MetaDataType.MOVIE, videoData.getId());
+            metadataStorageService.evictApiCaches(MOVIE, videoData.getId());
 
             LOG.debug("Updated movie in database: {}-'{}'", id, videoData.getTitle());
         } catch (Exception error) {
@@ -159,11 +160,11 @@ public class MetadataScannerService implements IQueueProcessService {
             metadataStorageService.updateScannedMetaData(series);
 
             // evict API caches
-            metadataStorageService.evictApiCaches(MetaDataType.SERIES, series.getId());
+            metadataStorageService.evictApiCaches(SERIES, series.getId());
             for (Season season : series.getSeasons()) {
-                metadataStorageService.evictApiCaches(MetaDataType.SEASON, season.getId());
+                metadataStorageService.evictApiCaches(SEASON, season.getId());
                 for (VideoData videoData : season.getVideoDatas()) {
-                    metadataStorageService.evictApiCaches(MetaDataType.EPISODE, videoData.getId());
+                    metadataStorageService.evictApiCaches(EPISODE, videoData.getId());
                 }
             }
                 
@@ -237,16 +238,16 @@ public class MetadataScannerService implements IQueueProcessService {
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
         if (queueElement.getId() == null) {
             // nothing to do
-        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+        } else if (queueElement.isMetadataType(MOVIE)) {
             LOG.error("Failed scan for movie "+queueElement.getId(), error);
             metadataStorageService.errorVideoData(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(SERIES)) {
             LOG.error("Failed scan for series "+queueElement.getId(), error);
             metadataStorageService.errorSeries(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+        } else if (queueElement.isMetadataType(PERSON)) {
             LOG.error("Failed scan for person "+queueElement.getId(), error);
             metadataStorageService.errorPerson(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+        } else if (queueElement.isMetadataType(FILMOGRAPHY)) {
             LOG.error("Failed scan for filmography of person "+queueElement.getId(), error);
             metadataStorageService.errorFilmography(queueElement.getId());
         }

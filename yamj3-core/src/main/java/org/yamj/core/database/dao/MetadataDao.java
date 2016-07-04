@@ -22,19 +22,21 @@
  */
 package org.yamj.core.database.dao;
 
+import static org.hibernate.CacheMode.NORMAL;
+import static org.yamj.common.type.StatusType.DELETED;
+import static org.yamj.common.type.StatusType.NEW;
+import static org.yamj.common.type.StatusType.UPDATED;
+import static org.yamj.plugin.api.model.type.ArtworkType.PHOTO;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.CacheMode;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -42,7 +44,6 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
-import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Transactional
 @Repository("metadataDao")
@@ -52,38 +53,28 @@ public class MetadataDao extends HibernateDao {
     private ArtworkDao artworkDao;
 
     public List<QueueDTO> getMetadataQueue(final String queryName, final int maxResults) {
-        final List<QueueDTO> queueElements = new ArrayList<>(maxResults);
-        
-        try (ScrollableResults scroll = currentSession().getNamedQuery(queryName)
+        return currentSession().getNamedQuery(queryName)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
+                .setCacheMode(NORMAL)
                 .setMaxResults(maxResults)
-                .scroll(ScrollMode.FORWARD_ONLY))
-        {
-            Object[] row;
-            while (scroll.next()) {
-                row = scroll.get();
-                
-                QueueDTO dto = new QueueDTO(convertRowElementToLong(row[0]));
-                dto.setMetadataType(convertRowElementToString(row[1]));
-                queueElements.add(dto);
-            }
-        }
-        
-        return queueElements;
+                .list();
     }
 
     public VideoData getVideoData(String identifier) {
-        return getByNaturalIdCaseInsensitive(VideoData.class, IDENTIFIER, identifier);
+        return getByNaturalIdCaseInsensitive(VideoData.class, LITERAL_IDENTIFIER, identifier);
     }
 
     public Season getSeason(String identifier) {
-        return getByNaturalIdCaseInsensitive(Season.class, IDENTIFIER, identifier);
+        return getByNaturalIdCaseInsensitive(Season.class, LITERAL_IDENTIFIER, identifier);
     }
 
     public Series getSeries(String identifier) {
-        return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
+        return getByNaturalIdCaseInsensitive(Series.class, LITERAL_IDENTIFIER, identifier);
+    }
+
+    public Person getPerson(String identifier) {
+        return getByNaturalIdCaseInsensitive(Person.class, LITERAL_IDENTIFIER, identifier);
     }
 
     @Cacheable(value=CachingNames.DB_PERSON, key="#id", unless="#result==null")
@@ -95,9 +86,9 @@ public class MetadataDao extends HibernateDao {
     public void duplicate(Person person, Person doubletPerson) {
         // find movies which contains the doublet
         List<VideoData> videoDatas = currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_PERSON)
-                .setLong("id", doubletPerson.getId())
+                .setLong(LITERAL_ID, doubletPerson.getId())
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
+                .setCacheMode(NORMAL)
                 .list();
         
         for (VideoData videoData : videoDatas) {
@@ -128,12 +119,12 @@ public class MetadataDao extends HibernateDao {
         }
         
         // update doublet person
-        doubletPerson.setStatus(StatusType.DELETED);
+        doubletPerson.setStatus(DELETED);
         this.updateEntity(doubletPerson);
     }
     
     public void storeMovieCredit(CreditDTO dto) {
-        Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
+        Person person = getByNaturalIdCaseInsensitive(Person.class, LITERAL_IDENTIFIER, dto.getIdentifier());
         if (person == null) {
             // create new person
             person = new Person(dto.getIdentifier());
@@ -142,15 +133,15 @@ public class MetadataDao extends HibernateDao {
             person.setFirstName(dto.getFirstName(), dto.getSource());
             person.setLastName(dto.getLastName(), dto.getSource());
             person.setBirthName(dto.getRealName(), dto.getSource());
-            person.setStatus(StatusType.NEW);
-            person.setFilmographyStatus(StatusType.NEW);
+            person.setStatus(NEW);
+            person.setFilmographyStatus(NEW);
             this.saveEntity(person);
 
             // store artwork
             Artwork photo = new Artwork();
-            photo.setArtworkType(ArtworkType.PHOTO);
+            photo.setArtworkType(PHOTO);
             photo.setPerson(person);
-            photo.setStatus(StatusType.NEW);
+            photo.setStatus(NEW);
             person.setPhoto(photo);
             this.saveEntity(photo);
         } else {
@@ -167,10 +158,10 @@ public class MetadataDao extends HibernateDao {
 
             if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
-                person.setStatus(StatusType.UPDATED);
+                person.setStatus(UPDATED);
             } else if (person.isDeleted()) {
                 // if previously deleted then set as updated now
-                person.setStatus(StatusType.UPDATED);
+                person.setStatus(UPDATED);
             }
         }
         
@@ -191,7 +182,7 @@ public class MetadataDao extends HibernateDao {
             located.setHashCode(dto.getHashCode());
             located.setPriority(5);
             located.setImageType(dto.getImageType());
-            located.setStatus(StatusType.NEW);
+            located.setStatus(NEW);
             
             artworkDao.saveArtworkLocated(artwork, located);
         }
@@ -199,10 +190,10 @@ public class MetadataDao extends HibernateDao {
 
     public List<Artwork> findPersonArtworks(String identifier) {
         return currentSession().getNamedQuery(Artwork.QUERY_FIND_PERSON_ARTWORKS)
-                .setParameter("artworkType", ArtworkType.PHOTO)
-                .setString(IDENTIFIER, identifier.toLowerCase())
+                .setParameter(LITERAL_ARTWORK_TYPE, PHOTO)
+                .setString(LITERAL_IDENTIFIER, identifier.toLowerCase())
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
+                .setCacheMode(NORMAL)
                 .list();
     }
 }

@@ -31,23 +31,45 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.api.model.dto.ApiExternalIdDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 /**
  * Abstract implementation of a scannable object.
  */
 
-@SqlResultSetMapping(name="metadata.externalid", classes={
-    @ConstructorResult(
-        targetClass=ApiExternalIdDTO.class,
-        columns={
-             @ColumnResult(name="id", type=Long.class),
-             @ColumnResult(name="externalId", type=String.class),
-             @ColumnResult(name="sourcedb", type=String.class),
-             @ColumnResult(name="skipped", type=Boolean.class)
-        }
-    )}
-)
+@SqlResultSetMappings(value ={
+    @SqlResultSetMapping(name="metadata.queue", classes={
+        @ConstructorResult(
+            targetClass=QueueDTO.class, 
+            columns={
+                 @ColumnResult(name="id", type=Long.class),
+                 @ColumnResult(name="metatype", type=String.class)
+            }
+        )}
+    ),
+    @SqlResultSetMapping(name="metadata.externalid", classes={
+        @ConstructorResult(
+            targetClass=ApiExternalIdDTO.class,
+            columns={
+                 @ColumnResult(name="id", type=Long.class),
+                 @ColumnResult(name="externalId", type=String.class),
+                 @ColumnResult(name="sourcedb", type=String.class),
+                 @ColumnResult(name="skipped", type=Boolean.class)
+            }
+        )}
+    ),
+    @SqlResultSetMapping(name="metadata.rating", classes={
+        @ConstructorResult(
+            targetClass=ApiRatingDTO.class,
+            columns={
+                 @ColumnResult(name="source", type=String.class),
+                 @ColumnResult(name="rating", type=Integer.class)
+            }
+        )}
+    )    
+})
 
 @MappedSuperclass
 public abstract class AbstractScannable extends AbstractStateful implements IScannable {

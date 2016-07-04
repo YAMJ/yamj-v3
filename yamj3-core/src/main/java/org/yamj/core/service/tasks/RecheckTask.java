@@ -65,7 +65,7 @@ public class RecheckTask implements ITask {
         LOG.debug("Execute recheck task");
         final long startTime = System.currentTimeMillis();
 
-        int limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.movie.maxLimit", 50));
+        int limit = this.configService.getIntProperty("yamj3.recheck.movie.maxLimit", 50);
         if (limit > 0) {
             int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 60);
             if (metadataStorageService.recheckMovie(new DateTime().minusDays(recheck).toDate(), limit)) {
@@ -73,7 +73,7 @@ public class RecheckTask implements ITask {
             }
         }
 
-        limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.tvshow.maxLimit", 20));
+        limit = this.configService.getIntProperty("yamj3.recheck.tvshow.maxLimit", 20);
         if (limit > 0) {
             int recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 60);
             if (metadataStorageService.recheckTvShow(new DateTime().minusDays(recheck).toDate(), limit)) {
@@ -81,7 +81,7 @@ public class RecheckTask implements ITask {
             }
         }
 
-        limit = Math.max(0, this.configService.getIntProperty("yamj3.recheck.person.maxLimit", 100));
+        limit = this.configService.getIntProperty("yamj3.recheck.person.maxLimit", 100);
         if (limit > 0) {
             int recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
             if (metadataStorageService.recheckPerson(new DateTime().minusDays(recheck).toDate(), limit)) {

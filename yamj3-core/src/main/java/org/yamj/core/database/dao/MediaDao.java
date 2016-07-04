@@ -58,7 +58,7 @@ public class MediaDao extends HibernateDao {
         sqlScalars.addToSql("WHERE mf.video_source is not null ");
         sqlScalars.addToSql(options.getSortString("mf.video_source"));
         
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(LITERAL_NAME, StringType.INSTANCE);
 
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
     }

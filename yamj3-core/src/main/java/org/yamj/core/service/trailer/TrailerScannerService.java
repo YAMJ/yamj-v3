@@ -22,14 +22,17 @@
  */
 package org.yamj.core.service.trailer;
 
+import static org.yamj.common.type.MetaDataType.MOVIE;
+import static org.yamj.common.type.MetaDataType.SERIES;
+import static org.yamj.common.type.StatusType.DONE;
+import static org.yamj.common.type.StatusType.NEW;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Series;
@@ -75,9 +78,9 @@ public class TrailerScannerService implements IQueueProcessService {
     public void processQueueElement(QueueDTO queueElement) {
         if (queueElement.getId() == null) {
             // nothing to do
-        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+        } else if (queueElement.isMetadataType(MOVIE)) {
             scanMovieTrailer(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(SERIES)) {
             scanSeriesTrailer(queueElement.getId());
         }
     }
@@ -110,10 +113,10 @@ public class TrailerScannerService implements IQueueProcessService {
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
         if (queueElement.getId() == null) {
             // nothing to do
-        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+        } else if (queueElement.isMetadataType(MOVIE)) {
             LOG.error("Failed trailer scan for movie "+queueElement.getId(), error);
             trailerStorageService.errorTrailerVideoData(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(SERIES)) {
             LOG.error("Failed trailer scan for series "+queueElement.getId(), error);
             trailerStorageService.errorTrailerSeries(queueElement.getId());
         }
@@ -178,7 +181,7 @@ public class TrailerScannerService implements IQueueProcessService {
             trailer.setUrl(dto.getUrl());
             trailer.setTitle(dto.getTitle());
             trailer.setHashCode(dto.getHashCode());
-            trailer.setStatus(downloadEnabled ? StatusType.NEW : StatusType.DONE);
+            trailer.setStatus(downloadEnabled ? NEW : DONE);
             trailers.add(trailer);
         }
      }
@@ -241,7 +244,7 @@ public class TrailerScannerService implements IQueueProcessService {
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
             trailer.setHashCode(dto.getHashCode());
-            trailer.setStatus(downloadEnabled ? StatusType.NEW : StatusType.DONE);
+            trailer.setStatus(downloadEnabled ? NEW : DONE);
             trailers.add(trailer);
         }
     }

@@ -22,24 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 /**
  * Abstract implementation of an metadata object.
  */
-
-@SqlResultSetMapping(name="metadata.rating", classes={
-    @ConstructorResult(
-        targetClass=ApiRatingDTO.class,
-        columns={
-             @ColumnResult(name="source", type=String.class),
-             @ColumnResult(name="rating", type=Integer.class)
-        }
-    )}
-)
 
 @MappedSuperclass
 public abstract class AbstractMetadata extends AbstractScannable implements IMetadata {
