@@ -69,9 +69,6 @@ public class ApiDao extends HibernateDao {
     private static final String LITERAL_JOB = "job";
     private static final String LITERAL_CREATION = "creation";
     private static final String LITERAL_LASTSCAN = "lastscan";
-    private static final String LITERAL_MIN_WIDTH = "minWidth";
-    private static final String LITERAL_MAX_WIDTH = "maxWidth";
-    private static final String LITERAL_COMBINED = "combined";
     private static final String LITERAL_NEWEST_DATE = "newestDate";
     private static final String LITERAL_ARTWORK_ID = "artworkId";
     private static final String LITERAL_LOCATED_ID = "locatedId";
@@ -169,7 +166,7 @@ public class ApiDao extends HibernateDao {
 
         // add the movie entries
         if (mdt.contains(MOVIE)) {
-            sbSQL.append(generateSqlForVideo(true, params));
+            sbSQL.append(generateSqlForVideo(MOVIE, params));
         }
 
         // add the TV series entries
@@ -193,7 +190,7 @@ public class ApiDao extends HibernateDao {
             if (sbSQL.length() > 0) {
                 sbSQL.append(SQL_UNION_ALL);
             }
-            sbSQL.append(generateSqlForVideo(false, params));
+            sbSQL.append(generateSqlForVideo(EPISODE, params));
         }
 
         // Add the sort string, this will be empty if there is no sort required
@@ -206,15 +203,10 @@ public class ApiDao extends HibernateDao {
     /**
      * Create the SQL fragment for the selection of movies
      */
-    private static StringBuilder generateSqlForVideo(boolean isMovie, IndexParams params) {
-        StringBuilder sbSQL = new StringBuilder();
-
-        sbSQL.append("SELECT vd.id");
-        if (isMovie) {
-            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MOVIE).append(SQL_AS_VIDEO_TYPE);
-        } else {
-            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(EPISODE).append(SQL_AS_VIDEO_TYPE);
-        }
+    private static StringBuilder generateSqlForVideo(MetaDataType type, IndexParams params) {
+      
+        StringBuilder sbSQL = new StringBuilder("SELECT vd.id");
+        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(type).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", vd.title, vd.title_original AS originalTitle, vd.title_sort AS sortTitle");
         sbSQL.append(", vd.publication_year AS videoYear, vd.release_date as releaseDate");
         sbSQL.append(", null AS seriesId, vd.season_id AS seasonId, null AS season, vd.episode AS episode ");
@@ -240,7 +232,7 @@ public class ApiDao extends HibernateDao {
         }
 
         sbSQL.append(" FROM videodata vd WHERE vd.episode");
-        sbSQL.append(isMovie ? "<0" : ">-1");
+        sbSQL.append(type == MOVIE ? "<0" : ">-1");
 
         if (params.getId() > 0L) {
             sbSQL.append(" AND vd.id=").append(params.getId());
@@ -263,191 +255,59 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(params.getWatched().booleanValue() ? "1" : "0");
         }
 
-        // check genre
-        if (params.includeGenre() || params.excludeGenre()) {
-            final String genre = params.getGenreName();
+        // check genre inclusion/exclusion
+        includeOrExcludeGenre(type, params, sbSQL);
 
-            addExistsOrNot(params.includeGenre(), sbSQL);
-            if (isMovie) {
-                sbSQL.append("SELECT 1 FROM videodata_genres vg, genre g ");
-                sbSQL.append("WHERE vd.id=vg.data_id AND vg.genre_id=g.id ");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_genres sg, genre g, season sea WHERE vd.season_id=sea.id ");
-                sbSQL.append("AND sg.series_id=sea.series_id AND sg.genre_id=g.id ");
+        // check studio inclusion/exclusion
+        includeOrExcludeStudio(type, params, sbSQL);
 
-            }
-            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
-            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
-            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
-        }
+        // check country inclusion/exclusion
+        includeOrExcludeCountry(type, params, sbSQL);
 
-        // check studio
-        if (params.includeStudio() || params.excludeStudio()) {
-            final String studio = params.getStudioName();
+        // check certification inclusion/exclusion
+        includeOrExcludeCertification(type, params, sbSQL);
 
-            addExistsOrNot(params.includeStudio(), sbSQL);
-            if (StringUtils.isNumeric(studio)) {
-                if (isMovie) {
-                    sbSQL.append("SELECT 1 FROM videodata_studios vs WHERE vd.id=vs.data_id AND vs.studio_id=");
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_studios ss, season sea WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND ss.series_id=sea.series_id AND ss.studio_id=");
-                }
-                sbSQL.append(studio).append(")");
-            } else {
-                if (isMovie) {
-                    sbSQL.append("SELECT 1 FROM videodata_studios vs, studio stu WHERE vd.id=vs.data_id AND vs.studio_id=stu.id ");
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_studios ss, studio stu, season sea WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND ss.series_id=sea.series_id AND ss.studio_id=stu.id ");
-                }
-                sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
-            }
-        }
+        // check award inclusion/exclusion
+        includeOrExcludeAward(type, params, sbSQL);
 
-        // check country
-        if (params.includeCountry() || params.excludeCountry()) {
+        // check video source inclusion/exclusion
+        includeOrExcludeVideoSource(type, params, sbSQL);
 
-            addExistsOrNot(params.includeCountry(), sbSQL);
-            if (isMovie) {
-                sbSQL.append("SELECT 1 FROM videodata_countries vc, country c WHERE vd.id=vc.data_id AND vc.country_id=c.id ");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_countries sc, country c, season sea WHERE vd.season_id=sea.id ");
-                sbSQL.append("AND sc.series_id=sea.series_id AND sc.country_id=c.id ");
+        // check resolution inclusion/exclusion
+        includeOrExcludeResolution(type, params, sbSQL);
 
-            }
-            sbSQL.append("AND lower(c.country_code)='").append(params.getCountryCode()).append("')");
-        }
+        // check rating inclusion/exclusion
+        includeOrExcludeRating(type, params, sbSQL);
 
-        // check studio
-        if (params.includeCertification() || params.excludeCertification()) {
-            int certId = params.getCertificationId();
-            if (certId > 0) {
-
-                addExistsOrNot(params.includeCertification(), sbSQL);
-                if (isMovie) {
-                    sbSQL.append("SELECT 1 FROM videodata_certifications vc WHERE vd.id=vc.data_id AND vc.cert_id=");
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_certifications sc, season sea WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND sc.series_id=sea.series_id AND sc.cert_id=");
-                }
-                sbSQL.append(certId).append(")");
-            }
-        }
-
-        // check award
-        if (params.includeAward() || params.excludeAward()) {
-            final String awardName = params.getAwardName();
-
-            addExistsOrNot(params.includeAward(), sbSQL);
-            if (StringUtils.isNumeric(awardName)) {
-                if (isMovie) {
-                    sbSQL.append("SELECT 1 FROM videodata_awards va WHERE vd.id=va.videodata_id AND va.award_id=");
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_awards sa, season sea WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND sa.series_id=sea.series_id AND sa.award_id=");
-                }
-                sbSQL.append(awardName).append(")");
-            } else {
-                if (isMovie) {
-                    sbSQL.append("SELECT 1 FROM videodata_awards va, award a WHERE vd.id=va.videodata_id AND va.award_id=a.id ");
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_awards sa, award a, season sea WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND sa.series_id=sea.series_id AND sa.award_id=a.id ");
-                }
-                sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
-            }
-        }
-
-        // check video source
-        if (params.includeVideoSource() || params.excludeVideoSource()) {
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter("videoSource", params.getVideoSource().toLowerCase());
-
-            addExistsOrNot(params.includeVideoSource(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf ");
-            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id WHERE mv.videodata_id=vd.id ");
-            sbSQL.append("AND mf.extra=:extra AND lower(mf.video_source)=:videoSource)");
-        }
-
-        // check resolution
-        if (params.includeResolution() || params.excludeResolution()) {
-            final ResolutionType resType = params.getResolution();
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter(LITERAL_MIN_WIDTH, resType.getMinWidth());
-            params.addParameter(LITERAL_MAX_WIDTH, resType.getMaxWidth());
-
-            addExistsOrNot(params.includeResolution(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("WHERE mv.videodata_id=vd.id AND mf.extra=:extra ");
-            sbSQL.append("AND mf.width>=:minWidth AND mf.width<=:maxWidth)");
-        }
-        
-        // check rating
-        if (params.includeRating() || params.excludeRating()) {
-            String source = params.getRatingSource();
-            if (source != null) {
-                final int rating = params.getRating();
-
-                addExistsOrNot(params.includeRating(), sbSQL);
-                if (LITERAL_COMBINED.equalsIgnoreCase(source)) {
-                    sbSQL.append("SELECT avg(vr.rating/10) as test, vr.videodata_id FROM videodata_ratings vr ");
-                    sbSQL.append("WHERE vr.videodata_id = vd.id GROUP BY vr.videodata_id HAVING round(test)=").append(rating);
-                } else {
-                    sbSQL.append("SELECT 1 FROM videodata_ratings vr WHERE vr.videodata_id = vd.id ");
-                    sbSQL.append("AND vr.sourcedb='").append(source).append("' ");
-                    sbSQL.append("AND round(vr.rating/10)=").append(rating);
-                }
-                sbSQL.append(")");
-            }
-        }
+        // check boxed set inclusion/exclusion
+        includeOrExcludeBoxedSet(type, params, sbSQL);
 
         // check newest
-        if (params.includeNewest() || params.excludeNewest()) {
-            String source = params.getNewestSource();
-            if (source != null) {
-                Date newestDate = params.getNewestDate();
-                params.addParameter(LITERAL_NEWEST_DATE, newestDate);
+        final String newestSource = params.getNewestSource();
+        if (newestSource != null) {
+            Date newestDate = params.getNewestDate();
+            params.addParameter(LITERAL_NEWEST_DATE, newestDate);
 
-                if (LITERAL_CREATION.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND vd.create_timestamp >= :newestDate");
-                    } else {
-                        sbSQL.append(" AND vd.create_timestamp < :newestDate");
-                    }
-                } else if (LITERAL_LASTSCAN.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND (vd.last_scanned is null or vd.last_scanned >= :newestDate)");
-                    } else {
-                        sbSQL.append(" AND vd.last_scanned is not null AND vd.last_scanned < :newestDate");
-                    }
+            if (LITERAL_CREATION.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND vd.create_timestamp >= :newestDate");
                 } else {
-                    params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-                    
-                    addExistsOrNot(params.includeNewest(), sbSQL);
-                    sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
-                    sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-                    sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' ");
-                    sbSQL.append("AND mf.extra=:extra AND sf.file_date >= :newestDate)");
+                    sbSQL.append(" AND vd.create_timestamp < :newestDate");
                 }
-            }
-        }
-
-        // check boxed set
-        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
-            final int boxSetId = params.getBoxSetId();
-            if (boxSetId > 0) {
+            } else if (LITERAL_LASTSCAN.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND (vd.last_scanned is null or vd.last_scanned >= :newestDate)");
+                } else {
+                    sbSQL.append(" AND vd.last_scanned is not null AND vd.last_scanned < :newestDate");
+                }
+            } else {
+                params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
                 
-                addExistsOrNot(params.includeBoxedSet(), sbSQL);
-                sbSQL.append("SELECT 1 FROM boxed_set_order bo ");
-                if (isMovie) {
-                    sbSQL.append("WHERE bo.videodata_id=vd.id ");
-                } else {
-                    sbSQL.append("JOIN season sea ON sea.series_id=bo.series_id WHERE vd.season_id=sea.id ");
-                }
-                sbSQL.append("AND bo.boxedset_id=");
-                sbSQL.append(boxSetId);
-                sbSQL.append(")");
+                addExistsOrNot(params.includeNewest(), sbSQL);
+                sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
+                sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+                sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' ");
+                sbSQL.append("AND mf.extra=:extra AND sf.file_date >= :newestDate)");
             }
         }
 
@@ -459,9 +319,8 @@ public class ApiDao extends HibernateDao {
      * Create the SQL fragment for the selection of series
      */
     private static StringBuilder generateSqlForSeries(IndexParams params) {
-        StringBuilder sbSQL = new StringBuilder();
-
-        sbSQL.append("SELECT ser.id");
+        
+        StringBuilder sbSQL = new StringBuilder("SELECT ser.id");
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(SERIES).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", ser.title, ser.title_original AS originalTitle, ser.title_sort AS sortTitle");
         sbSQL.append(", ser.start_year AS videoYear, null as releaseDate");
@@ -515,152 +374,62 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND v.season_id=sea.id and sea.series_id=ser.id)");
         }
 
-        // check genre
-        if (params.includeGenre() || params.excludeGenre()) {
-            final String genre = params.getGenreName();
+        // check genre inclusion/exclusion
+        includeOrExcludeGenre(SERIES, params, sbSQL);
 
-            addExistsOrNot(params.includeGenre(), sbSQL);
-            sbSQL.append("SELECT 1 FROM series_genres sg, genre g WHERE ser.id=sg.series_id ");
-            sbSQL.append("AND sg.genre_id=g.id ");
-            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
-            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
-            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
-        }
+        // check studio inclusion/exclusion
+        includeOrExcludeStudio(SERIES, params, sbSQL);
 
-        // check studio
-        if (params.includeStudio() || params.excludeStudio()) {
-            final String studio = params.getStudioName();
+        // check country inclusion/exclusion
+        includeOrExcludeCountry(SERIES, params, sbSQL);
 
-            addExistsOrNot(params.includeStudio(), sbSQL);
-            if (StringUtils.isNumeric(studio)) {
-                sbSQL.append("SELECT 1 FROM series_studios ss WHERE ss.series_id=ser.id ");
-                sbSQL.append("AND ss.studio_id=").append(studio).append(")");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu WHERE ser.id=ss.series_id ");
-                sbSQL.append("AND ss.studio_id=stu.id AND lower(stu.name)='").append(studio).append("')");
-            }
-        }
+        // check certification inclusion/exclusion
+        includeOrExcludeCertification(SERIES, params, sbSQL);
 
-        // check country
-        if (params.includeCountry() || params.excludeCountry()) {
+        // check award inclusion/exclusion
+        includeOrExcludeAward(SERIES, params, sbSQL);
 
-            addExistsOrNot(params.includeCountry(), sbSQL);
-            sbSQL.append("SELECT 1 FROM series_countries sc, country c ");
-            sbSQL.append("WHERE ser.id=sc.series_id ");
-            sbSQL.append("AND sc.country_id=c.id ");
-            sbSQL.append("AND lower(c.country_code)='").append(params.getCountryCode()).append("')");
-        }
+        // check video source inclusion/exclusion
+        includeOrExcludeVideoSource(SERIES, params, sbSQL);
 
-        // check award
-        if (params.includeAward() || params.excludeAward()) {
-            final String awardName = params.getAwardName();
+        // check resolution inclusion/exclusion
+        includeOrExcludeResolution(SERIES, params, sbSQL);
 
-            addExistsOrNot(params.includeAward(), sbSQL);
-            if (StringUtils.isNumeric(awardName)) {
-                sbSQL.append("SELECT 1 FROM series_awards sa WHERE sa.series_id=ser.id ");
-                sbSQL.append("AND sa.award_id=").append(awardName).append(")");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_awards sa, award a WHERE sa.series_id=ser.id ");
-                sbSQL.append("AND sa.award_id=a.id AND lower(a.event)='").append(awardName).append("')");
-            }
-        }
+        // check rating inclusion/exclusion
+        includeOrExcludeRating(SERIES, params, sbSQL);
 
-        // check certification
-        if (params.includeCertification() || params.excludeCertification()) {
-            final int certId = params.getCertificationId();
-            if (certId > 0) {
-                
-                addExistsOrNot(params.includeCertification(), sbSQL);
-                sbSQL.append("SELECT 1 FROM series_certifications sc WHERE ser.id=sc.series_id ");
-                sbSQL.append("AND sc.cert_id=").append(certId).append(")");
-            }
-        }
-
-        // check video source
-        if (params.includeVideoSource() || params.excludeVideoSource()) {
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter("videoSource", params.getVideoSource().toLowerCase());
-
-            addExistsOrNot(params.includeVideoSource(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id JOIN season sea ON sea.id=vd.season_id ");
-            sbSQL.append("WHERE sea.series_id=ser.id AND mf.extra=:extra AND lower(mf.video_source)=:videoSource)");
-        }
-
-        // check resolution
-        if (params.includeResolution() || params.excludeResolution()) {
-            final ResolutionType resType = params.getResolution();
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter(LITERAL_MIN_WIDTH, resType.getMinWidth());
-            params.addParameter(LITERAL_MAX_WIDTH, resType.getMaxWidth());
-
-            addExistsOrNot(params.includeResolution(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id JOIN season sea ON sea.id=vd.season_id ");
-            sbSQL.append("WHERE sea.series_id=ser.id AND mf.extra=:extra AND mf.width>=:minWidth  AND mf.width<=:maxWidth)");
-        }
-        
-        // check rating
-        if (params.includeRating() || params.excludeRating()) {
-            String source = params.getRatingSource();
-            if (source != null) {
-                final int rating = params.getRating();
-
-                addExistsOrNot(params.includeRating(), sbSQL);
-                if (LITERAL_COMBINED.equalsIgnoreCase(source)) {
-                    sbSQL.append("SELECT avg(sr.rating/10) as test, sr.series_id FROM series_ratings sr ");
-                    sbSQL.append("WHERE sr.series_id = ser.id GROUP BY sr.series_id ");
-                    sbSQL.append("HAVING round(test)=").append(rating);
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_ratings sr WHERE sr.series_id = ser.id ");
-                    sbSQL.append("AND sr.sourcedb='").append(source).append("' ");
-                    sbSQL.append("AND round(sr.rating/10)=").append(rating);
-                }
-                sbSQL.append(")");
-            }
-        }
+        // check boxed set inclusion/exclusion
+        includeOrExcludeBoxedSet(SERIES, params, sbSQL);
 
         // check newest
-        if (params.includeNewest() || params.excludeNewest()) {
-            String source = params.getNewestSource();
-            if (source != null) {
-                Date newestDate = params.getNewestDate();
-                params.addParameter(LITERAL_NEWEST_DATE, newestDate);
+        final String newestSource = params.getNewestSource();
+        if (newestSource != null) {
+            Date newestDate = params.getNewestDate();
+            params.addParameter(LITERAL_NEWEST_DATE, newestDate);
 
-                if (LITERAL_CREATION.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND ser.create_timestamp >= :newestDate");
-                    } else {
-                        sbSQL.append(" AND ser.create_timestamp < :newestDate");
-                    }
-                } else if (LITERAL_LASTSCAN.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND (ser.last_scanned is null or ser.last_scanned >= :newestDate)");
-                    } else {
-                        sbSQL.append(" AND ser.last_scanned is not null AND ser.last_scanned < :newestDate");
-                    }
+            if (LITERAL_CREATION.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND ser.create_timestamp >= :newestDate");
                 } else {
-                    params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-                    
-                    addExistsOrNot(params.includeNewest(), sbSQL);
-                    sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
-                    sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id JOIN videodata vd ON mv.videodata_id=vd.id ");
-                    sbSQL.append("JOIN season sea ON sea.id=vd.season_id WHERE sea.series_id=ser.id ");
-                    sbSQL.append("AND sf.file_type='VIDEO' AND sf.status");
-                    sbSQL.append(SQL_IGNORE_STATUS_SET);
-                    sbSQL.append("AND mf.extra=:extra ");
-                    sbSQL.append("AND sf.file_date >= :newestDate)");
+                    sbSQL.append(" AND ser.create_timestamp < :newestDate");
                 }
-            }
-        }
-
-        // check boxed set
-        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
-            int boxSetId = params.getBoxSetId();
-            if (boxSetId > 0) {
-                addExistsOrNot(params.includeBoxedSet(), sbSQL);
-                sbSQL.append("SELECT 1 FROM boxed_set_order bo WHERE bo.series_id=ser.id ");
-                sbSQL.append("AND bo.boxedset_id=").append(boxSetId).append(")");
+            } else if (LITERAL_LASTSCAN.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND (ser.last_scanned is null or ser.last_scanned >= :newestDate)");
+                } else {
+                    sbSQL.append(" AND ser.last_scanned is not null AND ser.last_scanned < :newestDate");
+                }
+            } else {
+                params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
+                
+                addExistsOrNot(params.includeNewest(), sbSQL);
+                sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
+                sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id JOIN videodata vd ON mv.videodata_id=vd.id ");
+                sbSQL.append("JOIN season sea ON sea.id=vd.season_id WHERE sea.series_id=ser.id ");
+                sbSQL.append("AND sf.file_type='VIDEO' AND sf.status");
+                sbSQL.append(SQL_IGNORE_STATUS_SET);
+                sbSQL.append("AND mf.extra=:extra ");
+                sbSQL.append("AND sf.file_date >= :newestDate)");
             }
         }
 
@@ -677,9 +446,8 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private static StringBuilder generateSqlForSeason(IndexParams params) {
-        StringBuilder sbSQL = new StringBuilder();
-
-        sbSQL.append("SELECT sea.id");
+       
+        StringBuilder sbSQL = new StringBuilder("SELECT sea.id");
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(SEASON).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", sea.title, sea.title_original AS originalTitle, sea.title_sort AS sortTitle");
         sbSQL.append(", sea.publication_year as videoYear, null as releaseDate");
@@ -731,149 +499,366 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND v.season_id=sea.id)");
         }
 
-        // check genre
-        if (params.includeGenre() || params.excludeGenre()) {
-            final String genre = params.getGenreName();
+        // check genre inclusion/exclusion
+        includeOrExcludeGenre(SEASON, params, sbSQL);
 
-            addExistsOrNot(params.includeGenre(), sbSQL);
-            sbSQL.append("SELECT 1 FROM series_genres sg, genre g WHERE sea.series_id=sg.series_id AND sg.genre_id=g.id ");
-            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
-            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
-            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
-        }
+        // check studio inclusion/exclusion
+        includeOrExcludeStudio(SEASON, params, sbSQL);
 
-        // check studio
-        if (params.includeStudio() || params.excludeStudio()) {
-            final String studio = params.getStudioName();
+        // check country inclusion/exclusion
+        includeOrExcludeCountry(SEASON, params, sbSQL);
 
-            addExistsOrNot(params.includeStudio(), sbSQL);
-            if (StringUtils.isNumeric(studio)) {
-                sbSQL.append("SELECT 1 FROM series_studios ss WHERE sea.series_id=ss.series_id ");
-                sbSQL.append("AND ss.studio_id=").append(studio).append(")");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu WHERE sea.series_id=ss.series_id ");
-                sbSQL.append("AND ss.studio_id=stu.id AND lower(stu.name)='").append(studio).append("')");
-            }
-        }
+        // check certification inclusion/exclusion
+        includeOrExcludeCertification(SEASON, params, sbSQL);
 
-        // check country
-        if (params.includeCountry() || params.excludeCountry()) {
+        // check award inclusion/exclusion
+        includeOrExcludeAward(SEASON, params, sbSQL);
 
-            addExistsOrNot(params.includeStudio(), sbSQL);
-            sbSQL.append("SELECT 1 FROM series_countries sc, country c WHERE sea.series_id=sc.series_id ");
-            sbSQL.append("AND sc.country_id=c.id AND lower(c.country_code)='").append(params.getCountryCode()).append("')");
-        }
+        // check video source inclusion/exclusion
+        includeOrExcludeVideoSource(SEASON, params, sbSQL);
 
-        // check award
-        if (params.includeAward() || params.excludeAward()) {
-            final String awardName = params.getAwardName();
+        // check resolution inclusion/exclusion
+        includeOrExcludeResolution(SEASON, params, sbSQL);
 
-            addExistsOrNot(params.includeAward(), sbSQL);
-            if (StringUtils.isNumeric(awardName)) {
-                sbSQL.append("SELECT 1 FROM series_awards sa WHERE sa.series_id=sea.series_id ");
-                sbSQL.append("AND sa.award_id=").append(awardName).append(")");
-            } else {
-                sbSQL.append("SELECT 1 FROM series_awards sa, award a WHERE sa.series_id=sea.series_id ");
-                sbSQL.append("AND sa.award_id=a.id AND lower(a.event)='").append(awardName).append("')");
-            }
-        }
+        // check resolution inclusion/exclusion
+        includeOrExcludeRating(SEASON, params, sbSQL);
 
-        // check certification
-        if (params.includeCertification() || params.excludeCertification()) {
-            int certId = params.getCertificationId();
-            if (certId > 0) {
-                addExistsOrNot(params.includeCertification(), sbSQL);
-                sbSQL.append("SELECT 1 FROM series_certifications sc WHERE sea.series_id=sc.series_id ");
-                sbSQL.append("AND sc.cert_id=").append(certId).append(")");
-            }
-        }
+        // check rating inclusion/exclusion
+        includeOrExcludeRating(SEASON, params, sbSQL);
 
-        // check video source
-        if (params.includeVideoSource() || params.excludeVideoSource()) {
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter("videoSource", params.getVideoSource().toLowerCase());
-
-            addExistsOrNot(params.includeVideoSource(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id ");
-            sbSQL.append("AND mf.extra=:extra AND lower(mf.video_source)=:videoSource)");
-        }
-
-        // check resolution
-        if (params.includeResolution() || params.excludeResolution()) {
-            final ResolutionType resType = params.getResolution();
-            params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-            params.addParameter(LITERAL_MIN_WIDTH, resType.getMinWidth());
-            params.addParameter(LITERAL_MAX_WIDTH, resType.getMaxWidth());
-
-            addExistsOrNot(params.includeResolution(), sbSQL);
-            sbSQL.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id ");
-            sbSQL.append("AND mf.extra=:extra AND mf.width>=:minWidth AND mf.width<=:maxWidth)");
-        }
-        
-        // check rating
-        if (params.includeRating() || params.excludeRating()) {
-            String source = params.getRatingSource();
-            if (source != null) {
-                final int rating = params.getRating();
-
-                addExistsOrNot(params.includeRating(), sbSQL);
-                if (LITERAL_COMBINED.equalsIgnoreCase(source)) {
-                    sbSQL.append("SELECT avg(sr.rating/10) as test, sr.series_id ");
-                    sbSQL.append("FROM series_ratings sr WHERE sr.series_id = sea.series_id ");
-                    sbSQL.append("GROUP BY sr.series_id HAVING round(test)=").append(rating);
-                } else {
-                    sbSQL.append("SELECT 1 FROM series_ratings sr WHERE sr.series_id = sea.series_id ");
-                    sbSQL.append("AND sr.sourcedb='").append(source).append("' ");
-                    sbSQL.append("AND round(sr.rating/10)=").append(rating);
-                }
-                sbSQL.append(")");
-            }
-        }
+        // check boxed set inclusion/exclusion
+        includeOrExcludeBoxedSet(SEASON, params, sbSQL);
 
         // check newest
-        if (params.includeNewest() || params.excludeNewest()) {
-            String source = params.getNewestSource();
-            if (source != null) {
-                Date newestDate = params.getNewestDate();
-                params.addParameter(LITERAL_NEWEST_DATE, newestDate);
+        final String newestSource = params.getNewestSource();
+        if (newestSource != null) {
+            Date newestDate = params.getNewestDate();
+            params.addParameter(LITERAL_NEWEST_DATE, newestDate);
 
-                if (LITERAL_CREATION.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND sea.create_timestamp >= :newestDate");
-                    } else {
-                        sbSQL.append(" AND sea.create_timestamp < :newestDate");
-                    }
-                } else if (LITERAL_LASTSCAN.equalsIgnoreCase(source)) {
-                    if (params.includeNewest()) {
-                        sbSQL.append(" AND (sea.last_scanned is null or sea.last_scanned >= :newestDate)");
-                    } else {
-                        sbSQL.append(" AND sea.last_scanned is not null AND sea.last_scanned < :newestDate");
-                    }
+            if (LITERAL_CREATION.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND sea.create_timestamp >= :newestDate");
                 } else {
-                    params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
-
-                    addExistsOrNot(params.includeNewest(), sbSQL);
-                    sbSQL.append("JOIN mediafile mf ON mf.id=sf.mediafile_id JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-                    sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id ");
-                    sbSQL.append("AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' AND mf.extra=:extra AND sf.file_date >= :newestDate)");
+                    sbSQL.append(" AND sea.create_timestamp < :newestDate");
                 }
-            }
-        }
-
-        // check boxed set
-        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
-            final int boxSetId = params.getBoxSetId();
-            if (boxSetId > 0) {
-                addExistsOrNot(params.includeBoxedSet(), sbSQL);
-                sbSQL.append("SELECT 1 FROM boxed_set_order bo WHERE bo.series_id=sea.series_id ");
-                sbSQL.append("AND bo.boxedset_id=").append(boxSetId).append(")");
+            } else if (LITERAL_LASTSCAN.equalsIgnoreCase(newestSource)) {
+                if (params.includeNewest()) {
+                    sbSQL.append(" AND (sea.last_scanned is null or sea.last_scanned >= :newestDate)");
+                } else {
+                    sbSQL.append(" AND sea.last_scanned is not null AND sea.last_scanned < :newestDate");
+                }
+            } else {
+                params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
+                
+                addExistsOrNot(params.includeNewest(), sbSQL);
+                sbSQL.append("JOIN mediafile mf ON mf.id=sf.mediafile_id JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+                sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id ");
+                sbSQL.append("AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' AND mf.extra=:extra AND sf.file_date >= :newestDate)");
             }
         }
 
         // add the search string, this will be empty if there is no search required
         return sbSQL.append(params.getSearchString(false));
+    }
+
+    private static void addExistsOrNot(boolean include, StringBuilder sb) {
+        if (include) {
+            sb.append(" AND exists (");
+        } else {
+            sb.append(" AND not exists (");
+        }
+    }
+
+    private static void includeOrExcludeGenre(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeGenre() && !params.excludeGenre()) {
+            // nothing to include or exclude
+            return;
+        }
+        
+        final String genre = params.getGenreName();
+
+        addExistsOrNot(params.includeGenre(), sql);
+        
+        switch(type) {
+            case SERIES:
+                sql.append("SELECT 1 FROM series_genres sg, genre g WHERE ser.id=sg.series_id AND sg.genre_id=g.id");
+                break;
+            case SEASON:
+                sql.append("SELECT 1 FROM series_genres sg, genre g WHERE sea.series_id=sg.series_id AND sg.genre_id=g.id");
+                break;
+            case EPISODE:
+                sql.append("SELECT 1 FROM series_genres sg, genre g, season sea WHERE vd.season_id=sea.id AND sg.series_id=sea.series_id AND sg.genre_id=g.id");
+                break;
+            default: // movie
+                sql.append("SELECT 1 FROM videodata_genres vg, genre g WHERE vd.id=vg.data_id AND vg.genre_id=g.id");
+                break;
+        }
+        
+        sql.append(" AND (lower(g.name)='").append(genre).append("'");
+        sql.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
+        sql.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
+    }
+    
+    private static void includeOrExcludeStudio(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeStudio() && !params.excludeStudio()) {
+            // nothing to include or exclude
+            return;
+        }
+        
+        addExistsOrNot(params.includeStudio(), sql);
+        
+        final String studio = params.getStudioName();
+        if (StringUtils.isNumeric(studio)) {
+            switch(type) {
+                case SERIES: 
+                    sql.append("SELECT 1 FROM series_studios ss WHERE ss.series_id=ser.id AND ss.studio_id=");
+                    break;
+                case SEASON: 
+                    sql.append("SELECT 1 FROM series_studios ss WHERE sea.series_id=ss.series_id AND ss.studio_id=");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM series_studios ss, season sea WHERE vd.season_id=sea.id ");
+                    sql.append("AND ss.series_id=sea.series_id AND ss.studio_id=");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM videodata_studios vs WHERE vd.id=vs.data_id AND vs.studio_id=");
+                    break;
+            }
+            sql.append(studio).append(")");
+        } else {
+            switch(type) {
+                case SERIES: 
+                    sql.append("SELECT 1 FROM series_studios ss, studio stu WHERE ser.id=ss.series_id AND ss.studio_id=stu.id");
+                    break;
+                case SEASON: 
+                    sql.append("SELECT 1 FROM series_studios ss, studio stu WHERE sea.series_id=ss.series_id AND ss.studio_id=stu.id");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM series_studios ss, studio stu, season sea WHERE vd.season_id=sea.id ");
+                    sql.append("AND ss.series_id=sea.series_id AND ss.studio_id=stu.id");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM videodata_studios vs, studio stu WHERE vd.id=vs.data_id AND vs.studio_id=stu.id");
+                    break;
+            }
+            sql.append(" AND lower(stu.name)='").append(studio).append("')");
+        }
+    }
+    
+    private static void includeOrExcludeCountry(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeCountry() && !params.excludeCountry()) {
+            // nothing to include or exclude
+            return;
+        }
+        
+        addExistsOrNot(params.includeCountry(), sql);
+        
+        switch(type) {
+            case SERIES:
+                sql.append("SELECT 1 FROM series_countries sc, country c WHERE ser.id=sc.series_id AND sc.country_id=c.id");
+                break;
+            case SEASON:
+                sql.append("SELECT 1 FROM series_countries sc, country c WHERE sea.series_id=sc.series_id AND sc.country_id=c.id");
+                break;
+            case EPISODE:
+                sql.append("SELECT 1 FROM series_countries sc, country c, season sea WHERE vd.season_id=sea.id AND sc.series_id=sea.series_id AND sc.country_id=c.id");
+                break;
+            default: // movie
+                sql.append("SELECT 1 FROM videodata_countries vc, country c WHERE vd.id=vc.data_id AND vc.country_id=c.id");
+                break;
+        }
+        
+        sql.append(" AND lower(c.country_code)='").append(params.getCountryCode()).append("')");
+    }
+
+    private static void includeOrExcludeCertification(MetaDataType type, IndexParams params, StringBuilder sql) {
+        int certId = params.getCertificationId();
+        if (certId > 0) { // if certification id is lower 1, then neither include nor exclude
+            
+            addExistsOrNot(params.includeCertification(), sql);
+
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT 1 FROM series_certifications sc WHERE ser.id=sc.series_id AND sc.cert_id=");
+                    break;
+                case SEASON:
+                    sql.append("SELECT 1 FROM series_certifications sc WHERE sea.series_id=sc.series_id AND sc.cert_id=");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM series_certifications sc, season sea WHERE vd.season_id=sea.id AND sc.series_id=sea.series_id AND sc.cert_id=");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM videodata_certifications vc WHERE vd.id=vc.data_id AND vc.cert_id=");
+                    break;
+            }
+            
+            sql.append(certId).append(")");
+        }
+    }
+
+    private static void includeOrExcludeAward(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeAward() && !params.excludeAward()) {
+            // nothing to include or exclude
+            return;
+        }
+        
+        addExistsOrNot(params.includeAward(), sql);
+
+        final String awardName = params.getAwardName();
+        if (StringUtils.isNumeric(awardName)) {
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT 1 FROM series_awards sa WHERE sa.series_id=sea.series_id AND sa.award_id=");
+                    break;
+                case SEASON:
+                    sql.append("SELECT 1 FROM series_awards sa WHERE sa.series_id=sea.series_id AND sa.award_id=");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM series_awards sa, season sea WHERE vd.season_id=sea.id AND sa.series_id=sea.series_id AND sa.award_id=");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM videodata_awards va WHERE vd.id=va.videodata_id AND va.award_id=");
+                    break;
+            }
+            sql.append(awardName).append(")");
+        } else {
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT 1 FROM series_awards sa, award a WHERE sa.series_id=ser.id AND sa.award_id=a.id");
+                    break;
+                case SEASON:
+                    sql.append("SELECT 1 FROM series_awards sa, award a WHERE sa.series_id=ser.id AND sa.award_id=a.id");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM series_awards sa, award a, season sea WHERE vd.season_id=sea.id AND sa.series_id=sea.series_id AND sa.award_id=a.id");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM videodata_awards va, award a WHERE vd.id=va.videodata_id AND va.award_id=a.id");
+                    break;
+            }
+            sql.append(" AND lower(a.event)='").append(awardName).append("')");
+        }
+    }
+
+    private static void includeOrExcludeVideoSource(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeVideoSource() && !params.excludeVideoSource()) {
+            // nothing to include or exclude
+            return;
+        }
+
+        params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
+        params.addParameter("videoSource", params.getVideoSource().toLowerCase());
+
+        addExistsOrNot(params.includeVideoSource(), sql);
+
+        sql.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+        switch(type) {
+            case SERIES:
+                sql.append("JOIN videodata vd ON mv.videodata_id=vd.id JOIN season sea ON sea.id=vd.season_id WHERE sea.series_id=ser.id");
+                break;
+            case SEASON:
+                sql.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id");
+                break;
+            default: // movie or episode
+                sql.append("WHERE mv.videodata_id=vd.id");
+                break;
+        }
+        sql.append(" AND mf.extra=:extra AND lower(mf.video_source)=:videoSource)");
+    }
+
+    private static void includeOrExcludeResolution(MetaDataType type, IndexParams params, StringBuilder sql) {
+        if (!params.includeResolution() && !params.excludeResolution()) {
+            // nothing to include or exclude
+            return;
+        }
+
+        final ResolutionType resType = params.getResolution();
+        params.addParameter(LITERAL_EXTRA, Boolean.FALSE);
+        params.addParameter("minWidth", resType.getMinWidth());
+        params.addParameter("maxWidth", resType.getMaxWidth());
+
+        addExistsOrNot(params.includeResolution(), sql);
+
+        sql.append("SELECT 1 FROM mediafile mf JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+        switch(type) {
+            case SERIES:
+                sql.append("JOIN videodata vd ON mv.videodata_id=vd.id JOIN season sea ON sea.id=vd.season_id WHERE sea.series_id=ser.id");
+                break;
+            case SEASON:
+                sql.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id");
+                break;
+            default: // movie or episode
+                sql.append("WHERE mv.videodata_id=vd.id");
+                break;
+        }
+        sql.append(" AND mf.extra=:extra AND mf.width>=:minWidth AND mf.width<=:maxWidth)");
+    }
+
+    private static void includeOrExcludeRating(MetaDataType type, IndexParams params, StringBuilder sql) {
+        final String source = params.getRatingSource();
+        if (source == null) {
+            // nothing to include or exclude
+            return;
+        }
+        final int rating = params.getRating();
+
+        addExistsOrNot(params.includeRating(), sql);
+
+        if ("combined".equalsIgnoreCase(source)) {
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT avg(sr.rating/10) as test, sr.series_id FROM series_ratings sr ");
+                    sql.append("WHERE sr.series_id=ser.id GROUP BY sr.series_id");
+                    break;
+                case SEASON:
+                    sql.append("SELECT avg(sr.rating/10) as test, sr.series_id FROM series_ratings sr ");
+                    sql.append("WHERE sr.series_id=sea.series_id GROUP BY sr.series_id");
+                    break;
+                default: // movie or episode
+                    sql.append("SELECT avg(vr.rating/10) as test, vr.videodata_id FROM videodata_ratings vr ");
+                    sql.append("WHERE vr.videodata_id=vd.id GROUP BY vr.videodata_id");
+                    break;
+            }
+            sql.append(" HAVING round(test)=").append(rating).append(")");
+        } else {
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT 1 FROM series_ratings rat WHERE rat.series_id=ser.id");
+                    break;
+                case SEASON:
+                    sql.append("SELECT 1 FROM series_ratings rat WHERE rat.series_id=sea.series_id");
+                    break;
+                default: // movie or episode
+                    sql.append("SELECT 1 FROM videodata_ratings rat WHERE rat.videodata_id=vd.id");
+                    break;
+            }
+            sql.append(" AND rat.sourcedb='").append(source).append("' AND round(rat.rating/10)=").append(rating).append(")");
+        }
+    }
+
+    private static void includeOrExcludeBoxedSet(MetaDataType type, IndexParams params, StringBuilder sql) {
+        final int boxSetId = params.getBoxSetId();
+        if (boxSetId > 0) { // if boxed set id is lower 1, then neither include nor exclude
+            
+            addExistsOrNot(params.includeBoxedSet(), sql);
+
+            switch(type) {
+                case SERIES:
+                    sql.append("SELECT 1 FROM boxed_set_order bo WHERE bo.series_id=ser.id");
+                    break;
+                case SEASON:
+                    sql.append("SELECT 1 FROM boxed_set_order bo WHERE bo.series_id=sea.series_id");
+                    break;
+                case EPISODE:
+                    sql.append("SELECT 1 FROM boxed_set_order bo JOIN season sea ON sea.series_id=bo.series_id WHERE vd.season_id=sea.id");
+                    break;
+                default: // movie
+                    sql.append("SELECT 1 FROM boxed_set_order bo WHERE bo.videodata_id=vd.id");
+                    break;
+            }
+            
+            sql.append(" AND bo.boxedset_id=").append(boxSetId).append(")");
+        }
     }
 
     /**
@@ -1490,7 +1475,7 @@ public class ApiDao extends HibernateDao {
 
         StringBuilder sql;
         if (type == MOVIE) {
-            sql = generateSqlForVideo(true, params);
+            sql = generateSqlForVideo(MOVIE, params);
         } else if (type == SERIES) {
             sql = generateSqlForSeries(params);
         } else if (type == SEASON) {
@@ -2140,15 +2125,6 @@ public class ApiDao extends HibernateDao {
 
         return results;
     }
-    
-    private static void addExistsOrNot(boolean include, StringBuilder sb) {
-        if (include) {
-            sb.append(" AND exists (");
-        } else {
-            sb.append(" AND not exists (");
-        }
-    }
-    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">

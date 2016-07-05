@@ -279,9 +279,7 @@ public class JsonApiStorageService {
             return null;
         }
 
-        ApiCountryDTO dto = new ApiCountryDTO();
-        dto.setId(country.getId());
-        dto.setCountryCode(country.getCountryCode());
+        ApiCountryDTO dto = new ApiCountryDTO(country.getId(), country.getCountryCode());
         localize(dto, language);
         return dto;
     }
@@ -292,9 +290,7 @@ public class JsonApiStorageService {
             return null;
         }
         
-        ApiCountryDTO dto = new ApiCountryDTO();
-        dto.setId(country.getId());
-        dto.setCountryCode(country.getCountryCode());
+        ApiCountryDTO dto = new ApiCountryDTO(country.getId(), country.getCountryCode());
         localize(dto, language);
         return dto;
     }
@@ -305,9 +301,9 @@ public class JsonApiStorageService {
         return result;
     }
 
-    public List<ApiCountryDTO> getCountryFilename(ApiWrapperList<ApiCountryDTO> wrapper, String filename) {
-        List<ApiCountryDTO> result = commonDao.getCountryFilename(wrapper, filename);
-        localizeCountries(result, wrapper.getOptions().getLanguage());
+    public List<ApiCountryDTO> getCountryFilename(OptionsId options, String filename) {
+        List<ApiCountryDTO> result = commonDao.getCountryFilename(filename);
+        localizeCountries(result, options.getLanguage());
         return result;
     }
 

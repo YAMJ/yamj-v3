@@ -331,8 +331,9 @@ public class CommonController {
 
         OptionsId options = new OptionsId();
         options.setLanguage(language);
+        
         ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getCountryFilename(wrapper, filename));
+        wrapper.setResults(jsonApiStorageService.getCountryFilename(options, filename));
         return wrapper;
     }
 

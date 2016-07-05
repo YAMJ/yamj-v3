@@ -24,8 +24,7 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.api.model.dto.ApiCountryDTO;
 
@@ -34,16 +33,20 @@ import org.yamj.core.api.model.dto.ApiCountryDTO;
         query = "DELETE FROM country WHERE not exists (select 1 from videodata_countries vc where vc.country_id=id) "+
                 "AND not exists (select 1 from series_countries sc where sc.country_id=id)"
     ),
-    @NamedNativeQuery(name = "metadata.country.series", resultSetMapping="metadata.country",
-        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+    @NamedNativeQuery(name = Country.QUERY_FILENAME, resultSetMapping = "metadata.country",
+        query = "SELECT DISTINCT c.id, c.country_code FROM mediafile m, mediafile_videodata mv, videodata v, videodata_countries vc, country c "+
+                "WHERE m.id=mv.mediafile_id AND mv.videodata_id=v.id AND v.id=vc.data_id AND vc.country_id=c.id AND lower(m.file_name)=:filename"
+    ),
+    @NamedNativeQuery(name = "metadata.country.series", resultSetMapping = "metadata.country",
+        query = "SELECT c.id, c.country_code FROM country c "+
                 "JOIN series_countries sc ON c.id=sc.country_id and sc.series_id=:id "
     ),
-    @NamedNativeQuery(name = "metadata.country.season", resultSetMapping="metadata.country",
-        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+    @NamedNativeQuery(name = "metadata.country.season", resultSetMapping = "metadata.country",
+        query = "SELECT c.id, c.country_code FROM country c "+
                 "JOIN season sea ON sea.id=:id JOIN series_countries sc ON c.id=sc.country_id and sc.series_id=sea.series_id "
     ),
-    @NamedNativeQuery(name = "metadata.country.movie", resultSetMapping="metadata.country",
-        query = "SELECT c.id, c.country_code as countryCode FROM country c "+
+    @NamedNativeQuery(name = "metadata.country.movie", resultSetMapping = "metadata.country",
+        query = "SELECT c.id, c.country_code FROM country c "+
                 "JOIN videodata_countries vc ON c.id=vc.country_id and vc.data_id=:id "
     )
 })
@@ -53,7 +56,7 @@ import org.yamj.core.api.model.dto.ApiCountryDTO;
         targetClass=ApiCountryDTO.class,
         columns={
              @ColumnResult(name="id", type=Long.class),
-             @ColumnResult(name="countryCode", type=String.class)
+             @ColumnResult(name="country_code", type=String.class)
         }
     )}
 )
@@ -66,18 +69,11 @@ public class Country extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 474957956935900650L;
     public static final String DELETE_ORPHANS = "country.deleteOrphans";
+    public static final String QUERY_FILENAME = "country.filename";
     
     @NaturalId(mutable = true)
     @Column(name = "country_code", nullable = false, length = 4)
     private String countryCode;
-
-    public Country() {
-        // empty constructor
-    }
-
-    public Country(String countryCode) {
-        this.countryCode = countryCode;
-    }
 
     // GETTER and SETTER
     
@@ -93,9 +89,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
     
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(getCountryCode())
-                .toHashCode();
+        return getCountryCode().hashCode();
     }
 
     @Override
@@ -114,10 +108,8 @@ public class Country extends AbstractIdentifiable implements Serializable {
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
-        // check other values        
-        return new EqualsBuilder()
-                .append(getCountryCode(), other.getCountryCode())
-                .isEquals();
+        // check country code      
+        return StringUtils.equals(getCountryCode(), other.getCountryCode());
     }
 
     @Override

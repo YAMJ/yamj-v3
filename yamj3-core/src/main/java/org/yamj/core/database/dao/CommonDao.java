@@ -97,7 +97,7 @@ public class CommonDao extends HibernateDao {
 
         sqlScalars.addToSql("SELECT DISTINCT ");
         if (options.getFull()) {
-            sqlScalars.addToSql("g.id as id, g.name as name, ");
+            sqlScalars.addToSql("g.id, g.name, ");
             sqlScalars.addToSql("CASE ");
             sqlScalars.addToSql(" WHEN g.target_api is not null THEN g.target_api ");
             sqlScalars.addToSql(" WHEN g.target_xml is not null THEN g.target_xml ");
@@ -246,21 +246,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiCountryDTO> getCountryFilename(ApiWrapperList<ApiCountryDTO> wrapper, String filename) {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT c.id, c.country_code ad countryCode ");
-        sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_countries vc, country c ");
-        sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
-        sqlScalars.addToSql("AND mv.videodata_id=v.id");
-        sqlScalars.addToSql("AND v.id=vc.data_id");
-        sqlScalars.addToSql("AND vc.country_id=c.id");
-        sqlScalars.addToSql("AND lower(m.file_name)=:filename");
-
-        sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
-        sqlScalars.addScalar(LITERAL_COUNTRY_CODE, StringType.INSTANCE);
-        sqlScalars.addParameter("filename", filename.toLowerCase());
-
-        return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
+    public List<ApiCountryDTO> getCountryFilename(String filename) {
+        return currentSession().getNamedQuery(Country.QUERY_FILENAME)
+                .setString("filename", filename.toLowerCase())
+                .setCacheable(true)
+                .setCacheMode(NORMAL)
+                .list();
     }
 
     @Cacheable(value=DB_CERTIFICATION, key="{#countryCode.toLowerCase(), #certificate.toLowerCase()}", unless="#result==null")
@@ -387,8 +378,8 @@ public class CommonDao extends HibernateDao {
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
         OptionsRating options = (OptionsRating) wrapper.getOptions();
 
-        boolean justMovie = (MOVIE == options.getType()); //NOSONAR
-        boolean justSeries = (SERIES == options.getType()); //NOSONAR
+        boolean justMovie = MOVIE == options.getType();
+        boolean justSeries = SERIES == options.getType();
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT DISTINCT ");

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.common.type.StatusType.*;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.annotations.Type;
@@ -31,6 +33,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 /**
  * Abstract implementation of a stateful object.
  */
+
 @SqlResultSetMapping(name="id.queue", classes={
     @ConstructorResult(
         targetClass=QueueDTO.class, 
@@ -67,22 +70,22 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
     
     @Transient
     public final boolean isDeleted() {
-        return StatusType.DELETED.equals(getStatus());
+        return DELETED.equals(getStatus());
     }
 
     @Transient
     public final boolean isNotFound() {
-        return StatusType.NOTFOUND.equals(getStatus());
+        return NOTFOUND.equals(getStatus());
     }
 
     @Transient
     public final boolean isDuplicate() {
-        return StatusType.DUPLICATE.equals(getStatus());
+        return DUPLICATE.equals(getStatus());
     }
     
     @Transient
     public final boolean isUpdated() {
-        return StatusType.NEW.equals(getStatus()) || StatusType.UPDATED.equals(getStatus());
+        return NEW.equals(getStatus()) || UPDATED.equals(getStatus());
     }
 
     @Transient
@@ -92,11 +95,11 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
 
     @Transient
     public final boolean isNew() {
-        return StatusType.NEW.equals(getStatus());
+        return NEW.equals(getStatus());
     }
     
     @Transient
     public final boolean isValid() {
-        return StatusType.DONE.equals(getStatus()) || StatusType.NEW.equals(getStatus()) || StatusType.UPDATED.equals(getStatus());
+        return DONE.equals(getStatus()) || NEW.equals(getStatus()) || UPDATED.equals(getStatus());
     }
 }

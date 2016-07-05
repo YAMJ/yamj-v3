@@ -35,7 +35,9 @@ public class ApiRatingDTO {
     private String source;
     private Integer rating;
 
-    public ApiRatingDTO() {}
+    public ApiRatingDTO() {
+        // empty constructor
+    }
     
     public ApiRatingDTO(String source, Integer rating) {
         this.source = source;
