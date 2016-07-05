@@ -78,7 +78,6 @@ public class ApiDao extends HibernateDao {
     private static final String SQL_UNION = " UNION ";
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE = "' AS videoType";
-    private static final String SQL_WHERE_1_EQ_1 = " WHERE 1=1";
     private static final String SQL_COMMA_SPACE_QUOTE = ", '";
     private static final String SQL_ARTWORK_TYPE_IN_ARTWORKLIST = " AND a.artwork_type IN (:artworklist) ";
     private static final String SQL_LEFT_JOIN_ARTWORK_GENERATED = " LEFT JOIN artwork_generated ag ON al.id=ag.located_id ";
@@ -347,9 +346,7 @@ public class ApiDao extends HibernateDao {
             }
         }
 
-        sbSQL.append(" FROM series ser");
-
-        sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
+        sbSQL.append(" FROM series ser WHERE 1=1");
 
         if (params.getId() > 0L) {
             sbSQL.append(" AND ser.id=").append(params.getId());
@@ -473,9 +470,7 @@ public class ApiDao extends HibernateDao {
             }
         }
 
-        sbSQL.append(" FROM season sea");
-
-        sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
+        sbSQL.append(" FROM season sea WHERE 1=1");
         if (params.getId().longValue() > 0L) {
             sbSQL.append(" AND sea.id=").append(params.getId());
         }
@@ -1359,7 +1354,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("FROM artwork a");
         sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
         sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-        sqlScalars.addToSql(SQL_WHERE_1_EQ_1);
+        sqlScalars.addToSql(" WHERE 1=1");
         
         if (options != null) {
             if (options.getId() > 0L) {
