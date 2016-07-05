@@ -281,8 +281,7 @@ public class VideoController {
         LOG.debug("Getting year list - Options: {}", options);
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getYears(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getYears(wrapper));
         
     }
 
@@ -297,7 +296,6 @@ public class VideoController {
         LOG.debug("Getting decade list - Options: {}", options);
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
     }
 }

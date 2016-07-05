@@ -362,8 +362,8 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
-    public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
-        return apiDao.getAlphabeticals(wrapper);
+    public List<ApiNameDTO> getAlphabeticals(OptionsMultiType options) {
+        return apiDao.getAlphabeticals(options);
     }
     //</editor-fold>
 

@@ -54,9 +54,7 @@ public class ConfigController {
             options.setMode("EXACT");
         }
 
-        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(configService.getConfigurations(options));
-        return wrapper;
+        return new ApiWrapperList<Configuration>(options).setResults(configService.getConfigurations(options));
     }
 
     @RequestMapping(value = "/add", method = {RequestMethod.GET, RequestMethod.POST})

@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
+import org.hibernate.CacheMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -42,12 +42,13 @@ public class ConfigDao extends HibernateDao {
 
     @Transactional(readOnly = true)
     public Map<String, String> readConfig() {
-        SQLQuery query = currentSession().createSQLQuery("select config_key, config_value from configuration");
-        query.setReadOnly(true);
-        query.setCacheable(true);
+        List<Object[]> objects = currentSession().createSQLQuery("select config_key, config_value from configuration")
+                .setReadOnly(true)
+                .setCacheable(true)
+                .setCacheMode(CacheMode.NORMAL)
+                .list();
 
         HashMap<String, String> config = new HashMap<>();
-        List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             String key = convertRowElementToString(object[0]);
             String value = convertRowElementToString(object[1]);

@@ -31,6 +31,20 @@ public class ApiGenreDTO extends AbstractApiIdentifiableDTO {
     private String name;
     private String target;
 
+    public ApiGenreDTO()  {
+        // empty constructor
+    }
+
+    public ApiGenreDTO(String name)  { 
+        this.name = name;
+    }
+
+    public ApiGenreDTO(Long id, String name, String target) {
+        super(id);
+        this.name = name;
+        this.target = target;
+    }
+    
     public String getName() {
         return name;
     }

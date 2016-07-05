@@ -30,7 +30,7 @@ import org.yamj.plugin.api.metadata.PersonScanner;
 
 public class PluginPersonScanner implements MetadataScanner {
 
-    private final Logger LOG = LoggerFactory.getLogger(PluginPersonScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginPersonScanner.class);
     private final PersonScanner personScanner;
 
     public PluginPersonScanner(PersonScanner personScanner) {

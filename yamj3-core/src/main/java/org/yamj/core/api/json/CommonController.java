@@ -61,10 +61,7 @@ public class CommonController {
     @RequestMapping(value = "/alphabetical/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
         LOG.debug("Getting alphabetical list - Options: {}", options);
-
-        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
-        return wrapper;
+        return new ApiWrapperList<ApiNameDTO>(options).setResults(jsonApiStorageService.getAlphabeticals(options));
     }
     //</editor-fold>
 
@@ -200,8 +197,7 @@ public class CommonController {
         LOG.debug("Getting genres for filename '{}'", filename);
         
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setResults(jsonApiStorageService.getGenreFilename(wrapper, filename));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getGenreFilename(wrapper, filename));
     }
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
@@ -241,8 +237,7 @@ public class CommonController {
         LOG.debug("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getGenres(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getGenres(wrapper));
     }
 
     @RequestMapping(value = "/genres/add", method = {RequestMethod.GET,RequestMethod.POST})
@@ -373,8 +368,7 @@ public class CommonController {
         LOG.debug("Getting award list - Options: {}", options);
 
         ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
     }
     //</editor-fold>
 
@@ -384,8 +378,7 @@ public class CommonController {
         LOG.debug("Getting certifications list - Options: {}", options);
 
         ApiWrapperList<ApiCertificationDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
     }
     //</editor-fold>
 
@@ -395,8 +388,7 @@ public class CommonController {
         LOG.debug("Getting video sources list - Options: {}", options);
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
     }
     //</editor-fold>
 
@@ -406,8 +398,7 @@ public class CommonController {
         LOG.debug("Getting ratings list - Options: {}", options);
 
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
     }
     //</editor-fold>
 
@@ -417,8 +408,7 @@ public class CommonController {
         LOG.debug("Getting boxset list - Options: {}", options);
 
         ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
     }
 
     @RequestMapping(value = "/boxset/{id}", method = RequestMethod.GET)
@@ -426,8 +416,7 @@ public class CommonController {
         LOG.debug("Getting boxset - Options: {}", options);
 
         ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<>(options);
-        wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
-        return wrapper;
+        return wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
     }
     //</editor-fold>
 }

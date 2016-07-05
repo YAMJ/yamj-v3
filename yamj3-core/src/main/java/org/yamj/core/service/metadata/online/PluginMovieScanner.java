@@ -31,7 +31,7 @@ import org.yamj.plugin.api.model.IdMap;
 
 public class PluginMovieScanner implements NfoScanner {
 
-    private final Logger LOG = LoggerFactory.getLogger(PluginMovieScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginMovieScanner.class);
     private final MovieScanner movieScanner;
     
     public PluginMovieScanner(MovieScanner movieScanner) {

@@ -26,8 +26,10 @@ import static org.hibernate.CacheMode.NORMAL;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
+import static org.yamj.core.database.dao.Literals.LITERAL_ARTWORK_TYPE;
+import static org.yamj.core.database.dao.Literals.LITERAL_ID;
+import static org.yamj.core.database.dao.Literals.LITERAL_IDENTIFIER;
 import static org.yamj.plugin.api.model.type.ArtworkType.PHOTO;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

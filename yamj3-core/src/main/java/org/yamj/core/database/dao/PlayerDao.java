@@ -23,7 +23,7 @@
 package org.yamj.core.database.dao;
 
 import static org.hibernate.criterion.CriteriaSpecification.DISTINCT_ROOT_ENTITY;
-
+import static org.yamj.core.database.dao.Literals.LITERAL_NAME;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;

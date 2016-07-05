@@ -115,12 +115,12 @@ public class IndexParams {
     }
 
     // genre check
-    public boolean includeGenre() {
-        return includes.containsKey(GENRE);
+    public boolean checkGenre() {
+        return includes.containsKey(GENRE) || excludes.containsKey(GENRE); 
     }
 
-    public boolean excludeGenre() {
-        return excludes.containsKey(GENRE);
+    public boolean includeGenre() {
+        return includes.containsKey(GENRE);
     }
 
     public String getGenreName() {
@@ -131,12 +131,12 @@ public class IndexParams {
     }
 
     // studio check
-    public boolean includeStudio() {
-        return includes.containsKey(STUDIO);
+    public boolean checkStudio() {
+        return includes.containsKey(STUDIO) || excludes.containsKey(STUDIO); 
     }
 
-    public boolean excludeStudio() {
-        return excludes.containsKey(STUDIO);
+    public boolean includeStudio() {
+        return includes.containsKey(STUDIO);
     }
 
     public String getStudioName() {
@@ -147,12 +147,12 @@ public class IndexParams {
     }
 
     // country check
+    public boolean checkCountry() {
+        return includes.containsKey(COUNTRY) || excludes.containsKey(COUNTRY); 
+    }
+    
     public boolean includeCountry() {
         return includes.containsKey(COUNTRY);
-    }
-
-    public boolean excludeCountry() {
-        return excludes.containsKey(COUNTRY);
     }
 
     public String getCountryCode() {
@@ -163,12 +163,12 @@ public class IndexParams {
     }
 
     // award check
+    public boolean checkAward() {
+        return includes.containsKey(AWARD) || excludes.containsKey(AWARD); 
+    }
+    
     public boolean includeAward() {
         return includes.containsKey(AWARD);
-    }
-
-    public boolean excludeAward() {
-        return excludes.containsKey(AWARD);
     }
 
     public String getAwardName() {
@@ -179,12 +179,12 @@ public class IndexParams {
     }
     
     // certification check
+    public boolean checkCertification() {
+        return includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION); 
+    }
+    
     public boolean includeCertification() {
         return includes.containsKey(CERTIFICATION);
-    }
-
-    public boolean excludeCertification() {
-        return excludes.containsKey(CERTIFICATION);
     }
 
     public int getCertificationId() {
@@ -195,12 +195,12 @@ public class IndexParams {
     }
 
     // video source check
-    public boolean includeVideoSource() {
-        return includes.containsKey(VIDEOSOURCE);
+    public boolean checkVideoSource() {
+        return includes.containsKey(VIDEOSOURCE) || excludes.containsKey(VIDEOSOURCE); 
     }
 
-    public boolean excludeVideoSource() {
-        return excludes.containsKey(VIDEOSOURCE);
+    public boolean includeVideoSource() {
+        return includes.containsKey(VIDEOSOURCE);
     }
 
     public String getVideoSource() {
@@ -211,12 +211,12 @@ public class IndexParams {
     }
 
     // resolution check
+    public boolean checkResolution() {
+        return includes.containsKey(RESOLUTION) || excludes.containsKey(RESOLUTION); 
+    }
+    
     public boolean includeResolution() {
         return includes.containsKey(RESOLUTION);
-    }
-
-    public boolean excludeResolution() {
-        return excludes.containsKey(RESOLUTION);
     }
 
     public ResolutionType getResolution() {
@@ -230,12 +230,12 @@ public class IndexParams {
     }
 
     // boxed set check
+    public boolean checkBoxedSet() {
+        return includes.containsKey(BOXSET) || excludes.containsKey(BOXSET); 
+    }
+    
     public boolean includeBoxedSet() {
         return includes.containsKey(BOXSET);
-    }
-
-    public boolean excludeBoxedSet() {
-        return excludes.containsKey(BOXSET);
     }
 
     public int getBoxSetId() {
@@ -246,12 +246,12 @@ public class IndexParams {
     }
 
     // rating check
-    public boolean includeRating() {
-        return includes.containsKey(RATING);
+    public boolean checkRating() {
+        return includes.containsKey(RATING) || excludes.containsKey(RATING); 
     }
 
-    public boolean excludeRating() {
-        return excludes.containsKey(RATING);
+    public boolean includeRating() {
+        return includes.containsKey(RATING);
     }
 
     public String getRatingSource() {
@@ -291,12 +291,12 @@ public class IndexParams {
     }
 
     // newest check
-    public boolean includeNewest() {
-        return includes.containsKey(NEWEST);
+    public boolean checkNewest() {
+        return includes.containsKey(NEWEST) || excludes.containsKey(NEWEST); 
     }
 
-    public boolean excludeNewest() {
-        return excludes.containsKey(NEWEST);
+    public boolean includeNewest() {
+        return includes.containsKey(NEWEST);
     }
 
     public String getNewestSource() {

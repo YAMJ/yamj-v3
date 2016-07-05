@@ -57,8 +57,7 @@ public class PlayerController {
         }
 
         ApiWrapperList<PlayerInfo> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getPlayerList(options));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getPlayerList(options));
     }
 
     /**

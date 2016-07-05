@@ -41,7 +41,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
@@ -109,7 +108,7 @@ public class MediaImportService {
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType) {
-        return this.stagingDao.getNextStageFileId(fileType, StatusType.NEW, StatusType.UPDATED);
+        return this.stagingDao.getNextStageFileId(fileType);
     }
 
     @Transactional

@@ -47,7 +47,7 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
         return result;
     }
 
-    public void setResult(T result) {
+    public ApiWrapperSingle<T> setResult(T result) {
         this.result = result;
 
         // Set the count
@@ -59,5 +59,7 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
             setTotalCount(1);
             setStatusCheck(ApiStatus.OK);
         }
+        
+        return this;
     }
 }

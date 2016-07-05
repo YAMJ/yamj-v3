@@ -50,7 +50,7 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
         return results;
     }
 
-    public void setResults(Collection<T> results) {
+    public ApiWrapperList<T> setResults(Collection<T> results) {
         this.results = results;
 
         // add the list's size
@@ -65,5 +65,7 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
             setTotalCount(0);
             setStatusCheck(ApiStatus.NO_RECORD);
         }
+        
+        return this;
     }
 }

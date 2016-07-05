@@ -45,19 +45,6 @@ import org.yamj.core.api.wrapper.IApiWrapper;
  */
 public abstract class HibernateDao {
 
-    // LITERALS
-    protected static final String  LITERAL_IDENTIFIER = "identifier";
-    protected static final String LITERAL_ID = "id";
-    protected static final String LITERAL_NAME = "name";
-    protected static final String LITERAL_ARTWORK_TYPE = "artworkType";
-    protected static final String LITERAL_FILE_TYPE = "fileType";
-    protected static final String LITERAL_WATCHED = "watched";
-    protected static final String LITERAL_SOURCE = "source";
-    protected static final String LITERAL_EXTRA = "extra";
-    protected static final String LITERAL_STATUS = "status";
-    protected static final String LITERAL_CACHE_FILENAME = "cacheFilename";
-    protected static final String LITERAL_TYPE = "type";
-
     @Autowired
     private SessionFactory sessionFactory;
 

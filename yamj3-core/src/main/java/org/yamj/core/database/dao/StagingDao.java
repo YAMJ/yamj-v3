@@ -23,7 +23,7 @@
 package org.yamj.core.database.dao;
 
 import static org.hibernate.CacheMode.NORMAL;
-
+import static org.yamj.core.database.dao.Literals.*;
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,10 +75,12 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
-    public Long getNextStageFileId(FileType fileType, StatusType... statusTypes) {
+    public Long getNextStageFileId(FileType fileType) {
         return (Long) currentSession().createCriteria(StageFile.class)
                 .add(Restrictions.eq(LITERAL_FILE_TYPE, fileType))    
-                .add(Restrictions.in(LITERAL_STATUS, statusTypes))
+                .add(Restrictions.or(
+                        Restrictions.eq(LITERAL_STATUS, StatusType.NEW),
+                        Restrictions.eq(LITERAL_STATUS, StatusType.UPDATED)))
                 .setProjection(Projections.min(LITERAL_ID))
                 .setCacheable(true)
                 .setCacheMode(NORMAL)

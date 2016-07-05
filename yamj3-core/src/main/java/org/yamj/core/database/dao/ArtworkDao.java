@@ -26,7 +26,7 @@ import static org.hibernate.CacheMode.NORMAL;
 import static org.hibernate.ScrollMode.FORWARD_ONLY;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.DONE;
-
+import static org.yamj.core.database.dao.Literals.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Criteria;
@@ -42,9 +42,6 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
-
-    // LITERALS
-    private static final String LITERAL_METADATA_TYPE = "metaDataType";
     
     public List<ArtworkProfile> getAllArtworkProfiles() {
         return currentSession().getNamedQuery(ArtworkProfile.QUERY_GET_ALL)

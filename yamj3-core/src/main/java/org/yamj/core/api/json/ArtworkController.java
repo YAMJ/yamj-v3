@@ -84,8 +84,7 @@ public class ArtworkController {
         LOG.debug("Artwork list - Options: {}", options);
         
         ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper, options));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper, options));
     }
 
     @RequestMapping(value = "/profiles", method = RequestMethod.GET)
@@ -108,9 +107,7 @@ public class ArtworkController {
             results.add(dto);
         }
         
-        ApiWrapperList<ApiArtworkProfileDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setResults(results);
-        return wrapper;
+        return new ApiWrapperList<ApiArtworkProfileDTO>().setResults(results);
     }
 
     @RequestMapping(value = "/regenerate/{id}", method = RequestMethod.GET)
