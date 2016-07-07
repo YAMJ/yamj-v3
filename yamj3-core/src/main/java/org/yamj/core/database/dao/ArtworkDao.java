@@ -26,7 +26,7 @@ import static org.hibernate.CacheMode.NORMAL;
 import static org.hibernate.ScrollMode.FORWARD_ONLY;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.DONE;
-import static org.yamj.core.database.dao.Literals.*;
+import static org.yamj.core.database.Literals.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Criteria;

@@ -54,7 +54,7 @@ public class DeleteTask implements ITask {
     }
 
     @Override
-    public void execute(String options) throws Exception {
+    public void execute(String options) {
         LOG.debug("Execute delete task");
         final long startTime = System.currentTimeMillis();
         

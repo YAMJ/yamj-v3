@@ -24,9 +24,8 @@ package org.yamj.core.database.dao;
 
 import static org.hibernate.CacheMode.NORMAL;
 import static org.hibernate.ScrollMode.FORWARD_ONLY;
-import static org.yamj.core.database.dao.Literals.LITERAL_CHECK_DATE;
+import static org.yamj.core.database.Literals.LITERAL_CHECK_DATE;
 import static org.yamj.plugin.api.Constants.*;
-
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollableResults;

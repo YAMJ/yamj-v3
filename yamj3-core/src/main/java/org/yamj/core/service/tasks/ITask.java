@@ -26,5 +26,5 @@ public interface ITask {
 
     public String getTaskName();
     
-    public void execute(String options) throws Exception;
+    public void execute(String options);
 }

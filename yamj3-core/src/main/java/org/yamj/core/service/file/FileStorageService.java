@@ -179,7 +179,7 @@ public class FileStorageService {
         return FileTools.copyFile(sourceFile, dst, deleteSource);
     }
 
-    public void storeImage(String filename, StorageType type, BufferedImage bi, ImageType imageType, int quality) throws Exception {
+    public void storeImage(String filename, StorageType type, BufferedImage bi, ImageType imageType, int quality) throws IOException {
         LOG.debug("Store {} {} image: {}", type, imageType, filename);
         String storageFileName = getStorageName(type, filename);
         File outputFile = new File(storageFileName);

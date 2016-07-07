@@ -26,10 +26,12 @@ import static org.hibernate.CacheMode.NORMAL;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
-import static org.yamj.core.database.dao.Literals.LITERAL_ARTWORK_TYPE;
-import static org.yamj.core.database.dao.Literals.LITERAL_ID;
-import static org.yamj.core.database.dao.Literals.LITERAL_IDENTIFIER;
+import static org.yamj.core.CachingNames.DB_PERSON;
+import static org.yamj.core.database.Literals.LITERAL_ARTWORK_TYPE;
+import static org.yamj.core.database.Literals.LITERAL_ID;
+import static org.yamj.core.database.Literals.LITERAL_IDENTIFIER;
 import static org.yamj.plugin.api.model.type.ArtworkType.PHOTO;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +41,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -79,12 +80,12 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Person.class, LITERAL_IDENTIFIER, identifier);
     }
 
-    @Cacheable(value=CachingNames.DB_PERSON, key="#id", unless="#result==null")
+    @Cacheable(value=DB_PERSON, key="#id", unless="#result==null")
     public Person getCacheablePerson(Long id) {
         return getById(Person.class, id);
     }
 
-    @CacheEvict(value=CachingNames.DB_PERSON, key="#doubletPerson.id")
+    @CacheEvict(value=DB_PERSON, key="#doubletPerson.id")
     public void duplicate(Person person, Person doubletPerson) {
         // find movies which contains the doublet
         List<VideoData> videoDatas = currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_PERSON)

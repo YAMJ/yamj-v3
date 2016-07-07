@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
@@ -237,7 +236,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
         return fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
     }
     
-    private ArtworkGenerated generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
+    private ArtworkGenerated generateImage(ArtworkLocated located, ArtworkProfile profile) throws IOException, ImageReadException { //NOSONAR
         // build cache filename
         final String cacheFilename = ArtworkStorageTools.buildCacheFilename(located, profile);
         
@@ -288,14 +287,13 @@ public class ArtworkProcessorService implements IQueueProcessService {
         return true;
     }
     
-    public ImageDTO getImage(Long id, String profileName) throws Exception {
+    public ImageDTO getImage(Long id, String profileName) throws IOException, ImageReadException { //NOSONAR
         ImageDTO result = new ImageDTO();
 
         ArtworkGenerated generated = this.artworkStorageService.getArtworkGenerated(id, profileName);
         if (generated != null) {
             final StorageType storageType = ArtworkStorageTools.getStorageType(generated.getArtworkProfile().getArtworkType());
-            final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-            result.setResource(this.fileStorageService.getStorageName(storageType, filename));
+            result.setResource(this.fileStorageService.getStorageName(storageType, generated.getFullCacheFilename()));
             result.setMediaType(MediaType.IMAGE_JPEG);
             return result;
         }
@@ -326,13 +324,12 @@ public class ArtworkProcessorService implements IQueueProcessService {
         
         // return the image
         final StorageType storageType = ArtworkStorageTools.getStorageType(located);
-        final String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-        result.setResource(this.fileStorageService.getStorageName(storageType, filename));
+        result.setResource(this.fileStorageService.getStorageName(storageType, generated.getFullCacheFilename()));
         result.setMediaType(MediaType.IMAGE_JPEG);
         return result;
     }
 
-    private void createAndStoreImage(ArtworkLocated located, ArtworkProfile profile, String cacheFilename) throws Exception {
+    private void createAndStoreImage(ArtworkLocated located, ArtworkProfile profile, String cacheFilename) throws IOException, ImageReadException { 
         final StorageType storageType = ArtworkStorageTools.getStorageType(profile);
         
         LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());

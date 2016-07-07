@@ -51,6 +51,7 @@ public class OnlineScannerService implements PluginMetadataService {
     public static final Set<String> PERSON_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.person", "tmdb,imdb");
     public static final Set<String> FILMOGRAPHY_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.filmography", "tmdb");
     private static final String SCANNING_ERROR = "Scanning error";
+    private static final String TEMP_UNAVAILABLE_ERROR = "{} service temporary not available; trigger retry: '{}'";
     
     private final HashMap<String, PluginMovieScanner> registeredMovieScanner = new HashMap<>();
     private final HashMap<String, PluginSeriesScanner> registeredSeriesScanner = new HashMap<>();
@@ -90,6 +91,10 @@ public class OnlineScannerService implements PluginMetadataService {
         }
     }
     
+    private boolean throwTempUnavailableError() {
+        return configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+    }
+
     /**
      * Scan a movie.
      * 
@@ -103,12 +108,12 @@ public class OnlineScannerService implements PluginMetadataService {
             return;
         }
         
+        final boolean throwTempError = this.throwTempUnavailableError();
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", false);
-        final boolean throwTempError = configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         final WrapperMovie wrapper = new WrapperMovie(videoData, localeService, identifierService);
         ScanResult scanResult = null;
                         
-        loop: for (String scanner : MOVIE_SCANNER) {
+        for (String scanner : MOVIE_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
@@ -128,7 +133,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
                     if (scanResult == null && videoData.getRetries() < configServiceWrapper.getIntProperty("yamj3.error.maxRetries.movie", 0)) {
-                        LOG.info("{} service temporary not available; trigger retry: '{}'", movieScanner.getScannerName(), videoData.getIdentifier());
+                        LOG.info(TEMP_UNAVAILABLE_ERROR, movieScanner.getScannerName(), videoData.getIdentifier());
                         innerResult = ScanResult.RETRY;
                     } else {
                         LOG.error("Temporary scanning error for movie '{}' with {} scanner", videoData.getIdentifier(), movieScanner.getScannerName());
@@ -145,13 +150,13 @@ public class OnlineScannerService implements PluginMetadataService {
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
                 if (!useAlternate) {
-                    break loop;
+                    break;
                 }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null) ? innerResult : scanResult;
+                scanResult = scanResult == null ? innerResult : scanResult;
             }
         }       
         
@@ -190,12 +195,12 @@ public class OnlineScannerService implements PluginMetadataService {
             return;
         }
         
+        final boolean throwTempError = this.throwTempUnavailableError();
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", false);
-        final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         final WrapperSeries wrapper = new WrapperSeries(series, localeService, identifierService);
         ScanResult scanResult = null;
 
-        loop: for (String scanner : SERIES_SCANNER) {
+       for (String scanner : SERIES_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.NO_RESULT;
             
@@ -215,7 +220,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
                     if (scanResult == null && series.getRetries() < configServiceWrapper.getIntProperty("yamj3.error.maxRetries.tvshow", 0)) {
-                        LOG.info("{} service temporary not available; trigger retry: '{}'", seriesScanner.getScannerName(), series.getIdentifier());
+                        LOG.info(TEMP_UNAVAILABLE_ERROR, seriesScanner.getScannerName(), series.getIdentifier());
                         innerResult = ScanResult.RETRY;
                     } else {
                         LOG.error("Temporary scanning error for series '{}' with {} scanner", series.getIdentifier(), seriesScanner.getScannerName());
@@ -232,13 +237,13 @@ public class OnlineScannerService implements PluginMetadataService {
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
                 if (!useAlternate) {
-                    break loop;
+                    break;
                 }
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null) ? innerResult : scanResult;
+                scanResult = scanResult == null ? innerResult : scanResult;
             }
         }
 
@@ -290,8 +295,8 @@ public class OnlineScannerService implements PluginMetadataService {
             return;
         }
         
+        final boolean throwTempError = this.throwTempUnavailableError();
         final boolean useAlternate = this.configServiceWrapper.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", false);
-        final boolean throwTempError = this.configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
         final WrapperPerson wrapper = new WrapperPerson(person);
         ScanResult scanResult = null;
         
@@ -315,7 +320,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
                     if (scanResult == null && person.getRetries() < configServiceWrapper.getIntProperty("yamj3.error.maxRetries.person", 0)) {
-                        LOG.info("{} service temporary not available; trigger retry: '{}'", personScanner.getScannerName(), person.getName());
+                        LOG.info(TEMP_UNAVAILABLE_ERROR, personScanner.getScannerName(), person.getName());
                         innerResult = ScanResult.RETRY;
                     } else {
                         LOG.error("Temporary scanning error for person '{}' with {} scanner", person.getName(), personScanner.getScannerName());
@@ -338,7 +343,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null) ? innerResult : scanResult;
+                scanResult = scanResult == null ? innerResult : scanResult;
             }
         }
         
@@ -380,7 +385,7 @@ public class OnlineScannerService implements PluginMetadataService {
             return;
         }
 
-        final boolean throwTempError = configServiceWrapper.getBooleanProperty("yamj3.error.throwTempUnavailableError", true);
+        final boolean throwTempError = this.throwTempUnavailableError();
         final WrapperPerson wrapper = new WrapperPerson(person);
         ScanResult scanResult = null;
 
@@ -404,7 +409,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 } catch (TemporaryUnavailableException ex) {
                     // check retry
                     if (scanResult == null && person.getRetries() < configServiceWrapper.getIntProperty("yamj3.error.maxRetries.filmography", 0)) {
-                        LOG.info("{} service temporary not available; trigger retry: '{}'", filmographyScanner.getScannerName(), person.getName());
+                        LOG.info(TEMP_UNAVAILABLE_ERROR, filmographyScanner.getScannerName(), person.getName());
                         innerResult = ScanResult.RETRY;
                     } else {
                         LOG.error("Temporary scanning error for filmography of '{}' with {} scanner", person.getName(), filmographyScanner.getScannerName());
@@ -424,7 +429,7 @@ public class OnlineScannerService implements PluginMetadataService {
                 // change nothing if scan skipped and force next scan
             } else {
                 // just set scan result to inner result if no scan result before
-                scanResult = (scanResult == null) ? innerResult : scanResult;
+                scanResult = scanResult == null ? innerResult : scanResult;
             }
         }
         
@@ -498,27 +503,24 @@ public class OnlineScannerService implements PluginMetadataService {
     }
     
     public boolean isKnownScanner(MetaDataType type, String source) {
+        final boolean result;
         switch(type) {
             case SERIES:
             case SEASON:
             case EPISODE:
-                if (registeredSeriesScanner.containsKey(source)) {
-                    return true;
-                }
-                return false;
+                result = registeredSeriesScanner.containsKey(source);
+                break;
             case MOVIE:
-                if (registeredMovieScanner.containsKey(source)) {
-                    return true;
-                }
-                return false;
+                result = registeredMovieScanner.containsKey(source);
+                break;
             case PERSON:
-                if (registeredPersonScanner.containsKey(source)) {
-                    return true;
-                }
-                return false;
+                result = registeredPersonScanner.containsKey(source);
+                break;
             default:
-                return false;
+                result = false;
+                break;
         }
+        return result;
     }
 
     @Override

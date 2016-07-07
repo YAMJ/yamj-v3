@@ -25,6 +25,8 @@ package org.yamj.core.service.various;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
+import static org.yamj.core.database.Literals.LITERAL_ID;
+import static org.yamj.core.database.Literals.LITERAL_STATUS;
 
 import java.io.File;
 import java.util.*;
@@ -207,17 +209,17 @@ public class StagingService {
     @Transactional
     public boolean deleteStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("id", id);
-        params.put("status", DELETED);
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_STATUS, DELETED);
         return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS, params)>0;
     }
 
     @Transactional
     public boolean updateStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("id", id);
-        params.put("status", UPDATED);
-        return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params)>0;
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_STATUS, UPDATED);
+        return 0 < this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params);
     }
 
     public void updateWatchedFile(MediaFile mediaFile, StageFile stageFile) {
@@ -353,7 +355,7 @@ public class StagingService {
     @Transactional
     public void markStageFilesAsDeleted(List<Long> stageFileIds) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("status", DELETED);
+        params.put(LITERAL_STATUS, DELETED);
         
         for (List<Long> subList : YamjTools.split(stageFileIds, 500)) {
             params.put("idList", subList);

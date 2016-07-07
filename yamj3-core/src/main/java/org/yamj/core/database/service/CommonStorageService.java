@@ -22,6 +22,10 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.common.type.StatusType.*;
+import static org.yamj.core.CachingNames.*;
+import static org.yamj.core.database.model.type.FileType.VIDEO;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -34,12 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.DeletionDTO;
-import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.artwork.ArtworkStorageTools;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
@@ -51,7 +52,8 @@ import org.yamj.core.tools.YamjTools;
 public class CommonStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonStorageService.class);
-
+    private static final String DELETE_MESSAGE = "Delete: {}";
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -71,7 +73,7 @@ public class CommonStorageService {
      * @return list of cached file names which must be deleted also
      */
     @Transactional
-    @CacheEvict(value=CachingNames.DB_STAGEFILE, key="#id")
+    @CacheEvict(value=DB_STAGEFILE, key="#id")
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
         StageFile stageFile = this.stagingDao.getById(StageFile.class, id);
@@ -119,13 +121,13 @@ public class CommonStorageService {
                 // mark first duplicate as DONE and reset media file status
                 for (StageFile check : mediaFile.getStageFiles()) {
                     if (check.isDuplicate()) {
-                        check.setStatus(StatusType.DONE);
+                        check.setStatus(DONE);
 
                         // update watched file marker
                         this.stagingService.updateWatchedFile(mediaFile, check);
                         
                         // media file needs an update
-                        mediaFile.setStatus(StatusType.UPDATED);
+                        mediaFile.setStatus(UPDATED);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
                             WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
@@ -162,7 +164,7 @@ public class CommonStorageService {
 
             // if no located artwork exists anymore then set status of artwork to NEW
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
-                artwork.setStatus(StatusType.NEW);
+                artwork.setStatus(NEW);
             }
         }
 
@@ -183,7 +185,7 @@ public class CommonStorageService {
     }
 
     private void delete(StageFile stageFile) {
-        LOG.debug("Delete: {}", stageFile);
+        LOG.debug(DELETE_MESSAGE, stageFile);
 
         StageDirectory stageDirectory = stageFile.getStageDirectory();
 
@@ -217,7 +219,7 @@ public class CommonStorageService {
     }
 
     private void delete(MediaFile mediaFile, Set<String> filesToDelete) {
-        LOG.debug("Delete: {}", mediaFile);
+        LOG.debug(DELETE_MESSAGE, mediaFile);
 
         // delete video data if this is the only media file
         for (VideoData videoData : mediaFile.getVideoDatas()) {
@@ -240,7 +242,7 @@ public class CommonStorageService {
     }
 
     private void delete(VideoData videoData, Set<String> filesToDelete) {
-        LOG.debug("Delete: {}", videoData);
+        LOG.debug(DELETE_MESSAGE, videoData);
 
         Season season = videoData.getSeason();
         if (season != null) {
@@ -259,7 +261,7 @@ public class CommonStorageService {
     }
 
     private void delete(Season season, Set<String> filesToDelete) {
-        LOG.debug("Delete: {}", season);
+        LOG.debug(DELETE_MESSAGE, season);
 
         Series series = season.getSeries();
         series.getSeasons().remove(season);
@@ -276,7 +278,7 @@ public class CommonStorageService {
     }
 
     private void delete(Series series, Set<String> filesToDelete) {
-        LOG.debug("Delete: {}", series);
+        LOG.debug(DELETE_MESSAGE, series);
 
         // delete artwork
         for (Artwork artwork : series.getArtworks()) {
@@ -329,7 +331,7 @@ public class CommonStorageService {
     @Transactional
     public DeletionDTO deleteArtworkLocated(Long id) {
         ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
-        LOG.debug("Delete: {}", located);
+        LOG.debug(DELETE_MESSAGE, located);
 
         Set<String> filesToDelete = new HashSet<>();
         boolean updateTrigger = false;
@@ -340,7 +342,7 @@ public class CommonStorageService {
 
             // if no located artwork exists anymore then set status of artwork to NEW
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
-                artwork.setStatus(StatusType.NEW);
+                artwork.setStatus(NEW);
                 updateTrigger = true;
             }
         }
@@ -354,12 +356,12 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
+    @CacheEvict(value=DB_PERSON, key="#id")
     public Set<String> deletePerson(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         Person person = this.stagingDao.getById(Person.class, id);
 
-        LOG.debug("Delete: {}", person);
+        LOG.debug(DELETE_MESSAGE, person);
 
         if (person != null) {
             this.delete(person.getPhoto(), filesToDelete);
@@ -375,12 +377,12 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_BOXEDSET, key="#id")
+    @CacheEvict(value=DB_BOXEDSET, key="#id")
     public Set<String> deleteBoxedSet(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         BoxedSet boxedSet = this.stagingDao.getById(BoxedSet.class, id);
 
-        LOG.debug("Delete: {}", boxedSet);
+        LOG.debug(DELETE_MESSAGE, boxedSet);
 
         if (boxedSet != null) {
             // delete artwork
@@ -407,7 +409,7 @@ public class CommonStorageService {
             }
 
             located.getGeneratedArtworks().clear();
-            located.setStatus(StatusType.IGNORE);
+            located.setStatus(IGNORE);
             stagingDao.updateEntity(located);
             return filesToDelete;
         }
@@ -422,13 +424,7 @@ public class CommonStorageService {
 
     @Transactional
     public boolean toogleWatchedStatus(final StageFile videoFile, final boolean watched, final boolean apiCall) {
-        if (videoFile == null) {
-            return false;
-        }
-        if (!FileType.VIDEO.equals(videoFile.getFileType())) {
-            return false;
-        }
-        if (videoFile.isDuplicate()) {
+        if (videoFile == null || !VIDEO.equals(videoFile.getFileType()) || videoFile.isDuplicate()) {
             return false;
         }
 
@@ -453,20 +449,20 @@ public class CommonStorageService {
 
         if (mediaFile.isExtra()) {
             LOG.trace("Media file is an extra where no watched status will be populated: {}", mediaFile);
-            return true;
+        } else {
+            // determine watch status for each video data
+            for (VideoData videoData : mediaFile.getVideoDatas()) {
+                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
+                videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
+                this.stagingDao.updateEntity(videoData);
+            }
         }
-
-        // determine watch status for each video data
-        for (VideoData videoData : mediaFile.getVideoDatas()) {
-            WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
-            videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
-            this.stagingDao.updateEntity(videoData);
-        }
+        
         return true;
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
+    @CacheEvict(value=DB_GENRE, allEntries=true)
     public void updateGenresXml(Map<String, String> subGenres) {
         Map<String, Object> params = new HashMap<>();
         params.put("subGenres", subGenres.keySet());
@@ -481,25 +477,25 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
+    @CacheEvict(value=DB_GENRE, allEntries=true)
     public int deleteOrphanGenres() {
         return this.stagingDao.executeUpdate(Genre.DELETE_ORPHANS);
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_STUDIO, allEntries=true)
+    @CacheEvict(value=DB_STUDIO, allEntries=true)
     public int deleteOrphanStudios() {
         return this.stagingDao.executeUpdate(Studio.DELETE_ORPHANS);
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_COUNTRY, allEntries=true)
+    @CacheEvict(value=DB_COUNTRY, allEntries=true)
     public int deleteOrphanCountries() {
         return this.stagingDao.executeUpdate(Country.DELETE_ORPHANS);
     }
 
     @Transactional
-    @CacheEvict(value=CachingNames.DB_CERTIFICATION, allEntries=true)
+    @CacheEvict(value=DB_CERTIFICATION, allEntries=true)
     public int deleteOrphanCertifications() {
         return this.stagingDao.executeUpdate(Certification.DELETE_ORPHANS);
     }
@@ -517,8 +513,7 @@ public class CommonStorageService {
         String fileToDelete = null;
         if (trailer != null) {
             if (StringUtils.isNotBlank(trailer.getCacheFilename())) {
-                String filename = FilenameUtils.concat(trailer.getCacheDirectory(), trailer.getCacheFilename());
-                fileToDelete = this.fileStorageService.getStorageDir(StorageType.TRAILER, filename);
+                fileToDelete = this.fileStorageService.getStorageDir(StorageType.TRAILER, trailer.getFullCacheFilename());
             }
             stagingDao.deleteEntity(trailer);
         }

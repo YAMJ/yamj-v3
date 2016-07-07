@@ -24,14 +24,16 @@ package org.yamj.core.database.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 
 /**
- * Abstract implementation of a stateful object with previous status
+ * Abstract implementation of a cacheable object with previous status
  */
 @MappedSuperclass
-public abstract class AbstractStatefulPrev extends AbstractStateful {
+public abstract class AbstractCacheable extends AbstractStateful {
 
     private static final long serialVersionUID = -1388803900038754325L;
     
@@ -39,9 +41,15 @@ public abstract class AbstractStatefulPrev extends AbstractStateful {
     @Column(name = "previous_status", length = 30)
     private StatusType previousStatus;
     
+    @Column(name = "cache_filename", length = 255)
+    private String cacheFilename;
+
+    @Column(name = "cache_dir", length = 50)
+    private String cacheDirectory;
+
     // CONSTRUCTORS
     
-    public AbstractStatefulPrev() {
+    public AbstractCacheable() {
         super();
     }
     
@@ -63,5 +71,36 @@ public abstract class AbstractStatefulPrev extends AbstractStateful {
 
     private void setPreviousStatus(StatusType previousStatus) {
         this.previousStatus = previousStatus;
+    }
+
+    public String getCacheFilename() {
+        return cacheFilename;
+    }
+
+    public void setCacheFilename(String cacheFilename) {
+        this.cacheFilename = cacheFilename;
+    }
+
+    public String getCacheDirectory() {
+        return cacheDirectory;
+    }
+
+    public void setCacheDirectory(String cacheDirectory) {
+        this.cacheDirectory = cacheDirectory;
+    }
+
+    // TRANSIENT METHODS
+    
+    public boolean isCached() {
+        return !isNotCached();
+    }
+
+    public boolean isNotCached() {
+        return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
+    }
+
+    
+    public String getFullCacheFilename() {
+        return FilenameUtils.concat(getCacheDirectory(), getCacheFilename());        
     }
 }

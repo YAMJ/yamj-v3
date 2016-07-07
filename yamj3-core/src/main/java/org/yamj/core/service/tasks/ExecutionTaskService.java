@@ -68,7 +68,7 @@ public class ExecutionTaskService {
         final Date lastExecution = new Date();
         try {
             task.execute(executionTask.getOptions());
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             LOG.error("Failed to execute task '" + task.getTaskName() + "'", ex);
         }
 

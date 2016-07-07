@@ -72,7 +72,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         return StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
     }
 
-    public static Set<String> getPropertyAsOrderedSet(String key, String defaultValue) {
+    public static LinkedHashSet<String> getPropertyAsOrderedSet(String key, String defaultValue) {
         final String prop = StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
         final LinkedHashSet<String> result = new LinkedHashSet<>();
         for (String val : prop.toLowerCase().split(",")) {

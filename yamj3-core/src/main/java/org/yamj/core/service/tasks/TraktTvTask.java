@@ -63,7 +63,7 @@ public class TraktTvTask implements ITask {
     }
 
     @Override
-    public void execute(String options) throws Exception {
+    public void execute(String options) {
         if (!collectionEnabled && !pushEnabled && !pullEnabled) {
             // nothing to do
             return;

@@ -155,7 +155,9 @@ public class WrapperSeries implements ISeries {
             final Set<String> countryCodes = new HashSet<>(countries.size());
             for (String country : countries) {
                 final String countryCode = localeService.findCountryCode(country);
-                if (countryCode != null) countryCodes.add(countryCode);
+                if (countryCode != null) {
+                    countryCodes.add(countryCode);
+                }
             }
             series.setCountryCodes(countryCodes, scannerName);
         }

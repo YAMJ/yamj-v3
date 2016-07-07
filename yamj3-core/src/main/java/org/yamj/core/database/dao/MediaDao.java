@@ -22,7 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import static org.yamj.core.database.dao.Literals.LITERAL_NAME;
+import static org.yamj.core.database.Literals.LITERAL_NAME;
 import java.util.List;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;

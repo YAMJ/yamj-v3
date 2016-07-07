@@ -581,7 +581,7 @@ public class TraktTvService {
 
     private boolean syncCollectedShows(List<SyncShow> syncShows) {
         boolean noError = true;
-        if (syncShows.size() > 0) {
+        if (!syncShows.isEmpty()) {
             try {
                 this.traktTvApi.syncService().addItemsToCollection(new SyncItems().shows(syncShows));
             } catch (Exception ex) {
@@ -763,7 +763,9 @@ public class TraktTvService {
         }
         if (showIds.tvdb() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TVDB+"#"+showIds.tvdb()+"#"+season+"#"+episode);
-            if (i != null) updateable.addAll(i);
+            if (i != null) {
+                updateable.addAll(i);
+            }
         }
         if (showIds.tvRage() != null) {
             List<Long> i = updatedEpisodes.get(SOURCE_TVRAGE+"#"+showIds.tvRage()+"#"+season+"#"+episode);

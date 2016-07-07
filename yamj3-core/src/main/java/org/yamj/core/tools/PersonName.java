@@ -66,6 +66,6 @@ public final class PersonName {
     }
     
     private static String fixName(final String input) {
-    	return StringUtils.replace(input, "\"", "'");
+        return StringUtils.replace(input, "\"", "'");
     }
 }

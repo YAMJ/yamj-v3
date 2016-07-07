@@ -61,7 +61,7 @@ public class RecheckTask implements ITask {
     }
 
     @Override
-    public void execute(String options) throws Exception {
+    public void execute(String options) {
         LOG.debug("Execute recheck task");
         final long startTime = System.currentTimeMillis();
 

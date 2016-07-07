@@ -23,7 +23,8 @@
 package org.yamj.core.database.dao;
 
 import static org.hibernate.CacheMode.NORMAL;
-import static org.yamj.core.database.dao.Literals.*;
+import static org.yamj.core.CachingNames.DB_STAGEFILE;
+import static org.yamj.core.database.Literals.*;
 
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -36,7 +37,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -63,7 +63,7 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
-    @Cacheable(value=CachingNames.DB_STAGEFILE, key="#id", unless="#result==null")
+    @Cacheable(value=DB_STAGEFILE, key="#id", unless="#result==null")
     public StageFile getStageFile(Long id) {
         return getById(StageFile.class, id);
     }

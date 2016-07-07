@@ -153,11 +153,11 @@ public final class DOMHelper {
      *
      * @param docString
      * @return
-     * @throws javax.xml.parsers.ParserConfigurationException
-     * @throws org.xml.sax.SAXException
-     * @throws java.io.IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
      */
-    public static Document getDocFromString(String docString) throws ParserConfigurationException, SAXException, IOException {
+    public static Document getDocFromString(String docString) throws SAXException, IOException, ParserConfigurationException { //NOSONAR
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         InputSource is = new InputSource(new StringReader(docString));
         return dbf.newDocumentBuilder().parse(is);
@@ -172,7 +172,7 @@ public final class DOMHelper {
      * @throws ParserConfigurationException
      * @throws SAXException
      */
-    public static Document getDocFromFile(File xmlFile) throws ParserConfigurationException, SAXException, IOException {
+    public static Document getDocFromFile(File xmlFile) throws SAXException, IOException, ParserConfigurationException { //NOSONAR
         URL url = xmlFile.toURI().toURL();
         DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 

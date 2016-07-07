@@ -24,8 +24,7 @@ package org.yamj.core.database.dao;
 
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.core.CachingNames.*;
-import static org.yamj.core.database.dao.Literals.*;
-
+import static org.yamj.core.database.Literals.*;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;

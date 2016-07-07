@@ -22,6 +22,13 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.common.type.StatusType.*;
+import static org.yamj.core.CachingNames.DB_ARTWORK_IMAGE;
+import static org.yamj.core.CachingNames.DB_ARTWORK_PROFILE;
+import static org.yamj.core.database.Literals.LITERAL_ARTWORK_TYPE;
+import static org.yamj.core.database.Literals.LITERAL_ID;
+import static org.yamj.core.database.Literals.LITERAL_STATUS;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
@@ -34,8 +41,6 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -55,14 +60,14 @@ public class ArtworkStorageService {
     private FileStorageService fileStorageService;
 
     @Transactional
-    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    @CachePut(value=DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
     public ArtworkProfile saveArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkDao.saveEntity(artworkProfile);
         return artworkProfile;
     }
 
     @Transactional
-    @CachePut(value=CachingNames.DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
+    @CachePut(value=DB_ARTWORK_PROFILE, key="{#artworkProfile.profileName, #artworkProfile.metaDataType, #artworkProfile.artworkType}")
     public ArtworkProfile updateArtworkProfile(ArtworkProfile artworkProfile) {
         this.artworkDao.updateEntity(artworkProfile);
         return artworkProfile;
@@ -74,7 +79,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value=CachingNames.DB_ARTWORK_PROFILE, key="{#profileName, #metaDataType, #artworkType}", unless="#result==null")
+    @Cacheable(value=DB_ARTWORK_PROFILE, key="{#profileName, #metaDataType, #artworkType}", unless="#result==null")
     public ArtworkProfile getArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType) {
         return artworkDao.getArtworkProfile(profileName, metaDataType, artworkType);
     }
@@ -106,16 +111,16 @@ public class ArtworkStorageService {
         for (ArtworkLocated located : locatedArtworks) {
             StageFile stageFile = located.getStageFile();
             if (stageFile != null && stageFile.isNotFound()) {
-                stageFile.setStatus(StatusType.DONE);
+                stageFile.setStatus(DONE);
                 this.artworkDao.updateEntity(stageFile);
             }
         }
         
         // set status of artwork
         if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
-            artwork.setStatus(StatusType.NOTFOUND);
+            artwork.setStatus(NOTFOUND);
         } else {
-            artwork.setStatus(StatusType.DONE);
+            artwork.setStatus(DONE);
         }
 
         // update artwork in database
@@ -157,8 +162,8 @@ public class ArtworkStorageService {
     @Transactional
     public void errorArtwork(Long id) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_STATUS, ERROR);
         artworkDao.executeUpdate(Artwork.UPDATE_STATUS, params);
     }
 
@@ -177,16 +182,16 @@ public class ArtworkStorageService {
     @Transactional
     public void errorArtworkLocated(Long id) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_STATUS, ERROR);
         artworkDao.executeUpdate(ArtworkLocated.UPDATE_STATUS, params);
     }
 
     @Transactional
     public void errorArtworkGenerated(Long id) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("id", id);
-        params.put("status", StatusType.ERROR);
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_STATUS, ERROR);
         artworkDao.executeUpdate(ArtworkGenerated.UPDATE_STATUS, params);
     }
 
@@ -201,7 +206,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    @CachePut(value=CachingNames.DB_ARTWORK_IMAGE, key="{#located.id, #profile.profileName}")
+    @CachePut(value=DB_ARTWORK_IMAGE, key="{#located.id, #profile.profileName}")
     public ArtworkGenerated storeArtworkGenerated(ArtworkLocated located, ArtworkProfile profile, String cacheDir, String cacheFileName) {
         ArtworkGenerated generated = this.artworkDao.getStoredArtworkGenerated(located, profile);
         if (generated == null) {
@@ -210,12 +215,12 @@ public class ArtworkStorageService {
             generated.setArtworkProfile(profile);
             generated.setCacheDirectory(cacheDir);
             generated.setCacheFilename(cacheFileName);
-            generated.setStatus(StatusType.DONE);
+            generated.setStatus(DONE);
             this.artworkDao.saveEntity(generated);
         } else {
             generated.setCacheDirectory(cacheDir);
             generated.setCacheFilename(cacheFileName);
-            generated.setStatus(StatusType.DONE);
+            generated.setStatus(DONE);
             this.artworkDao.updateEntity(generated);
         }
         return generated;
@@ -258,8 +263,8 @@ public class ArtworkStorageService {
         sb.append("AND a.artworkType=:artworkType ");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        params.put("artworkType", artworkType);
+        params.put(LITERAL_ID, id);
+        params.put(LITERAL_ARTWORK_TYPE, artworkType);
         return this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
     }
 
@@ -277,7 +282,7 @@ public class ArtworkStorageService {
                 LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
                 
                 // reset status and cache file name
-                located.setStatus(StatusType.UPDATED);
+                located.setStatus(UPDATED);
                 located.setCacheDirectory(null);
                 located.setCacheFilename(null);
             } else {
@@ -286,7 +291,7 @@ public class ArtworkStorageService {
                     if (!fileStorageService.existsFile(storageType, generated.getCacheDirectory(), generated.getCacheFilename())) {
                         LOG.trace("Mark generated artwork {} for UPDATE due missing generated image", generated.getId());
                         // set status of generated to UPDATED
-                        generated.setStatus(StatusType.UPDATED);
+                        generated.setStatus(UPDATED);
                     }
                 }
             }
@@ -296,7 +301,7 @@ public class ArtworkStorageService {
     }
 
     @Transactional(readOnly=true)
-    @Cacheable(value=CachingNames.DB_ARTWORK_IMAGE, key="{#locatedId, #profileName}", unless="#result==null")
+    @Cacheable(value=DB_ARTWORK_IMAGE, key="{#locatedId, #profileName}", unless="#result==null")
     public ArtworkGenerated getArtworkGenerated(Long locatedId, String profileName) {
         return this.artworkDao.getArtworkGenerated(locatedId, profileName);
     }
@@ -315,7 +320,7 @@ public class ArtworkStorageService {
         }
 
         Map<String,Object> params = new HashMap<>(2);
-        params.put("id", id);
+        params.put(LITERAL_ID, id);
         params.put("profileDate", profileDate);
         return this.artworkDao.executeUpdate(ArtworkGenerated.UPDATE_STATUS_FOR_PROFILE, params);
     }

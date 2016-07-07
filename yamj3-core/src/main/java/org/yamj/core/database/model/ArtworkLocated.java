@@ -58,7 +58,7 @@ import org.yamj.plugin.api.model.type.ImageType;
        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "source", "hash_code"}),
        indexes = @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")
 )
-public class ArtworkLocated extends AbstractStatefulPrev {
+public class ArtworkLocated extends AbstractCacheable {
 
     private static final long serialVersionUID = -981494909436217076L;
     public static final String QUERY_REQUIRED = "artworkLocated.required";
@@ -105,12 +105,6 @@ public class ArtworkLocated extends AbstractStatefulPrev {
     @Type(type = "imageType")
     @Column(name = "image_type", nullable = false, length = 4)
     private ImageType imageType;
-
-    @Column(name = "cache_filename", length = 255)
-    private String cacheFilename;
-
-    @Column(name = "cache_dir", length = 50)
-    private String cacheDirectory;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
     private Set<ArtworkGenerated> generatedArtworks = new HashSet<>(0);
@@ -205,38 +199,12 @@ public class ArtworkLocated extends AbstractStatefulPrev {
         this.imageType = imageType;
     }
 
-    public String getCacheFilename() {
-        return cacheFilename;
-    }
-
-    public void setCacheFilename(String cacheFilename) {
-        this.cacheFilename = cacheFilename;
-    }
-
-    public String getCacheDirectory() {
-        return cacheDirectory;
-    }
-
-    public void setCacheDirectory(String cacheDirectory) {
-        this.cacheDirectory = cacheDirectory;
-    }
-
     public Set<ArtworkGenerated> getGeneratedArtworks() {
         return generatedArtworks;
     }
 
     public void setGeneratedArtworks(Set<ArtworkGenerated> generatedArtworks) {
         this.generatedArtworks = generatedArtworks;
-    }
-
-    // TRANSIENT METHODS
-    
-    public boolean isCached() {
-        return !isNotCached();
-    }
-
-    public boolean isNotCached() {
-        return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
     }
 
     // EQUALITY CHECKS

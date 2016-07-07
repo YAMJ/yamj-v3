@@ -62,7 +62,7 @@ public class StagingSanityTask implements ITask {
     }
 
     @Override
-    public void execute(String options) throws Exception {
+    public void execute(String options) {
         if (!checkStagingSanity) {
             // staging sanity is disabled
             return;

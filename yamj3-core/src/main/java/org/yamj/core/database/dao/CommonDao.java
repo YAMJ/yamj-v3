@@ -29,11 +29,10 @@ import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
 import static org.yamj.core.CachingNames.*;
-import static org.yamj.core.database.dao.Literals.*;
+import static org.yamj.core.database.Literals.*;
 import static org.yamj.plugin.api.model.type.ArtworkType.BANNER;
 import static org.yamj.plugin.api.model.type.ArtworkType.FANART;
 import static org.yamj.plugin.api.model.type.ArtworkType.POSTER;
-
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;

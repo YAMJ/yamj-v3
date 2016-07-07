@@ -55,13 +55,15 @@ public final class Start {
     private static final String WAR_DIR = "lib/";
     private static final String WAR_FILE_RELEASE = "yamj3-core-3.0.war";
     private static final String WAR_FILE_SNAPSHOT = "yamj3-core-3.0-SNAPSHOT.war";
+    private static final String RESOURCES_DIR = "./resources/";
+    private static final String SKINS_DIR = "skins/";
+    private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
+    private static final String SERVER_ERROR = "Server error";
+
     private static String yamjHome = ".";
     private static int yamjPort = 8888;
     private static int yamjShutdownTimeout = 5000;
     private static boolean yamjStopAtShutdown = true;
-    private static final String RESOURCES_DIR = "./resources/";
-    private static final String SKINS_DIR = "skins/";
-    private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
 
     private Start() {
         // empty private constructor
@@ -173,15 +175,15 @@ public final class Start {
             return SUCCESS;
         } catch (IOException ex) {
             LOG.error("Failed to start server, error: ", ex.getMessage());
-            LOG.trace("Server error", ex);
+            LOG.trace(SERVER_ERROR, ex);
             return STARTUP_FAILURE;
         } catch (InterruptedException ex) {
             LOG.error("Server interrupted, error: ", ex.getMessage());
-            LOG.trace("Server error", ex);
+            LOG.trace(SERVER_ERROR, ex);
             return STARTUP_FAILURE;
         } catch (Exception ex) {
             LOG.error("General server eror, message: ", ex.getMessage());
-            LOG.trace("Server error", ex);
+            LOG.trace(SERVER_ERROR, ex);
             return STARTUP_FAILURE;
         }
     }

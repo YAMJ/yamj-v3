@@ -92,7 +92,7 @@ import org.yamj.plugin.api.model.type.ContainerType;
        uniqueConstraints = @UniqueConstraint(name = "UIX_TRAILER_NATURALID", columnNames = {"videodata_id", "series_id", "source", "hash_code"}),
        indexes = {@Index(name = "IX_TRAILER_STATUS", columnList = "status")}
 )
-public class Trailer extends AbstractStatefulPrev implements ITrailer {
+public class Trailer extends AbstractCacheable implements ITrailer {
 
     private static final long serialVersionUID = -7853145730427742811L;
     public static final String QUERY_REQUIRED = "trailer.required";
@@ -132,12 +132,6 @@ public class Trailer extends AbstractStatefulPrev implements ITrailer {
     @Type(type = "containerType")
     @Column(name = "container", nullable = false, length = 10)
     private ContainerType container;
-
-    @Column(name = "cache_filename", length = 255)
-    private String cacheFilename;
-
-    @Column(name = "cache_dir", length = 50)
-    private String cacheDirectory;
 
     @Column(name = "title", length = 255)
     private String title;
@@ -203,22 +197,6 @@ public class Trailer extends AbstractStatefulPrev implements ITrailer {
         this.container = container;
     }
 
-    public String getCacheFilename() {
-        return cacheFilename;
-    }
-
-    public void setCacheFilename(String cacheFilename) {
-        this.cacheFilename = cacheFilename;
-    }
-
-    public String getCacheDirectory() {
-        return cacheDirectory;
-    }
-
-    public void setCacheDirectory(String cacheDirectory) {
-        this.cacheDirectory = cacheDirectory;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -227,16 +205,6 @@ public class Trailer extends AbstractStatefulPrev implements ITrailer {
         this.title = title;
     }
 
-    // TRANSIENT METHODS
-    
-    public boolean isCached() {
-        return !isNotCached();
-    }
-
-    public boolean isNotCached() {
-        return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
-    }
-    
     // EQUALITY CHECKS
     
     @Override

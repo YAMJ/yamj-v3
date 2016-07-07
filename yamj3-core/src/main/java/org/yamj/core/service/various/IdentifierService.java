@@ -64,12 +64,12 @@ public class IdentifierService {
         LOG.trace("Initialize identifier service");
 
         if (transliterationEnabled) {
-            for (Transliterator transliterator : pluginManager.getExtensions(Transliterator.class)) {
+            for (Transliterator transliter : pluginManager.getExtensions(Transliterator.class)) {
                 if (this.transliterator == null) {
-                    this.transliterator = transliterator;
-                    LOG.info("Use transliterator: {}", transliterator.getClass().getName());
+                    this.transliterator = transliter;
+                    LOG.info("Use transliterator: {}", transliter.getClass().getName());
                 } else {
-                    LOG.warn("Another transliterator present, but ignored: {}", transliterator.getClass().getName()); 
+                    LOG.warn("Another transliterator present, but ignored: {}", transliter.getClass().getName()); 
                 }
             }
         

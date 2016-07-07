@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.core.database.Literals.LITERAL_EXTRA;
+import static org.yamj.core.database.Literals.LITERAL_ID;
+
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -240,22 +243,22 @@ public class ArtworkLocatorService {
     
     private List<StageFile> findVideoFiles(VideoData videoData) {
         final Map<String,Object> params = new HashMap<>();
-        params.put("id", videoData.getId());
-        params.put("extra", Boolean.FALSE);
+        params.put(LITERAL_ID, videoData.getId());
+        params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA, params);
     }
 
     private List<StageFile> findVideoFiles(Season season) {
         final Map<String,Object> params = new HashMap<>();
-        params.put("id", season.getId());
-        params.put("extra", Boolean.FALSE);
+        params.put(LITERAL_ID, season.getId());
+        params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_SEASON, params);
     }
 
     private List<StageDirectory> findVideoDirectories(Series series) {
         final Map<String,Object> params = new HashMap<>();
-        params.put("id", series.getId());
-        params.put("extra", Boolean.FALSE);
+        params.put(LITERAL_ID, series.getId());
+        params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageDirectory.QUERY_VIDEO_DIRECTORIES_FOR_SERIES, params);
     }
 

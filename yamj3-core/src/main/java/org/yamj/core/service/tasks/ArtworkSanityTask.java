@@ -56,7 +56,7 @@ public class ArtworkSanityTask implements ITask {
     }
 
     @Override
-    public void execute(String options) throws Exception {
+    public void execute(String options) {
         LOG.debug("Execute artwork sanity task");
         final long startTime = System.currentTimeMillis();
 

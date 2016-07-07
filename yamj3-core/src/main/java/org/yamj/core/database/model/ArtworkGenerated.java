@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import javax.persistence.*;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -122,6 +123,10 @@ public class ArtworkGenerated extends AbstractStateful {
 
     public boolean isNotCached() {
         return StringUtils.isBlank(getCacheFilename()) || StringUtils.isBlank(getCacheDirectory());
+    }
+
+    public String getFullCacheFilename() {
+        return FilenameUtils.concat(getCacheDirectory(), getCacheFilename());        
     }
 
     // EQUALITY CHECKS
