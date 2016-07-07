@@ -20,32 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.tools;
+package org.yamj.core;
 
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+public final class ServiceConstants {
 
-public class EhCacheWrapper {
-
-    private final Ehcache ehcache;
+    public static final String DEFAULT = "default";
+    public static final String STORAGE_ERROR = "Storage error";
+    public static final String IMAGE_GENERATION_ERROR = "Image generation error";
     
-    public EhCacheWrapper(Ehcache ehcache) {
-        this.ehcache = ehcache;
-    }
-    
-    @SuppressWarnings("unchecked")
-    public <T> T get(String key, Class<T> type) {
-        Element element = this.ehcache.get(key);
-        Object value = element != null ? element.getObjectValue() : null;
-        if (value != null && type != null && !type.isInstance(value)) {
-            throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
-        }
-        return (T) value;
-    }
-
-    public void store(String key, Object value) {
-        if (value != null) {
-            this.ehcache.putIfAbsent(new Element(key, value));
-        }
+    private ServiceConstants() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 }

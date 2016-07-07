@@ -49,9 +49,9 @@ public final class OverrideTools {
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
-    private static final String DEFAULT_PLUGIN_SERIES_MOVIE = "api,nfo,"+TYPE_SERIES_SCANNER+","+TYPE_MOVIE_SCANNER;
-    private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,"+TYPE_SERIES_SCANNER;
-    private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,"+TYPE_PERSON_SCANNER;
+    private static final String DEFAULT_PLUGIN_SERIES_MOVIE = "api,nfo,"+TYPE_SERIES_SCANNER+","+TYPE_MOVIE_SCANNER; // NOSONAR
+    private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,"+TYPE_SERIES_SCANNER; // NOSONAR
+    private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,"+TYPE_PERSON_SCANNER; // NOSONAR
     private static final String APPEND_FILENAME = ",filename";
     
     static {
@@ -234,7 +234,7 @@ public final class OverrideTools {
             }
 
             // index < 0 means: not in list, so skip the check
-            return (index < 0);
+            return index < 0;
         }
 
         // no skip
@@ -326,7 +326,11 @@ public final class OverrideTools {
 
                 // until now these checks are enough
             }
-            if (check) return true;
+            
+            if (check) {
+                // if one override exists, then immediately return
+                return true;
+            }
         }
         return false;
     }

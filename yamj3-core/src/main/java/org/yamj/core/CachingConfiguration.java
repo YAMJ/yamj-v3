@@ -23,6 +23,7 @@
 package org.yamj.core;
 
 import static org.yamj.core.CachingNames.*;
+import static org.yamj.core.ServiceConstants.DEFAULT;
 
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
@@ -55,7 +56,7 @@ public class CachingConfiguration implements CachingConfigurer {
         return net.sf.ehcache.CacheManager.create(
             new net.sf.ehcache.config.Configuration()
                 // default cache
-                .defaultCache(cacheConfig("default", 100, TTL_10_MINUTES))
+                .defaultCache(cacheConfig(DEFAULT, 100, TTL_10_MINUTES))
                 .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 
                 // caches for database objects

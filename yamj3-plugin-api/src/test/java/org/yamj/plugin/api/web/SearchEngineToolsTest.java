@@ -34,7 +34,7 @@ import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.HttpClientWrapper;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
 
-@SuppressWarnings("resource")
+@SuppressWarnings("all")
 public class SearchEngineToolsTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchEngineToolsTest.class);

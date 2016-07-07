@@ -86,7 +86,7 @@ public class TrailerScanScheduler extends AbstractQueueScheduler {
             }
     
             // process located or generated artwork
-            int maxResults = Math.max(1,configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30));
+            int maxResults = Math.max(1, configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30));
             List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForScanning(maxResults);
             if (CollectionUtils.isEmpty(queueElements)) {
                 LOG.trace("No trailer found to scan");

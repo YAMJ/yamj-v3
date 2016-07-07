@@ -138,7 +138,7 @@ public class JpegReader {
         if (segments != null && !segments.isEmpty()) {
             UnknownSegment app14Segment = (UnknownSegment) segments.get(0);
             byte[] data = app14Segment.bytes;
-            if (data.length >= 12 && data[0] == 'A' && data[1] == 'd' && data[2] == 'o' && data[3] == 'b' && data[4] == 'e') {
+            if (data.length >= 12 && data[0] == 'A' && data[1] == 'd' && data[2] == 'o' && data[3] == 'b' && data[4] == 'e') { //NOSONAR
                 this.hasAdobeMarker = true;
                 int transform = app14Segment.bytes[11] & 0xff;
                 if (transform == 2) {

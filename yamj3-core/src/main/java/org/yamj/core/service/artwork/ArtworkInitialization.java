@@ -21,6 +21,7 @@
  *
  */
 package org.yamj.core.service.artwork;
+import static org.yamj.core.ServiceConstants.DEFAULT;
 
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -42,26 +43,26 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 public class ArtworkInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
-    
+
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
     @PostConstruct
     public void init() {
         LOG.debug("Initialize artwork profiles");
-        initArtworkProfile("default", MetaDataType.MOVIE, ArtworkType.FANART, 1280, 720); 
-        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.FANART, 1280, 720); 
-        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.FANART, 1280, 720); 
-        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.FANART, 1280, 720);
-        initArtworkProfile("default", MetaDataType.MOVIE, ArtworkType.POSTER, 224, 332); 
-        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.POSTER, 224, 332); 
-        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.POSTER, 224, 332); 
-        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.POSTER, 224, 332);
-        initArtworkProfile("default", MetaDataType.SERIES, ArtworkType.BANNER, 650, 120); 
-        initArtworkProfile("default", MetaDataType.SEASON, ArtworkType.BANNER, 650, 120); 
-        initArtworkProfile("default", MetaDataType.BOXSET, ArtworkType.BANNER, 650, 120); 
-        initArtworkProfile("default", MetaDataType.EPISODE, ArtworkType.VIDEOIMAGE, 400, 225);
-        initArtworkProfile("default", MetaDataType.PERSON, ArtworkType.PHOTO, 200, 300);
+        initArtworkProfile(DEFAULT, MetaDataType.MOVIE, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile(DEFAULT, MetaDataType.SERIES, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile(DEFAULT, MetaDataType.SEASON, ArtworkType.FANART, 1280, 720); 
+        initArtworkProfile(DEFAULT, MetaDataType.BOXSET, ArtworkType.FANART, 1280, 720);
+        initArtworkProfile(DEFAULT, MetaDataType.MOVIE, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile(DEFAULT, MetaDataType.SERIES, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile(DEFAULT, MetaDataType.SEASON, ArtworkType.POSTER, 224, 332); 
+        initArtworkProfile(DEFAULT, MetaDataType.BOXSET, ArtworkType.POSTER, 224, 332);
+        initArtworkProfile(DEFAULT, MetaDataType.SERIES, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile(DEFAULT, MetaDataType.SEASON, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile(DEFAULT, MetaDataType.BOXSET, ArtworkType.BANNER, 650, 120); 
+        initArtworkProfile(DEFAULT, MetaDataType.EPISODE, ArtworkType.VIDEOIMAGE, 400, 225);
+        initArtworkProfile(DEFAULT, MetaDataType.PERSON, ArtworkType.PHOTO, 200, 300);
     }
     
     private void initArtworkProfile(String profileName, MetaDataType metaDataType, ArtworkType artworkType, int width, int height) {

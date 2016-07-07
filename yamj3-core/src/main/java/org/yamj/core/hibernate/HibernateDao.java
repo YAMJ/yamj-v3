@@ -177,13 +177,15 @@ public abstract class HibernateDao {
      * @return <code>String</code>
      */
     protected static String convertRowElementToString(Object rowElement) {
+        final String result;
         if (rowElement == null) {
-            return null;
+            result = null;
         } else if (rowElement instanceof String) {
-            return (String) rowElement;
+            result = (String) rowElement;
         } else {
-            return rowElement.toString();
+            result = rowElement.toString();
         }
+        return result;
     }
 
     /**
@@ -193,19 +195,21 @@ public abstract class HibernateDao {
      * @return <code>Integer</code>
      */
     protected static Integer convertRowElementToInteger(Object rowElement) {
+        final Integer result;
         if (rowElement == null) {
-            return 0;
+            result = Integer.valueOf(0);
         } else if (rowElement instanceof Integer) {
-            return (Integer) rowElement;
+            result = (Integer) rowElement;
         } else if (rowElement instanceof BigInteger) {
-            return ((BigInteger) rowElement).intValue();
+            result = ((BigInteger) rowElement).intValue();
         } else if (rowElement instanceof Long) {
-            return ((Long) rowElement).intValue();
+            result = ((Long) rowElement).intValue();
         } else if (StringUtils.isNumeric(rowElement.toString())) {
-            return Integer.valueOf(rowElement.toString());
+            result = Integer.valueOf(rowElement.toString());
         } else {
-            return 0;
+            result = Integer.valueOf(0);
         }
+        return result;
     }
 
     /**
@@ -215,19 +219,21 @@ public abstract class HibernateDao {
      * @return <code>Long</code>
      */
     protected static Long convertRowElementToLong(Object rowElement) {
+        final Long result;
         if (rowElement == null) {
-            return 0L;
+            result = Long.valueOf(0);
         } else if (rowElement instanceof BigInteger) {
-            return ((BigInteger) rowElement).longValue();
+            result = ((BigInteger) rowElement).longValue();
         } else if (rowElement instanceof Long) {
-            return (Long) rowElement;
+            result = (Long) rowElement;
         } else if (rowElement instanceof Integer) {
-            return ((Integer) rowElement).longValue();
+            result = ((Integer) rowElement).longValue();
         } else if (StringUtils.isNumeric(rowElement.toString())) {
-            return Long.valueOf(rowElement.toString());
+            result = Long.valueOf(rowElement.toString());
         } else {
-            return 0L;
+            result = Long.valueOf(0);
         }
+        return result;
     }
 
     /**
@@ -237,14 +243,17 @@ public abstract class HibernateDao {
      * @return
      */
     protected static Date convertRowElementToDate(Object rowElement) {
+        final Date result;
         if (rowElement == null) {
-            return null;
+            result = null;
         } else if (rowElement instanceof Date) {
-            return (Date) rowElement;
+            result = (Date) rowElement;
         } else if (rowElement instanceof Timestamp) {
-            return (Date) rowElement;
+            result =  (Date) rowElement;
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     /**
@@ -254,14 +263,17 @@ public abstract class HibernateDao {
      * @return
      */
     protected static Timestamp convertRowElementToTimestamp(Object rowElement) {
+        final Timestamp result;
         if (rowElement == null) {
-            return null;
+            result = null;
         } else if (rowElement instanceof Timestamp) {
-            return (Timestamp) rowElement;
+            result = (Timestamp) rowElement;
         } else if (rowElement instanceof Date) {
-            return new Timestamp(((Date)rowElement).getTime());
+            result = new Timestamp(((Date)rowElement).getTime());
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     /**
@@ -271,13 +283,15 @@ public abstract class HibernateDao {
      * @return <code>BigDecimal</code>
      */
     protected static BigDecimal convertRowElementToBigDecimal(Object rowElement) {
+        final BigDecimal result;
         if (rowElement == null) {
-            return BigDecimal.ZERO;
+            result = BigDecimal.ZERO;
         } else if (rowElement instanceof BigDecimal) {
-            return (BigDecimal) rowElement;
+            result = (BigDecimal) rowElement;
         } else {
-            return new BigDecimal(rowElement.toString());
+            result = new BigDecimal(rowElement.toString());
         }
+        return result;
     }
 
     /**
@@ -287,17 +301,19 @@ public abstract class HibernateDao {
      * @return <code>BigDecimal</code>
      */
     protected static Boolean convertRowElementToBoolean(Object rowElement) {
+        final Boolean result;
         if (rowElement == null) {
-            return Boolean.FALSE;
+            result =  Boolean.FALSE;
         } else if (rowElement instanceof Boolean) {
-            return (Boolean) rowElement;
+            result =  (Boolean) rowElement;
         } else if ("1".equals(rowElement.toString())) {
-            return Boolean.TRUE;
+            result =  Boolean.TRUE;
         } else if ("true".equals(rowElement.toString())) {
-            return Boolean.TRUE;
+            result =  Boolean.TRUE;
         } else {
-            return Boolean.FALSE;
+            result =  Boolean.FALSE;
         }
+        return result;
     }
 
     private static void applyNamedParameters(Query queryObject, Map<String, Object> params) throws HibernateException {

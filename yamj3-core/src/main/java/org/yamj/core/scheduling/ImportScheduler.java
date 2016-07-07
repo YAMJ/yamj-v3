@@ -41,7 +41,10 @@ public class ImportScheduler {
     private static final ReentrantLock IMPORT_LOCK = new ReentrantLock();
     private static final String STAGING_ERROR = "Staging Error";
     private static final String DATABASE_ERROR = "Database Error";
-    
+
+    // start with an initial media import
+    private final AtomicBoolean watchProcess = new AtomicBoolean(true);
+
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
@@ -51,9 +54,6 @@ public class ImportScheduler {
     @Autowired
     private ArtworkProcessScheduler artworkProcessScheduler;
     
-    private final AtomicBoolean watchProcess = new AtomicBoolean(false);
-
-    @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void trigger() {
         LOG.trace("Trigger media import");
         watchProcess.set(true);

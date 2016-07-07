@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.tasks;
 
+import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
+
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +120,7 @@ public class ExecutionTaskService {
             this.executionTaskStorageService.updateEntity(executionTask);
         } catch (Exception ex) {
             LOG.error("Failed to update: {}", executionTask);
-            LOG.warn("Storage error", ex);
+            LOG.warn(STORAGE_ERROR, ex);
         }
     }
 }

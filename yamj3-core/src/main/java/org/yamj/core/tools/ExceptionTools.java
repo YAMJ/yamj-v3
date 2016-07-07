@@ -42,39 +42,27 @@ public final class ExceptionTools {
     }
 
     public static boolean isLockingError(Exception e) {
+        final boolean result;
         if (e == null) {
-            return false;
+            result = false;
+        } else if (e instanceof ConcurrencyFailureException) {
+            result = true;
+        } else if (e instanceof LockingStrategyException) {
+            result = true;
+        } else if (e instanceof StaleStateException) {
+            result = true;
+        } else if (e instanceof OptimisticLockException) {
+            result = true;
+        } else if (e instanceof PessimisticLockException) {
+            result = true;
+        } else if (e instanceof LockTimeoutException) {
+            result = true;
+        } else if (e instanceof LockAcquisitionException) {
+            result = true;
+        } else {
+            result = false;
         }
-
-        if (e instanceof ConcurrencyFailureException) {
-            return true;
-        }
-
-        if (e instanceof LockingStrategyException) {
-            return true;
-        }
-
-        if (e instanceof StaleStateException) {
-            return true;
-        }
-
-        if (e instanceof OptimisticLockException) {
-            return true;
-        }
-
-        if (e instanceof PessimisticLockException) {
-            return true;
-        }
-
-        if (e instanceof LockTimeoutException) {
-            return true;
-        }
-        
-        if (e instanceof LockAcquisitionException) {
-            return true;
-        }
-
-        return false;
+        return result;
     }
     
     public static boolean is404(ApiException ex) {

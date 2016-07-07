@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import static org.yamj.core.ServiceConstants.IMAGE_GENERATION_ERROR;
+import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
 import static org.yamj.core.service.artwork.ArtworkStorageTools.SOURCE_UPLOAD;
 
 import java.awt.Dimension;
@@ -121,8 +123,8 @@ public class ArtworkProcessorService implements IQueueProcessService {
                     stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
                 }
             } catch (IOException ex) {
-                LOG.error("Storage error: {}", ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.error("{}: {}", STORAGE_ERROR, ex.getMessage());
+                LOG.trace(STORAGE_ERROR, ex);
                 
                 return;
             }
@@ -152,7 +154,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                 generateImage(located, profile);
             } catch (IOException ex)  {
                 LOG.warn("Original image is not found: {}/{}", located.getCacheDirectory(), located.getCacheFilename());
-                LOG.trace("Image generation error", ex);
+                LOG.trace(IMAGE_GENERATION_ERROR, ex);
                 
                 // reset cache values and mark located artwork for update
                 located.setCacheDirectory(null);
@@ -181,7 +183,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
                 break;
             } catch (Exception ex) {
                 LOG.error("Failed to generate image for {} with profile {}", located, profile.getProfileName());
-                LOG.warn("Image generation error", ex);
+                LOG.warn(IMAGE_GENERATION_ERROR, ex);
             }
         }
 
@@ -202,7 +204,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             generated.setStatus(StatusType.DONE);
         } catch (Exception ex) {
             LOG.error("Failed to generate image for {}", generated);
-            LOG.warn("Image generation error", ex);
+            LOG.warn(IMAGE_GENERATION_ERROR, ex);
 
             // mark generated image as error
             generated.setStatus(StatusType.ERROR);

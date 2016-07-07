@@ -289,28 +289,21 @@ public class FilenameScanner {
         }
 
         final String ext = extension.toLowerCase();
-
+        final FileType result;
         if ("nfo".equals(ext)) {
             return FileType.NFO;
+        } else if ("watched".equals(extension)) {
+            result = FileType.WATCHED;
+        } else if (videoExtensions.contains(ext)) {
+            result = FileType.VIDEO;
+        } else if (subtitleExtensions.contains(ext)) {
+            result = FileType.SUBTITLE;
+        } else if (imageExtensions.contains(ext)) {
+            result = FileType.IMAGE;
+        } else {
+            result = FileType.UNKNOWN;
         }
-
-        if ("watched".equals(extension)) {
-            return FileType.WATCHED;
-        }
-
-        if (videoExtensions.contains(ext)) {
-            return FileType.VIDEO;
-        }
-
-        if (subtitleExtensions.contains(ext)) {
-            return FileType.SUBTITLE;
-        }
-
-        if (imageExtensions.contains(ext)) {
-            return FileType.IMAGE;
-        }
-
-        return FileType.UNKNOWN;
+        return result;
     }
 
     public void scan(FilenameDTO dto) {

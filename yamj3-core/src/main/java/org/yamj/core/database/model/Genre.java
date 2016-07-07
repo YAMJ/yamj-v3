@@ -27,6 +27,7 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
 
 @NamedQueries({
     @NamedQuery(name = Genre.UPDATE_TARGET_XML_CLEAN,
@@ -38,11 +39,28 @@ import org.hibernate.annotations.NaturalId;
 })
 
 @NamedNativeQueries({    
+    @NamedNativeQuery(name = Genre.QUERY_FILENAME, resultSetMapping = "metadata.genre",
+        query = "SELECT g.id, g.name,"+
+                "CASE WHEN target_api is not null THEN target_api WHEN target_xml is not null THEN target_xml ELSE name END as target "+
+                "FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g "+
+                "WHERE m.id=mv.mediafile_id AND mv.videodata_id=v.id AND v.id = vg.data_id AND vg.genre_id=g.id AND lower(m.file_name)=:filename"
+    ),
     @NamedNativeQuery(name = Genre.DELETE_ORPHANS,
         query = "DELETE FROM genre WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) "+
                 "AND not exists (select 1 from series_genres sg where sg.genre_id=id) "
     )
 })
+
+@SqlResultSetMapping(name="metadata.genre", classes={
+    @ConstructorResult(
+        targetClass=ApiGenreDTO.class,
+        columns={
+             @ColumnResult(name="id", type=Long.class),
+             @ColumnResult(name="name", type=String.class),
+             @ColumnResult(name="target", type=String.class),
+        }
+    )}
+)
 
 @Entity
 @Table(name = "genre",
@@ -51,6 +69,7 @@ import org.hibernate.annotations.NaturalId;
 public class Genre extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
+    public static final String QUERY_FILENAME = "genre.filename";
     public static final String UPDATE_TARGET_XML_CLEAN = "genre.targetXml.clean";
     public static final String UPDATE_TARGET_XML_SET = "genre.targetXml.set";
     public static final String DELETE_ORPHANS = "genre.deleteOrphans";

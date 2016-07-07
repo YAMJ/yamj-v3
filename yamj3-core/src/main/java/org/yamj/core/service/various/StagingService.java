@@ -22,6 +22,10 @@
  */
 package org.yamj.core.service.various;
 
+import static org.yamj.common.type.StatusType.DELETED;
+import static org.yamj.common.type.StatusType.NEW;
+import static org.yamj.common.type.StatusType.UPDATED;
+
 import java.io.File;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
@@ -36,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
@@ -122,15 +125,10 @@ public class StagingService {
         for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
             String baseName = FilenameUtils.getBaseName(stageFileDTO.getFileName());
             String extension = FilenameUtils.getExtension(stageFileDTO.getFileName());
-            if (StringUtils.isBlank(baseName) || StringUtils.isBlank(extension)) {
-                // no valid baseName or extension
-                continue;
-            }
-
             FileType fileType = filenameScanner.determineFileType(extension);
-            if (fileType == FileType.UNKNOWN) {
-                LOG.info("Skipped file cause unknown extension: {}", stageFileDTO.getFileName());
-                // unknown file type
+
+            if (StringUtils.isBlank(baseName) || fileType == FileType.UNKNOWN) {
+                // no valid baseName or extension
                 continue;
             }
 
@@ -143,7 +141,7 @@ public class StagingService {
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(filenameScanner.determineFileType(extension));
                 stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
-                stageFile.setStatus(StatusType.NEW);
+                stageFile.setStatus(NEW);
 
                 // set changeable values in stage file
                 setChangeableValues(stageFile, stageFileDTO);
@@ -164,7 +162,7 @@ public class StagingService {
                         // Note: duplicate is only set for videos with same name
                     } else {
                         // mark stage file as updated
-                        stageFile.setStatus(StatusType.UPDATED);
+                        stageFile.setStatus(UPDATED);
                     }
 
                     LOG.debug("Updated {} file: {}", stageFile.getFileType().name().toLowerCase(), stageFile.getFullPath());
@@ -210,7 +208,7 @@ public class StagingService {
     public boolean deleteStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.DELETED);
+        params.put("status", DELETED);
         return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS, params)>0;
     }
 
@@ -218,7 +216,7 @@ public class StagingService {
     public boolean updateStageFile(Long id) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("id", id);
-        params.put("status", StatusType.UPDATED);
+        params.put("status", UPDATED);
         return this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params)>0;
     }
 
@@ -355,7 +353,7 @@ public class StagingService {
     @Transactional
     public void markStageFilesAsDeleted(List<Long> stageFileIds) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("status", StatusType.DELETED);
+        params.put("status", DELETED);
         
         for (List<Long> subList : YamjTools.split(stageFileIds, 500)) {
             params.put("idList", subList);

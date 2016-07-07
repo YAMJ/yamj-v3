@@ -44,7 +44,8 @@ public final class MetadataTools {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final IDateTimeConfig DATETIME_CONFIG_DEFAULT;
     private static final IDateTimeConfig DATETIME_CONFIG_FALLBACK;
-
+    private static final List<String> ROLE_MARKERS = new ArrayList<>();
+    
     static {
         // default date and time configuration
         DATETIME_CONFIG_DEFAULT = DateTimeConfig.getGlobalDefault();
@@ -52,6 +53,19 @@ public final class MetadataTools {
         DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
         builder.setDmyOrder(!DATETIME_CONFIG_DEFAULT.isDmyOrder());
         DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
+        
+        // build role markers to strip from role
+        ROLE_MARKERS.add("(voice");
+        ROLE_MARKERS.add("(Sprechrolle");
+        ROLE_MARKERS.add("(as");
+        ROLE_MARKERS.add("(aka");
+        ROLE_MARKERS.add("(uncredit");
+        ROLE_MARKERS.add("(non crédité");
+        ROLE_MARKERS.add("(Season");
+        ROLE_MARKERS.add("(archive footage");
+        for (int i = 1; i <= 10; i++) {
+            ROLE_MARKERS.add("("+i+" episode");
+        }
     }
 
     private MetadataTools() {
@@ -208,9 +222,9 @@ public final class MetadataTools {
         Date parsedDate = null;
         try {
             parsedDate = DateTime.parse(dateToParse, config).toDate();
-            LOG.trace("Converted date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+            LOG.trace("Converted date '{}' using {} order", dateToParse, config.isDmyOrder() ? "DMY" : "MDY");
         } catch (IllegalArgumentException ex) { //NOSONAR
-            LOG.debug("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+            LOG.debug("Failed to convert date '{}' using {} order", dateToParse, config.isDmyOrder() ? "DMY" : "MDY");
         }
         return parsedDate;
     }
@@ -386,13 +400,7 @@ public final class MetadataTools {
      * @return
      */
     public static boolean isVoiceRole(final String role) {
-        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
-        if (idx >= 0) return true;
-        idx = StringUtils.indexOfIgnoreCase(role, "(Sprechrolle");
-        if (idx >= 0) return true;
-
-        // everything else
-        return false;
+        return StringUtils.containsIgnoreCase(role, "(voice") || StringUtils.containsIgnoreCase(role, "(Sprechrolle");
     }
 
     /**
@@ -424,69 +432,17 @@ public final class MetadataTools {
     }
     
     private static String removeRoleMarkers(final String role) {
-        if (role.indexOf('(') < 0 ) {
-            return role;
-        }
-        
         // holds the new role
         String newRole = role;
 
-        // voice roles
-        int idx = StringUtils.indexOfIgnoreCase(newRole, "(voice");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(Sprechrolle");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-
-        // alternate names
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(aka ");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-
-        // uncredited cast member
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(non crédité");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-
-        // season marker
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
-        if (idx >= 0) {
-            newRole = newRole.substring(0, idx);
-            if (newRole.indexOf('(') < 0) return newRole;
-        }
-
-        // episode markers
-        for (int i = 1; i <= 10; i++) {
-            idx = StringUtils.indexOfIgnoreCase(newRole, "("+i+" episode");
+        for (String marker : ROLE_MARKERS) {
+            if (newRole.indexOf('(') < 0 ) {
+                return newRole;
+            }
+            int idx = StringUtils.indexOfIgnoreCase(newRole, marker);
             if (idx >= 0) {
                 newRole = newRole.substring(0, idx);
-                if (newRole.indexOf('(') < 0) return newRole;
             }
-        }
-
-        // archive footage
-        idx = StringUtils.indexOfIgnoreCase(newRole, "(archive footage");
-        if (idx >= 0) {
-            return newRole.substring(0, idx);
         }
         return newRole;
     }

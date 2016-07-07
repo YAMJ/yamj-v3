@@ -23,6 +23,7 @@
 package org.yamj.core.service.metadata;
 
 import static org.yamj.common.type.MetaDataType.*;
+import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -111,7 +112,7 @@ public class MetadataScannerService implements IQueueProcessService {
                 LOG.warn("Locking error while storing movie {}-'{}'", id, videoData.getTitle());
             } else {
                 LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
-                LOG.error("Storage error", error);
+                LOG.error(STORAGE_ERROR, error);
             }
         }
     }
@@ -175,7 +176,7 @@ public class MetadataScannerService implements IQueueProcessService {
                 LOG.warn("Locking error while storing series {}-'{}'", id, series.getTitle());
             } else {
                 LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
-                LOG.error("Storage error", error);
+                LOG.error(STORAGE_ERROR, error);
             }
         }
     }
@@ -202,7 +203,7 @@ public class MetadataScannerService implements IQueueProcessService {
                 LOG.warn("Locking error while storing person {}-'{}'", id, person.getName());
             } else {
                 LOG.error("Failed storing person {}-'{}'", id, person.getName());
-                LOG.error("Storage error", error);
+                LOG.error(STORAGE_ERROR, error);
             }
         }
     }
@@ -229,7 +230,7 @@ public class MetadataScannerService implements IQueueProcessService {
                 LOG.warn("Locking error while storing person filmography {}-'{}'", id, person.getName());
             } else {
                 LOG.error("Failed storing person filmography {}-'{}'", id, person.getName());
-                LOG.error("Storage error", error);
+                LOG.error(STORAGE_ERROR, error);
             }
         }
     }

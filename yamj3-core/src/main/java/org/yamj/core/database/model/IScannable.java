@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.Collection;
 import java.util.Date;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -30,6 +31,8 @@ public interface IScannable {
     String getSourceDbId(String sourceDb);
 
     boolean setSourceDbId(String sourceDb, String id);
+
+    void removeSourceDbIds(Collection<String> sourceDbs);
 
     boolean removeSourceDbId(String sourceDb);
     

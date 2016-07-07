@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -49,6 +51,10 @@ public class ArtworkScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
     private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
+    private static final String SCANNER_NOT_REG_MOVIE = "Movie artwork scanner {} not registered";
+    private static final String SCANNER_NOT_REG_SERIES= "Series artwork scanner {} not registered";
+    private static final String SCANNER_NOT_REG_BOXEDSET = "BoxedSet artwork scanner {} not registered";
+    private static final String SCANNER_NOT_REG_PERSON = "Person artwork scanner {} not registered";
     
     private final HashMap<String, MovieArtworkScanner> registeredMovieArtworkScanner = new HashMap<>();
     private final HashMap<String, SeriesArtworkScanner> registeredSeriesArtworkScanner = new HashMap<>();
@@ -126,7 +132,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing artwork {}-{}", queueElement.getId(), artwork.getArtworkType().toString());
-            LOG.warn("Storage error", error);
+            LOG.warn(STORAGE_ERROR, error);
         }
     }
 
@@ -192,7 +198,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_BOXEDSET, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     posters = scanner.getPosters(iBoxedSet);
@@ -209,7 +215,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("Movie artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_MOVIE, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     posters = scanner.getPosters(iMovie);
@@ -225,7 +231,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("Series artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_SERIES, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     if (artwork.getSeries() != null) {
@@ -308,7 +314,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_BOXEDSET, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     fanarts = scanner.getFanarts(iBoxedSet);
@@ -325,7 +331,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.movie.priorities", registeredMovieArtworkScanner.keySet())) {
                 MovieArtworkScanner scanner = registeredMovieArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("Movie artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_MOVIE, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     fanarts = scanner.getFanarts(iMovie);
@@ -341,7 +347,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("Series artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_SERIES, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     if (artwork.getSeries() != null) {
@@ -422,7 +428,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.boxset.priorities", registeredBoxedSetArtworkScanner.keySet())) {
                 BoxedSetArtworkScanner scanner = registeredBoxedSetArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("BoxedSet artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_BOXEDSET, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     banners = scanner.getBanners(iBoxedSet);
@@ -438,7 +444,7 @@ public class ArtworkScannerService implements IQueueProcessService {
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.tvshow.priorities", registeredSeriesArtworkScanner.keySet())) {
                 SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
                 if (scanner == null) {
-                    LOG.warn("Series artwork scanner {} not registered", prio);
+                    LOG.warn(SCANNER_NOT_REG_SERIES, prio);
                 } else {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     if (artwork.getSeries() != null) {
@@ -531,7 +537,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         for (String prio : determinePriorities("yamj3.artwork.scanner.videoimage.priorities", registeredSeriesArtworkScanner.keySet())) {
             SeriesArtworkScanner scanner = registeredSeriesArtworkScanner.get(prio);
             if (scanner == null) {
-                LOG.warn("Series artwork scanner {} not registered", prio);
+                LOG.warn(SCANNER_NOT_REG_SERIES, prio);
             } else {
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 videoimages = scanner.getVideoImages(buildEpisode(videoData));
@@ -591,7 +597,7 @@ public class ArtworkScannerService implements IQueueProcessService {
         for (String prio : determinePriorities("yamj3.artwork.scanner.photo.priorities", registeredPersonArtworkScanner.keySet())) {
             PersonArtworkScanner scanner = registeredPersonArtworkScanner.get(prio);
             if (scanner == null) {
-                LOG.warn("Person artwork scanner {} not registered", prio);
+                LOG.warn(SCANNER_NOT_REG_PERSON, prio);
             } else {
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
                 photos = scanner.getPhotos(iPerson);

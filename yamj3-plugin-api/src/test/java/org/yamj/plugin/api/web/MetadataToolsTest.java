@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.yamj.plugin.api.metadata.MetadataTools;
 
+@SuppressWarnings("all")
 public class MetadataToolsTest {
 
     @Test

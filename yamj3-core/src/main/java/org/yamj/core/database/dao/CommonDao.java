@@ -133,28 +133,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT g.id, g.name, ");
-        sqlScalars.addToSql("CASE ");
-        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
-        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
-        sqlScalars.addToSql(" ELSE name ");
-        sqlScalars.addToSql("END as target ");
-        sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g");
-        sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
-        sqlScalars.addToSql("AND mv.videodata_id=v.id");
-        sqlScalars.addToSql("AND v.id = vg.data_id");
-        sqlScalars.addToSql("AND vg.genre_id=g.id");
-        sqlScalars.addToSql("AND lower(m.file_name)=:filename");
-
-        sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
-        sqlScalars.addScalar(LITERAL_NAME, StringType.INSTANCE);
-        sqlScalars.addScalar("target", StringType.INSTANCE);
-
-        sqlScalars.addParameter("filename", filename.toLowerCase());
-
-        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
+    public List<ApiGenreDTO> getGenreFilename(String filename) {
+        return currentSession().getNamedQuery(Genre.QUERY_FILENAME)
+                .setString("filename", filename.toLowerCase())
+                .setCacheable(true)
+                .setCacheMode(NORMAL)
+                .list();
     }
 
     @Cacheable(value=DB_STUDIO, key="#id", unless="#result==null")

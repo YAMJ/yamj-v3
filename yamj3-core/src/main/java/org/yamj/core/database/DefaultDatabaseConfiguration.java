@@ -23,6 +23,7 @@
 package org.yamj.core.database;
 
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static org.yamj.core.ServiceConstants.DEFAULT;
 
 import java.util.Properties;
 import javax.sql.DataSource;
@@ -37,7 +38,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("default")
+@Profile(DEFAULT)
 public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultDatabaseConfiguration.class);

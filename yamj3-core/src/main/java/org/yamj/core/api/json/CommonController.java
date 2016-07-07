@@ -197,7 +197,7 @@ public class CommonController {
         LOG.debug("Getting genres for filename '{}'", filename);
         
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
-        return wrapper.setResults(jsonApiStorageService.getGenreFilename(wrapper, filename));
+        return wrapper.setResults(jsonApiStorageService.getGenreFilename(filename));
     }
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
@@ -228,8 +228,7 @@ public class CommonController {
             }
         }
         
-        wrapper.setResult(result);
-        return wrapper;
+        return wrapper.setResult(result);
     }
 
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
@@ -302,8 +301,7 @@ public class CommonController {
             studio = jsonApiStorageService.getStudio(name);
         }
         
-        wrapper.setResult(studio);
-        return wrapper;
+        return wrapper.setResult(studio);
     }
 
     @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
@@ -311,8 +309,7 @@ public class CommonController {
         LOG.debug("Getting studio list - Options: {}", options);
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getStudios(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getStudios(wrapper));
     }
     //</editor-fold>
 
@@ -324,12 +321,8 @@ public class CommonController {
    {
         LOG.debug("Getting countries for filename '{}'", filename);
 
-        OptionsId options = new OptionsId();
-        options.setLanguage(language);
-        
-        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getCountryFilename(options, filename));
-        return wrapper;
+        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
+        return wrapper.setResults(jsonApiStorageService.getCountryFilename(filename, language));
     }
 
     @RequestMapping(value = "/country/{countryCode}", method = RequestMethod.GET)
@@ -337,8 +330,6 @@ public class CommonController {
         @PathVariable String countryCode,
         @RequestParam(required = false) String language)
     {
-        ApiWrapperSingle<ApiCountryDTO> wrapper = new ApiWrapperSingle<>();
-
         ApiCountryDTO country;
         if (StringUtils.isNumeric(countryCode)) {
             LOG.info("Getting country with ID {}", countryCode);
@@ -348,17 +339,16 @@ public class CommonController {
             country = jsonApiStorageService.getCountry(countryCode, language);
         }
 
-        wrapper.setResult(country);
-        return wrapper;
-    }
+        ApiWrapperSingle<ApiCountryDTO> wrapper = new ApiWrapperSingle<>();
+        return wrapper.setResult(country);
+   }
 
     @RequestMapping(value = "/countries/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiCountryDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
         LOG.debug("Getting country list - Options: {}", options);
 
         ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>(options);
-        wrapper.setResults(jsonApiStorageService.getCountries(wrapper));
-        return wrapper;
+        return wrapper.setResults(jsonApiStorageService.getCountries(wrapper));
     }
     //</editor-fold>
 

@@ -253,8 +253,8 @@ public class JsonApiStorageService {
         return commonDao.getGenres(wrapper);
     }
 
-    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
-        return commonDao.getGenreFilename(wrapper, filename);
+    public List<ApiGenreDTO> getGenreFilename(String filename) {
+        return commonDao.getGenreFilename(filename);
     }
     //</editor-fold>
 
@@ -301,9 +301,9 @@ public class JsonApiStorageService {
         return result;
     }
 
-    public List<ApiCountryDTO> getCountryFilename(OptionsId options, String filename) {
+    public List<ApiCountryDTO> getCountryFilename(String filename, String language) {
         List<ApiCountryDTO> result = commonDao.getCountryFilename(filename);
-        localizeCountries(result, options.getLanguage());
+        localizeCountries(result, language);
         return result;
     }
 

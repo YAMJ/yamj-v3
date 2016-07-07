@@ -70,6 +70,10 @@ final class Literals {
     protected static final String LITERAL_PLOT = "plot";
     protected static final String LITERAL_OUTLINE = "outline";
     protected static final String LITERAL_COMBINED = "combined";
+    protected static final String LITERAL_BASENAME = "baseName";
+    protected static final String LITERAL_STAGE_DIRECTORY = "stageDirectory";
+    protected static final String LITERAL_CHECK_DATE = "checkDate";
+    
     
     // SQL
     protected static final String SQL_UNION = " UNION ";

@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import static org.yamj.core.CachingNames.*;
+import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -133,7 +134,7 @@ public class MetadataStorageService {
                 this.metadataDao.storeMovieCredit(creditDTO);
             } catch (Exception ex) {
                 LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 PERSON_STORAGE_LOCK.unlock();
             }
@@ -174,7 +175,7 @@ public class MetadataStorageService {
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to store country '{}', error: {}", countryCode, ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 COUNTRY_STORAGE_LOCK.unlock();
             }
@@ -195,7 +196,7 @@ public class MetadataStorageService {
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 STUDIO_STORAGE_LOCK.unlock();
             }
@@ -217,7 +218,7 @@ public class MetadataStorageService {
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 GENRE_STORAGE_LOCK.unlock();
             }
@@ -233,7 +234,7 @@ public class MetadataStorageService {
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 CERTIFICATION_STORAGE_LOCK.unlock();
             }
@@ -249,7 +250,7 @@ public class MetadataStorageService {
                 }
             } catch (Exception ex) {
                 LOG.error("Failed to store award '{}'-'{}', error: {}", award.getEvent(), award.getCategory(), ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 AWARD_STORAGE_LOCK.unlock();
             }
@@ -263,7 +264,7 @@ public class MetadataStorageService {
                 this.commonDao.storeNewBoxedSet(boxedSet);
             } catch (Exception ex) {
                 LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
-                LOG.trace("Storage error", ex);
+                LOG.trace(STORAGE_ERROR, ex);
             } finally {
                 BOXSET_STORAGE_LOCK.unlock();
             }
@@ -932,10 +933,9 @@ public class MetadataStorageService {
             Iterator<BoxedSetOrder> iter = videoData.getBoxedSets().iterator();
             while (iter.hasNext()) {
                 BoxedSetOrder boxedSetOrder = iter.next();
-                BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
                 
                 // remove modified sources for idMap clone
-                Map<String,String> boxedSetSources = boxedSet.getIdMap();
+                Map<String,String> boxedSetSources = boxedSetOrder.getBoxedSet().getIdMap();
                 for (String source : videoData.getModifiedSources()) {
                     boxedSetSources.remove(source);
                 }
@@ -957,13 +957,13 @@ public class MetadataStorageService {
                     }
                 }
                 
-                if (source.equals(videoData.getOverrideSource(OverrideFlag.GENRES))) {
+                if (videoData.hasOverrideSource(OverrideFlag.GENRES, source)) {
                     videoData.getGenres().clear();
                 }
-                if (source.equals(videoData.getOverrideSource(OverrideFlag.STUDIOS))) {
+                if (videoData.hasOverrideSource(OverrideFlag.STUDIOS, source)) {
                     videoData.getStudios().clear();
                 }
-                if (source.equals(videoData.getOverrideSource(OverrideFlag.COUNTRIES))) {
+                if (videoData.hasOverrideSource(OverrideFlag.COUNTRIES, source)) {
                     videoData.getCountries().clear();
                 }
 
@@ -1009,11 +1009,11 @@ public class MetadataStorageService {
             }
     
             for (VideoData videoData : season.getVideoDatas()) {
-                for (String sourceDb : season.getModifiedSources()) {
-                    videoData.removeSourceDbId(sourceDb);
-                }
+                // remove source IDS for modified sources
+                videoData.removeSourceDbIds(season.getModifiedSources());
                 // merge modified sources, cause episodes may have no own source IDs
                 videoData.addModifiedSources(season.getModifiedSources());
+                // handle modified sources
                 handleModifiedSources(videoData);
             }
         }
@@ -1037,10 +1037,9 @@ public class MetadataStorageService {
             Iterator<BoxedSetOrder> iter = series.getBoxedSets().iterator();
             while (iter.hasNext()) {
                 BoxedSetOrder boxedSetOrder = iter.next();
-                BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
                 
                 // remove modified sources for idMap clone
-                Map<String,String> boxedSetSources = boxedSet.getIdMap();
+                Map<String,String> boxedSetSources = boxedSetOrder.getBoxedSet().getIdMap();
                 for (String source : series.getModifiedSources()) {
                     boxedSetSources.remove(source);
                 }
@@ -1062,13 +1061,13 @@ public class MetadataStorageService {
                     }
                 }
                 
-                if (source.equals(series.getOverrideSource(OverrideFlag.GENRES))) {
+                if (series.hasOverrideSource(OverrideFlag.GENRES, source)) {
                     series.getGenres().clear();
                 }
-                if (source.equals(series.getOverrideSource(OverrideFlag.STUDIOS))) {
+                if (series.hasOverrideSource(OverrideFlag.STUDIOS, source)) {
                     series.getStudios().clear();
                 }
-                if (source.equals(series.getOverrideSource(OverrideFlag.COUNTRIES))) {
+                if (series.hasOverrideSource(OverrideFlag.COUNTRIES, source)) {
                     series.getCountries().clear();
                 }
 
@@ -1086,11 +1085,11 @@ public class MetadataStorageService {
             }
 
             for (Season season : series.getSeasons()) {
-                for (String sourceDb : series.getModifiedSources()) {
-                    season.removeSourceDbId(sourceDb);
-                }
+                // remove source IDS for modified sources
+                season.removeSourceDbIds(series.getModifiedSources());
                 // merge modified sources, cause season may have no own source IDs
                 season.addModifiedSources(series.getModifiedSources());
+                // handle modified sources
                 handleModifiedSources(season);
             }
         }

@@ -190,6 +190,13 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
     }
 
     @Override
+    public void removeSourceDbIds(Collection<String> sourceDbs) {
+        for (String sourceDb : sourceDbs) {
+            removeSourceDbId(sourceDb);
+        }
+    }
+
+    @Override
     public boolean removeSourceDbId(String sourceDb) {
         if (getSourceDbIdMap().remove(sourceDb) != null) {
             addModifiedSource(sourceDb);
@@ -281,7 +288,7 @@ public abstract class AbstractScannable extends AbstractStateful implements ISca
         return getOverrideFlags().get(overrideFlag);
     }
 
-    protected boolean hasOverrideSource(OverrideFlag overrideFlag, String sourceDb) {
+    public boolean hasOverrideSource(OverrideFlag overrideFlag, String sourceDb) {
         return StringUtils.equals(getOverrideSource(overrideFlag), sourceDb);
     }
     

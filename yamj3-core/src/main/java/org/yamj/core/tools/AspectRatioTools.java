@@ -215,12 +215,12 @@ public class AspectRatioTools {
      */
     public class AspectRatio {
 
-        private String ratioName;
-        private float minFloat;
-        private float maxFloat;
-        private float ratio3digit;
-        private float ratio2digit;
-        private float ratio1digit;
+        private final String ratioName;
+        private final float minFloat;
+        private final float maxFloat;
+        private final float ratio3digit;
+        private final float ratio2digit;
+        private final float ratio1digit;
 
         /**
          * Constructor for Aspect Ratio
@@ -242,19 +242,13 @@ public class AspectRatioTools {
         }
 
         /**
-         * Default constructor
-         */
-        public AspectRatio() {
-        }
-
-        /**
          * Test to see if a passed value is in the range of this aspect ratio
          *
          * @param ratioValue
          * @return
          */
         public boolean testAspectRatio(float ratioValue) {
-            return (ratioValue >= this.minFloat && ratioValue <= this.maxFloat);
+            return ratioValue >= this.minFloat && ratioValue <= this.maxFloat;
         }
 
         public String getRatioName() {
@@ -279,30 +273,6 @@ public class AspectRatioTools {
 
         public float getRatio1digit() {
             return ratio1digit;
-        }
-
-        public void setRatioName(String ratioName) {
-            this.ratioName = ratioName;
-        }
-
-        public void setMinFloat(float minFloat) {
-            this.minFloat = minFloat;
-        }
-
-        public void setMaxFloat(float maxFloat) {
-            this.maxFloat = maxFloat;
-        }
-
-        public void setRatio3digit(float ratio3digit) {
-            this.ratio3digit = ratio3digit;
-        }
-
-        public void setRatio2digit(float ratio2digit) {
-            this.ratio2digit = ratio2digit;
-        }
-
-        public void setRatio1digit(float ratio1digit) {
-            this.ratio1digit = ratio1digit;
         }
 
         @Override

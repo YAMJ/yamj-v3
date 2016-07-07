@@ -147,7 +147,7 @@ public final class YamjTools {
 
             // resolve decimal format
             DecimalFormat df;
-            long checker = (fileSize / divider);
+            long checker = fileSize / divider;
             if (checker < 10) {
                 df = FILESIZE_FORMAT_2;
             } else if (checker < 100) {

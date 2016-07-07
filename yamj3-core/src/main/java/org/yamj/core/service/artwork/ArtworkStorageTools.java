@@ -126,7 +126,7 @@ public final class ArtworkStorageTools {
         return getMetaDataType(located.getArtwork());
     }
 
-    public static MetaDataType getMetaDataType(Artwork artwork) {
+    public static MetaDataType getMetaDataType(Artwork artwork) { //NOSONAR
         MetaDataType metaDataType = MetaDataType.UNKNOWN;
 
         final ArtworkType artworkType = artwork.getArtworkType(); 

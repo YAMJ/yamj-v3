@@ -33,6 +33,7 @@ import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 
+@SuppressWarnings("all")
 public class FilenameScannerTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilenameScannerTest.class);

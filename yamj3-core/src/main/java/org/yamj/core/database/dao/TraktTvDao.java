@@ -22,12 +22,13 @@
  */
 package org.yamj.core.database.dao;
 
+import static org.hibernate.CacheMode.NORMAL;
+import static org.hibernate.ScrollMode.FORWARD_ONLY;
+import static org.yamj.core.database.dao.Literals.LITERAL_CHECK_DATE;
 import static org.yamj.plugin.api.Constants.*;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.CacheMode;
-import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.springframework.stereotype.Repository;
 import org.yamj.core.database.model.VideoData;
@@ -42,8 +43,8 @@ public class TraktTvDao extends HibernateDao {
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_MOVIES)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             return readIdQueue(scroll);
         }
@@ -53,8 +54,8 @@ public class TraktTvDao extends HibernateDao {
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_EPISODES)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             return readIdQueue(scroll);
         }
@@ -86,11 +87,11 @@ public class TraktTvDao extends HibernateDao {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_COLLECTED_MOVIES)
-                .setTimestamp("checkDate", checkDate)
+                .setTimestamp(LITERAL_CHECK_DATE, checkDate)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             Object[] row;
             Long id;
@@ -127,11 +128,11 @@ public class TraktTvDao extends HibernateDao {
         final Map<Long,TraktMovieDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_WATCHED_MOVIES)
-                .setTimestamp("checkDate", checkDate)
+                .setTimestamp(LITERAL_CHECK_DATE, checkDate)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             Object[] row;
             Long id;
@@ -159,11 +160,11 @@ public class TraktTvDao extends HibernateDao {
         final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_COLLECTED_EPISODES)
-                .setTimestamp("checkDate", checkDate)
+                .setTimestamp(LITERAL_CHECK_DATE, checkDate)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             Object[] row;
             Long id;
@@ -202,11 +203,11 @@ public class TraktTvDao extends HibernateDao {
         final Map<Long,TraktEpisodeDTO> result = new HashMap<>();
         
         try (ScrollableResults scroll = currentSession().getNamedQuery(VideoData.QUERY_TRAKTTV_WATCHED_EPISODES)
-                .setTimestamp("checkDate", checkDate)
+                .setTimestamp(LITERAL_CHECK_DATE, checkDate)
                 .setReadOnly(true)
                 .setCacheable(true)
-                .setCacheMode(CacheMode.NORMAL)
-                .scroll(ScrollMode.FORWARD_ONLY))
+                .setCacheMode(NORMAL)
+                .scroll(FORWARD_ONLY))
         {
             Object[] row;
             Long id;
