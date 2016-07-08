@@ -27,6 +27,7 @@ import static org.yamj.plugin.api.Constants.DEFAULT_SPLITTER;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +86,7 @@ public class ConfigService {
     
     public String getProperty(final String key, final String defaultValue) {
         final String value = cachedProperties.get(key);
-        return (value == null) ? defaultValue : value;
+        return value == null ? defaultValue : value;
     }
 
     public List<String> getPropertyAsList(final String key, final String defaultValue) {
@@ -93,39 +94,29 @@ public class ConfigService {
     }
 
     public List<String> getPropertyAsList(final String key, final String defaultValue, final String splitter) {
-        final String props = this.getProperty(key, defaultValue);
-        return Arrays.asList(props.split(splitter));
+        return Arrays.asList(getProperty(key, defaultValue).split(splitter));
     }
     
     public boolean getBooleanProperty(final String key, final boolean defaultValue) {
-        final String value = cachedProperties.get(key);
-        if (value != null) {
-            return Boolean.parseBoolean(value.trim());
-        }
-        return defaultValue;
+        final String value = StringUtils.trimToNull(cachedProperties.get(key));
+        return value == null ? defaultValue : Boolean.parseBoolean(value);
     }
 
     public int getIntProperty(final String key, final int defaultValue) {
-        final String value = cachedProperties.get(key);
-        return NumberUtils.toInt(value, defaultValue);
+        return NumberUtils.toInt(cachedProperties.get(key), defaultValue);
     }
 
     public long getLongProperty(final String key, final long defaultValue) {
-        final String value = cachedProperties.get(key);
-        return NumberUtils.toLong(value, defaultValue);
+        return NumberUtils.toLong(cachedProperties.get(key), defaultValue);
     }
 
     public float getFloatProperty(final String key, final float defaultValue) {
-        String value = cachedProperties.get(key);
-        return NumberUtils.toFloat(value, defaultValue);
+        return NumberUtils.toFloat(cachedProperties.get(key), defaultValue);
     }
 
     public Date getDateProperty(final String key) {
         final long ms  = NumberUtils.toLong(cachedProperties.get(key), -1);
-        if (ms < 0) {
-            return null;
-        }
-        return new Date(ms);
+        return ms < 0 ? null : new Date(ms);
     }
     
     public void setProperty(String key, String value) {

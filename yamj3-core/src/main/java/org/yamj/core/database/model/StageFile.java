@@ -40,11 +40,11 @@ import org.yamj.core.database.model.type.FileType;
 @NamedQueries({    
     @NamedQuery(name = StageFile.QUERY_FIND_NFO,
         query = "SELECT distinct sf FROM StageFile sf "+
-                "WHERE sf.fileType='NFO' AND lower(sf.baseName)=:searchName AND sf.stageDirectory=:stageDirectory AND sf.status != 'DELETED'"
+                "WHERE sf.fileType='NFO' AND lower(sf.baseName)=:baseName AND sf.stageDirectory=:stageDirectory AND sf.status != 'DELETED'"
     ),
     @NamedQuery(name = StageFile.QUERY_VALID_NFOS_VIDEO,
         query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel JOIN nfrel.nfoRelationPK.videoData vd "+
-                "WHERE vd.id=:videoDataId AND sf.status in ('NEW','UPDATED','DONE') ORDER BY nfrel.priority DESC"
+                "WHERE vd.id=:videodataId AND sf.status in ('NEW','UPDATED','DONE') ORDER BY nfrel.priority DESC"
     ),
     @NamedQuery(name = StageFile.QUERY_VALID_NFOS_SERIES,
         query = "SELECT distinct sf FROM StageFile sf JOIN FETCH sf.nfoRelations nfrel "+

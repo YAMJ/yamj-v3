@@ -38,7 +38,6 @@ import org.yamj.common.util.KeywordMap;
 public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyTools.class);
-    private static final String DEPRECATED_PROP_LOG_MESSAGE = "Property '{}' has been deprecated and will be removed; please use '{}' instead";
     private static final Properties PROPERTIES = new Properties();
 
     // default as in PropertyPlaceholderConfigurer
@@ -56,8 +55,8 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
         PROPERTIES.clear();
         for (Object key : props.keySet()) {
-            String keyStr = key.toString();
-            String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
+            final String keyStr = key.toString();
+            final String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
             PROPERTIES.put(keyStr, valueStr);
         }
 
@@ -72,7 +71,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         return StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
     }
 
-    public static LinkedHashSet<String> getPropertyAsOrderedSet(String key, String defaultValue) {
+    public static Set<String> getPropertyAsOrderedSet(String key, String defaultValue) {
         final String prop = StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
         final LinkedHashSet<String> result = new LinkedHashSet<>();
         for (String val : prop.toLowerCase().split(",")) {
@@ -91,12 +90,8 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static boolean getBooleanProperty(String key, boolean defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
-
-        if (StringUtils.isNotBlank(property)) {
-            return Boolean.parseBoolean(property.trim());
-        }
-        return defaultValue;
+        final String value = StringUtils.trimToNull(PROPERTIES.getProperty(key));
+        return value == null ? defaultValue : Boolean.parseBoolean(value);
     }
 
     /**
@@ -107,8 +102,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static int getIntProperty(String key, int defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
-        return NumberUtils.toInt(property, defaultValue);
+        return NumberUtils.toInt(StringUtils.trimToNull(PROPERTIES.getProperty(key)), defaultValue);
     }
 
     /**
@@ -119,8 +113,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static long getLongProperty(String key, long defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
-        return NumberUtils.toLong(property, defaultValue);
+        return NumberUtils.toLong(StringUtils.trimToNull(PROPERTIES.getProperty(key)), defaultValue);
     }
 
     /**
@@ -131,65 +124,39 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static float getFloatProperty(String key, float defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
-        return NumberUtils.toFloat(property, defaultValue);
+        return NumberUtils.toFloat(StringUtils.trimToNull(PROPERTIES.getProperty(key)), defaultValue);
     }
 
-    public static String getReplacedProperty(String newKey, String oldKey, String defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
-        if (StringUtils.isBlank(property)) {
-            property = PROPERTIES.getProperty(newKey, defaultValue);
+    public static String getReplacedProperty(String newKey, String oldKey) {
+        String value = StringUtils.trimToNull(PROPERTIES.getProperty(oldKey));
+        if (value == null) {
+            value = StringUtils.trimToNull(PROPERTIES.getProperty(newKey));
         } else {
-            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
-        return property;
+        return value;
+    }
+    
+    public static String getReplacedProperty(String newKey, String oldKey, String defaultValue) {
+        final String value = getReplacedProperty(newKey, oldKey);
+        return value == null ? defaultValue : value;
     }
 
     public static boolean getReplacedBooleanProperty(String newKey, String oldKey, boolean defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
-        if (StringUtils.isBlank(property)) {
-            property = StringUtils.trimToEmpty(PROPERTIES.getProperty(newKey));
-        } else {
-            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
-        }
-
-        if (StringUtils.isNotBlank(property)) {
-            return Boolean.parseBoolean(property.trim());
-        }
-        return defaultValue;
+        final String value = getReplacedProperty(newKey, oldKey);
+        return value == null ? defaultValue : Boolean.parseBoolean(value);
     }
 
     public static int getReplacedIntProperty(String newKey, String oldKey, int defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
-        if (StringUtils.isBlank(property)) {
-            property = PROPERTIES.getProperty(newKey);
-        } else {
-            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
-        }
-
-        return NumberUtils.toInt(PROPERTIES.getProperty(property), defaultValue);
+        return NumberUtils.toInt(getReplacedProperty(newKey, oldKey), defaultValue);
     }
 
     public static long getReplacedLongProperty(String newKey, String oldKey, long defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
-        if (StringUtils.isBlank(property)) {
-            property = PROPERTIES.getProperty(newKey);
-        } else {
-            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
-        }
-
-        return NumberUtils.toLong(PROPERTIES.getProperty(property), defaultValue);
+        return NumberUtils.toLong(getReplacedProperty(newKey, oldKey), defaultValue);
     }
 
     public static float getReplacedFloatProperty(String newKey, String oldKey, float defaultValue) {
-        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
-        if (StringUtils.isBlank(property)) {
-            property = PROPERTIES.getProperty(newKey);
-        } else {
-            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
-        }
-
-        return NumberUtils.toFloat(PROPERTIES.getProperty(property), defaultValue);
+        return NumberUtils.toFloat(getReplacedProperty(newKey, oldKey), defaultValue);
     }
 
     public static Set<Entry<Object, Object>> getEntrySet() {

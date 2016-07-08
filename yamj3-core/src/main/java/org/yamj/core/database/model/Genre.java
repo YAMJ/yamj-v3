@@ -39,7 +39,7 @@ import org.yamj.core.api.model.dto.ApiGenreDTO;
 })
 
 @NamedNativeQueries({    
-    @NamedNativeQuery(name = Genre.QUERY_FILENAME, resultSetMapping = "metadata.genre",
+    @NamedNativeQuery(name = Genre.QUERY_FILENAME, resultSetMapping = "metadata.genre.full",
         query = "SELECT g.id, g.name,"+
                 "CASE WHEN target_api is not null THEN target_api WHEN target_xml is not null THEN target_xml ELSE name END as target "+
                 "FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g "+
@@ -48,19 +48,42 @@ import org.yamj.core.api.model.dto.ApiGenreDTO;
     @NamedNativeQuery(name = Genre.DELETE_ORPHANS,
         query = "DELETE FROM genre WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) "+
                 "AND not exists (select 1 from series_genres sg where sg.genre_id=id) "
+    ),
+    @NamedNativeQuery(name = "metadata.genre.series", resultSetMapping = "metadata.genre.target",
+        query = "SELECT DISTINCT CASE WHEN target_api is not null THEN target_api WHEN target_xml is not null THEN target_xml ELSE name END as target "+
+                "FROM series_genres sg, genre g WHERE sg.series_id=:id AND sg.genre_id=g.id ORDER BY target"
+    ),
+    @NamedNativeQuery(name = "metadata.genre.season", resultSetMapping = "metadata.genre.target",
+        query = "SELECT DISTINCT CASE WHEN target_api is not null THEN target_api WHEN target_xml is not null THEN target_xml ELSE name END as target "+
+                "FROM season sea, series_genres sg, genre g WHERE sea.id=:id AND sg.series_id=sea.series_id AND sg.genre_id=g.id ORDER BY target"
+    ),
+    @NamedNativeQuery(name = "metadata.genre.movie", resultSetMapping = "metadata.genre.target",
+        query = "SELECT DISTINCT CASE WHEN target_api is not null THEN target_api WHEN target_xml is not null THEN target_xml ELSE name END as target "+
+                "FROM videodata_genres vg, genre g WHERE vg.data_id=:id AND vg.genre_id=g.id ORDER BY target"
+    )    
+})
+
+@SqlResultSetMappings({
+    @SqlResultSetMapping(name="metadata.genre.target", classes={
+        @ConstructorResult(
+            targetClass=ApiGenreDTO.class,
+            columns={
+                 @ColumnResult(name="target", type=String.class),
+            }
+        )}
+    ),
+    @SqlResultSetMapping(name="metadata.genre.full", classes={
+        @ConstructorResult(
+            targetClass=ApiGenreDTO.class,
+            columns={
+                 @ColumnResult(name="id", type=Long.class),
+                 @ColumnResult(name="name", type=String.class),
+                 @ColumnResult(name="target", type=String.class),
+            }
+        )}
     )
 })
 
-@SqlResultSetMapping(name="metadata.genre", classes={
-    @ConstructorResult(
-        targetClass=ApiGenreDTO.class,
-        columns={
-             @ColumnResult(name="id", type=Long.class),
-             @ColumnResult(name="name", type=String.class),
-             @ColumnResult(name="target", type=String.class),
-        }
-    )}
-)
 
 @Entity
 @Table(name = "genre",

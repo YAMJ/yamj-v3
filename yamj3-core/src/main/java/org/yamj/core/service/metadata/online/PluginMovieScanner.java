@@ -49,7 +49,7 @@ public class PluginMovieScanner implements NfoScanner {
     
     public ScanResult scanMovie(WrapperMovie wrapper, boolean throwTempError) {
         // set actual scanner
-        wrapper.setScannerName(movieScanner.getScannerName());
+        wrapper.setScanner(movieScanner);
 
         // get the movie id
         String movieId = movieScanner.getMovieId(wrapper, throwTempError);

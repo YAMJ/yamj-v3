@@ -29,6 +29,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IMovie;
 import org.yamj.plugin.api.model.type.JobType;
 
@@ -45,8 +46,9 @@ public class WrapperMovie implements IMovie {
         this.identifierService = identifierService;
     }
    
-    public void setScannerName(String scannerName) {
-        this.scannerName = scannerName;
+    public WrapperMovie setScanner(OnlineScanner scanner) {
+        this.scannerName = scanner.getScannerName();
+        return this;
     }
     
     @Override

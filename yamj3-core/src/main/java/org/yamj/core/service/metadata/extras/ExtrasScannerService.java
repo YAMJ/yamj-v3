@@ -96,8 +96,7 @@ public class ExtrasScannerService {
                 } else {
                     LOG.debug("Scanning movie extras for '{}' using {}", videoData.getTitle(), extrasScanner.getScannerName());
                     try {
-                        wrapper.setScannerName(extrasScanner.getScannerName());
-                        extrasScanner.scanExtras(wrapper);
+                        extrasScanner.scanExtras(wrapper.setScanner(extrasScanner));
                     } catch (Exception error) {
                         LOG.error("Failed scanning movie with {} scanner", extrasScanner.getScannerName());
                         LOG.warn("Scanning error", error);
@@ -127,8 +126,7 @@ public class ExtrasScannerService {
                 } else {
                     LOG.debug("Scanning series extras for '{}' using {}", series.getTitle(), extrasScanner.getScannerName());
                     try {
-                        wrapper.setScannerName(extrasScanner.getScannerName());
-                        extrasScanner.scanExtras(wrapper);
+                        extrasScanner.scanExtras(wrapper.setScanner(extrasScanner));
                     } catch (Exception error) {
                         LOG.error("Failed scanning series with {} scanner", extrasScanner.getScannerName());
                         LOG.warn("Scanning error", error);

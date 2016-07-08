@@ -25,11 +25,11 @@ package org.yamj.core.database.dao;
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.core.CachingNames.*;
 import static org.yamj.core.database.Literals.*;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Query;
 import org.hibernate.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1598,33 +1598,7 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_GENRES, key="{#type, #id}")
     public List<ApiGenreDTO> getGenresForMetadata(MetaDataType type, Long id) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT ");
-        sql.append("CASE ");
-        sql.append(" WHEN target_api is not null THEN target_api ");
-        sql.append(" WHEN target_xml is not null THEN target_xml ");
-        sql.append(" ELSE name ");
-        sql.append("END as name ");
-        if (type == SERIES) {
-            sql.append("FROM series_genres sg, genre g ");
-            sql.append("WHERE sg.series_id=:id AND sg.genre_id=g.id ");
-        } else if (type == SEASON) {
-            sql.append("FROM season sea, series_genres sg, genre g ");
-            sql.append("WHERE sea.id=:id ");
-            sql.append("AND sg.series_id=sea.series_id ");
-            sql.append("AND sg.genre_id=g.id ");
-        } else {
-            // defaults to movie
-            sql.append("FROM videodata_genres vg, genre g ");
-            sql.append("WHERE vg.data_id=:id AND vg.genre_id=g.id ");
-        }
-        sql.append("ORDER BY name");
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-        sqlScalars.addScalar(LITERAL_NAME, StringType.INSTANCE);
-        sqlScalars.addParameter(LITERAL_ID, id);
-
-        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars);
+        return currentSession().getNamedQuery("metadata.genre."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
 
     /**
@@ -1672,14 +1646,8 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_RATINGS, key="{#type, #id}")
     public List<ApiRatingDTO> getRatingsForMetadata(MetaDataType type, Long id) {
-        Query query;
-        if (EPISODE == type) {
-            // same as for movie
-            query = currentSession().getNamedQuery("metadata.rating.movie");
-        } else {
-            query = currentSession().getNamedQuery("metadata.rating."+type.name().toLowerCase());
-        }
-        return query.setParameter(LITERAL_ID, id).list();
+        final MetaDataType fixedType = EPISODE == type ? MOVIE : type; 
+        return currentSession().getNamedQuery("metadata.rating."+fixedType.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
 
     /**
@@ -1703,14 +1671,8 @@ public class ApiDao extends HibernateDao {
      */
     @Cacheable(value=API_EXTERNAL_IDS, key="{#type, #id}")
     public List<ApiExternalIdDTO> getExternalIdsForMetadata(MetaDataType type, Long id) {
-        Query query;
-        if (EPISODE == type) {
-            // same as for movie
-            query = currentSession().getNamedQuery("metadata.externalid.movie");
-        } else {
-            query = currentSession().getNamedQuery("metadata.externalid."+type.name().toLowerCase());
-        }
-        return query.setParameter(LITERAL_ID, id).list();
+        final MetaDataType fixedType = EPISODE == type ? MOVIE : type; 
+        return currentSession().getNamedQuery("metadata.externalid."+fixedType.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
 
     /**

@@ -29,6 +29,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.ISeason;
 import org.yamj.plugin.api.model.ISeries;
 
@@ -46,12 +47,13 @@ public class WrapperSeries implements ISeries {
         this.identifierService = identifierService;
     }
 
+    public WrapperSeries setScanner(OnlineScanner scanner) {
+        this.scannerName = scanner.getScannerName();
+        return this;
+    }
+
     public String getScannerName() {
         return this.scannerName;
-    }
-    
-    public void setScannerName(String scannerName) {
-        this.scannerName = scannerName;
     }
     
     @Override

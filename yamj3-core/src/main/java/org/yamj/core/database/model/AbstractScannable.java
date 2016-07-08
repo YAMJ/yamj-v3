@@ -39,7 +39,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
  * Abstract implementation of a scannable object.
  */
 
-@SqlResultSetMappings(value ={
+@SqlResultSetMappings({
     @SqlResultSetMapping(name="metadata.queue", classes={
         @ConstructorResult(
             targetClass=QueueDTO.class, 

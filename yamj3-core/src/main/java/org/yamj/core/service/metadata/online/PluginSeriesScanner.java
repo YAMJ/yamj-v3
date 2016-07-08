@@ -49,7 +49,7 @@ public class PluginSeriesScanner implements NfoScanner {
 
     public ScanResult scanSeries(WrapperSeries wrapper, boolean throwTempError) {
         // set actual scanner
-        wrapper.setScannerName(seriesScanner.getScannerName());
+        wrapper.setScanner(seriesScanner);
 
         // get the series id
         String seriesId = seriesScanner.getSeriesId(wrapper, throwTempError);

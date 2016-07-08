@@ -24,7 +24,6 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.CachingNames.API_EXTERNAL_IDS;
 import static org.yamj.core.CachingNames.API_GENRES;
-import static org.yamj.core.api.model.builder.DataItem.*;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,6 +40,7 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
+import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -84,52 +84,55 @@ public class JsonApiStorageService {
         List<ApiVideoDTO> results = apiDao.getVideoList(wrapper, options);
         
         for (ApiVideoDTO video : results) {
-
-            if (MetaDataType.EPISODE != video.getVideoType()) {
-                // not for episodes
-
-                if (options.hasDataItem(GENRE)) {
-                    video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+            for (DataItem dataItem : options.splitDataItems()) {
+                switch (dataItem) {
+                    case GENRE:
+                        if (MetaDataType.EPISODE != video.getVideoType()) {
+                            video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+                        }
+                        break;
+                    case STUDIO:
+                        if (MetaDataType.EPISODE != video.getVideoType()) {
+                            video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
+                        }
+                        break;
+                    case COUNTRY:
+                        if (MetaDataType.EPISODE != video.getVideoType()) {
+                            video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
+                            localizeCountries(video.getCountries(), options.getLanguage());
+                        }
+                        break;
+                    case CERTIFICATION:
+                        if (MetaDataType.EPISODE != video.getVideoType()) {
+                            video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
+                            localizeCertifications(video.getCertifications(), options.getLanguage());
+                        }
+                        break;
+                    case AWARD:
+                        if (MetaDataType.EPISODE != video.getVideoType()) {
+                            video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
+                        }
+                        break;
+                    case RATING:
+                        video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case EXTERNALID:
+                        video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case BOXSET:
+                        video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case TRAILER:
+                        if (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType())) {
+                            video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
+                        }
+                        break;
+                    case VIDEOSOURCE:
+                        video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    default:
+                        break;
                 }
-
-                if (options.hasDataItem(STUDIO)) {
-                    video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
-                }
-
-                if (options.hasDataItem(COUNTRY)) {
-                    video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
-                    localizeCountries(video.getCountries(), options.getLanguage());
-                }
-            
-                if (options.hasDataItem(CERTIFICATION)) {
-                    video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
-                    localizeCertifications(video.getCertifications(), options.getLanguage());
-                }
-
-                if (options.hasDataItem(AWARD)) {
-                    video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
-                }
-            }
-            
-            if (options.hasDataItem(RATING)) {
-                video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            
-            if (options.hasDataItem(EXTERNALID)) {
-                video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
-            }
-            
-            if (options.hasDataItem(BOXSET)) {
-                video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
-            }
-            
-            if (options.hasDataItem(TRAILER) && (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType()))) {
-                video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
-            }
-            
-            if (options.hasDataItem(VIDEOSOURCE)) {
-                video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
             }
         }
         
@@ -507,35 +510,35 @@ public class JsonApiStorageService {
         List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper, options);
         
         for (ApiEpisodeDTO episode : results) {
-            if (options.hasDataItem(GENRE)) {
-                episode.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
-            }
-
-            if (options.hasDataItem(STUDIO)) {
-                episode.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
-            }
-            
-            if (options.hasDataItem(COUNTRY)) {
-                episode.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
-                localizeCountries(episode.getCountries(), options.getLanguage());
-            }
-            
-            if (options.hasDataItem(CERTIFICATION)) {
-                episode.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
-                localizeCertifications(episode.getCertifications(), options.getLanguage());
-            }
-            
-            if (options.hasDataItem(RATING)) {
-                episode.setRatings(apiDao.getRatingsForMetadata(MetaDataType.EPISODE, episode.getId()));
-            }
-
-            if (options.hasDataItem(AWARD)) {
-                episode.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
-            }
-
-            if (options.hasDataItem(FILES)) {
-                episode.setFiles(apiDao.getFilesForMetadata(MetaDataType.EPISODE, episode.getId()));
-                localizeFiles(episode.getFiles(), options.getLanguage());
+            for (DataItem dataItem : options.splitDataItems()) {
+                switch(dataItem) {
+                    case GENRE:
+                        episode.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                        break;
+                    case STUDIO:
+                        episode.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                        break;
+                    case COUNTRY:
+                        episode.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                        localizeCountries(episode.getCountries(), options.getLanguage());
+                        break;
+                    case CERTIFICATION:
+                        episode.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                        localizeCertifications(episode.getCertifications(), options.getLanguage());
+                        break;
+                    case RATING:
+                        episode.setRatings(apiDao.getRatingsForMetadata(MetaDataType.EPISODE, episode.getId()));
+                        break;
+                    case AWARD:
+                        episode.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, episode.getSeriesId()));
+                        break;
+                    case FILES:
+                        episode.setFiles(apiDao.getFilesForMetadata(MetaDataType.EPISODE, episode.getId()));
+                        localizeFiles(episode.getFiles(), options.getLanguage());
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         
@@ -572,51 +575,50 @@ public class JsonApiStorageService {
         
         if (video != null) {
             
-            if (options.hasDataItem(GENRE)) {
-                video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(STUDIO)) {
-                video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(COUNTRY)) {
-                video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
-                localizeCountries(video.getCountries(), options.getLanguage());
-            }
-
-            if (options.hasDataItem(CERTIFICATION)) {
-                video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
-                localizeCertifications(video.getCertifications(), options.getLanguage());
-            }
-
-            if (options.hasDataItem(RATING)) {
-                video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(AWARD)) {
-                video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(EXTERNALID)) {
-                video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(BOXSET)) {
-                video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(TRAILER) && (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType()))) {
-                video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(VIDEOSOURCE)) {
-                video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
-            }
-
-            if (options.hasDataItem(FILES)) {
-                video.setFiles(apiDao.getFilesForMetadata(video.getVideoType(), video.getId()));
-                localizeFiles(video.getFiles(), options.getLanguage());
+            for (DataItem dataItem : options.splitDataItems()) {
+                switch (dataItem) {
+                    case GENRE:
+                        video.setGenres(apiDao.getGenresForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case STUDIO:
+                        video.setStudios(apiDao.getStudiosForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case COUNTRY:
+                        video.setCountries(apiDao.getCountriesForMetadata(video.getVideoType(), video.getId()));
+                        localizeCountries(video.getCountries(), options.getLanguage());
+                        break;
+                    case CERTIFICATION:
+                        video.setCertifications(apiDao.getCertificationsForMetadata(video.getVideoType(), video.getId()));
+                        localizeCertifications(video.getCertifications(), options.getLanguage());
+                        break;
+                    case RATING:
+                        video.setRatings(apiDao.getRatingsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case AWARD:
+                        video.setAwards(apiDao.getAwardsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case EXTERNALID:
+                        video.setExternalIds(apiDao.getExternalIdsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case BOXSET:
+                        video.setBoxedSets(apiDao.getBoxedSetsForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case TRAILER:
+                        if (MetaDataType.SERIES == video.getVideoType() || MetaDataType.MOVIE.equals(video.getVideoType())) {
+                            video.setTrailers(apiDao.getTrailersForMetadata(video.getVideoType(), video.getId()));
+                        }
+                        break;
+                    case VIDEOSOURCE:
+                        video.setVideoSource(apiDao.getVideoSourceForMetadata(video.getVideoType(), video.getId()));
+                        break;
+                    case FILES:
+                        video.setFiles(apiDao.getFilesForMetadata(video.getVideoType(), video.getId()));
+                        localizeFiles(video.getFiles(), options.getLanguage());
+                        break;
+                    default:
+                        break;
+                        
+                }
             }
             
             if (MapUtils.isNotEmpty(options.splitJobs())) {
@@ -775,31 +777,31 @@ public class JsonApiStorageService {
         List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper, options);
         
         for (ApiSeriesInfoDTO series : results) {
-
-            if (options.hasDataItem(GENRE)) {
-                series.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, series.getId()));
-            }
-
-            if (options.hasDataItem(STUDIO)) {
-                series.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, series.getId()));
-            }
-
-            if (options.hasDataItem(COUNTRY)) {
-                series.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, series.getId()));
-                localizeCountries(series.getCountries(), options.getLanguage());
-            }
-
-            if (options.hasDataItem(CERTIFICATION)) {
-                series.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, series.getId()));
-                localizeCertifications(series.getCertifications(), options.getLanguage());
-            }
-            
-            if (options.hasDataItem(RATING)) {
-                series.setRatings(apiDao.getRatingsForMetadata(MetaDataType.SERIES, series.getId()));
-            }
-
-            if (options.hasDataItem(AWARD)) {
-                series.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, series.getId()));
+            for (DataItem dataItem : options.splitDataItems()) {
+                switch(dataItem) {
+                    case GENRE:
+                        series.setGenres(apiDao.getGenresForMetadata(MetaDataType.SERIES, series.getId()));
+                        break;
+                    case STUDIO:
+                        series.setStudios(apiDao.getStudiosForMetadata(MetaDataType.SERIES, series.getId()));
+                        break;
+                    case COUNTRY:
+                        series.setCountries(apiDao.getCountriesForMetadata(MetaDataType.SERIES, series.getId()));
+                        localizeCountries(series.getCountries(), options.getLanguage());
+                        break;
+                    case CERTIFICATION:
+                        series.setCertifications(apiDao.getCertificationsForMetadata(MetaDataType.SERIES, series.getId()));
+                        localizeCertifications(series.getCertifications(), options.getLanguage());
+                        break;
+                    case RATING:
+                        series.setRatings(apiDao.getRatingsForMetadata(MetaDataType.SERIES, series.getId()));
+                        break;
+                    case AWARD:
+                        series.setAwards(apiDao.getAwardsForMetadata(MetaDataType.SERIES, series.getId()));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         

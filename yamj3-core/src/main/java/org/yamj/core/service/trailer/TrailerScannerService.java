@@ -150,8 +150,7 @@ public class TrailerScannerService implements IQueueProcessService {
                 LOG.warn("Movie trailer scanner {} not registerd", prio);
             } else {
                 LOG.debug("Scanning movie trailers for '{}' using {}", videoData.getTitle(), scanner.getScannerName());
-                wrapper.setScannerName(scanner.getScannerName());
-                trailerDTOs = scanner.scanForTrailer(wrapper);
+                trailerDTOs = scanner.scanForTrailer(wrapper.setScanner(scanner));
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break;
                 }
@@ -214,8 +213,7 @@ public class TrailerScannerService implements IQueueProcessService {
                 LOG.warn("Series trailer scanner {} not registerd", prio);
             } else {
                 LOG.debug("Scanning series trailers for '{}' using {}", series.getTitle(), scanner.getScannerName());
-                wrapper.setScannerName(scanner.getScannerName());
-                trailerDTOs = scanner.scanForTrailer(wrapper);
+                trailerDTOs = scanner.scanForTrailer(wrapper.setScanner(scanner));
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
                     break;
                 }
