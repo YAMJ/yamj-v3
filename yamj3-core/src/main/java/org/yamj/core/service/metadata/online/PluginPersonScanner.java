@@ -48,7 +48,7 @@ public class PluginPersonScanner implements MetadataScanner {
 
     public ScanResult scanPerson(WrapperPerson wrapper, boolean throwTempError) {
         // set actual scanner
-        wrapper.setScannerName(personScanner.getScannerName());
+        wrapper.setScanner(personScanner);
 
         // get the person id
         String personId = personScanner.getPersonId(wrapper, throwTempError);

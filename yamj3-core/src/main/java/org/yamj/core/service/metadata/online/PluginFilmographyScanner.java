@@ -53,7 +53,7 @@ public class PluginFilmographyScanner implements MetadataScanner {
     
     public ScanResult scanFilmography(WrapperPerson wrapper, boolean throwTempError) {
         // set actual scanner
-        wrapper.setScannerName(filmographyScanner.getScannerName());
+        wrapper.setScanner(filmographyScanner);
 
         // get the person id
         String personId = filmographyScanner.getPersonId(wrapper, throwTempError);

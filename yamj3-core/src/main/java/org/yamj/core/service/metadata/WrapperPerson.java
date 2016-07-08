@@ -28,6 +28,7 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonName;
 import org.yamj.core.tools.YamjTools;
+import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IPerson;
 
 public class WrapperPerson implements IPerson {
@@ -43,8 +44,8 @@ public class WrapperPerson implements IPerson {
         return person;
     }
     
-    public void setScannerName(String actualSource) {
-        this.scannerName = actualSource;
+    public void setScanner(OnlineScanner scanner) {
+        this.scannerName = scanner.getScannerName();
     }
     
     @Override
