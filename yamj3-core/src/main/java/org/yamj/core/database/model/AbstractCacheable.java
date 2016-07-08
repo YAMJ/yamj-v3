@@ -53,6 +53,8 @@ public abstract class AbstractCacheable extends AbstractStateful {
         super();
     }
     
+    // GETTER and SETTER
+
     @Override
     public void setStatus(StatusType status) {
         if (StatusType.DELETED.equals(status)) {
@@ -63,8 +65,6 @@ public abstract class AbstractCacheable extends AbstractStateful {
         super.setStatus(status);
     }
 
-    // GETTER and SETTER
-    
     public StatusType getPreviousStatus() {
         return previousStatus;
     }
