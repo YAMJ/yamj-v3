@@ -24,6 +24,7 @@ package org.yamj.core.service.mediaimport;
 
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.common.type.StatusType.*;
+import static org.yamj.core.service.mediaimport.ImageImportTools.*;
 import static org.yamj.plugin.api.model.type.ArtworkType.*;
 
 import java.util.*;
@@ -31,7 +32,6 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -825,25 +825,25 @@ public class MediaImportService {
         final ArtworkType artworkType;
         final EnumSet<MetaDataType> metaDataTypes;
         
-        if (tokensPoster.contains(fileBaseName)) {
+        if (isGenericImage(fileBaseName, tokensPoster)) {
             // determine a generic poster image which can match several metadata objects
             generic = true;
             artworkType = POSTER;
             metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
-        } else if (tokensFanart.contains(fileBaseName)) {
+        } else if (isGenericImage(fileBaseName, tokensFanart)) {
             // determine a generic fanart image which can match several metadata objects
             generic = true;
             artworkType = FANART;
             metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
-        } else if (tokensBanner.contains(fileBaseName)) {
+        } else if (isGenericImage(fileBaseName, tokensBanner)) {
             // determine a generic banner image which can match several metadata objects
             generic = true;
             artworkType = BANNER;
             metaDataTypes = EnumSet.of(MOVIE, SEASON, SERIES);
 
-        } else if (fileBaseName.indexOf(".videoimage") > 0) {
+        } else if (isVideoImage(fileBaseName)) {
             // determined a video image of an episode
             generic = false;
             artworkType = VIDEOIMAGE;
@@ -1107,59 +1107,6 @@ public class MediaImportService {
         }
 
         return true;
-    }
-
-    private static boolean endsWithToken(final String name, final List<String> tokens) {
-        for (String token : tokens) {
-            if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isSpecialImage(final String name, final String special, final List<String> tokens) {
-        for (String token : tokens) {
-            if (name.equals(special.concat(".").concat(token)) || name.equals(special.concat("-").concat(token))) {
-                return true;
-            }
-        }
-        return false;
-    }
-        
-    private static String stripToken(final String name, final List<String> tokens) {
-        for (String token : tokens) {
-            if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
-                return name.substring(0, name.length() - token.length() -1);
-            }
-        }
-        return name;
-    }
-    
-    private static String getBoxedSetName(final String stripped) {
-        String boxedSetName = stripped.substring(4);
-        int index = boxedSetName.lastIndexOf("_");
-        if (index > -1) {
-            boxedSetName = boxedSetName.substring(0, index);
-        }
-        return boxedSetName;
-    }
-
-    private static final int getVideoImagePart(final String name) {
-        if (name.endsWith(".videoimage")) {
-            // no number so video image is for first episode
-            return 1;
-        }
-        int lastIndex = name.lastIndexOf("_");
-        if (lastIndex < 0) {
-            // assume that video image is for first part
-            return 1;
-        }
-        return Math.max(1, NumberUtils.toInt(name.substring(lastIndex+1)));
-    }
-
-    private static final String getBaseNameFromVideoImage(final String name) {
-        return name.substring(0, name.indexOf(".videoimage"));
     }
     
     @Transactional
