@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.core.database.Literals.LITERAL_NAME;
+
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,12 +54,12 @@ public class ExecutionTaskStorageService {
 
     @Transactional(readOnly = true)
     public ExecutionTask getExecutionTask(String name) {
-        return commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, "name", name);
+        return commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, LITERAL_NAME, name);
     }
     
     @Transactional(readOnly = true)
     public List<ExecutionTask> getAllTasks() {
-        return this.commonDao.getAll(ExecutionTask.class, "name");
+        return this.commonDao.getAll(ExecutionTask.class, LITERAL_NAME);
     }
 
     @Transactional(readOnly = true)

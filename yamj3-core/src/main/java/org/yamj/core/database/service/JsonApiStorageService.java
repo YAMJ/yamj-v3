@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.CachingNames.API_EXTERNAL_IDS;
 import static org.yamj.core.CachingNames.API_GENRES;
+import static org.yamj.core.database.Literals.LITERAL_NAME;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -403,7 +404,7 @@ public class JsonApiStorageService {
 
     @Transactional
     public void storePlayer(PlayerInfo player) {
-        PlayerInfo playerInfo = playerDao.getByNaturalIdCaseInsensitive(PlayerInfo.class, "name", player.getName());
+        PlayerInfo playerInfo = playerDao.getByNaturalIdCaseInsensitive(PlayerInfo.class, LITERAL_NAME, player.getName());
         if (playerInfo == null) {
             playerDao.saveEntity(player);
         } else {
