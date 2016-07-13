@@ -33,6 +33,7 @@ import static org.yamj.core.database.Literals.*;
 import static org.yamj.plugin.api.model.type.ArtworkType.BANNER;
 import static org.yamj.plugin.api.model.type.ArtworkType.FANART;
 import static org.yamj.plugin.api.model.type.ArtworkType.POSTER;
+
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -215,11 +216,11 @@ public class CommonDao extends HibernateDao {
             sqlScalars.addToSql("JOIN videodata_countries vc ON c.id=vc.country_id ");
         } else if (SERIES == options.getType()) {
             sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
+        } else {
+            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
+            sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
         }
         
-        sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
-        sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
-
         sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_COUNTRY_CODE, StringType.INSTANCE);
         sqlScalars.addToSql(options.getSortString());
