@@ -816,7 +816,7 @@ public class TraktTvService {
             }
 
             // build episode and set watched date
-            addSyncMovie(dto, syncMovies);
+            addSyncMovie(dto, syncMovies).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
             counter++;
             
@@ -869,7 +869,7 @@ public class TraktTvService {
             }
 
             // build episode and set watched date
-            addSyncEpisode(dto, syncShows);
+            addSyncEpisode(dto, syncShows).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
             counter++;
             
