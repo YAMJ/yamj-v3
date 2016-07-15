@@ -993,7 +993,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("' as type, c1.job as job, c1.role as role, c1.voice_role as voiceRole, ");
         sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, -1 as yearEnd,");
         sbSQL.append("v1.release_date as releaseDate, v1.release_country_code as releaseCountryCode,");
-        sbSQL.append("v1.id as videoDataId, null as seriesId ");
+        sbSQL.append("v1.id as videodataId, null as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
             sbSQL.append(", v1.plot as description ");
@@ -1009,7 +1009,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("' as type, c2.job as job, c2.role as role, c2.voice_role as voiceRole, ");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
         sbSQL.append("null as releaseDate, null as releaseCountryCode,");
-        sbSQL.append("null as videoDataId, ser.id as seriesId ");
+        sbSQL.append("null as videodataId, ser.id as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
             sbSQL.append(", ser.plot as description ");
@@ -1043,10 +1043,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", releaseDate ");
         sbSQL.append(sortDir);
 
-        SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        LOG.info("Filmography inside SQL: {}", sqlScalars.getSql());
-
-        return retrieveFilmography(id, sqlScalars);
+        LOG.info("Filmography inside SQL: {}", sbSQL);
+        return retrieveFilmography(id, sbSQL);
     }
 
     private List<ApiFilmographyDTO> getPersonFilmographyScanned(Long id, OptionsId options) {
@@ -1054,7 +1052,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("SELECT DISTINCT p.participation_type as type, p.job as job, p.role as role, p.voice_role as voiceRole, ");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
         sbSQL.append("p.release_date as releaseDate, p.release_country_code as releaseCountryCode,");
-        sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
+        sbSQL.append("movie.id as videodataId, serids.series_id as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
             sbSQL.append(", p.description as description ");
@@ -1097,13 +1095,12 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", p.release_date ");
         sbSQL.append(sortDir);
 
-        SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        LOG.info("Filmography scanned SQL: {}", sqlScalars.getSql());
-
-        return retrieveFilmography(id, sqlScalars);
+        LOG.info("Filmography scanned SQL: {}", sbSQL);
+        return retrieveFilmography(id, sbSQL);
     }
 
-    public List<ApiFilmographyDTO> retrieveFilmography(Long id, SqlScalars sqlScalars) {
+    public List<ApiFilmographyDTO> retrieveFilmography(Long id, StringBuilder query) {
+        SqlScalars sqlScalars = new SqlScalars(query);
         sqlScalars.addScalar(LITERAL_TYPE, StringType.INSTANCE);
         sqlScalars.addScalar(LITERAL_JOB, StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);

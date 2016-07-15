@@ -45,7 +45,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     private String releaseCountryCode;
     private String releaseCountry;
     private String description;
-    private Long videoDataId;
+    private Long videodataId;
     private Long seriesId;
 
     public ParticipationType getType() {
@@ -149,12 +149,12 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
         this.description = description;
     }
 
-    public Long getVideoDataId() {
-        return videoDataId;
+    public Long getVideodataId() {
+        return videodataId;
     }
 
-    public void setVideoDataId(Long videoDataId) {
-        this.videoDataId = videoDataId;
+    public void setVideodataId(Long videodataId) {
+        this.videodataId = videodataId;
     }
 
     public Long getSeriesId() {

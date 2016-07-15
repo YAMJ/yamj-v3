@@ -43,15 +43,6 @@ public final class SqlScalars {
     }
 
     public SqlScalars(StringBuilder sql) {
-        setSql(sql);
-    }
-
-    /**
-     * Set the SQL
-     *
-     * @param sql
-     */
-    public void setSql(StringBuilder sql) {
         this.sql = sql;
     }
 
