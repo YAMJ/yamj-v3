@@ -41,8 +41,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.*;
+import org.joda.time.DateTime;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -543,7 +543,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedNfo(final boolean watchedNfo, final Date watchedNfoLastDate) {
         if (watchedNfoLastDate != null) {
-            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedNfoLastDate,0);
+            final Date dateWithoutMS = new DateTime(watchedNfoLastDate.getTime()).withMillisOfSecond(0).toDate();
 
             setWatchedNfo(watchedNfo);
             setWatchedNfoLastDate(dateWithoutMS);
@@ -573,7 +573,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedApi(final boolean watchedApi, final Date watchedApiLastDate) {
         if (watchedApiLastDate != null) {
-            final Date dateWithoutMS = DateUtils.setMilliseconds(watchedApiLastDate,0);
+            final Date dateWithoutMS = new DateTime(watchedApiLastDate.getTime()).withMillisOfSecond(0).toDate();
             
             setWatchedApi(watchedApi);
             setWatchedApiLastDate(dateWithoutMS);
@@ -634,7 +634,7 @@ public class VideoData extends AbstractMetadata {
     public void setWatched(final boolean watched, final Date watchedDate) {
         if (watchedDate != null) {
             setWatched(watched);
-            setWatchedDate(DateUtils.setMilliseconds(watchedDate,0));
+            setWatchedDate(new DateTime(watchedDate.getTime()).withMillisOfSecond(0).toDate());
         }
     }
     

@@ -398,15 +398,25 @@ public class TraktTvService {
 
     // COLLECTION
     
-    private DateTime getCheckDate(String property) {
-        Date checkDate = this.configService.getDateProperty(property);
+    private DateTime getCheckDate(final String key) {
+        DateTime checkDate = this.configService.getDateTimeProperty(key);
         if (checkDate == null) {
             // build a date long, long ago ...
             return DateTime.now().minusYears(100);
         }
-        return new DateTime(checkDate.getTime());
+        return checkDate.withMillisOfSecond(0);
     }
-    
+
+    private void setPushPullDate(final String key, final Date pushPullDate) {
+        if (pushPullDate != null) {
+            final DateTime dt = new DateTime(pushPullDate.getTime()).withMillisOfSecond(0);
+            final DateTime dtCheck = this.configService.getDateTimeProperty(key).withMillisOfSecond(0);
+            if (dtCheck != null && dtCheck.isAfter(dt)) {
+                this.configService.setProperty(key, dt);
+            }
+        }
+    }
+
     public void collectMovies() {
         // store last collection date for later use
         final Date lastCollection = new Date();
@@ -607,7 +617,7 @@ public class TraktTvService {
 
     public boolean pullWatchedMovies() {
         // store last pull date for later use (without milliseconds)
-        final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
+        final DateTime lastPull = DateTime.now().withMillisOfSecond(0);
         
         // get watched movies from Trakt.TV
         List<TrackedMovie> watchedMovies;
@@ -623,8 +633,8 @@ public class TraktTvService {
             return true;
         }
 
-        // filter out movies which has been watched before check date
-        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_MOVIES);
+        // filter out movies which has been watched before check date (minus 1 second to allow equal dates)
+        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_MOVIES).minusSeconds(1);
         List<TrackedMovie> filteredMovies = new ArrayList<>();
         for (TrackedMovie movie : watchedMovies) {
             if (movie.getLastWatchedAt().isAfter(checkDate)) {
@@ -695,7 +705,7 @@ public class TraktTvService {
 
     public boolean pullWatchedEpisodes() {
         // store last pull date for later use (without milliseconds)
-        final Date lastPull = DateTime.now().withMillisOfSecond(0).toDate();
+        final DateTime lastPull = DateTime.now().withMillisOfSecond(0);
 
         // get watched shows from Trakt.TV
         List<TrackedShow> watchedShows;
@@ -711,8 +721,8 @@ public class TraktTvService {
             return true;
         }
 
-        // filter out episodes which has been watched before check date
-        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_EPISODES);
+        // filter out episodes which has been watched before check date (minus 1 second to allow equal dates)
+        final DateTime checkDate = getCheckDate(TRAKTTV_LAST_PULL_EPISODES).minusSeconds(1);
         List<WatchedEpisode> watchedEpisodes = new ArrayList<>();
         for (TrackedShow show : watchedShows) {
             for (TrackedSeason season : show.getSeasons()) {
@@ -800,7 +810,9 @@ public class TraktTvService {
 
     public void pushWatchedMovies() {
         // store last push date for later use
-        final Date lastPush = new Date();
+        final DateTime lastPush = DateTime.now().withMillisOfSecond(0);
+        // set value for minimal push-after-pull
+        Date pushPullDate = null;
         
         // get the updated movie IDs for setting watched status
         final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_MOVIES).toDate();
@@ -815,6 +827,11 @@ public class TraktTvService {
                 continue;
             }
 
+            // reset push-after-pull date
+            if (pushPullDate == null || pushPullDate.after(dto.getWatchedDate())) {
+                pushPullDate = dto.getWatchedDate();
+            }
+            
             // build episode and set watched date
             addSyncMovie(dto, syncMovies).watchedAt(dto.getWatchedDate());
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
@@ -829,6 +846,9 @@ public class TraktTvService {
         
         // sync outstanding movies
         noError = noError && syncWatchedMovies(syncMovies);
+
+        // set last pull date to minimum of watched movies which has been synchronized
+        setPushPullDate(TRAKTTV_LAST_PULL_MOVIES, pushPullDate);
         
         // if no error then set last push date for next run
         if (noError) {
@@ -854,8 +874,10 @@ public class TraktTvService {
 
     public void pushWatchedEpisodes() {
         // store last push date for later use
-        final Date lastPush = new Date();
-        
+        final DateTime lastPush = DateTime.now().withMillisOfSecond(0);
+        // set value for minimal push-after-pull
+        Date pushPullDate = null;
+
         // get the updated movie IDs for setting watched status
         final Date checkDate = getCheckDate(TRAKTTV_LAST_PUSH_EPISODES).toDate();
         Collection<TraktEpisodeDTO> watchedEpisodes = this.traktTvStorageService.getWatchedEpisodes(checkDate);
@@ -866,6 +888,11 @@ public class TraktTvService {
         for (TraktEpisodeDTO dto : watchedEpisodes) {
             if (!dto.isValid()) {
                 continue;
+            }
+
+            // reset push-after-pull date
+            if (pushPullDate == null || pushPullDate.after(dto.getWatchedDate())) {
+                pushPullDate = dto.getWatchedDate();
             }
 
             // build episode and set watched date
@@ -883,6 +910,9 @@ public class TraktTvService {
         // sync outstanding episodes
         noError = noError && syncWatchedShows(syncShows);
         
+        // set last pull date to minimum of watched movies which has been synchronized
+        setPushPullDate(TRAKTTV_LAST_PULL_EPISODES, pushPullDate);
+
         // if no error then set last push date for next run
         if (noError) {
             this.configService.setProperty(TRAKTTV_LAST_PUSH_EPISODES, lastPush);

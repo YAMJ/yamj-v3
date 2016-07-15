@@ -28,6 +28,7 @@ import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,12 @@ public class ConfigService {
         final long ms  = NumberUtils.toLong(cachedProperties.get(key), -1);
         return ms < 0 ? null : new Date(ms);
     }
-    
+
+    public DateTime getDateTimeProperty(final String key) {
+        final long ms  = NumberUtils.toLong(cachedProperties.get(key), -1);
+        return ms < 0 ? null : new DateTime(ms);
+    }
+
     public void setProperty(String key, String value) {
         // first store in database ...
         configDao.storeConfig(key, value, true);
@@ -147,7 +153,13 @@ public class ConfigService {
             setProperty(key, Long.toString(date.getTime()));
         }
     }
-    
+
+    public void setProperty(String key, DateTime dateTime) {
+        if (dateTime != null) {
+            setProperty(key, Long.toString(dateTime.getMillis()));
+        }
+    }
+
     @Transactional
     public void deleteProperty(String key) {
         // Delete the config from the database
