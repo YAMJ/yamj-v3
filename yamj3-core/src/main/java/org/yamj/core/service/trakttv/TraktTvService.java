@@ -113,8 +113,8 @@ public class TraktTvService {
     public TraktTvInfo getTraktTvInfo() {
         TraktTvInfo traktTvInfo = new TraktTvInfo();
         traktTvInfo.setSynchronization(isSynchronizationEnabled());
-        traktTvInfo.setPush(pushEnabled);
         traktTvInfo.setPull(pullEnabled);
+        traktTvInfo.setPush(pushEnabled && pullEnabled);
         traktTvInfo.setAuthorized(configService.getProperty(TRAKTTV_ACCESS_TOKEN)!=null);
         traktTvInfo.setExpirationDate(configService.getDateProperty(TRAKTTV_EXPIRATION));
         return traktTvInfo;
