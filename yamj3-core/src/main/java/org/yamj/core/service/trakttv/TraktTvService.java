@@ -840,7 +840,7 @@ public class TraktTvService {
         boolean noError = true;
         if (!syncMovies.isEmpty()) {
             try {
-                this.traktTvApi.syncService().deleteItemsFromWatchedHistory(new SyncItems().movies(syncMovies));
+                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
                 LOG.error("Failed to add {} movies to watched history", syncMovies.size());
                 LOG.warn(TRAKTTV_ERROR, ex);
@@ -893,7 +893,7 @@ public class TraktTvService {
         boolean noError = true;
         if (!syncShows.isEmpty()) {
             try {
-                this.traktTvApi.syncService().deleteItemsFromWatchedHistory(new SyncItems().shows(syncShows));
+                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
             } catch (Exception ex) {
                 LOG.error("Failed to add episodes to watched history");
                 LOG.warn(TRAKTTV_ERROR, ex);
