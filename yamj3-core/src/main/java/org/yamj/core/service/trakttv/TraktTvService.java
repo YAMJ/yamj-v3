@@ -437,6 +437,10 @@ public class TraktTvService {
         boolean noError = true;
         int counter = 0;
         for (TraktMovieDTO dto : collectedMovies) {
+            if (!dto.isValid()) {
+                continue;
+            }
+            
             final TrackedMovie movie = findMovie(dto, trackedMovies);
             if (movie != null) {
                 LOG.trace("Movie {} already collected", dto.getIdentifier());
@@ -521,6 +525,10 @@ public class TraktTvService {
         boolean noError = true;
         int counter = 0;
         for (TraktEpisodeDTO dto : collectedEpisodes) {
+            if (!dto.isValid()) {
+                continue;
+            }
+            
             final TrackedEpisode episode = findEpisode(dto, trackedShows);
             if (episode != null) {
                 LOG.trace("Episode {} already collected", dto.getIdentifier());
@@ -808,7 +816,7 @@ public class TraktTvService {
             }
 
             // build episode and set watched date
-            addSyncMovie(dto, syncMovies).watchedAt(dto.getWatchedDate());
+            addSyncMovie(dto, syncMovies);
             LOG.debug("Trakt.TV watched movie sync: {}", dto.getIdentifier());
             counter++;
             
@@ -832,7 +840,7 @@ public class TraktTvService {
         boolean noError = true;
         if (!syncMovies.isEmpty()) {
             try {
-                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().movies(syncMovies));
+                this.traktTvApi.syncService().deleteItemsFromWatchedHistory(new SyncItems().movies(syncMovies));
             } catch (Exception ex) {
                 LOG.error("Failed to add {} movies to watched history", syncMovies.size());
                 LOG.warn(TRAKTTV_ERROR, ex);
@@ -861,7 +869,7 @@ public class TraktTvService {
             }
 
             // build episode and set watched date
-            addSyncEpisode(dto, syncShows).watchedAt(dto.getWatchedDate());
+            addSyncEpisode(dto, syncShows);
             LOG.debug("Trakt.TV watched episode sync: {}", dto.getIdentifier());
             counter++;
             
@@ -885,7 +893,7 @@ public class TraktTvService {
         boolean noError = true;
         if (!syncShows.isEmpty()) {
             try {
-                this.traktTvApi.syncService().addItemsToWatchedHistory(new SyncItems().shows(syncShows));
+                this.traktTvApi.syncService().deleteItemsFromWatchedHistory(new SyncItems().shows(syncShows));
             } catch (Exception ex) {
                 LOG.error("Failed to add episodes to watched history");
                 LOG.warn(TRAKTTV_ERROR, ex);
