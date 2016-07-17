@@ -1866,7 +1866,7 @@ public class ApiDao extends HibernateDao {
         LOG.debug("Getting season information for series ID {}", options.getId());
         
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, s.title, s.title_original AS originalTitle,");
+        sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, s.title, s.title_original AS originalTitle, s.publication_year AS year,");
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("s.plot,");
             sqlScalars.addScalar(LITERAL_PLOT, StringType.INSTANCE);
@@ -1875,15 +1875,16 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("s.outline,");
             sqlScalars.addScalar(LITERAL_OUTLINE, StringType.INSTANCE);
         }
-        sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid where vid.season_id=s.id) as watched ");
-        sqlScalars.addToSql("FROM season s WHERE series_id=:id ORDER BY series_id, season");
+        sqlScalars.addToSql("(SELECT min(vd.watched) from videodata vd where vd.season_id=s.id) as watched ");
+        sqlScalars.addToSql("FROM season s WHERE s.series_id=:id ORDER BY s.season");
         sqlScalars.addParameter(LITERAL_ID, options.getId());
 
         sqlScalars.addScalar(LITERAL_SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_SEASON_ID, LongType.INSTANCE);
-        sqlScalars.addScalar(LITERAL_SEASON, IntegerType.INSTANCE);
+        sqlScalars.addScalar(LITERAL_SEASON, IntegerType.INSTANCE);        
         sqlScalars.addScalar(LITERAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(LITERAL_ORIGINAL_TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(LITERAL_YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar(LITERAL_WATCHED, BooleanType.INSTANCE);
 
         List<ApiSeasonInfoDTO> seasonResults = executeQueryWithTransform(ApiSeasonInfoDTO.class, sqlScalars);
