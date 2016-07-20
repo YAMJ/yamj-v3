@@ -29,22 +29,28 @@ import org.yamj.core.database.model.dto.QueueDTO;
 public abstract class AbstractQueueScheduler {
 
     protected void threadedProcessing(Collection<QueueDTO> queueElements, int maxThreads, IQueueProcessService service) {
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
+        final BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new QueueProcessRunner(queue, service));
-        }
-        
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // interrupt in sleep can be ignored
+        if (maxThreads > 1) {
+            // instantiate executor if more then 1 thread should be used
+            final ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
+            for (int i = 0; i < maxThreads; i++) {
+                executor.execute(new QueueProcessRunner(queue, service));
             }
+            
+            executor.shutdown();
+    
+            // run until all workers have finished
+            while (!executor.isTerminated()) {
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException ignore) {
+                    // interrupt in sleep can be ignored
+                }
+            }
+        } else {
+            // single threaded processing
+            new QueueProcessRunner(queue, service).run();
         }
     }
 }
