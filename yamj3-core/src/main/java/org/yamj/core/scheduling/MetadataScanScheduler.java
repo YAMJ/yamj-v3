@@ -67,7 +67,7 @@ public class MetadataScanScheduler extends AbstractQueueScheduler {
     private final AtomicBoolean watchScanPeople = new AtomicBoolean(false);
     private final AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 30000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void trigger() {
         LOG.trace("Trigger metadata scan");
         watchScanVideo.set(true);

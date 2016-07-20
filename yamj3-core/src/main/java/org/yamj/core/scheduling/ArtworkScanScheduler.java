@@ -54,7 +54,7 @@ public class ArtworkScanScheduler extends AbstractQueueScheduler {
     private boolean messageDisabled = false; // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
     
-    @Scheduled(initialDelay = 5000, fixedDelay = 60000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void trigger() {
         LOG.trace("Trigger artwork scan");
         watchProcess.set(true);
