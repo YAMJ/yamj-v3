@@ -62,8 +62,9 @@ public class NfoScannerService {
         if (CollectionUtils.isEmpty(stageFiles)) {
             videoData.setSkippendScansNfo(null);
             if (videoData.isWatchedNfo()) {
-                // the date where the NFO change for watch was detected
-                videoData.setWatchedNfo(false, new Date());
+                // the last date when NFO was watched (or actual date when last NFO date not set)
+                final Date watchedNfoLastDate = videoData.getWatchedNfoLastDate() == null ? new Date() : videoData.getWatchedNfoLastDate();
+                videoData.setWatchedNfo(false, watchedNfoLastDate);
             }
             return;
         }
@@ -199,7 +200,6 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            final Date watchedDate = new Date();
             series.setSkippendScansNfo(null);
             
             for (Season season : series.getSeasons()) {
@@ -213,8 +213,9 @@ public class NfoScannerService {
                         videoData.setTvEpisodeNotFound();
                     }
                     if (videoData.isWatchedNfo()) {
-                        // the date where the NFO change for watch was detected
-                        videoData.setWatchedNfo(false, watchedDate);
+                        // the last date when NFO was watched (or actual date when last NFO date not set)
+                        final Date watchedNfoLastDate = videoData.getWatchedNfoLastDate() == null ? new Date() : videoData.getWatchedNfoLastDate();
+                        videoData.setWatchedNfo(false, watchedNfoLastDate);
                         videoData.setTvEpisodeNotFound();
                     }
                 }

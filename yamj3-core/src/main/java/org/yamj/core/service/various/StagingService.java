@@ -229,8 +229,8 @@ public class StagingService {
             // just update last date if max watched file date has been found
             mediaFile.setWatchedFile(true, maxWatchedFileDate);
         } else if (mediaFile.isWatchedFile()) {
-            // set watched date to actual date if watch-change detected
-            mediaFile.setWatchedFile(false, new Date());
+            // set watched date to false at date when file was last watched
+            mediaFile.setWatchedFile(false, mediaFile.getWatchedFileLastDate());
         }
     }
     

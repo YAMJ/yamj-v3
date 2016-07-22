@@ -603,14 +603,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedTraktTv(boolean watchedTraktTv, Date watchedTraktTvLastDate) {
         if (watchedTraktTvLastDate != null) {
-            // NOTE: given watchedTraktTvLastDate is always without milliseconds
+            final Date dateWithoutMS = new DateTime(watchedTraktTvLastDate.getTime()).withMillisOfSecond(0).toDate();
             
             setWatchedTraktTv(watchedTraktTv);
-            setWatchedTraktTvLastDate(watchedTraktTvLastDate);
+            setWatchedTraktTvLastDate(dateWithoutMS);
     
-            if (getWatchedDate() == null || getWatchedDate().before(watchedTraktTvLastDate)) {
+            if (getWatchedDate() == null || getWatchedDate().before(dateWithoutMS)) {
                 setWatched(watchedTraktTv);
-                setWatchedDate(watchedTraktTvLastDate);
+                setWatchedDate(dateWithoutMS);
             }
         }
     }

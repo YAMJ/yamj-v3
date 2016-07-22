@@ -69,7 +69,7 @@
                 <tr>
                     <td colspan="2" class="center">
                         <spring:message code="page.trakttv.text.request.pin"/>:<br>
-                        <a href="http://trakt.tv/pin/8032" target="_blank">http://trakt.tv/pin/8032</a>
+                        <a href="https://trakt.tv/pin/9882" target="_blank">https://trakt.tv/pin/9882</a>
                     </td>
                 </tr>
                 <tr>
