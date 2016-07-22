@@ -64,7 +64,8 @@ public class TraktTvService {
     private static final String TRAKTTV_LAST_PUSH_EPISODES = "trakttv.last.push.episodes";
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     private static final int SYNC_MAX_RESULTS = 100;
-    
+    private static final long ONE_DAY_MILLISECONDS = 86400000;
+                    
     private static final ReentrantLock REFRESH_LOCK = new ReentrantLock();
     private static boolean REFRESH_FAILED = false;
     
@@ -107,7 +108,7 @@ public class TraktTvService {
     public boolean isExpired() {
         // check expiration date
         final Date expirationDate = configService.getDateProperty(TRAKTTV_EXPIRATION);
-        return expirationDate == null || expirationDate.getTime() < System.currentTimeMillis();
+        return expirationDate == null || (expirationDate.getTime()-ONE_DAY_MILLISECONDS) < System.currentTimeMillis();
     }
 
     public TraktTvInfo getTraktTvInfo() {
