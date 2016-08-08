@@ -27,6 +27,7 @@ import static org.hibernate.ScrollMode.FORWARD_ONLY;
 import static org.yamj.common.type.StatusType.DELETED;
 import static org.yamj.common.type.StatusType.DONE;
 import static org.yamj.core.database.Literals.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Criteria;
@@ -148,7 +149,7 @@ public class ArtworkDao extends HibernateDao {
     public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
         return currentSession().createCriteria(ArtworkLocated.class)
                 .add(Restrictions.isNotNull(LITERAL_CACHE_FILENAME))
-                .add(Restrictions.ne(LITERAL_SOURCE, DELETED))
+                .add(Restrictions.ne(LITERAL_STATUS, DELETED))
                 .add(Restrictions.gt(LITERAL_ID, lastId))
                 .addOrder(Order.asc(LITERAL_ID))
                 .setMaxResults(100)
