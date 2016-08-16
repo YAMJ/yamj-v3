@@ -93,7 +93,7 @@ public class TraktTvIdScanner implements MovieExtrasScanner, SeriesExtrasScanner
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(movie.getTitle(), movie.getOriginalTitle())) {
+        if (MetadataTools.isOriginalTitleScannable(movie)) {
             found = traktTvService.searchMovieByTitleAndYear(movie.getOriginalTitle(), movie.getYear());
             if (found != null && found.intValue() > NO_ID) {
                 movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
@@ -157,7 +157,7 @@ public class TraktTvIdScanner implements MovieExtrasScanner, SeriesExtrasScanner
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(series.getTitle(), series.getOriginalTitle())) {
+        if (MetadataTools.isOriginalTitleScannable(series)) {
             found = traktTvService.searchShowByTitleAndYear(series.getOriginalTitle(), series.getStartYear());
             if (found != null && found.intValue() > NO_ID) {
                 series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));

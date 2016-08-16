@@ -24,13 +24,9 @@ package org.yamj.plugin.api.model;
 
 import java.util.Date;
 
-public interface IEpisode extends ICredits {
+public interface IEpisode extends ICredits, IdMap {
 
     int getNumber();
-
-    String getId(String source);
-
-    void addId(String source, String id);
 
     String getTitle();
 

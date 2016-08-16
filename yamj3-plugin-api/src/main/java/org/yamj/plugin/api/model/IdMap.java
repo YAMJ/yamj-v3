@@ -24,7 +24,7 @@ package org.yamj.plugin.api.model;
 
 public interface IdMap {
 
-    String getId(String sourceDb);
+    String getId(String source);
     
-    void addId(String sourceDb, String sourceId);
+    void addId(String source, String id);
 }

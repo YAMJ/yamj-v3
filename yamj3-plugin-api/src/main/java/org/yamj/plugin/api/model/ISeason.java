@@ -24,14 +24,10 @@ package org.yamj.plugin.api.model;
 
 import java.util.Collection;
 
-public interface ISeason {
+public interface ISeason extends IdMap {
 
     int getNumber();
-    
-    String getId(String source);
-    
-    void addId(String source, String id);
-    
+       
     String getTitle();
 
     void setTitle(String title);

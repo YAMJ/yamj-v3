@@ -31,6 +31,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.pojava.datetime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.plugin.api.model.ICombined;
 
 public final class MetadataTools {
 
@@ -447,10 +448,10 @@ public final class MetadataTools {
         return newRole;
     }
         
-    public static boolean isOriginalTitleScannable(String title, String originalTitle) {
-        if (StringUtils.isBlank(originalTitle)) {
+    public static boolean isOriginalTitleScannable(ICombined combined) {
+        if (StringUtils.isBlank(combined.getOriginalTitle())) {
             return false;
         }
-        return !StringUtils.equalsIgnoreCase(title, originalTitle);
+        return !StringUtils.equalsIgnoreCase(combined.getTitle(), combined.getOriginalTitle());
     }
 }
