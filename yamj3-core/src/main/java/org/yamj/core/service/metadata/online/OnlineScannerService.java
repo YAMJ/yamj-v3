@@ -39,6 +39,9 @@ import org.yamj.core.service.metadata.WrapperSeries;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.plugin.api.metadata.*;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.ISeries;
+import org.yamj.plugin.api.model.IdMap;
 import org.yamj.plugin.api.service.PluginMetadataService;
 import org.yamj.plugin.api.web.TemporaryUnavailableException;
 
@@ -524,20 +527,28 @@ public class OnlineScannerService implements PluginMetadataService {
     }
 
     @Override
-    public MovieScanner getMovieScanner(String source) {
-        PluginMovieScanner pluginScanner = registeredMovieScanner.get(source);
-        return pluginScanner == null ? null : pluginScanner.getMovieScanner();
+    public String getMovieId(String source, IMovie movie) {
+        PluginMovieScanner movieScanner = registeredMovieScanner.get(source);
+        if (movieScanner != null) { 
+            return movieScanner.getMovieScanner().getMovieId(movie, false);
+        }
+        return null;
     }
 
     @Override
-    public SeriesScanner getSeriesScanner(String source) {
-        PluginSeriesScanner pluginScanner = registeredSeriesScanner.get(source);
-        return pluginScanner == null ? null : pluginScanner.getSeriesScanner();
+    public String getSeriesId(String source, ISeries series) {
+        PluginSeriesScanner seriesScanner = registeredSeriesScanner.get(source);
+        if (seriesScanner != null) { 
+            return seriesScanner.getSeriesScanner().getSeriesId(series, false);
+        }
+        return null;
     }
-
+    
     @Override
-    public PersonScanner getPersonScanner(String source) {
-        PluginPersonScanner pluginScanner = registeredPersonScanner.get(source);
-        return pluginScanner == null ? null : pluginScanner.getPersonScanner();
+    public void scanNFO(String source, String nfoContent, IdMap idMap) {
+        PluginMovieScanner movieScanner = registeredMovieScanner.get(source);
+        if (movieScanner != null) { 
+            movieScanner.scanNFO(nfoContent, idMap);
+        }
     }
 }

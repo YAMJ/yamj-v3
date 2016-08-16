@@ -22,25 +22,25 @@
  */
 package org.yamj.plugin.api.service.mock;
 
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.ISeries;
+import org.yamj.plugin.api.model.IdMap;
 import org.yamj.plugin.api.service.PluginMetadataService;
 
 public class PluginMetadataServiceMock implements PluginMetadataService {
 
     @Override
-    public MovieScanner getMovieScanner(String source) {
+    public String getMovieId(String source, IMovie movie) {
         return null;
     }
 
     @Override
-    public SeriesScanner getSeriesScanner(String source) {
+    public String getSeriesId(String source, ISeries series) {
         return null;
     }
-
+    
     @Override
-    public PersonScanner getPersonScanner(String source) {
-        return null;
+    public void scanNFO(String source, String nfoContent, IdMap idMap) {
+        // nothing to do
     }
 }

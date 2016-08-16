@@ -22,15 +22,15 @@
  */
 package org.yamj.plugin.api.service;
 
-import org.yamj.plugin.api.metadata.MovieScanner;
-import org.yamj.plugin.api.metadata.PersonScanner;
-import org.yamj.plugin.api.metadata.SeriesScanner;
+import org.yamj.plugin.api.model.IMovie;
+import org.yamj.plugin.api.model.ISeries;
+import org.yamj.plugin.api.model.IdMap;
 
 public interface PluginMetadataService {
 
-    MovieScanner getMovieScanner(String source);
+    String getMovieId(String source, IMovie movie);
 
-    SeriesScanner getSeriesScanner(String source);
-
-    PersonScanner getPersonScanner(String source);
+    String getSeriesId(String source, ISeries series);
+    
+    void scanNFO(String source, String nfoContent, IdMap idMap);
 }
