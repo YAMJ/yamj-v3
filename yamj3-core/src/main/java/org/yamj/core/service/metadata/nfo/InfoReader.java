@@ -22,7 +22,9 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.yamj.plugin.api.Constants.*;
+import static org.yamj.plugin.api.metadata.MetadataTools.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.xml.DOMHelper;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.type.JobType;
 
 /**
@@ -90,7 +90,7 @@ public final class InfoReader {
             nfoFile = null;
             nfoContent = stageFile.getContent();
             
-            if (StringUtils.isBlank(nfoContent)) {
+            if (isBlank(nfoContent)) {
                 LOG.warn("NFO file '{}' is not readable", nfoFilename);
                 
                 try {
@@ -110,9 +110,9 @@ public final class InfoReader {
         boolean parsedNfo = false;   // was the NFO XML parsed correctly or at all
         boolean hasXml = false;
 
-        if (StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_MOVIE)
-                || StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_TVSHOW)
-                || StringUtils.containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_EPISODE)) {
+        if (containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_MOVIE)
+                || containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_TVSHOW)
+                || containsIgnoreCase(nfoContent, XML_START + DOMHelper.TYPE_EPISODE)) {
             hasXml = true;
         }
 
@@ -128,20 +128,20 @@ public final class InfoReader {
             int posEp = findPosition(nfoContent, DOMHelper.TYPE_EPISODE);
             int start = Math.min(posMovie, Math.min(posTv, posEp));
 
-            posMovie = StringUtils.indexOf(nfoContent, XML_END + DOMHelper.TYPE_MOVIE);
-            posTv = StringUtils.indexOf(nfoContent, XML_END + DOMHelper.TYPE_TVSHOW);
-            posEp = StringUtils.indexOf(nfoContent, XML_END + DOMHelper.TYPE_EPISODE);
+            posMovie = indexOf(nfoContent, XML_END + DOMHelper.TYPE_MOVIE);
+            posTv = indexOf(nfoContent, XML_END + DOMHelper.TYPE_TVSHOW);
+            posEp = indexOf(nfoContent, XML_END + DOMHelper.TYPE_EPISODE);
             int end = Math.max(posMovie, Math.max(posTv, posEp));
 
             if ((end > -1) && (end > start)) {
-                end = StringUtils.indexOf(nfoContent, '>', end) + 1;
+                end = indexOf(nfoContent, '>', end) + 1;
 
                 // Send text to be read
-                String nfoTrimmed = StringUtils.substring(nfoContent, start, end);
+                String nfoTrimmed = substring(nfoContent, start, end);
                 parsedNfo = readXmlNfo(null, nfoTrimmed, nfoFilename, stageFile.getFileDate(), dto);
 
-                nfoTrimmed = StringUtils.remove(nfoContent, nfoTrimmed);
-                if (parsedNfo && StringUtils.isNotBlank(nfoTrimmed)) {
+                nfoTrimmed = remove(nfoContent, nfoTrimmed);
+                if (parsedNfo && isNotBlank(nfoTrimmed)) {
                     // we have some text left, so scan that with the text scanner
                     readTextNfo(nfoTrimmed, dto);
                 }
@@ -177,8 +177,8 @@ public final class InfoReader {
      * @return
      */
     private static int findPosition(final String nfoText, final String xmlType) {
-        final int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
-        return (pos == -1) ? Integer.MAX_VALUE : pos;
+        final int pos = indexOf(nfoText, XML_START + xmlType);
+        return pos == -1 ? Integer.MAX_VALUE : pos;
     }
 
     /**
@@ -259,7 +259,7 @@ public final class InfoReader {
     
                 // specific TVDB id
                 value = DOMHelper.getValueFromElement(eCommon, "tvdbid");
-                if (StringUtils.isNotBlank(value)) {
+                if (isNotBlank(value)) {
                     dto.addId(SOURCE_TVDB, value);
                 }
                 
@@ -275,8 +275,7 @@ public final class InfoReader {
             parseSets(eCommon.getElementsByTagName("set"), dto);
     
             // parse rating
-            int rating = MetadataTools.parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
-            dto.setRating(rating);
+            dto.setRating(parseRating(DOMHelper.getValueFromElement(eCommon, "rating")));
     
             // parse certification
             parseCertification(eCommon, dto);
@@ -409,9 +408,9 @@ public final class InfoReader {
             Element eId = (Element) nElements;
 
             String movieId = eId.getTextContent();
-            if (StringUtils.isNotBlank(movieId)) {
+            if (isNotBlank(movieId)) {
                 String movieDb = eId.getAttribute("moviedb");
-                if (StringUtils.isBlank(movieDb)) {
+                if (isBlank(movieDb)) {
                     if ("-1".equals(movieId)) {
                         // skip all scans
                         dto.setSkipAllScans();
@@ -433,7 +432,7 @@ public final class InfoReader {
             
             // process the TMDB id
             movieId = eId.getAttribute("TMDB");
-            if (StringUtils.isNotBlank(movieId)) {
+            if (isNotBlank(movieId)) {
                 LOG.debug("Found TheMovieDb ID: {}", movieId);
                 dto.addId(SOURCE_TMDB, movieId);
             }
@@ -452,21 +451,20 @@ public final class InfoReader {
         
         if (certificationMPAA) {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
-            if (StringUtils.isNotBlank(tempCert)) {
-                String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
+            if (isNotBlank(tempCert)) {
+                dto.addCertificatioInfo("MPAA", trimToNull(processMpaaCertification(tempCert)));
             }
         }
 
         tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
-        if (StringUtils.isBlank(tempCert)) {
+        if (isBlank(tempCert)) {
             return;
         }
             
         // scan for given countries
         for (String countryCode : this.localeService.getCertificationCountryCodes()) {
             for (String countryName : this.localeService.getCountryNames(countryCode)) {
-                int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, countryName);
+                int countryPos = lastIndexOfIgnoreCase(tempCert, countryName);
                 if (countryPos >= 0) {
                     // We've found the country, so extract just that tag
                     String certification = tempCert.substring(countryPos);
@@ -481,14 +479,13 @@ public final class InfoReader {
                             certification = certification.substring(pos + 1);
                         }
                     }
-                    dto.addCertificatioInfo(countryCode, StringUtils.trimToNull(certification));
+                    dto.addCertificatioInfo(countryCode, trimToNull(certification));
                 }
             }
             
-            if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
+            if (certificationMPAA && containsIgnoreCase(tempCert, "Rated")) {
                 // extract the MPAA rating from the certification
-                String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
+                dto.addCertificatioInfo("MPAA", trimToNull(processMpaaCertification(tempCert)));
             }
         }
     }
@@ -554,10 +551,10 @@ public final class InfoReader {
      * @param dto
      */
     private static void movieDate(final String dateString, InfoDTO dto) {
-        Date releaseDate = MetadataTools.parseToDate(dateString);
+        Date releaseDate = parseToDate(dateString);
         if (releaseDate != null) {
             dto.setReleaseDate(releaseDate);
-            dto.setYear(MetadataTools.extractYearAsString(releaseDate));
+            dto.setYear(extractYearAsString(releaseDate));
         }
     }
 
@@ -577,7 +574,7 @@ public final class InfoReader {
             
             Element eId = (Element) nElements;
             String setOrder = eId.getAttribute("order");
-            if (StringUtils.isNumeric(setOrder)) {
+            if (isNumeric(setOrder)) {
                 dto.addSetInfo(eId.getTextContent(), Integer.valueOf(setOrder));
             } else {
                 dto.addSetInfo(eId.getTextContent());
@@ -676,9 +673,9 @@ public final class InfoReader {
                         aName = eCast.getTextContent();
                         aRole = null;
                         aThumb = null;
-                    } else if ("role".equalsIgnoreCase(eCast.getNodeName()) && StringUtils.isNotBlank(eCast.getTextContent())) {
+                    } else if ("role".equalsIgnoreCase(eCast.getNodeName()) && isNotBlank(eCast.getTextContent())) {
                         aRole = eCast.getTextContent();
-                    } else if ("thumb".equalsIgnoreCase(eCast.getNodeName()) && StringUtils.isNotBlank(eCast.getTextContent())) {
+                    } else if ("thumb".equalsIgnoreCase(eCast.getNodeName()) && isNotBlank(eCast.getTextContent())) {
                         // thumb will be skipped if there's nothing in there
                         aThumb = eCast.getTextContent();
                     }
@@ -756,23 +753,23 @@ public final class InfoReader {
         episodeDTO.setTitle(DOMHelper.getValueFromElement(eEpisodeDetails, "title"));
 
         String tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "season");
-        if (StringUtils.isNumeric(tempValue)) {
+        if (isNumeric(tempValue)) {
             episodeDTO.setSeason(Integer.parseInt(tempValue));
         }
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "episode");
-        if (StringUtils.isNumeric(tempValue)) {
+        if (isNumeric(tempValue)) {
             episodeDTO.setEpisode(Integer.parseInt(tempValue));
         }
 
         episodeDTO.setPlot(DOMHelper.getValueFromElement(eEpisodeDetails, "plot"));
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "rating");
-        episodeDTO.setRating(MetadataTools.parseRating(tempValue));
+        episodeDTO.setRating(parseRating(tempValue));
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
-        if (StringUtils.isNotBlank(tempValue)) {
-            episodeDTO.setFirstAired(MetadataTools.parseToDate(tempValue.trim()));
+        if (isNotBlank(tempValue)) {
+            episodeDTO.setFirstAired(parseToDate(tempValue.trim()));
         }
 
         episodeDTO.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));
@@ -795,15 +792,15 @@ public final class InfoReader {
         LOG.trace("Scanning NFO for Poster URL");
         int urlStartIndex = 0;
         while (urlStartIndex >= 0 && urlStartIndex < nfoContent.length()) {
-            int currentUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", urlStartIndex);
+            int currentUrlStartIndex = indexOfIgnoreCase(nfoContent, "http://", urlStartIndex);
             if (currentUrlStartIndex >= 0) {
-                int currentUrlEndIndex = StringUtils.indexOfIgnoreCase(nfoContent, "jpg", currentUrlStartIndex);
+                int currentUrlEndIndex = indexOfIgnoreCase(nfoContent, "jpg", currentUrlStartIndex);
                 if (currentUrlEndIndex >= 0) {
-                    int nextUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex); 
+                    int nextUrlStartIndex = indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex); 
                     // look for shortest http://
                     while ((nextUrlStartIndex != -1) && (nextUrlStartIndex < currentUrlEndIndex + 3)) {
                         currentUrlStartIndex = nextUrlStartIndex;
-                        nextUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex + 1); 
+                        nextUrlStartIndex = indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex + 1); 
                     }
 
                     // Check to see if the URL has <fanart> at the beginning and ignore it if it does (Issue 706)

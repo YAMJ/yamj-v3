@@ -25,6 +25,7 @@ package org.yamj.core.database.service;
 import static org.yamj.common.type.StatusType.*;
 import static org.yamj.core.CachingNames.*;
 import static org.yamj.core.database.model.type.FileType.VIDEO;
+import static org.yamj.core.tools.YamjTools.getWatchedDTO;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -46,7 +47,6 @@ import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.WatchedDTO;
-import org.yamj.core.tools.YamjTools;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -130,7 +130,7 @@ public class CommonStorageService {
                         mediaFile.setStatus(UPDATED);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
-                            WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
+                            final WatchedDTO watchedDTO = getWatchedDTO(videoData);
                             videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                         }
                         
@@ -230,7 +230,7 @@ public class CommonStorageService {
                 // reset watched flag on video data
                 videoData.getMediaFiles().remove(mediaFile);
                 
-                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
+                final WatchedDTO watchedDTO = getWatchedDTO(videoData);
                 videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 this.stagingDao.updateEntity(videoData);
             }
@@ -452,7 +452,7 @@ public class CommonStorageService {
         } else {
             // determine watch status for each video data
             for (VideoData videoData : mediaFile.getVideoDatas()) {
-                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
+                final WatchedDTO watchedDTO = getWatchedDTO(videoData);
                 videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 this.stagingDao.updateEntity(videoData);
             }

@@ -25,6 +25,11 @@ package org.yamj.core.service.mediaimport;
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.common.type.StatusType.*;
 import static org.yamj.core.service.mediaimport.ImageImportTools.*;
+import static org.yamj.core.tools.YamjTools.getExternalSubtitleFormat;
+import static org.yamj.core.tools.YamjTools.getWatchedDTO;
+import static org.yamj.core.tools.YamjTools.setSortTitle;
+import static org.yamj.plugin.api.Constants.LANGUAGE_UNTERTERMINED;
+import static org.yamj.plugin.api.Constants.UNKNOWN;
 import static org.yamj.plugin.api.model.type.ArtworkType.*;
 
 import java.util.*;
@@ -52,8 +57,6 @@ import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.WatchedDTO;
-import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.Constants;
 import org.yamj.plugin.api.model.type.ArtworkType;
 import org.yamj.plugin.api.model.type.ImageType;
 
@@ -232,7 +235,7 @@ public class MediaImportService {
                 }
 
                 // set sort title
-                YamjTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+                setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
 
                 LOG.debug("Store new movie: '{}' - {}", videoData.getTitle(), videoData.getPublicationYear());
                 metadataDao.saveEntity(videoData);
@@ -256,7 +259,7 @@ public class MediaImportService {
                 videoData.addMediaFile(mediaFile);
 
                 // set watched status
-                WatchedDTO watchedDTO = YamjTools.getWatchedDTO(videoData);
+                final WatchedDTO watchedDTO = getWatchedDTO(videoData);
                 videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 
                 // update video data
@@ -270,7 +273,7 @@ public class MediaImportService {
                     final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
                     if (StringUtils.isNotBlank(boxedSetIdentifier)) {
                         LOG.debug("Add movie filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                        videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                        videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), UNKNOWN);
                     }
                 }
 
@@ -306,7 +309,7 @@ public class MediaImportService {
                             series.setTrailerStatus(NEW);
 
                             // set sort title
-                            YamjTools.setSortTitle(series, prefixes);
+                            setSortTitle(series, prefixes);
 
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
@@ -340,7 +343,7 @@ public class MediaImportService {
                                 final String boxedSetIdentifier = identifierService.cleanIdentifier(entry.getKey());
                                 if (StringUtils.isNotBlank(boxedSetIdentifier)) {
                                     LOG.debug("Add series filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), UNKNOWN);
                                 }
                             }
 
@@ -358,7 +361,7 @@ public class MediaImportService {
                         season.setStatus(NEW);
 
                         // set sort title
-                        YamjTools.setSortTitle(season, prefixes);
+                        setSortTitle(season, prefixes);
 
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
@@ -401,7 +404,7 @@ public class MediaImportService {
                     videoData.setTrailerStatus(NEW);
 
                     // set sort title
-                    YamjTools.setSortTitle(videoData, prefixes);
+                    setSortTitle(videoData, prefixes);
 
                     LOG.debug("Store new episode: '{}' - Season {} - Episode {}", season.getTitle(), season.getSeason(), videoData.getEpisode());
                     metadataDao.saveEntity(videoData);
@@ -589,9 +592,9 @@ public class MediaImportService {
             subtitle.setCounter(0);
             subtitle.setStageFile(subtitleFile);
             subtitle.setMediaFile(mediaFile);
-            subtitle.setFormat(YamjTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
+            subtitle.setFormat(getExternalSubtitleFormat(subtitleFile.getExtension()));
             // TODO search stage files with language
-            subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
+            subtitle.setLanguageCode(LANGUAGE_UNTERTERMINED);
             subtitle.setDefaultFlag(true);
             this.mediaDao.saveEntity(subtitle);
 
@@ -1141,10 +1144,10 @@ public class MediaImportService {
                 subtitle.setMediaFile(videoFile.getMediaFile());
 
                 if (!subtitleFile.getSubtitles().contains(subtitle)) {
-                    subtitle.setFormat(YamjTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
+                    subtitle.setFormat(getExternalSubtitleFormat(subtitleFile.getExtension()));
 
                     if (StringUtils.isBlank(languageCode)) {
-                        subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
+                        subtitle.setLanguageCode(LANGUAGE_UNTERTERMINED);
                         subtitle.setDefaultFlag(true);
                     } else {
                         subtitle.setLanguageCode(languageCode);

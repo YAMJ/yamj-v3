@@ -22,10 +22,12 @@
  */
 package org.yamj.core.api.model;
 
+import static org.yamj.common.tools.DateTimeTools.BUILD_FORMAT;
+import static org.yamj.common.tools.DateTimeTools.convertDateToString;
+
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.type.MetaDataType;
 
 /**
@@ -81,7 +83,7 @@ public class CountTimestamp {
 
     public void setCreateTimestamp(Date createTimestamp) {
         this.createTimestamp = createTimestamp;
-        this.createTimestampString = DateTimeTools.convertDateToString(createTimestamp, DateTimeTools.BUILD_FORMAT);
+        this.createTimestampString = convertDateToString(createTimestamp, BUILD_FORMAT);
     }
 
     public Date getUpdateTimestamp() {
@@ -94,7 +96,7 @@ public class CountTimestamp {
 
     public void setUpdateTimestamp(Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
-        this.updateTimestampString = DateTimeTools.convertDateToString(updateTimestamp, DateTimeTools.BUILD_FORMAT);
+        this.updateTimestampString = convertDateToString(updateTimestamp, BUILD_FORMAT);
     }
 
     public long getLastId() {

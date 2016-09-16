@@ -22,12 +22,13 @@
  */
 package org.yamj.core.api.model.dto;
 
+import static org.yamj.plugin.api.metadata.MetadataTools.formatDateShort;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.type.JobType;
 
 /**
@@ -91,7 +92,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setBirthDay(Date birthDay) {
-        this.birthDay = MetadataTools.formatDateShort(birthDay);
+        this.birthDay = formatDateShort(birthDay);
     }
 
     public String getBirthPlace() {
@@ -115,7 +116,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setDeathDay(Date deathDay) {
-        this.deathDay = MetadataTools.formatDateShort(deathDay);
+        this.deathDay = formatDateShort(deathDay);
     }
 
     public String getDeathPlace() {

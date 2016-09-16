@@ -22,9 +22,10 @@
  */
 package org.yamj.plugin.api.service.mock;
 
+import static org.yamj.plugin.api.Constants.DEFAULT_SPLITTER;
+
 import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.yamj.plugin.api.Constants;
 import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.service.PluginConfigService;
 
@@ -61,7 +62,7 @@ public class PluginConfigServiceMock implements PluginConfigService {
 
     @Override
     public List<String> getPropertyAsList(String key, String defaultValue) {
-        return this.getPropertyAsList(key, defaultValue, Constants.DEFAULT_SPLITTER);
+        return this.getPropertyAsList(key, defaultValue, DEFAULT_SPLITTER);
     }
 
     @Override

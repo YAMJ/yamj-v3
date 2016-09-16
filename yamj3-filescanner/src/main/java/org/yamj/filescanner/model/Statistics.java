@@ -22,13 +22,16 @@
  */
 package org.yamj.filescanner.model;
 
+import static org.apache.commons.lang3.text.WordUtils.capitalizeFully;
+import static org.yamj.common.tools.DateTimeTools.formatDurationColon;
+import static org.yamj.common.tools.DateTimeTools.formatDurationText;
+import static org.yamj.common.tools.DateTimeTools.getDuration;
+
 import java.util.EnumMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.text.WordUtils;
-import org.yamj.common.tools.DateTimeTools;
 
 /**
  * Class to store any statistics about the jukebox
@@ -158,11 +161,11 @@ public class Statistics {
     public String getProcessingTime(TimeType timeStart, TimeType timeEnd, boolean useColon) {
         String returnValue = "";
         if (times.containsKey(timeStart) && times.containsKey(timeEnd)) {
-            Long duration = DateTimeTools.getDuration(times.get(timeStart), times.get(timeEnd));
+            Long duration = getDuration(times.get(timeStart), times.get(timeEnd));
             if (useColon) {
-                returnValue = DateTimeTools.formatDurationColon(duration);
+                returnValue = formatDurationColon(duration);
             } else {
-                DateTimeTools.formatDurationText(duration);
+                formatDurationText(duration);
             }
         }
 
@@ -190,9 +193,9 @@ public class Statistics {
         if (times.containsKey(timeType)) {
             long timeToFormat = times.get(timeType);
             if (useColon) {
-                returnValue = DateTimeTools.formatDurationColon(timeToFormat);
+                returnValue = formatDurationColon(timeToFormat);
             } else {
-                returnValue = DateTimeTools.formatDurationText(timeToFormat);
+                returnValue = formatDurationText(timeToFormat);
             }
         }
         return returnValue;
@@ -227,7 +230,7 @@ public class Statistics {
             value = stats.get(stat);
             if (value > 0 || !skipZero) {
                 statOutput.append(lineFeed);
-                statOutput.append(WordUtils.capitalizeFully(stat.toString().replace("_", " ").toLowerCase()));
+                statOutput.append(capitalizeFully(stat.toString().replace("_", " ").toLowerCase()));
                 statOutput.append(" = ");
                 statOutput.append(value);
             }

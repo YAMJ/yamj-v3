@@ -22,6 +22,7 @@
  */
 package org.yamj.core.tools.player;
 
+import static org.yamj.api.common.tools.ResponseTools.isOK;
 import static org.yamj.plugin.api.Constants.UTF8;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
-import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
@@ -212,7 +212,7 @@ public final class PlayerTools {
 
         try {
             DigestedResponse response = getRequest(url);
-            if (ResponseTools.isOK(response)) {
+            if (isOK(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
                 if (wrapper.getResponse().getFileList() != null) {
@@ -255,7 +255,7 @@ public final class PlayerTools {
         String playerName = "UNKNOWN";
         try {
             DigestedResponse response = getRequest(url);
-            if (ResponseTools.isOK(response)) {
+            if (isOK(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
                 if (wrapper.getResponse() != null) {

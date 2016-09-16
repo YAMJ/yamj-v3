@@ -22,13 +22,14 @@
  */
 package org.yamj.core.api.model.dto;
 
+import static org.yamj.plugin.api.metadata.MetadataTools.formatDateLong;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Studio;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.type.JobType;
 
 /**
@@ -169,7 +170,7 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     }
 
     public String getNewest() {
-        return MetadataTools.formatDateLong(this.newest);
+        return formatDateLong(this.newest);
     }
 
     public String getStatus() {

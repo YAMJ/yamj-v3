@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.trakttv;
 
+import static org.yamj.api.common.tools.ResponseTools.isTemporaryError;
 import static org.yamj.plugin.api.Constants.*;
 
 import java.util.*;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.api.trakttv.TraktTvApi;
 import org.yamj.api.trakttv.TraktTvException;
 import org.yamj.api.trakttv.auth.TokenResponse;
@@ -392,7 +392,7 @@ public class TraktTvService {
     }
 
     private static void checkTempError(boolean throwTempError, TraktTvException ex) {
-        if (throwTempError && ResponseTools.isTemporaryError(ex.getResponseCode())) {
+        if (throwTempError && isTemporaryError(ex.getResponseCode())) {
             throw new TemporaryUnavailableException("Trakt.TV service temporary not available: " + ex.getResponseCode(), ex);
         }
     }
@@ -400,12 +400,8 @@ public class TraktTvService {
     // COLLECTION
     
     private DateTime getCheckDate(final String key) {
-        DateTime checkDate = this.configService.getDateTimeProperty(key);
-        if (checkDate == null) {
-            // build a date long, long ago ...
-            return DateTime.now().minusYears(100);
-        }
-        return checkDate.withMillisOfSecond(0);
+        final DateTime checkDate = this.configService.getDateTimeProperty(key);
+        return checkDate == null ? DateTime.now().minusYears(100) : checkDate.withMillisOfSecond(0);
     }
 
     private void setPushPullDate(final String key, final Date pushPullDate) {

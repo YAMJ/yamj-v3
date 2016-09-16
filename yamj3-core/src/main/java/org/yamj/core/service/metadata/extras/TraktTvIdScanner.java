@@ -23,6 +23,7 @@
 package org.yamj.core.service.metadata.extras;
 
 import static org.yamj.plugin.api.Constants.*;
+import static org.yamj.plugin.api.metadata.MetadataTools.isOriginalTitleScannable;
 
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -33,7 +34,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.service.trakttv.TraktTvService;
 import org.yamj.plugin.api.extras.MovieExtrasScanner;
 import org.yamj.plugin.api.extras.SeriesExtrasScanner;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.IMovie;
 import org.yamj.plugin.api.model.ISeries;
 
@@ -93,7 +93,7 @@ public class TraktTvIdScanner implements MovieExtrasScanner, SeriesExtrasScanner
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(movie)) {
+        if (isOriginalTitleScannable(movie)) {
             found = traktTvService.searchMovieByTitleAndYear(movie.getOriginalTitle(), movie.getYear());
             if (found != null && found.intValue() > NO_ID) {
                 movie.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));
@@ -157,7 +157,7 @@ public class TraktTvIdScanner implements MovieExtrasScanner, SeriesExtrasScanner
         }
         
         // search by original title first
-        if (MetadataTools.isOriginalTitleScannable(series)) {
+        if (isOriginalTitleScannable(series)) {
             found = traktTvService.searchShowByTitleAndYear(series.getOriginalTitle(), series.getStartYear());
             if (found != null && found.intValue() > NO_ID) {
                 series.addId(SOURCE_TRAKTTV, Integer.toString(found.intValue()));

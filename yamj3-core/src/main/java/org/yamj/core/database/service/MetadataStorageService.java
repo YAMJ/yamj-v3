@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.CachingNames.*;
 import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
+import static org.yamj.core.tools.YamjTools.getEqualObject;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -52,7 +53,6 @@ import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.GenreXmlTools;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.model.type.ArtworkType;
 
 @Service("metadataStorageService")
@@ -297,7 +297,7 @@ public class MetadataStorageService {
         Set<FilmParticipation> deletions = new HashSet<>();
 
         for (FilmParticipation filmo : person.getFilmography()) {
-            FilmParticipation newFilmo = YamjTools.getEqualObject(person.getNewFilmography(), filmo);
+            FilmParticipation newFilmo = getEqualObject(person.getNewFilmography(), filmo);
             if (newFilmo == null) {
                 // actual participation should be deleted
                 deletions.add(filmo);

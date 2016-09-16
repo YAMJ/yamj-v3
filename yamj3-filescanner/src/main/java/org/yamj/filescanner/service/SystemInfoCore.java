@@ -22,6 +22,10 @@
  */
 package org.yamj.filescanner.service;
 
+import static org.yamj.common.tools.DateTimeTools.convertDateToString;
+import static org.yamj.common.tools.DateTimeTools.formatDurationText;
+import static org.yamj.common.tools.DateTimeTools.getDuration;
+
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -30,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.stereotype.Service;
 import org.yamj.common.remote.service.SystemInfoService;
-import org.yamj.common.tools.DateTimeTools;
 
 /**
  * Wait for the core server to be available or timeout
@@ -135,14 +138,14 @@ public final class SystemInfoCore {
      * @return
      */
     public String status() {
-        long diff = DateTimeTools.getDuration(lastCheck, new DateTime());
+        long diff = getDuration(lastCheck, new DateTime());
 
         StringBuilder status = new StringBuilder("Core server last checked at ");
-        status.append(DateTimeTools.convertDateToString(lastCheck, DATETIME_FORMAT));
+        status.append(convertDateToString(lastCheck, DATETIME_FORMAT));
         if (diff > TimeUnit.SECONDS.toMillis(DIFF_CHECK_SECONDS)) {
             // Only add the difference if the time was longer than 5 seconds
             status.append(", ");
-            status.append(DateTimeTools.formatDurationText(diff));
+            status.append(formatDurationText(diff));
             status.append(" ago");
         }
         status.append(" and connection status was ").append(connected ? "connected" : "not connected");

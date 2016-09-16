@@ -22,9 +22,11 @@
  */
 package org.yamj.core.api.wrapper;
 
+import static org.yamj.common.tools.DateTimeTools.BUILD_FORMAT;
+import static org.yamj.common.tools.DateTimeTools.convertDateToString;
+
 import org.joda.time.DateTime;
 import org.yamj.common.model.YamjInfo;
-import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.IOptions;
 
@@ -61,7 +63,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
 
     @Override
     public String getQueryTime() {
-        return DateTimeTools.convertDateToString(queryTime, DateTimeTools.BUILD_FORMAT);
+        return convertDateToString(queryTime, BUILD_FORMAT);
     }
 
     @Override

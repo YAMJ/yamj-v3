@@ -22,6 +22,8 @@
  */
 package org.yamj.common.model;
 
+import static org.yamj.common.tools.DateTimeTools.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +39,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.MetaDataType;
@@ -145,7 +146,7 @@ public class YamjInfo {
                 this.moduleName = properties.get("yamj.name").toString();
                 this.moduleDescription = properties.get("yamj.description").toString();
 
-                this.buildDateTime = DateTimeTools.parseDate(properties.get("git.build.time").toString(), DateTimeTools.BUILD_FORMAT);
+                this.buildDateTime = parseDate(properties.get("git.build.time").toString(), BUILD_FORMAT);
                 this.buildRevision = properties.get("git.commit.id.abbrev").toString();
                 this.buildDirty = asBoolean(properties.get("git.dirty").toString());
             }
@@ -220,15 +221,15 @@ public class YamjInfo {
     }
 
     public String getBuildDate() {
-        return DateTimeTools.convertDateToString(buildDateTime, DateTimeTools.BUILD_FORMAT);
+        return convertDateToString(buildDateTime, BUILD_FORMAT);
     }
 
     public String getStartUpTime() {
-        return DateTimeTools.convertDateToString(startUpDateTime, DateTimeTools.BUILD_FORMAT);
+        return convertDateToString(startUpDateTime, BUILD_FORMAT);
     }
 
     public String getUptime() {
-        return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
+        return formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
     }
 
     public String getDatabaseName() {

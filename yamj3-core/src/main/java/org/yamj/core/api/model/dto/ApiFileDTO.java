@@ -22,13 +22,15 @@
  */
 package org.yamj.core.api.model.dto;
 
+import static org.yamj.core.tools.YamjTools.formatFileSize;
+import static org.yamj.core.tools.YamjTools.formatRuntime;
+import static org.yamj.plugin.api.metadata.MetadataTools.formatDateLong;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.metadata.MetadataTools;
 
 /**
  * Information on the physical file for the API
@@ -181,7 +183,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setRuntime(Integer runtime) {
         if (runtime != null) {
-            this.runtime = YamjTools.formatRuntime(runtime.intValue());
+            this.runtime = formatRuntime(runtime.intValue());
         }
     }
 
@@ -214,7 +216,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setFileDate(Date fileDate) {
-        this.fileDate = MetadataTools.formatDateLong(fileDate);
+        this.fileDate = formatDateLong(fileDate);
     }
 
     public String getFileSize() {
@@ -223,7 +225,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setFileSize(Long fileSize) {
         if (fileSize != null) {
-            this.fileSize = YamjTools.formatFileSize(fileSize.longValue());
+            this.fileSize = formatFileSize(fileSize.longValue());
         }
     }
 

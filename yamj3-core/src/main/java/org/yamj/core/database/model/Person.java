@@ -22,7 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.YamjTools.splitFullName;
 import static org.yamj.plugin.api.Constants.ALL;
+import static org.yamj.plugin.api.metadata.MetadataTools.fixScannedValue;
 
 import java.util.*;
 import javax.persistence.*;
@@ -42,8 +44,6 @@ import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.PersonName;
-import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.metadata.MetadataTools;
 
 @NamedQueries({    
     @NamedQuery(name = Person.QUERY_ORPHANS,
@@ -188,7 +188,7 @@ public class Person extends AbstractScannable {
 
     public void setName(String name, String source) {
         if (StringUtils.isNotBlank(name)) {
-            setName(MetadataTools.fixScannedValue(name.trim()));
+            setName(fixScannedValue(name.trim()));
             setOverrideFlag(OverrideFlag.NAME, source);
         }
     }
@@ -210,14 +210,14 @@ public class Person extends AbstractScannable {
 
     public void setFirstName(String firstName, String source) {
         if (StringUtils.isNotBlank(firstName)) {
-            setFirstName(MetadataTools.fixScannedValue(firstName.trim()));
+            setFirstName(fixScannedValue(firstName.trim()));
             setOverrideFlag(OverrideFlag.FIRSTNAME, source);
         }
     }
 
     public void removeFirstName(String source) {
         if (hasOverrideSource(OverrideFlag.FIRSTNAME, source)) {
-            PersonName personName = YamjTools.splitFullName(getIdentifier());
+            PersonName personName = splitFullName(getIdentifier());
             setFirstName(personName.getFirstName());
             removeOverrideFlag(OverrideFlag.FIRSTNAME);
         }
@@ -233,14 +233,14 @@ public class Person extends AbstractScannable {
 
     public void setLastName(String lastName, String source) {
         if (StringUtils.isNotBlank(lastName)) {
-            setLastName(MetadataTools.fixScannedValue(lastName.trim()));
+            setLastName(fixScannedValue(lastName.trim()));
             setOverrideFlag(OverrideFlag.LASTNAME, source);
         }
     }
 
     public void removeLastName(String source) {
         if (hasOverrideSource(OverrideFlag.LASTNAME, source)) {
-            PersonName personName = YamjTools.splitFullName(getIdentifier());
+            PersonName personName = splitFullName(getIdentifier());
             setLastName(personName.getLastName());
             removeOverrideFlag(OverrideFlag.LASTNAME);
         }
@@ -278,7 +278,7 @@ public class Person extends AbstractScannable {
 
     public void setBirthPlace(String birthPlace, String source) {
         if (StringUtils.isNotBlank(birthPlace)) {
-            setBirthPlace(MetadataTools.fixScannedValue(birthPlace.trim()));
+            setBirthPlace(fixScannedValue(birthPlace.trim()));
             setOverrideFlag(OverrideFlag.BIRTHPLACE, source);
         }
     }
@@ -300,7 +300,7 @@ public class Person extends AbstractScannable {
 
     public void setBirthName(String birthName, String source) {
         if (StringUtils.isNotBlank(birthName)) {
-            setBirthName(MetadataTools.fixScannedValue(birthName.trim()));
+            setBirthName(fixScannedValue(birthName.trim()));
             setOverrideFlag(OverrideFlag.BIRTHNAME, source);
         }
     }
@@ -344,7 +344,7 @@ public class Person extends AbstractScannable {
 
     public void setDeathPlace(String deathPlace, String source) {
         if (StringUtils.isNotBlank(deathPlace)) {
-            setDeathPlace(MetadataTools.fixScannedValue(deathPlace.trim()));
+            setDeathPlace(fixScannedValue(deathPlace.trim()));
             setOverrideFlag(OverrideFlag.DEATHPLACE, source);
         }
     }
@@ -366,7 +366,7 @@ public class Person extends AbstractScannable {
 
     public void setBiography(String biography, String source) {
         if (StringUtils.isNotBlank(biography)) {
-            setBiography(MetadataTools.fixScannedValue(biography.trim()));
+            setBiography(fixScannedValue(biography.trim()));
             setOverrideFlag(OverrideFlag.BIOGRAPHY, source);
         }
     }

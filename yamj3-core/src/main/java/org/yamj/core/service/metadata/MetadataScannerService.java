@@ -24,6 +24,8 @@ package org.yamj.core.service.metadata;
 
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.core.ServiceConstants.STORAGE_ERROR;
+import static org.yamj.core.tools.ExceptionTools.isLockingError;
+import static org.yamj.core.tools.YamjTools.setSortTitle;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -38,8 +40,6 @@ import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.metadata.extras.ExtrasScannerService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.tools.ExceptionTools;
-import org.yamj.core.tools.YamjTools;
 
 @Service("metadataScannerService")
 public class MetadataScannerService implements IQueueProcessService {
@@ -93,7 +93,7 @@ public class MetadataScannerService implements IQueueProcessService {
         this.extrasScannerService.scanMovie(videoData);
 
         // reset sort title
-        YamjTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+        setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
 
         try {
             // store associated entities
@@ -108,7 +108,7 @@ public class MetadataScannerService implements IQueueProcessService {
             LOG.debug("Updated movie in database: {}-'{}'", id, videoData.getTitle());
         } catch (Exception error) {
             // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
+            if (isLockingError(error)) {
                 LOG.warn("Locking error while storing movie {}-'{}'", id, videoData.getTitle());
             } else {
                 LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
@@ -145,11 +145,11 @@ public class MetadataScannerService implements IQueueProcessService {
 
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
-        YamjTools.setSortTitle(series, prefixes);
+        setSortTitle(series, prefixes);
         for (Season season : series.getSeasons()) {
-            YamjTools.setSortTitle(season, prefixes);
+            setSortTitle(season, prefixes);
             for (VideoData videoData : season.getVideoDatas()) {
-                YamjTools.setSortTitle(videoData, prefixes);
+                setSortTitle(videoData, prefixes);
             }
         }
 
@@ -172,7 +172,7 @@ public class MetadataScannerService implements IQueueProcessService {
             LOG.debug("Updated series in database: {}-'{}'", id, series.getTitle());
         } catch (Exception error) {
             // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
+            if (isLockingError(error)) {
                 LOG.warn("Locking error while storing series {}-'{}'", id, series.getTitle());
             } else {
                 LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
@@ -199,7 +199,7 @@ public class MetadataScannerService implements IQueueProcessService {
             LOG.debug("Updated person in database: {}-'{}'", id, person.getName());
         } catch (Exception error) {
             // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
+            if (isLockingError(error)) {
                 LOG.warn("Locking error while storing person {}-'{}'", id, person.getName());
             } else {
                 LOG.error("Failed storing person {}-'{}'", id, person.getName());
@@ -226,7 +226,7 @@ public class MetadataScannerService implements IQueueProcessService {
             LOG.debug("Updated person filmography in database: {}-'{}'", id, person.getName());
         } catch (Exception error) {
             // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
+            if (isLockingError(error)) {
                 LOG.warn("Locking error while storing person filmography {}-'{}'", id, person.getName());
             } else {
                 LOG.error("Failed storing person filmography {}-'{}'", id, person.getName());

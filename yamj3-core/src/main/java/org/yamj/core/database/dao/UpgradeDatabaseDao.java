@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import static org.yamj.plugin.api.metadata.MetadataTools.cleanRole;
+
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,7 +31,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.database.model.CastCrew;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.plugin.api.metadata.MetadataTools;
 
 @Transactional
 @Repository("upgradeDatabaseDao")
@@ -133,7 +134,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         List<CastCrew> list = currentSession().createQuery("FROM CastCrew cc WHERE cc.role like '%(%'").list();
         for (CastCrew cc : list) {
             String role = cc.getRole();
-            String fixedRole = MetadataTools.cleanRole(role);
+            String fixedRole = cleanRole(role);
             if (!StringUtils.equals(role, fixedRole)) {
                 cc.setRole(StringUtils.abbreviate(fixedRole, 255));
                 currentSession().update(cc);

@@ -23,6 +23,7 @@
 package org.yamj.core.scheduling;
 
 import static org.yamj.core.database.model.type.FileType.*;
+import static org.yamj.core.tools.ExceptionTools.isLockingError;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.service.mediaimport.MediaImportService;
-import org.yamj.core.tools.ExceptionTools;
 
 @Component
 public class ImportScheduler {
@@ -93,7 +93,7 @@ public class ImportScheduler {
                     }
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockingError(error)) {
+                if (isLockingError(error)) {
                     LOG.warn("Locking error during import of video stage file {}", id);
                 } else if (id == null) {
                     LOG.error("Failed to get next video stage file", error);
@@ -130,7 +130,7 @@ public class ImportScheduler {
                     counter++;
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockingError(error)) {
+                if (isLockingError(error)) {
                     LOG.warn("Locking error during import of nfo stage file {}", id);
                 } else if (id == null) {
                     LOG.error("Failed to get next nfo stage file", error);
@@ -171,7 +171,7 @@ public class ImportScheduler {
                     }
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockingError(error)) {
+                if (isLockingError(error)) {
                     LOG.warn("Locking error during import of image stage file {}", id);
                 } else if (id == null) {
                     LOG.error("Failed to get next image stage file", error);
@@ -206,7 +206,7 @@ public class ImportScheduler {
                     LOG.info("Processed watched stage file: {}", id);
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockingError(error)) {
+                if (isLockingError(error)) {
                     LOG.warn("Locking error during import of watched stage file {}", id);
                 } else if (id == null) {
                     LOG.error("Failed to get next watched stage file", error);
@@ -236,7 +236,7 @@ public class ImportScheduler {
                     LOG.info("Processed subtitle stage file: {}", id);
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockingError(error)) {
+                if (isLockingError(error)) {
                     LOG.warn("Locking error during import of subtitle stage file {}", id);
                 } else if (id == null) {
                     LOG.error("Failed to get next subtitle stage file", error);

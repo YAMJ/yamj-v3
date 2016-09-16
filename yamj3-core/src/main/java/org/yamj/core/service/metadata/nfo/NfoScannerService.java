@@ -23,6 +23,8 @@
 package org.yamj.core.service.metadata.nfo;
 
 import static org.yamj.plugin.api.Constants.ALL;
+import static org.yamj.plugin.api.Constants.UNKNOWN;
+import static org.yamj.plugin.api.metadata.MetadataTools.extractYearAsInt;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -37,8 +39,6 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.service.various.IdentifierService;
 import org.yamj.core.service.various.StagingService;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.plugin.api.Constants;
-import org.yamj.plugin.api.metadata.MetadataTools;
 
 @Service("nfoScannerService")
 public class NfoScannerService {
@@ -168,7 +168,7 @@ public class NfoScannerService {
                     LOG.warn("Empty boxed set identifier for '{}'", entry.getKey());
                 } else {
                     LOG.debug("Add movie nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                    videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                    videoData.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), UNKNOWN);
                 }
             }
 
@@ -295,7 +295,7 @@ public class NfoScannerService {
                     LOG.warn("Empty boxed set identifier for '{}'", entry.getKey());
                 } else {
                     LOG.debug("Add series nfo boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), Constants.UNKNOWN);
+                    series.addBoxedSetDTO(SCANNER_ID, boxedSetIdentifier, entry.getKey(), entry.getValue(), UNKNOWN);
                 }
             }
             
@@ -320,7 +320,7 @@ public class NfoScannerService {
 
                 if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
                     Date seasonFirstDate = infoDTO.getSeasonFirstDate(season.getSeason());
-                    season.setPublicationYear(MetadataTools.extractYearAsInt(seasonFirstDate), SCANNER_ID);
+                    season.setPublicationYear(extractYearAsInt(seasonFirstDate), SCANNER_ID);
                 }
 
                 // mark season as done

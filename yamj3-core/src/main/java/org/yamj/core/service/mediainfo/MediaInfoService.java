@@ -22,7 +22,9 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import static org.yamj.plugin.api.Constants.DEFAULT_SPLITTER;
+import static org.yamj.common.tools.DateTimeTools.processRuntime;
+import static org.yamj.core.tools.ExceptionTools.isLockingError;
+import static org.yamj.plugin.api.Constants.*;
 
 import java.io.*;
 import java.util.*;
@@ -35,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.LocaleService;
@@ -45,8 +46,6 @@ import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
-import org.yamj.core.tools.ExceptionTools;
-import org.yamj.plugin.api.Constants;
 
 @Service("mediaInfoService")
 public class MediaInfoService implements IQueueProcessService {
@@ -194,7 +193,7 @@ public class MediaInfoService implements IQueueProcessService {
 
     @Override
     public void processErrorOccurred(QueueDTO queueElement, Exception error) {
-        if (ExceptionTools.isLockingError(error)) {
+        if (isLockingError(error)) {
             // NOTE: status will not be changed
             LOG.warn("Locking error while media file scan {}", queueElement.getId());
         } else {
@@ -220,11 +219,7 @@ public class MediaInfoService implements IQueueProcessService {
 
         // get runtime either from video info or general section
         String runtime = getRuntime(infosGeneral, infosVideo);
-        if (StringUtils.isNotBlank(runtime)) {
-            mediaFile.setRuntime(DateTimeTools.processRuntime(runtime));
-        } else {
-            mediaFile.setRuntime(-1);
-        }
+        mediaFile.setRuntime(StringUtils.isBlank(runtime) ? -1 : processRuntime(runtime));
 
         // get Info from first video stream only
         // TODO can evolve to get info from longest video stream
@@ -247,7 +242,7 @@ public class MediaInfoService implements IQueueProcessService {
                 infoValue = infosMainVideo.get("Original frame rate");
             }
             if (StringUtils.isNotBlank(infoValue)) {
-                int inxDiv = infoValue.indexOf(Constants.SPACE_SLASH_SPACE);
+                int inxDiv = infoValue.indexOf(SPACE_SLASH_SPACE);
                 if (inxDiv > -1) {
                     infoValue = infoValue.substring(0, inxDiv);
                 }
@@ -323,7 +318,7 @@ public class MediaInfoService implements IQueueProcessService {
         // codec
         String infoValue = infosAudio.get("Codec ID");
         if (StringUtils.isBlank(infoValue)) {
-            audioCodec.setCodec(Constants.UNDEFINED);
+            audioCodec.setCodec(UNDEFINED);
         } else {
             audioCodec.setCodec(infoValue);
         }
@@ -331,7 +326,7 @@ public class MediaInfoService implements IQueueProcessService {
         // codec format
         infoValue = infosAudio.get(FORMAT);
         if (StringUtils.isBlank(infoValue)) {
-            audioCodec.setCodecFormat(Constants.UNDEFINED);
+            audioCodec.setCodecFormat(UNDEFINED);
         } else {
             audioCodec.setCodecFormat(infoValue);
         }
@@ -353,7 +348,7 @@ public class MediaInfoService implements IQueueProcessService {
         }
 
         // language
-        audioCodec.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
+        audioCodec.setLanguageCode(LANGUAGE_UNTERTERMINED);
         infoValue = infosAudio.get("Language");
         if (StringUtils.isNotBlank(infoValue)) {
             if (infoValue.contains("/")) {
@@ -394,7 +389,7 @@ public class MediaInfoService implements IQueueProcessService {
             
             String langCode = localeService.findLanguageCode(infoLanguage);
             if (StringUtils.isBlank(infoLanguage)) {
-                subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
+                subtitle.setLanguageCode(LANGUAGE_UNTERTERMINED);
             } else {
                 subtitle.setLanguageCode(langCode);
             }
@@ -434,8 +429,8 @@ public class MediaInfoService implements IQueueProcessService {
     private static int getBitRate(String bitRateValue) {
         if (StringUtils.isNotBlank(bitRateValue)) {
             String tmp;
-            if (bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE) > -1) {
-                tmp = bitRateValue.substring(0, bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE));
+            if (bitRateValue.indexOf(SPACE_SLASH_SPACE) > -1) {
+                tmp = bitRateValue.substring(0, bitRateValue.indexOf(SPACE_SLASH_SPACE));
             } else {
                 tmp = bitRateValue;
             }

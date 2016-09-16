@@ -22,6 +22,10 @@
  */
 package org.yamj.plugin.api.web;
 
+import static org.yamj.api.common.tools.ResponseTools.isNotOK;
+import static org.yamj.api.common.tools.ResponseTools.isTemporaryError;
+import static org.yamj.plugin.api.Constants.UTF8;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -34,8 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
-import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.plugin.api.Constants;
 
 public class SearchEngineTools {
 
@@ -64,7 +66,7 @@ public class SearchEngineTools {
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
-        this(httpClient, locale, Constants.UTF8);
+        this(httpClient, locale, UTF8);
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
@@ -197,10 +199,9 @@ public class SearchEngineTools {
             LOG.trace("Google search: {}", sb);
             
             DigestedResponse response = this.requestContent(sb);
-            if (ResponseTools.isNotOK(response)) {
-                if (throwTempError && ResponseTools.isTemporaryError(response)) {
-                    throw new TemporaryUnavailableException("Google search is temporary not available: " + response.getStatusCode());
-                }
+            if (throwTempError && isTemporaryError(response)) {
+                throw new TemporaryUnavailableException("Google search is temporary not available: " + response.getStatusCode());
+            } else if (isNotOK(response)) {
                 LOG.warn("Google search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -243,10 +244,9 @@ public class SearchEngineTools {
             LOG.trace("Yahoo search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
-            if (ResponseTools.isNotOK(response)) {
-                if (throwTempError && ResponseTools.isTemporaryError(response)) {
-                    throw new TemporaryUnavailableException("Yahoo search is temporary not available: " + response.getStatusCode());
-                }
+            if (throwTempError && isTemporaryError(response)) {
+                throw new TemporaryUnavailableException("Yahoo search is temporary not available: " + response.getStatusCode());
+            } else if (isNotOK(response)) {
                 LOG.warn("Yahoo search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -296,10 +296,9 @@ public class SearchEngineTools {
             LOG.trace("Bing search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
-            if (ResponseTools.isNotOK(response)) {
-                if (throwTempError && ResponseTools.isTemporaryError(response)) {
-                    throw new TemporaryUnavailableException("Bing search is temporary not available: " + response.getStatusCode());
-                }
+            if (throwTempError && isTemporaryError(response)) {
+                throw new TemporaryUnavailableException("Bing search is temporary not available: " + response.getStatusCode());
+            } else if (isNotOK(response)) {
                 LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -337,10 +336,9 @@ public class SearchEngineTools {
             LOG.trace("Blekko search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
-            if (ResponseTools.isNotOK(response)) {
-                if (throwTempError && ResponseTools.isTemporaryError(response)) {
-                    throw new TemporaryUnavailableException("Blekko search is temporary not available: " + response.getStatusCode());
-                }
+            if (throwTempError && isTemporaryError(response)) {
+                throw new TemporaryUnavailableException("Blekko search is temporary not available: " + response.getStatusCode());
+            } else if (isNotOK(response)) {
                 LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }

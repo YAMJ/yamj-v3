@@ -22,11 +22,12 @@
  */
 package org.yamj.core.api.model.dto;
 
+import static org.yamj.plugin.api.metadata.MetadataTools.formatDateShort;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.plugin.api.metadata.MetadataTools;
 
 /**
  * @author modmax
@@ -59,6 +60,6 @@ public class ApiBoxedSetMemberDTO extends AbstractMetaDataDTO {
     }
 
     public void setReleaseDate(Date releaseDate) {
-        this.releaseDate = MetadataTools.formatDateShort(releaseDate);
+        this.releaseDate = formatDateShort(releaseDate);
     }
 }

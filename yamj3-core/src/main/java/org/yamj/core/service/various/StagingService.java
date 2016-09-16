@@ -27,6 +27,7 @@ import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
 import static org.yamj.core.database.Literals.LITERAL_ID;
 import static org.yamj.core.database.Literals.LITERAL_STATUS;
+import static org.yamj.core.tools.YamjTools.split;
 
 import java.io.File;
 import java.util.*;
@@ -48,7 +49,6 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
-import org.yamj.core.tools.YamjTools;
 
 @Transactional(readOnly = true)
 @Service("stagingService")
@@ -357,7 +357,7 @@ public class StagingService {
         Map<String, Object> params = new HashMap<>(2);
         params.put(LITERAL_STATUS, DELETED);
         
-        for (List<Long> subList : YamjTools.split(stageFileIds, 500)) {
+        for (List<Long> subList : split(stageFileIds, 500)) {
             params.put("idList", subList);
             int updated = this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_BULK, params);
             LOG.trace("Marked {} stage files as deleted", updated);

@@ -22,10 +22,13 @@
  */
 package org.yamj.core.service.various;
 
+import static org.apache.commons.lang3.text.WordUtils.capitalize;
+import static org.yamj.core.tools.YamjTools.splitFullName;
+import static org.yamj.plugin.api.metadata.MetadataTools.isVoiceRole;
+
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +38,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.tools.PersonName;
-import org.yamj.core.tools.YamjTools;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.type.JobType;
 import org.yamj.plugin.api.transliteration.Transliterator;
 import ro.fortsoft.pf4j.PluginManager;
@@ -98,7 +99,7 @@ public class IdentifierService {
         // remove all accents from letters
         result = StringUtils.stripAccents(result);
         // capitalize first letter
-        result = WordUtils.capitalize(result, CLEAN_DELIMITERS);
+        result = capitalize(result, CLEAN_DELIMITERS);
         // remove punctuation and symbols
         result = result.replaceAll("[\\p{Po}|\\p{S}]", "");
         // just leave characters and digits
@@ -126,7 +127,7 @@ public class IdentifierService {
         }
 
         CreditDTO credit = new CreditDTO(source, sourceId, jobType, identifier, trimmedName);
-        PersonName personName = YamjTools.splitFullName(trimmedName);
+        final PersonName personName = splitFullName(trimmedName);
         credit.setFirstName(personName.getFirstName());
         credit.setLastName(personName.getLastName());
         return credit;
@@ -140,7 +141,7 @@ public class IdentifierService {
         CreditDTO credit = this.createCredit(source, sourceId, jobType, name);
         if (credit != null && role != null) {
             credit.setRole(role);
-            credit.setVoice(MetadataTools.isVoiceRole(role));
+            credit.setVoice(isVoiceRole(role));
         }
         return credit;
     }

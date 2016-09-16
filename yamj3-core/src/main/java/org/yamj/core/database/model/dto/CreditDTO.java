@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model.dto;
 
+import static org.yamj.plugin.api.metadata.MetadataTools.cleanRole;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +31,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.plugin.api.artwork.ArtworkDTO;
-import org.yamj.plugin.api.metadata.MetadataTools;
 import org.yamj.plugin.api.model.type.JobType;
 
 public final class CreditDTO {
@@ -104,7 +105,7 @@ public final class CreditDTO {
     }
 
     public void setRole(String role) {
-        this.role = MetadataTools.cleanRole(role);
+        this.role = cleanRole(role);
     }
     
     public boolean isVoice() {

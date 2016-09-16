@@ -22,12 +22,13 @@
  */
 package org.yamj.core.service.metadata;
 
+import static org.yamj.core.tools.YamjTools.splitFullName;
+
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonName;
-import org.yamj.core.tools.YamjTools;
 import org.yamj.plugin.api.OnlineScanner;
 import org.yamj.plugin.api.model.IPerson;
 
@@ -69,7 +70,7 @@ public class WrapperPerson implements IPerson {
 
     @Override
     public void setName(String name) {
-        PersonName personName = YamjTools.splitFullName(name);
+        PersonName personName = splitFullName(name);
         if (OverrideTools.checkOverwriteName(person, scannerName)) {
             person.setName(personName.getName(), scannerName);
         }

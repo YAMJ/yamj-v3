@@ -22,6 +22,9 @@
  */
 package org.yamj.core.remote.service;
 
+import static org.yamj.api.common.tools.ResponseTools.isNotOK;
+import static org.yamj.common.tools.DateTimeTools.*;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -35,9 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
-import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.remote.service.GitHubService;
-import org.yamj.common.tools.DateTimeTools;
 
 /**
  * Calls GitHub to determine the last code update
@@ -85,7 +86,7 @@ public class GitHubServiceImpl implements GitHubService {
             httpGet.setURI(newUrl.toURI());
 
             DigestedResponse response = httpClient.requestContent(httpGet);
-            if (ResponseTools.isNotOK(response)) {
+            if (isNotOK(response)) {
                 LOG.warn("Request for GitHub informations failed with status {}", response.getStatusCode());
                 return returnDate;
             }
@@ -146,15 +147,15 @@ public class GitHubServiceImpl implements GitHubService {
             return true;
         }
 
-        DateTime dt1 = DateTimeTools.parseDate(ghDate, DateTimeTools.ISO8601_FORMAT);
-        long diff = DateTimeTools.getDuration(dt1, buildDate);
+        DateTime dt1 = parseDate(ghDate, ISO8601_FORMAT);
+        long diff = getDuration(dt1, buildDate);
 
-        LOG.debug("Difference : {}", diff, DateTimeTools.formatDurationColon(diff));
+        LOG.debug("Difference : {}", diff, formatDurationColon(diff));
         if (diff > (maxAgeDays * MILLISECONDS_PER_DAY)) {
             LOG.warn("Your installation is older than () days! Please update it", maxAgeDays);
             return false;
         } else if (diff > 0) {
-            LOG.debug("Your installation is only {} old.", DateTimeTools.formatDurationText(diff));
+            LOG.debug("Your installation is only {} old.", formatDurationText(diff));
         } else {
             LOG.debug("Your installation is up to date");
         }
