@@ -23,14 +23,20 @@
 package org.yamj.core.service.various;
 
 import static org.yamj.common.type.StatusType.DELETED;
+import static org.yamj.common.type.StatusType.DUPLICATE;
 import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
 import static org.yamj.core.database.Literals.LITERAL_ID;
 import static org.yamj.core.database.Literals.LITERAL_STATUS;
+import static org.yamj.core.database.model.type.FileType.VIDEO;
 import static org.yamj.core.tools.YamjTools.split;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -45,7 +51,13 @@ import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.database.model.MediaFile;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
@@ -215,11 +227,24 @@ public class StagingService {
     }
 
     @Transactional
-    public boolean updateStageFile(Long id) {
-        Map<String, Object> params = new HashMap<>(2);
-        params.put(LITERAL_ID, id);
-        params.put(LITERAL_STATUS, UPDATED);
-        return 0 < this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_NO_DUPLICATE, params);
+    public FileType updateStageFile(Long id) { 
+    	StageFile stageFile = this.stagingDao.getStageFile(id);
+    	if (stageFile == null || stageFile.getStatus().equals(DELETED) || stageFile.getStatus().equals(DUPLICATE)) {
+        	// no change
+        	return null;
+    	}
+
+		if (stageFile.getFileType().equals(VIDEO) && stageFile.getMediaFile() != null) {
+			// update media file instead stage file
+			stageFile.getMediaFile().setStatus(UPDATED);
+			this.stagingDao.updateEntity(stageFile.getMediaFile());
+		} else { 		
+			// just update stage file
+			stageFile.setStatus(UPDATED);
+			this.stagingDao.updateEntity(stageFile);
+		}
+		
+		return stageFile.getFileType();
     }
 
     public void updateWatchedFile(MediaFile mediaFile, StageFile stageFile) {

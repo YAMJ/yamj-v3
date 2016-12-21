@@ -25,9 +25,14 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
+import org.yamj.core.scheduling.MediaFileScanScheduler;
 import org.yamj.core.service.various.StagingService;
 
 @RestController
@@ -40,6 +45,8 @@ public class FileController {
     private StagingService stagingService;
     @Autowired
     private CommonStorageService commonStorageService;
+    @Autowired
+    private MediaFileScanScheduler mediaFileScanScheduler;
 
     /**
      * Mark a stage file as deleted.
@@ -78,13 +85,18 @@ public class FileController {
 
         LOG.info("Updating file {}", id);
 
-        final ApiStatus status;
-        if (this.stagingService.updateStageFile(id)) {
-            status = statusOK(id, "updated");
-        } else {
-            status = statusNotFound(id);
+        FileType fileType = this.stagingService.updateStageFile(id);
+        if (fileType == null) {
+        	// not found
+        	return statusNotFound(id);
         }
-        return status;
+        
+        if (FileType.VIDEO.equals(fileType)) {
+        	// trigger media file scanning
+        	this.mediaFileScanScheduler.trigger();
+        }
+        
+        return statusOK(id, "updated");
     }
 
     /**

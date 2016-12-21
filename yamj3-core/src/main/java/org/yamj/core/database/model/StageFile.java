@@ -75,9 +75,6 @@ import org.yamj.core.database.model.type.FileType;
     ),
     @NamedQuery(name = StageFile.UPDATE_STATUS_BULK,
         query = "UPDATE StageFile SET status=:status WHERE id in :idList"
-    ),
-    @NamedQuery(name = StageFile.UPDATE_STATUS_NO_DUPLICATE,
-        query = "UPDATE StageFile SET status=:status WHERE id=:id and status != 'DELETED'"
     )
 })
     
@@ -102,7 +99,6 @@ public class StageFile extends AbstractStateful {
     public static final String QUERY_FOR_DELETION = "stageFile.forDeletion";
     public static final String UPDATE_STATUS = "stageFile.updateStatus";
     public static final String UPDATE_STATUS_BULK = "stageFile.updateStatus.bulk";
-    public static final String UPDATE_STATUS_NO_DUPLICATE = "stageFile.updateStatus.noDuplicate";
     
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
