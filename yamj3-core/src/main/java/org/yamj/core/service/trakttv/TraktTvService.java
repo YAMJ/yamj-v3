@@ -65,7 +65,9 @@ public class TraktTvService {
     private static final String TRAKTTV_ERROR = "Trakt.TV error";
     private static final int SYNC_MAX_RESULTS = 100;
     private static final long ONE_DAY_MILLISECONDS = 86400000;
-                    
+    private static final String TYPE_SHOW = "show";
+    private static final String TYPE_MOVIE = "movie";
+    
     private static final ReentrantLock REFRESH_LOCK = new ReentrantLock();
     private static boolean REFRESH_FAILED = false;
     
@@ -241,7 +243,7 @@ public class TraktTvService {
             return null;
         }
         for (SearchResult searchResult : searchResults) {
-            if (searchResult.getMovie() != null) {
+        	if (TYPE_MOVIE.equals(searchResult.getType()) && searchResult.getMovie() != null) {
                 return searchResult.getMovie().getIds().trakt();
             }
         }
@@ -328,7 +330,7 @@ public class TraktTvService {
             return null;
         }
         for (SearchResult searchResult : searchResults) {
-            if (searchResult.getShow() != null) {
+        	if (TYPE_SHOW.equals(searchResult.getType()) && searchResult.getShow() != null) {
                 return searchResult.getShow().getIds().trakt();
             }
         }
