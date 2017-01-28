@@ -88,11 +88,13 @@ public class StagingDao extends HibernateDao {
                 .uniqueResult();
     }
 
-    public List<Long> getRootDirectories() {
+    @SuppressWarnings("unchecked")
+	public List<Long> getRootDirectories() {
         return currentSession().getNamedQuery(StageDirectory.QUERY_ROOT_DIRECTORIES).list();
     }
     
-    public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
         }
@@ -104,7 +106,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<VideoData> findVideoDatasForNFO(StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public List<VideoData> findVideoDatasForNFO(StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
         }
@@ -117,7 +120,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<VideoData> findVideoDatasForNFO(String baseName, StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public List<VideoData> findVideoDatasForNFO(String baseName, StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
         }
@@ -131,7 +135,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<VideoData> findVideoDatasForNFO(String baseName, Library library) {
+    @SuppressWarnings("unchecked")
+	public List<VideoData> findVideoDatasForNFO(String baseName, Library library) {
         if (library == null) {
             return Collections.emptyList();
         }
@@ -145,7 +150,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<VideoData> findVideoDatasForNFO(Collection<StageDirectory> stageDirectories) {
+    @SuppressWarnings("unchecked")
+	public List<VideoData> findVideoDatasForNFO(Collection<StageDirectory> stageDirectories) {
         if (CollectionUtils.isEmpty(stageDirectories)) {
             return Collections.emptyList();
         }
@@ -171,7 +177,8 @@ public class StagingDao extends HibernateDao {
                 .uniqueResult();
     }
 
-    public List<StageFile> getValidNFOFilesForVideo(long videoDataId) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> getValidNFOFilesForVideo(long videoDataId) {
         return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_VIDEO)
                 .setLong(LITERAL_VIDEODATA_ID, videoDataId)
                 .setCacheable(true)
@@ -179,7 +186,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<StageFile> getValidNFOFilesForSeries(long seriesId) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> getValidNFOFilesForSeries(long seriesId) {
         return currentSession().getNamedQuery(StageFile.QUERY_VALID_NFOS_SERIES)
                 .setLong(LITERAL_SERIES_ID, seriesId)
                 .setCacheable(true)
@@ -187,7 +195,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
         // NOTE: union not supported in HQL, so each query has to be executed
         Set<Artwork> result = new HashSet<>();
 
@@ -222,7 +231,8 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    public List<Artwork> findMatchingArtworkForSeries(ArtworkType artworkType, StageDirectory stageDirectory, boolean videosOnlyInSubDirs) {
+    @SuppressWarnings("unchecked")
+	public List<Artwork> findMatchingArtworkForSeries(ArtworkType artworkType, StageDirectory stageDirectory, boolean videosOnlyInSubDirs) {
         Map<String, Object> params = new HashMap<>();
         params.put(LITERAL_ARTWORK_TYPE, artworkType);
         params.put(LITERAL_EXTRA, Boolean.FALSE);
@@ -242,7 +252,8 @@ public class StagingDao extends HibernateDao {
         return this.findByNamedParameters(sb, params);
     }
 
-    public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
+    @SuppressWarnings("unchecked")
+	public Set<Artwork> findMatchingArtworkForMovieOrSeason(ArtworkType artworkType, String baseName, Library library) {
         // NOTE: union not supported in HQL, so each query has to be executed
         Set<Artwork> result = new HashSet<>();
 
@@ -283,7 +294,8 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    public List<Artwork> findMatchingVideoImages(String baseName, StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public List<Artwork> findMatchingVideoImages(String baseName, StageDirectory stageDirectory) {
         return currentSession().getNamedQuery(Artwork.QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY)
                 .setString(LITERAL_BASENAME, baseName)
                 .setParameter(LITERAL_STAGE_DIRECTORY, stageDirectory)
@@ -293,7 +305,8 @@ public class StagingDao extends HibernateDao {
                 .list();
     }
 
-    public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, StageDirectory stageDirectory) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, StageDirectory stageDirectory) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf FROM StageFile sf WHERE sf.fileType=:fileType AND lower(sf.baseName)=:baseName ");
         if (searchExtension != null) {
@@ -313,7 +326,8 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, Library library) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, Library library) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf FROM StageFile sf ");
         if (library != null) {
@@ -342,7 +356,8 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    public List<StageFile> findStageFilesInSpecialFolder(FileType fileType, String folderName, Library library, Collection<String> searchNames) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> findStageFilesInSpecialFolder(FileType fileType, String folderName, Library library, Collection<String> searchNames) {
         if (StringUtils.isBlank(folderName) || CollectionUtils.isEmpty(searchNames)) {
             return Collections.emptyList();
         }
@@ -397,7 +412,8 @@ public class StagingDao extends HibernateDao {
         return (Date) query.uniqueResult();
     }
 
-    public List<StageFile> findVideoStageFiles(Artwork artwork) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> findVideoStageFiles(Artwork artwork) {
         final long id;
         final String namedQuery;
         if (artwork.getSeries() != null) {

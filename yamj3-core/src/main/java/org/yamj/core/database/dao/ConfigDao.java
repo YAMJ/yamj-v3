@@ -40,7 +40,8 @@ public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public Map<String, String> readConfig() {
         List<Object[]> objects = currentSession().createSQLQuery("select config_key, config_value from configuration")
                 .setReadOnly(true)
@@ -80,7 +81,8 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
-    public List<Configuration> getConfigurations(OptionsConfig options) {
+    @SuppressWarnings("unchecked")
+	public List<Configuration> getConfigurations(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
 
         if (StringUtils.isBlank(options.getConfig())) {

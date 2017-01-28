@@ -195,7 +195,8 @@ public class AttachmentScannerService {
      *
      * @param movieFile the movie file to scan
      */
-    private List<Attachment> scanAttachments(StageFile stageFile) {
+    @SuppressWarnings("unchecked")
+	private List<Attachment> scanAttachments(StageFile stageFile) {
         if (!isFileScanable(stageFile)) {
             Collections.emptyList();
         }

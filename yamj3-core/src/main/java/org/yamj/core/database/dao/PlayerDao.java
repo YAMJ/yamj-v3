@@ -37,14 +37,15 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("playerDao")
 public class PlayerDao extends HibernateDao {
 
-    public List<PlayerInfo> getPlayerList() {
+    @SuppressWarnings("unchecked")
+	public List<PlayerInfo> getPlayerList() {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
-        // http://stackoverflow.com/a/4645549/443283
         criteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
         return criteria.list();
     }
 
-    public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
+    @SuppressWarnings("unchecked")
+	public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
         criteria.setResultTransformer(DISTINCT_ROOT_ENTITY);
         

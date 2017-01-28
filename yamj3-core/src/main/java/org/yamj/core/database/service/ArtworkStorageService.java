@@ -137,7 +137,8 @@ public class ArtworkStorageService {
         return artworkDao.getArtworkQueueForProcessing(maxResults);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public Artwork getRequiredArtwork(long id) {
         List<Artwork> objects = this.artworkDao.namedQueryById(Artwork.QUERY_REQUIRED, id);
         Artwork artwork = DataAccessUtils.requiredUniqueResult(objects);
@@ -167,13 +168,15 @@ public class ArtworkStorageService {
         artworkDao.executeUpdate(Artwork.UPDATE_STATUS, params);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(long id) {
         List<ArtworkLocated> objects = this.artworkDao.namedQueryById(ArtworkLocated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public ArtworkGenerated getRequiredArtworkGenerated(long id) {
         List<ArtworkGenerated> objects = this.artworkDao.namedQueryById(ArtworkGenerated.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);

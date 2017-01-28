@@ -141,7 +141,8 @@ public abstract class HibernateDao {
      * @param order
      * @return
      */
-    public <T> List<T> getAll(Class<T> entityClass, String order) {
+    @SuppressWarnings("unchecked")
+	public <T> List<T> getAll(Class<T> entityClass, String order) {
         return currentSession().createCriteria(entityClass).addOrder(Order.asc(order)).list();
     }
 
@@ -465,7 +466,7 @@ public abstract class HibernateDao {
      * @param wrapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars, IApiWrapper wrapper) { //NOSONAR
         
         SQLQuery query = currentSession().createSQLQuery(sqlScalars.getSql());
@@ -502,7 +503,7 @@ public abstract class HibernateDao {
         }
 
         // run query
-        List<T> queryResults = query.list();
+		List<T> queryResults = query.list();
 
         // if the wrapper is populated, then run the query to get the maximum results
         if (wrapper != null) {

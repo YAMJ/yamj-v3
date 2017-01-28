@@ -55,19 +55,22 @@ public class TrailerStorageService {
         return commonDao.getQueueIdOnly(Trailer.QUERY_PROCESSING_QUEUE, maxResults);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
         List<VideoData> objects = this.commonDao.namedQueryById(VideoData.QUERY_REQUIRED_FOR_TRAILER, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
         List<Series> objects = this.commonDao.namedQueryById(Series.QUERY_REQUIRED_FOR_TRAILER, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
     
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public Trailer getRequiredTrailer(Long id) {
         List<Trailer> objects = this.commonDao.namedQueryById(Trailer.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);

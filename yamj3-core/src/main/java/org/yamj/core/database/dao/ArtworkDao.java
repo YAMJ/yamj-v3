@@ -44,7 +44,8 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
     
-    public List<ArtworkProfile> getAllArtworkProfiles() {
+    @SuppressWarnings("unchecked")
+	public List<ArtworkProfile> getAllArtworkProfiles() {
         return currentSession().getNamedQuery(ArtworkProfile.QUERY_GET_ALL)
                 .setReadOnly(true)
                 .setCacheable(true)
@@ -59,7 +60,8 @@ public class ArtworkDao extends HibernateDao {
                 .load();
     }
 
-    public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
+    @SuppressWarnings("unchecked")
+	public List<ArtworkProfile> getPreProcessArtworkProfiles(MetaDataType metaDataType, ArtworkType artworkType) {
         return currentSession().createCriteria(ArtworkProfile.class)
                 .add(Restrictions.eq(LITERAL_METADATA_TYPE, metaDataType))
                 .add(Restrictions.eq(LITERAL_ARTWORK_TYPE, artworkType))
@@ -90,7 +92,8 @@ public class ArtworkDao extends HibernateDao {
                 .uniqueResult();
     }
     
-    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean scanPhoto) {
+    @SuppressWarnings("unchecked")
+	public List<QueueDTO> getArtworkQueueForScanning(final int maxResults,boolean scanPhoto) {
         return currentSession().getNamedQuery(Artwork.QUERY_SCANNING_QUEUE)
                 .setString("personStatus", scanPhoto?DONE.name():"NONE")
                 .setReadOnly(true)
@@ -122,7 +125,8 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
-    public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
+    @SuppressWarnings("unchecked")
+	public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         return currentSession().createCriteria(Artwork.class)
                 .add(Restrictions.eq(LITERAL_ARTWORK_TYPE, artworkType))
                 .createAlias("boxedSet", "bs")
@@ -146,7 +150,8 @@ public class ArtworkDao extends HibernateDao {
         }
     }
     
-    public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
+    @SuppressWarnings("unchecked")
+	public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
         return currentSession().createCriteria(ArtworkLocated.class)
                 .add(Restrictions.isNotNull(LITERAL_CACHE_FILENAME))
                 .add(Restrictions.ne(LITERAL_STATUS, DELETED))

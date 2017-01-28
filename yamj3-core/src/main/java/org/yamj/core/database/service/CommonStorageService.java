@@ -61,7 +61,8 @@ public class CommonStorageService {
     @Autowired
     private StagingService stagingService;
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<Long> getStageFilesForDeletion() {
         return stagingDao.namedQuery(StageFile.QUERY_FOR_DELETION);
     }
@@ -323,7 +324,8 @@ public class CommonStorageService {
         this.stagingDao.deleteEntity(generated);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<Long> getArtworkLocatedForDeletion() {
         return stagingDao.namedQuery(ArtworkLocated.QUERY_FOR_DELETION);
     }
@@ -350,7 +352,8 @@ public class CommonStorageService {
         return new DeletionDTO(filesToDelete, updateTrigger);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
         return this.stagingDao.namedQuery(Person.QUERY_ORPHANS);
     }
@@ -371,7 +374,8 @@ public class CommonStorageService {
         return filesToDelete;
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<Long> getOrphanBoxedSets() {
         return this.stagingDao.namedQuery(BoxedSet.QUERY_ORPHANS);
     }
@@ -500,7 +504,8 @@ public class CommonStorageService {
         return this.stagingDao.executeUpdate(Certification.DELETE_ORPHANS);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<Long> getTrailersToDelete() {
         return stagingDao.namedQuery(Trailer.QUERY_FOR_DELETION);
     }

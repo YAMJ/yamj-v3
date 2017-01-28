@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
-import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.tools.PersonName;
 import org.yamj.plugin.api.model.type.JobType;
@@ -52,8 +51,6 @@ public class IdentifierService {
 
     @Autowired
     private PluginManager pluginManager;
-    @Autowired
-    private ConfigServiceWrapper configServiceWrapper;
     
     @Value("${yamj3.transliterate:false}")
     private boolean transliterationEnabled;

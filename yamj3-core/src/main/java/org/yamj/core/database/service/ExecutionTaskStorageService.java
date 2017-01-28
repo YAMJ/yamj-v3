@@ -62,7 +62,8 @@ public class ExecutionTaskStorageService {
         return this.commonDao.getAll(ExecutionTask.class, LITERAL_NAME);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public List<ExecutionTask> getExecutableTasks() {
         Map<String,Object> params = Collections.singletonMap("actualDate", (Object)new Date());
         return this.commonDao.namedQueryByNamedParameters(ExecutionTask.QUERY_EXECUTABLE_TASKS, params);

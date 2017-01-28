@@ -217,7 +217,8 @@ public class ArtworkLocatorService {
         addNameWithTokens(artworkNames, name, tokens);
     }
 
-    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
+    @SuppressWarnings("unchecked")
+	public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
         final StringBuilder sb = new StringBuilder();
         sb.append("select distinct f from StageFile f ");
         sb.append("where lower(f.baseName) like 'set_");
@@ -241,28 +242,32 @@ public class ArtworkLocatorService {
         return stagingDao.findByNamedParameters(sb, params);
     }
     
-    private List<StageFile> findVideoFiles(VideoData videoData) {
+    @SuppressWarnings("unchecked")
+	private List<StageFile> findVideoFiles(VideoData videoData) {
         final Map<String,Object> params = new HashMap<>();
         params.put(LITERAL_ID, videoData.getId());
         params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA, params);
     }
 
-    private List<StageFile> findVideoFiles(Season season) {
+    @SuppressWarnings("unchecked")
+	private List<StageFile> findVideoFiles(Season season) {
         final Map<String,Object> params = new HashMap<>();
         params.put(LITERAL_ID, season.getId());
         params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageFile.QUERY_VIDEOFILES_FOR_SEASON, params);
     }
 
-    private List<StageDirectory> findVideoDirectories(Series series) {
+    @SuppressWarnings("unchecked")
+	private List<StageDirectory> findVideoDirectories(Series series) {
         final Map<String,Object> params = new HashMap<>();
         params.put(LITERAL_ID, series.getId());
         params.put(LITERAL_EXTRA, Boolean.FALSE);
         return stagingDao.namedQueryByNamedParameters(StageDirectory.QUERY_VIDEO_DIRECTORIES_FOR_SERIES, params);
     }
 
-    private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
+    @SuppressWarnings("unchecked")
+	private List<StageFile> findArtworkStageFiles(Collection<StageDirectory> directories, Set<String> artworkNames) {
         final Map<String,Object> params = new HashMap<>();
         params.put("directories", directories);
         params.put("artworkNames", artworkNames);
@@ -290,7 +295,8 @@ public class ArtworkLocatorService {
         return artworks;
     }
     
-    public List<Long> getVideoEpisodes(VideoData videoData) {
+    @SuppressWarnings("unchecked")
+	public List<Long> getVideoEpisodes(VideoData videoData) {
         return this.stagingDao.namedQueryById(VideoData.QUERY_EPISODES_OF_MEDIAFILE, videoData.getId());
     }
 

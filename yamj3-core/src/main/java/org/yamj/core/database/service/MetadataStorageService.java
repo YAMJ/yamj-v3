@@ -98,7 +98,8 @@ public class MetadataStorageService {
         return videoData;
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
         List<Series> objects = metadataDao.namedQueryById(Series.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);
@@ -861,7 +862,8 @@ public class MetadataStorageService {
         commonDao.executeUpdate(Person.UPDATE_FILMOGRAPHY_STATUS, params);
     }
 
-    @Transactional
+    @SuppressWarnings("unchecked")
+	@Transactional
     public boolean recheckMovie(Date compareDate, int limit) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         List<Long> idList = this.commonDao.namedQueryByNamedParameters(VideoData.QUERY_IDS_RECHECK_MOVIE, params, limit);
@@ -874,7 +876,8 @@ public class MetadataStorageService {
         return this.commonDao.executeUpdate(VideoData.UPDATE_STATUS_RECHECK, params)>0;
     }
 
-    @Transactional
+    @SuppressWarnings("unchecked")
+	@Transactional
     public boolean recheckTvShow(Date compareDate, int limit) {
         final Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         int updated = 0;
@@ -904,7 +907,8 @@ public class MetadataStorageService {
         return updated > 0;
     }
 
-    @Transactional
+    @SuppressWarnings("unchecked")
+	@Transactional
     public boolean recheckPerson(Date compareDate, int limit) {
         Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         List<Long> idList = this.commonDao.namedQueryByNamedParameters(Person.QUERY_IDS_RECHECK, params, limit);
@@ -1131,7 +1135,6 @@ public class MetadataStorageService {
         this.commonDao.updateEntity(person);
     }
     
-    @SuppressWarnings("unused")
     @CacheEvict(value={API_GENRES,API_STUDIOS,API_COUNTRIES,API_CERTIFICATIONS,API_EXTERNAL_IDS,API_RATINGS,API_AWARDS,API_BOXEDSETS,API_TRAILERS,API_VIDEOSOURCE}, key="{#type, #id}")
     public void evictApiCaches(MetaDataType type, Long id) {
         // just for evicting caches

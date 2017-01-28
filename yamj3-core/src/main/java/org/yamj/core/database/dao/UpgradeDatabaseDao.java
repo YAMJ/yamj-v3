@@ -38,7 +38,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // MYSQL CHECKS
     
-    protected boolean mysqlExistsColumn(String table, String column) {
+    @SuppressWarnings("unchecked")
+	protected boolean mysqlExistsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.COLUMNS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -48,7 +49,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return CollectionUtils.isNotEmpty(objects);
     }
 
-    protected boolean mysqlExistsForeignKey(String table, String foreignKey) {
+    @SuppressWarnings("unchecked")
+	    protected boolean mysqlExistsForeignKey(String table, String foreignKey) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -68,7 +70,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
     }
     
-    @SuppressWarnings("cast")
+    @SuppressWarnings({ "cast", "unchecked" })
     protected List<String> mysqlListForeignKeys(String table) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS ");
@@ -78,7 +80,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (List<String>) currentSession().createSQLQuery(sb.toString()).list();
     }
 
-    protected boolean mysqlExistsIndex(String table, String indexName) {
+    @SuppressWarnings("unchecked")
+	protected boolean mysqlExistsIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.STATISTICS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -97,7 +100,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
     }
 
-    protected boolean mysqlExistsUniqueIndex(String table, String indexName) {
+    @SuppressWarnings("unchecked")
+	protected boolean mysqlExistsUniqueIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -119,7 +123,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // HSQL CHECKS
     
-    protected boolean hsqlExistsColumn(String table, String column) {
+    @SuppressWarnings("unchecked")
+	protected boolean hsqlExistsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.COLUMNS ");
         sb.append("WHERE UPPER(TABLE_NAME) = '").append(table.toUpperCase()).append("' ");
@@ -130,7 +135,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     // FIX ROLES
     
-    public void fixRoles() {
+    @SuppressWarnings("unchecked")
+	public void fixRoles() {
         List<CastCrew> list = currentSession().createQuery("FROM CastCrew cc WHERE cc.role like '%(%'").list();
         for (CastCrew cc : list) {
             String role = cc.getRole();

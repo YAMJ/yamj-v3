@@ -37,8 +37,10 @@ import org.yamj.core.service.metadata.extras.ExtrasScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.trailer.TrailerProcessorService;
 import org.yamj.core.service.trailer.TrailerScannerService;
-import org.yamj.core.service.various.IdentifierService;
-import org.yamj.plugin.api.*;
+import org.yamj.plugin.api.NeedsConfigService;
+import org.yamj.plugin.api.NeedsHttpClient;
+import org.yamj.plugin.api.NeedsLocaleService;
+import org.yamj.plugin.api.NeedsMetadataService;
 import org.yamj.plugin.api.artwork.ArtworkScanner;
 import org.yamj.plugin.api.extras.ExtrasScanner;
 import org.yamj.plugin.api.metadata.MetadataScanner;
@@ -60,8 +62,6 @@ public class PluginExtensionInitialization {
     private ConfigServiceWrapper congfigServiceWrapper;
     @Autowired
     private LocaleService localeService;
-    @Autowired
-    private IdentifierService identifierService;
     @Autowired
     private PoolingHttpClient poolingHttpClient;
     @Autowired

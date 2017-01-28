@@ -59,7 +59,8 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
     
-    public List<QueueDTO> getQueueIdOnly(final String queryName, final int maxResults) {        
+    @SuppressWarnings("unchecked")
+	public List<QueueDTO> getQueueIdOnly(final String queryName, final int maxResults) {        
         return currentSession().getNamedQuery(queryName)
                 .setReadOnly(true)
                 .setCacheable(true)
@@ -133,7 +134,8 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiGenreDTO> getGenreFilename(String filename) {
+    @SuppressWarnings("unchecked")
+	public List<ApiGenreDTO> getGenreFilename(String filename) {
         return currentSession().getNamedQuery(Genre.QUERY_FILENAME)
                 .setString("filename", filename.toLowerCase())
                 .setCacheable(true)
@@ -228,7 +230,8 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiCountryDTO> getCountryFilename(String filename) {
+    @SuppressWarnings("unchecked")
+	public List<ApiCountryDTO> getCountryFilename(String filename) {
         return currentSession().getNamedQuery(Country.QUERY_FILENAME)
                 .setString("filename", filename.toLowerCase())
                 .setCacheable(true)

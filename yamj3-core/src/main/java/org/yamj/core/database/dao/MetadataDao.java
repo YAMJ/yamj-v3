@@ -55,7 +55,8 @@ public class MetadataDao extends HibernateDao {
     @Autowired
     private ArtworkDao artworkDao;
 
-    public List<QueueDTO> getMetadataQueue(final String queryName, final int maxResults) {
+    @SuppressWarnings("unchecked")
+	public List<QueueDTO> getMetadataQueue(final String queryName, final int maxResults) {
         return currentSession().getNamedQuery(queryName)
                 .setReadOnly(true)
                 .setCacheable(true)
@@ -85,7 +86,8 @@ public class MetadataDao extends HibernateDao {
         return getById(Person.class, id);
     }
 
-    @CacheEvict(value=DB_PERSON, key="#doubletPerson.id")
+    @SuppressWarnings("unchecked")
+	@CacheEvict(value=DB_PERSON, key="#doubletPerson.id")
     public void duplicate(Person person, Person doubletPerson) {
         // find movies which contains the doublet
         List<VideoData> videoDatas = currentSession().getNamedQuery(VideoData.QUERY_FIND_VIDEOS_FOR_PERSON)
@@ -191,7 +193,8 @@ public class MetadataDao extends HibernateDao {
         }
     }
 
-    public List<Artwork> findPersonArtworks(String identifier) {
+    @SuppressWarnings("unchecked")
+	public List<Artwork> findPersonArtworks(String identifier) {
         return currentSession().getNamedQuery(Artwork.QUERY_FIND_PERSON_ARTWORKS)
                 .setParameter(LITERAL_ARTWORK_TYPE, PHOTO)
                 .setString(LITERAL_IDENTIFIER, identifier.toLowerCase())

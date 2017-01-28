@@ -929,15 +929,30 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         
-        if (!results.isEmpty() && options.hasDataItem(DataItem.ARTWORK)) {
-            LOG.trace("Adding photos");
-            // Get the artwork associated with the IDs in the results
-            Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForMetadata(PERSON, generateIdList(results), artworkRequired, options.getArtworksortdir());
-            for (ApiPersonDTO p : results) {
-                if (artworkList.containsKey(p.getId())) {
-                    p.setArtwork(artworkList.get(p.getId()));
+        if (!results.isEmpty()) {
+        	
+        	if (options.hasDataItem(DataItem.ARTWORK)) {
+	            LOG.trace("Adding photos");
+	            // Get the artwork associated with the IDs in the results
+	            Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
+	            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForMetadata(PERSON, generateIdList(results), artworkRequired, options.getArtworksortdir());
+	            for (ApiPersonDTO person : results) {
+	                if (artworkList.containsKey(person.getId())) {
+	                	person.setArtwork(artworkList.get(person.getId()));
+	                }
+	            }
+        	}
+
+        	if (options.hasDataItem(DataItem.FILMOGRAPHY_INSIDE)) {
+        		LOG.trace("Adding filmograpghy inside");
+	            for (ApiPersonDTO person: results) {
+	            	person.setFilmography(getPersonFilmographyInside(person.getId(), options));
                 }
+            } else if (options.hasDataItem(DataItem.FILMOGRAPHY_SCANNED)) {
+                LOG.trace("Adding filmograpghy scanned");
+	            for (ApiPersonDTO person: results) {
+	            	person.setFilmography(getPersonFilmographyScanned(person.getId(), options));
+	            }
             }
         }
         
@@ -1043,7 +1058,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", releaseDate ");
         sbSQL.append(sortDir);
 
-        LOG.info("Filmography inside SQL: {}", sbSQL);
+        LOG.trace("Filmography inside SQL: {}", sbSQL);
         return retrieveFilmography(id, sbSQL);
     }
 
@@ -1095,7 +1110,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", p.release_date ");
         sbSQL.append(sortDir);
 
-        LOG.info("Filmography scanned SQL: {}", sbSQL);
+        LOG.trace("Filmography scanned SQL: {}", sbSQL);
         return retrieveFilmography(id, sbSQL);
     }
 
@@ -1137,7 +1152,7 @@ public class ApiDao extends HibernateDao {
                 }
             }
         } else {
-            LOG.info("No artwork found/requested for {} with ID {}", metaDataType, options.getId());
+            LOG.debug("No artwork found/requested for {} with ID {}", metaDataType, options.getId());
         }
 
         return results;
@@ -1505,7 +1520,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    public List<ApiFileDTO> getFilesForMetadata(MetaDataType type, Long id) {
+    @SuppressWarnings("unchecked")
+	public List<ApiFileDTO> getFilesForMetadata(MetaDataType type, Long id) {
         // Build the SQL statement
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT mf.id as id, mf.extra as extra, mf.part as part, mf.part_title as partTitle, mf.movie_version as version, ");
@@ -1581,7 +1597,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_TRAILERS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_TRAILERS, key="{#type, #id}")
     public List<ApiTrailerDTO> getTrailersForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.trailer."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1593,7 +1610,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_GENRES, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_GENRES, key="{#type, #id}")
     public List<ApiGenreDTO> getGenresForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.genre."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1605,7 +1623,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_STUDIOS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_STUDIOS, key="{#type, #id}")
     public List<Studio> getStudiosForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.studio."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1617,7 +1636,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_COUNTRIES, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_COUNTRIES, key="{#type, #id}")
     public List<ApiCountryDTO> getCountriesForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.country."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1629,7 +1649,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_CERTIFICATIONS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_CERTIFICATIONS, key="{#type, #id}")
     public List<ApiCertificationDTO> getCertificationsForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.certification."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1641,7 +1662,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_RATINGS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_RATINGS, key="{#type, #id}")
     public List<ApiRatingDTO> getRatingsForMetadata(MetaDataType type, Long id) {
         final MetaDataType fixedType = EPISODE == type ? MOVIE : type; 
         return currentSession().getNamedQuery("metadata.rating."+fixedType.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
@@ -1654,7 +1676,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_AWARDS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_AWARDS, key="{#type, #id}")
     public List<ApiAwardDTO> getAwardsForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.award."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
@@ -1666,7 +1689,8 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    @Cacheable(value=API_EXTERNAL_IDS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_EXTERNAL_IDS, key="{#type, #id}")
     public List<ApiExternalIdDTO> getExternalIdsForMetadata(MetaDataType type, Long id) {
         final MetaDataType fixedType = EPISODE == type ? MOVIE : type; 
         return currentSession().getNamedQuery("metadata.externalid."+fixedType.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
@@ -2029,7 +2053,8 @@ public class ApiDao extends HibernateDao {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
-    @Cacheable(value=API_BOXEDSETS, key="{#type, #id}")
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_BOXEDSETS, key="{#type, #id}")
     public List<ApiBoxedSetDTO> getBoxedSetsForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.boxedset."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }

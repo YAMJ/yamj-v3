@@ -251,7 +251,8 @@ public class FileStorageService {
         return message;
     }
 
-    private static boolean unzipSkinFile(Skin skin, String zipFilename) {
+    @SuppressWarnings("unchecked")
+	private static boolean unzipSkinFile(Skin skin, String zipFilename) {
         boolean unzipResult;
         try {
             ZipFile zf = new ZipFile(zipFilename);

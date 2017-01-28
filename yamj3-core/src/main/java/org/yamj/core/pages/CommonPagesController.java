@@ -39,7 +39,6 @@ import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.Skin;
-import org.yamj.core.config.ConfigService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.trakttv.TraktTvPin;
@@ -52,8 +51,6 @@ public class CommonPagesController extends AbstractPagesController {
     
     @Autowired
     private IndexController indexController;
-    @Autowired
-    private ConfigService configService;
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired 

@@ -122,7 +122,6 @@ public class TrailerScannerService implements IQueueProcessService {
         }
     }
 
-    @SuppressWarnings("unused")
     private void scanTrailerLocal(VideoData videoData, List<Trailer> trailers) {
         if (!configService.getBooleanProperty("yamj3.trailer.scan.local.movie", true)) {
             LOG.trace("Local movie trailer scan disabled");
@@ -185,7 +184,6 @@ public class TrailerScannerService implements IQueueProcessService {
         }
      }
 
-    @SuppressWarnings("unused")
     private void scanTrailerLocal(Series series, List<Trailer> trailers) {
         if (!configService.getBooleanProperty("yamj3.trailer.scan.local.series", true)) {
             LOG.trace("Local series trailer scan disabled");

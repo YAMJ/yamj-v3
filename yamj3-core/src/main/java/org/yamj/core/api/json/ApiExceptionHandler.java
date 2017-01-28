@@ -18,7 +18,6 @@ public class ApiExceptionHandler {
     
     @ResponseBody
     @ExceptionHandler(Exception.class)
-    @SuppressWarnings("unused")
     public ResponseEntity<Object> defaultException(Exception ex, WebRequest request) { //NOSONAR
         if (isLockingError(ex)) {
             LOG.trace("Locking error occured", ex);

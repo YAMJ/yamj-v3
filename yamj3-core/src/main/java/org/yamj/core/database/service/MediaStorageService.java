@@ -50,7 +50,8 @@ public class MediaStorageService {
         return commonDao.getQueueIdOnly(MediaFile.QUERY_QUEUE, maxResults);
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
     public MediaFile getRequiredMediaFile(Long id) {
         List<MediaFile> objects = this.commonDao.namedQueryById(MediaFile.QUERY_REQUIRED, id);
         return DataAccessUtils.requiredUniqueResult(objects);

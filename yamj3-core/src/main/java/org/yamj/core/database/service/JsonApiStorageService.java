@@ -26,7 +26,15 @@ import static org.yamj.core.CachingNames.API_EXTERNAL_IDS;
 import static org.yamj.core.CachingNames.API_GENRES;
 import static org.yamj.core.database.Literals.LITERAL_NAME;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,13 +50,51 @@ import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiCertificationDTO;
+import org.yamj.core.api.model.dto.ApiCountryDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiFileDTO;
+import org.yamj.core.api.model.dto.ApiFilmographyDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiSubtitleDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.model.dto.ApiYearDecadeDTO;
+import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsIdArtwork;
+import org.yamj.core.api.options.OptionsIndexArtwork;
+import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.options.OptionsPlayer;
+import org.yamj.core.api.options.UpdatePerson;
+import org.yamj.core.api.options.UpdateVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.dao.*;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.dao.ApiDao;
+import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.MetadataDao;
+import org.yamj.core.database.dao.PlayerDao;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.IScannable;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Trailer;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
@@ -169,22 +215,28 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
     public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper, OptionsId options) {
-        return apiDao.getPersonList(wrapper, options);
+        List<ApiPersonDTO> personList = apiDao.getPersonList(wrapper, options);
+        for (ApiPersonDTO person : personList) {
+        	localizeFilmography(person, options.getLanguage());
+        }
+        return personList;
     }
 
     public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper, OptionsId options) {
         ApiPersonDTO person = apiDao.getPerson(wrapper, options);
-        
         if (person != null) {
-            for (ApiFilmographyDTO filmo : person.getFilmography()) {
-                String releaseCountry = localeService.getDisplayCountry(options.getLanguage(), filmo.getReleaseCountryCode());
-                filmo.setReleaseCountry(releaseCountry);
-            }
+        	localizeFilmography(person, options.getLanguage());
         }
-        
         return person;
     }
 
+    private void localizeFilmography(ApiPersonDTO person, String inLanguage) {
+        for (ApiFilmographyDTO filmo : person.getFilmography()) {
+            String releaseCountry = localeService.getDisplayCountry(inLanguage, filmo.getReleaseCountryCode());
+            filmo.setReleaseCountry(releaseCountry);
+        }
+    }
+    
     public  List<ApiPersonDTO> getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         return apiDao.getPersonListByVideoType(metaDataType, wrapper);
     }
