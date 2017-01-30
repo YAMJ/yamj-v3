@@ -25,11 +25,14 @@ package org.yamj.core.database.dao;
 import static org.yamj.common.type.MetaDataType.*;
 import static org.yamj.core.CachingNames.*;
 import static org.yamj.core.database.Literals.*;
+import static org.yamj.plugin.api.model.type.ArtworkType.*;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.SQLQuery;
+import org.hibernate.transform.Transformers;
 import org.hibernate.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2065,15 +2068,9 @@ public class ApiDao extends HibernateDao {
 
         List<ApiBoxedSetDTO> boxedSets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
         
-        if (!boxedSets.isEmpty() && options.hasDataItem(DataItem.ARTWORK)) {
+        if (options.hasDataItem(DataItem.ARTWORK)) {
             for (ApiBoxedSetDTO boxedSet : boxedSets) {
-                Map<Long, List<ApiArtworkDTO>> artworkList;
-                if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                    artworkList = getArtworkForMetadata(BOXSET, boxedSet.getId(), options.getArtworkTypes(), options.getArtworksortdir());
-                } else {
-                    artworkList = getArtworkForMetadata(BOXSET, boxedSet.getId(), options.getArtworksortdir());
-                }
-                boxedSet.addArtwork(artworkList.get(boxedSet.getId()));
+            	getBoxedSetArtwork(boxedSet, options);
             }
         }
         
@@ -2138,19 +2135,36 @@ public class ApiDao extends HibernateDao {
         }
 
         if (options.hasDataItem(DataItem.ARTWORK)) {
-            LOG.trace("Adding artwork for ID {}", options.getId());
-            Map<Long, List<ApiArtworkDTO>> artworkList;
-            if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                artworkList = getArtworkForMetadata(BOXSET, options.getId(), options.getArtworkTypes(), options.getArtworksortdir());
-            } else {
-                artworkList = getArtworkForMetadata(BOXSET, options.getId(), options.getArtworksortdir());
-            }
-            boxedSet.addArtwork(artworkList.get(options.getId()));
+        	getBoxedSetArtwork(boxedSet, options);
         }
 
         return boxedSet;
     }
 
+    private void getBoxedSetArtwork(ApiBoxedSetDTO boxedSet, OptionsBoxedSet options) {
+        LOG.trace("Adding artwork for boxed set ID {}", boxedSet.getId());
+        Map<Long, List<ApiArtworkDTO>> artworkList;
+        if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+            artworkList = getArtworkForMetadata(BOXSET, boxedSet.getId(), options.getArtworkTypes(), options.getArtworksortdir());
+        } else {
+            artworkList = getArtworkForMetadata(BOXSET, boxedSet.getId(), options.getArtworksortdir());
+        }
+        boxedSet.addArtwork(artworkList.get(boxedSet.getId()));
+        
+        if (!boxedSet.hasArtwork(POSTER) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(POSTER))) {
+        	// use first poster of boxed set members
+        	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), POSTER, options.getArtworksortdir()));
+        }
+        if (!boxedSet.hasArtwork(FANART) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(FANART))) {
+        	// use first fanart of boxed set members
+        	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), FANART, options.getArtworksortdir()));
+        }
+        if (!boxedSet.hasArtwork(BANNER) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(BANNER))) {
+        	// use first banner of boxed set members
+        	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), BANNER, options.getArtworksortdir()));
+        }
+    }
+    
     private static SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id, s.name, count(s.member) as memberCount, min(s.watched_set) as watched FROM (");
@@ -2190,6 +2204,57 @@ public class ApiDao extends HibernateDao {
 
         return sqlScalars;
     }
+
+    /**
+     * Get a select list of artwork available for a video ID
+     *
+     * @param type
+     * @param id
+     * @param artworkRequired
+     * @param artworkSortDir
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	private List<ApiArtworkDTO> getFirstMemberArtwork(Long boxedSetId, ArtworkType artworkType, String artworkSortDir) {
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("SELECT 'BOXSET' as source, bso_1.boxedset_id as id, a_1.id AS artworkId, al_1.id AS locatedId, ag_1.id AS generatedId,");
+    	sb.append("a_1.artwork_type AS artworkType, ag_1.cache_dir AS cacheDir, ag_1.cache_filename AS cacheFilename, al_1.create_timestamp, bso_1.ordering ");
+    	sb.append("FROM boxed_set_order bso_1 ");
+    	sb.append("JOIN artwork a_1 ON a_1.videodata_id=bso_1.videodata_id AND a_1.artwork_type=:artworkType ");
+    	sb.append("JOIN artwork_located al_1 ON a_1.id=al_1.artwork_id and al_1.status not in ('INVALID','NOTFOUND','ERROR','IGNORE','DELETED') ");
+    	sb.append("JOIN artwork_generated ag_1 ON al_1.id=ag_1.located_id ");
+    	sb.append("WHERE bso_1.boxedset_id=:id ");
+    	sb.append("UNION ");
+    	sb.append("SELECT 'BOXSET' as source, bso_2.boxedset_id as id, a_2.id AS artworkId, al_2.id AS locatedId, ag_2.id AS generatedId,");
+    	sb.append("a_2.artwork_type AS artworkType, ag_2.cache_dir AS cacheDir, ag_2.cache_filename AS cacheFilename, al_2.create_timestamp, bso_2.ordering ");
+    	sb.append("FROM boxed_set_order bso_2 ");
+    	sb.append("JOIN artwork a_2 ON a_2.series_id=bso_2.series_id AND a_2.artwork_type=:artworkType ");
+    	sb.append("JOIN artwork_located al_2 ON a_2.id=al_2.artwork_id and al_2.status not in ('INVALID','NOTFOUND','ERROR','IGNORE','DELETED') "); 
+    	sb.append("JOIN artwork_generated ag_2 ON al_2.id=ag_2.located_id ");
+    	sb.append("WHERE bso_2.boxedset_id=:id  ");
+        if ("DESC".equalsIgnoreCase(artworkSortDir)) {
+        	sb.append("ORDER BY ordering DESC, create_timestamp DESC");
+        } else {
+        	sb.append("ORDER BY ordering ASC, create_timestamp ASC");
+        }
+        
+    	SQLQuery query = currentSession().createSQLQuery(sb.toString());
+    	query.addScalar(LITERAL_ID, LongType.INSTANCE);
+    	query.addScalar(LITERAL_SOURCE, StringType.INSTANCE);
+    	query.addScalar(LITERAL_ARTWORK_ID, LongType.INSTANCE);
+    	query.addScalar(LITERAL_LOCATED_ID, LongType.INSTANCE);
+    	query.addScalar(LITERAL_GENERATED_ID, LongType.INSTANCE);
+    	query.addScalar(LITERAL_ARTWORK_TYPE, StringType.INSTANCE);
+    	query.addScalar(LITERAL_CACHE_DIR, StringType.INSTANCE);
+    	query.addScalar(LITERAL_CACHE_FILENAME, StringType.INSTANCE);
+
+    	query.setLong(LITERAL_ID, boxedSetId);
+    	query.setString("artworkType", artworkType.name());
+        query.setResultTransformer(Transformers.aliasToBean(ApiArtworkDTO.class));
+        query.setMaxResults(1); // just the first result
+        return query.list();
+    }
+
     //</editor-fold>
 
     public List<ApiNameDTO> getAlphabeticals(OptionsMultiType options) {

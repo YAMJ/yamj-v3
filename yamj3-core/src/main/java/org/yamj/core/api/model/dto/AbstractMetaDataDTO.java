@@ -120,6 +120,10 @@ public abstract class AbstractMetaDataDTO extends AbstractApiIdentifiableDTO {
         this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 
+    public final boolean hasArtwork(ArtworkType artworkType) {
+    	return CollectionUtils.isNotEmpty(this.artwork.get(artworkType));
+    }
+    
     public final int getArtworkCount() {
         int count = 0;
         for (Map.Entry<ArtworkType, List<ApiArtworkDTO>> entry : artwork.entrySet()) {
