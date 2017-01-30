@@ -2151,15 +2151,15 @@ public class ApiDao extends HibernateDao {
         }
         boxedSet.addArtwork(artworkList.get(boxedSet.getId()));
         
-        if (!boxedSet.hasArtwork(POSTER) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(POSTER))) {
+        if (!boxedSet.hasArtwork(POSTER) && options.hasArtworkType(POSTER)) {
         	// use first poster of boxed set members
         	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), POSTER, options.getArtworksortdir()));
         }
-        if (!boxedSet.hasArtwork(FANART) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(FANART))) {
+        if (!boxedSet.hasArtwork(FANART) && options.hasArtworkType(FANART)) {
         	// use first fanart of boxed set members
         	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), FANART, options.getArtworksortdir()));
         }
-        if (!boxedSet.hasArtwork(BANNER) && (CollectionUtils.isEmpty(options.getArtworkTypes()) || options.hasArtwork(BANNER))) {
+        if (!boxedSet.hasArtwork(BANNER) && options.hasArtworkType(BANNER)) {
         	// use first banner of boxed set members
         	boxedSet.addArtwork(getFirstMemberArtwork(boxedSet.getId(), BANNER, options.getArtworksortdir()));
         }

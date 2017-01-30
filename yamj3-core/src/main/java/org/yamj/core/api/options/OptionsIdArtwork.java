@@ -54,10 +54,6 @@ public class OptionsIdArtwork extends OptionsId {
         splitArtwork();
     }
 
-    public boolean hasArtwork(ArtworkType artworkType) {
-        return artworkTypes.contains(artworkType.toString());
-    }
-
     private void splitArtwork() {
         this.artworkTypes.clear();
         if (StringUtils.containsIgnoreCase(artwork, ALL)) {
@@ -82,5 +78,9 @@ public class OptionsIdArtwork extends OptionsId {
     @JsonIgnore
     public Set<String> getArtworkTypes() {
         return artworkTypes;
+    }
+
+    public boolean hasArtworkType(ArtworkType artworkType) {
+        return artworkTypes.contains(artworkType.toString());
     }
 }
