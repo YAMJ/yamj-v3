@@ -28,13 +28,16 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 public final class JettyCore {
 
+	private static final int PORT = 9090;
+	
     private JettyCore() {
         // empty private constructor
     }
     
     public static void main(final String[] aArgs) throws Exception {
-        BasicConfigurator.configure();
-        final Server server = new Server(8888);
+        System.setProperty("yamj3.core.port", String.valueOf(PORT));
+    	BasicConfigurator.configure();
+        final Server server = new Server(PORT);
         server.setHandler(createWebAppContext());
 
         server.start();

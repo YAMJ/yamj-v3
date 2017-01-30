@@ -136,6 +136,7 @@ public final class Start {
         }
 
         LOG.info("Starting server...");
+        System.setProperty("yamj3.core.port", String.valueOf(yamjPort));
         Server server = new Server(yamjPort);
         server.setGracefulShutdown(yamjShutdownTimeout);
         server.setStopAtShutdown(yamjStopAtShutdown);

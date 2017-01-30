@@ -36,6 +36,7 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,8 +115,10 @@ public class YamjInfo {
         }
 
         // Core Port
-        this.corePort = 8888;   // TODO: Get this from jetty!
-
+        this.corePort = PropertyTools.getIntProperty("yamj3.core.port", 
+        		NumberUtils.toInt(System.getProperty("yamj3.core.port"), 8888));
+        System.err.println(System.getProperty("yamj3.core.port"));
+        
         // Database IP & Name
         findDatabaseInfo();
 
