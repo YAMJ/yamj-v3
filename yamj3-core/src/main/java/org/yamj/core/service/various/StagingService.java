@@ -339,20 +339,18 @@ public class StagingService {
     private void checkDirectory(StageDirectory directory, List<Long> stageFileIds) {
         File dirFile = new File(directory.getDirectoryPath());
         if (dirFile.isDirectory()) {
-            if (dirFile.exists()) {
-                // find not existing stage files
-                for (StageFile stageFile : directory.getStageFiles()) {
-                    if (!new File(stageFile.getFullPath()).exists()) {
-                        LOG.debug("Stage file '{}' does not exist", stageFile.getFullPath());
-                        stageFileIds.add(stageFile.getId());
-                    }
-                }
-            } else {
-                LOG.debug("Stage directory '{}' does not exist", directory.getDirectoryPath());
-                // add all stage files for deletion
-                for (StageFile stageFile : directory.getStageFiles()) {
+            // find not existing stage files
+            for (StageFile stageFile : directory.getStageFiles()) {
+                if (!new File(stageFile.getFullPath()).exists()) {
+                    LOG.debug("Stage file '{}' does not exist", stageFile.getFullPath());
                     stageFileIds.add(stageFile.getId());
                 }
+            }
+        } else {
+            LOG.debug("Stage directory '{}' does not exist", directory.getDirectoryPath());
+            // add all stage files for deletion
+            for (StageFile stageFile : directory.getStageFiles()) {
+                stageFileIds.add(stageFile.getId());
             }
         }
         
