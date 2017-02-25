@@ -212,7 +212,7 @@ public class CommonStorageService {
             return;
         }
 
-        LOG.debug("Delete empty directory:  {}", stageDirectory);
+        LOG.debug("Delete empty directory:  {}", stageDirectory.getDirectoryPath());
         this.stagingDao.deleteEntity(stageDirectory);
 
         // recurse to parents
