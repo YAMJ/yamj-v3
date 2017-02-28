@@ -266,7 +266,7 @@ public class CommonStorageService {
 
         Series series = season.getSeries();
         series.getSeasons().remove(season);
-        if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+        if (CollectionUtils.isEmpty(series.getSeasons())) {
             this.delete(series, filesToDelete);
         }
 
