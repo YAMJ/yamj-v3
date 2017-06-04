@@ -205,14 +205,14 @@ Get an index of videos.
         <td>include</td>
         <td>Comma delimited list of fields & values to include.<br/>
             Example: include=year-2010,genre-Action<br/>
-            Valid includes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset
+            Valid includes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset, library
         </td>
     </tr>
     <tr>
         <td>exclude</td>
         <td>Comma delimited list of fields & values to exclude.<br/>
             Example: exclude=year-2012,genre-Thriller<br/>
-            Valid excludes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset
+            Valid excludes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset, library
         </td>
     </tr>
     <tr>
@@ -3144,6 +3144,121 @@ GET /api/videosources/list
     ]
 }
 
+
+Get list of libraries.
+***
+
+**Optional Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get libraries for that type  sources for.<br/>
+            May be just movie, series, season, episode
+        </td>
+    </tr>
+	 <tr>
+        <td>SORTING</td>
+		<td>See above for the explanation on sorting parameters</td>
+        <td>to get sorted<br/>
+            May be base_directory, client, lastscanned
+        </td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/libraries/list`
+
+GET /api/libraries/list
+< 200
+< Content-Type: application/json
+{
+    "options": {},
+    "baseArtworkUrl": "http://192.168.1.8:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.1.8:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.1.8:8888/photo/",
+    "baseTrailerUrl": "http://192.168.1.8:8888/trailer/",
+    "count": 3,
+    "totalCount": 3,
+    "queryDuration": "2ms",
+    "queryTime": "2017-06-05 00:00:24 +0200",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "results": [
+        {
+            "id": 1,
+            "client": "FileScanner",
+            "playerPath": "",
+            "baseDirectory": "T:/video/Film",
+            "lastScanned": "2017-05-30",
+            "name": "T:/video/Film"
+        },
+        {
+            "id": 2,
+            "client": "FileScanner",
+            "playerPath": " ",
+            "baseDirectory": "U:/video",
+            "lastScanned": "2017-06-01",
+            "name": "U:/video"
+        },
+        {
+            "id": 8,
+            "client": "FileScanner",
+            "playerPath": "",
+            "baseDirectory": "U:/Film_test/Series",
+            "lastScanned": "2017-05-31",
+            "name": "U:/Film_test/Series"
+        }
+    ]
+}
+
+Get information of a library.
+***
+
+**Optional Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The id of a library</td>
+		<td>or path</td>
+        <td>path a library<br/>
+				should be enclode by quote
+		</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/library/1`
+
+GET /api/libraries/list
+< 200
+< Content-Type: application/json
+{
+    "options": null,
+    "baseArtworkUrl": "http://192.168.1.8:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.1.8:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.1.8:8888/photo/",
+    "baseTrailerUrl": "http://192.168.1.8:8888/trailer/",
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "8ms",
+    "queryTime": "2017-06-05 00:10:22 +0200",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "result": {
+        "id": 1,
+        "client": "FileScanner",
+        "playerPath": "",
+        "baseDirectory": "T:/video/Film",
+        "lastScanned": 1496104322000,
+        "name": "T:/video/Film"
+    }
+}
 
 Get information ratings.
 ***
