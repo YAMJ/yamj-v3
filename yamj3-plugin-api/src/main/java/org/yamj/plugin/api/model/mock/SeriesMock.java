@@ -41,6 +41,7 @@ public class SeriesMock implements ISeries {
     private int rating = -1;
     private Collection<String> genres;
     private Collection<String> studios;
+	private Collection<String> libraries;
     private Collection<String> countries;
     private Map<String,String> certifications;
     private Collection<ISeason> seasons;
@@ -144,6 +145,17 @@ public class SeriesMock implements ISeries {
     public void setStudios(Collection<String> studios) {
         this.studios = studios;
     }
+	
+	// add getLibraries
+	public Collection<String> getLibraries() {
+        return libraries;
+    }
+
+    @Override
+    public void setLibraries(Collection<String> libraries) {
+        this.libraries = libraries;
+    }
+	// end library
 
     public Collection<String> getGenres() {
         return genres;

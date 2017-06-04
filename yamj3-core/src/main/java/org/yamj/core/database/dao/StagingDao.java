@@ -47,10 +47,10 @@ import org.yamj.plugin.api.model.type.ArtworkType;
 @Repository("stagingDao")
 public class StagingDao extends HibernateDao {
 
-    public Library getLibrary(String client, String playerPath) {
+    public Library getLibrary(String client, String baseDirectory) {
         return (Library) currentSession().createCriteria(Library.class)
                 .add(Restrictions.eq("client", client))
-                .add(Restrictions.eq("playerPath", playerPath))
+                .add(Restrictions.eq("baseDirectory", baseDirectory))
                 .setCacheable(true)
                 .setCacheMode(NORMAL)
                 .uniqueResult();

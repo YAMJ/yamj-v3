@@ -167,7 +167,7 @@ public class ApiDao extends HibernateDao {
         // Add the sort string, this will be empty if there is no sort required
         sbSQL.append(params.getSortString());
 
-        LOG.trace("SqlForVideoList: {}", sbSQL);
+        LOG.debug("SqlForVideoList: {}", sbSQL);
         return sbSQL;
     }
 
@@ -231,6 +231,9 @@ public class ApiDao extends HibernateDao {
 
         // check studio inclusion/exclusion
         includeOrExcludeStudio(type, params, sbSQL);
+		
+		// check library inclusion/exclusion
+        includeOrExcludeLibrary(type, params, sbSQL);
 
         // check country inclusion/exclusion
         includeOrExcludeCountry(type, params, sbSQL);
@@ -348,6 +351,9 @@ public class ApiDao extends HibernateDao {
 
         // check studio inclusion/exclusion
         includeOrExcludeStudio(SERIES, params, sbSQL);
+		
+		// check library inclusion/exclusion
+        includeOrExcludeLibrary(SERIES, params, sbSQL);
 
         // check country inclusion/exclusion
         includeOrExcludeCountry(SERIES, params, sbSQL);
@@ -471,6 +477,9 @@ public class ApiDao extends HibernateDao {
 
         // check studio inclusion/exclusion
         includeOrExcludeStudio(SEASON, params, sbSQL);
+		
+		// check library inclusion/exclusion
+        includeOrExcludeLibrary(SEASON, params, sbSQL);
 
         // check country inclusion/exclusion
         includeOrExcludeCountry(SEASON, params, sbSQL);
@@ -607,7 +616,77 @@ public class ApiDao extends HibernateDao {
             }
         }
     }
-    
+    // add includeOrExcludeLibrary
+	private static void includeOrExcludeLibrary(MetaDataType type, IndexParams params, StringBuilder sql) {
+	//	LOG.debug ("includeOrExcludeLibrary  type = " + type + " checkLibrary : " + params.checkLibrary());
+        if (params.checkLibrary()) {
+
+            final String library = params.getLibraryName();
+           // addExistsOrNot(params.includeLibrary(), sql);
+			LOG.debug ("includeOrExcludeLibrary with checkLibrary: library_id = " + library + " type = " + type );
+            if (StringUtils.isNumeric(library)) {
+                switch(type) {
+                    case SERIES: 
+					//		sql.append(" and ser.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory where library_id = ");
+							sql.append(" and ser.id IN (select sea.series_id from season sea where sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
+							sql.append(library).append(")))))");
+						break;
+                //        sql.append("SELECT 1 FROM series_library sl WHERE sl.series_id=ser.id AND sl.library_id=");
+                //        break;
+                    case SEASON: 
+                //  	sql.append(" and sea.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory where library_id = ");
+						sql.append(" and sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
+						sql.append(library).append("))))");
+					break;
+				//		sql.append("SELECT 1 FROM series_library sl WHERE sea.series_id=sl.series_id AND sl.library_id=");
+                //        break;
+                    case EPISODE:
+                 	sql.append(" and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
+                        sql.append(library).append(")))");
+						break;
+				//		sql.append("SELECT 1 FROM series_library sl, season sea WHERE vd.season_id=sea.id ");
+                 //       sql.append("AND sl.series_id=sea.series_id AND sl.library_id=");
+                  //      break;
+                    default: // movie
+                       // sql.append("SELECT 1 FROM videodata_library vl WHERE vl.id=vl.data_id AND vl.library_id=");
+						sql.append(" and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
+                        sql.append(library).append(")))");
+						break;
+                }
+              //  sql.append(library).append(")))");
+            } else {
+			LOG.debug ("includeOrExcludeLibrary is not numeric: library_id = " + library + " type = " + type );
+            switch(type) {
+                case SERIES:
+				//	sql.append(" and ser.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
+                    sql.append(" and ser.id IN (select sea.series_id from season sea where sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
+					sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))))");
+					break;
+                //    sql.append("SELECT 1 FROM series_library sl, library l WHERE ser.id=sl.series_id AND sl.library_id=l.id");
+                //   break;
+                case SEASON:
+				//   sql.append(" and sea.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
+                   sql.append(" and sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = "); 
+				   sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))))");
+				   break;
+                 //   sql.append("SELECT 1 FROM series_library sl, library l WHERE sea.series_id=sl.series_id AND sl.library_id=l.id");
+                 //   break;
+                case EPISODE:
+				   sql.append(" and vd.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
+                   sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
+				   break;
+                //    sql.append("SELECT 1 FROM series_library sl, library l, season sea WHERE vd.season_id=sea.id AND sl.series_id=sea.series_id AND sl.library_id=l.id");
+                //    break;
+                default: // movie
+                    sql.append(" and vd.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
+                    sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
+						break;
+				}
+		//			sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
+			}
+        }
+    }
+	//end library
     private static void includeOrExcludeCountry(MetaDataType type, IndexParams params, StringBuilder sql) {
         if (params.checkCountry()) {
         
@@ -1631,7 +1710,20 @@ public class ApiDao extends HibernateDao {
     public List<Studio> getStudiosForMetadata(MetaDataType type, Long id) {
         return currentSession().getNamedQuery("metadata.studio."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
     }
-    
+    // add libraries for metadata
+	/**
+     * Get a list of the libraries for a metadata object.
+     *
+     * @param type the metadata type
+     * @param id the id of the metadata object
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@Cacheable(value=API_LIBRARIES, key="{#type, #id}")
+    public List<Library> getLibrariesForMetadata(MetaDataType type, Long id) {
+        return currentSession().getNamedQuery("metadata.library."+type.name().toLowerCase()).setParameter(LITERAL_ID, id).list();
+    }
+	// end library
     /**
      * Get a list of the genres for a metadata object.
      *
@@ -2421,4 +2513,5 @@ public class ApiDao extends HibernateDao {
         this.executeUpdate(Series.UPDATE_RESCAN_ALL);
         this.executeUpdate(Artwork.UPDATE_RESCAN_ALL);
     }
+	
 }

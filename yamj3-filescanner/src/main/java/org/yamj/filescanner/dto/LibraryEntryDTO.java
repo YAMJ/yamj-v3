@@ -26,6 +26,8 @@ import java.io.Serializable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class used to represent a library entry
@@ -34,7 +36,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("libraryFile")
 public class LibraryEntryDTO implements Serializable {
-
+	private static final Logger LOG = LoggerFactory.getLogger(LibraryEntryDTO.class);
     private static final long serialVersionUID = 1811957207452221890L;
     
     // Properties
@@ -77,6 +79,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param path
      */
     public void setPath(String path) {
+	//	LOG.debug ("LibraryEntryDTO setPath path : " + path);
         this.path = path;
     }
 
@@ -86,6 +89,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public String getPlayerpath() {
+	//	LOG.debug ("LibraryEntryDTO getPlayerpath path : " + playerpath);
         return playerpath;
     }
 
@@ -97,6 +101,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param playerpath
      */
     public void setPlayerpath(String playerpath) {
+	//	LOG.debug ("LibraryEntryDTO setPlayerpath path : " + playerpath);
         this.playerpath = playerpath;
     }
 
@@ -106,6 +111,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public String getDescription() {
+	//	LOG.debug ("LibraryEntryDTO getDescription path : " + description);
         return description;
     }
 
@@ -115,6 +121,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param description
      */
     public void setDescription(String description) {
+	//	LOG.debug ("LibraryEntryDTO setDescription path : " + description);
         this.description = description;
     }
 
@@ -124,6 +131,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public String getInclude() {
+	//	LOG.debug ("LibraryEntryDTO getInclude path : " + include);
         return include;
     }
 
@@ -133,6 +141,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param include
      */
     public void setInclude(String include) {
+	//	LOG.debug ("LibraryEntryDTO setInclude path : " + include);
         this.include = include;
     }
 
@@ -142,6 +151,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public String getExclude() {
+	//	LOG.debug ("LibraryEntryDTO getExclude path : " + exclude);
         return exclude;
     }
 
@@ -151,6 +161,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param exclude
      */
     public void setExclude(String exclude) {
+	//	LOG.debug ("LibraryEntryDTO setExclude path : " + exclude);
         this.exclude = exclude;
     }
 
@@ -162,6 +173,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public boolean isScrape() {
+	//	LOG.debug ("LibraryEntryDTO isScrape path : " + scrape);
         return scrape;
     }
 
@@ -173,6 +185,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param scrape
      */
     public void setScrape(boolean scrape) {
+	//	LOG.debug ("LibraryEntryDTO setScrape path : " + scrape);
         this.scrape = scrape;
     }
 
@@ -182,6 +195,7 @@ public class LibraryEntryDTO implements Serializable {
      * @return
      */
     public boolean isWatch() {
+	//	LOG.debug ("LibraryEntryDTO isWatch path : " + watch);
         return watch;
     }
 
@@ -191,6 +205,7 @@ public class LibraryEntryDTO implements Serializable {
      * @param watch
      */
     public void setWatch(boolean watch) {
+	//	LOG.debug ("LibraryEntryDTO setWatch path : " + watch);
         this.watch = watch;
     }
     //</editor-fold>

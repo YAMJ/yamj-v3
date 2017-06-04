@@ -37,6 +37,7 @@ public class IndexParams {
 
     private static final String YEAR = "year";
     private static final String GENRE = "genre";
+	private static final String LIBRARY = "library";
     private static final String STUDIO = "studio";
     private static final String COUNTRY = "country";
     private static final String AWARD = "award";
@@ -130,6 +131,22 @@ public class IndexParams {
         return excludes.get(GENRE);
     }
 
+	 // library check
+    public boolean checkLibrary() {
+        return includes.containsKey(LIBRARY) || excludes.containsKey(LIBRARY); 
+    }
+
+    public boolean includeLibrary() {
+        return includes.containsKey(LIBRARY);
+    }
+
+    public String getLibraryName() {
+        if (includeLibrary()) {
+            return includes.get(LIBRARY);
+        }
+        return excludes.get(LIBRARY);
+    }
+	
     // studio check
     public boolean checkStudio() {
         return includes.containsKey(STUDIO) || excludes.containsKey(STUDIO); 

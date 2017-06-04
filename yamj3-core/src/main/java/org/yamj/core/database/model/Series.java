@@ -177,6 +177,16 @@ public class Series extends AbstractMetadata {
             inverseForeignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO"))
     private Set<Studio> studios = new HashSet<>(0);
 
+	// add series_libraries
+	@ManyToMany
+    @JoinTable(name = "series_libraries",
+            joinColumns = @JoinColumn(name = "series_id"),
+            foreignKey = @ForeignKey(name = "FK_SERIESLIBRARIES_SERIES"),
+            inverseJoinColumns = @JoinColumn(name = "library_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_SERIESLIBRARIES_LIBRARY"))
+    private Set<Library> libraries = new HashSet<>(0);
+	// end library
+	
     @ManyToMany
     @JoinTable(name = "series_countries",
             joinColumns = @JoinColumn(name = "series_id"),
@@ -213,6 +223,11 @@ public class Series extends AbstractMetadata {
 
     @Transient
     private Collection<String> studioNames;
+	
+	// add libraryNames
+	@Transient
+    private Collection<String> libraryNames;
+	//end library
 
     @Transient
     private Collection<String> countryCodes;
@@ -441,6 +456,16 @@ public class Series extends AbstractMetadata {
         this.studios = studios;
     }
 
+	// add setLibraries
+	public Set<Library> getLibraries() {
+        return libraries;
+    }
+	
+	public void setLibraries(Set<Library> libraries) {
+        this.libraries = libraries;
+    }
+	//end library
+	
     public Set<Country> getCountries() {
         return countries;
     }
@@ -496,6 +521,19 @@ public class Series extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
+	
+	// add Collection libraryNames
+	 public Collection<String> getLibraryNames() {
+        return libraryNames;
+    }
+
+    public void setLibraryNames(Collection<String> libraryNames, String source) {
+        if (CollectionUtils.isNotEmpty(libraryNames)) {
+            this.libraryNames = libraryNames;
+            setOverrideFlag(OverrideFlag.LIBRARIES, source);
+        }
+    }
+	//end library
 
     public Collection<String> getCountryCodes() {
         return countryCodes;

@@ -34,6 +34,9 @@ import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.type.StatusType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Stuart
@@ -41,6 +44,7 @@ import org.yamj.common.type.StatusType;
 public class Library implements Serializable {
 
     private static final long serialVersionUID = -7307516287202738381L;
+	private static final Logger LOG = LoggerFactory.getLogger(Library.class);
 
     private boolean watch;
     private String description;
@@ -189,6 +193,7 @@ public class Library implements Serializable {
      * @return
      */
     public ImportDTO getImportDTO(StageDirectoryDTO stageDir) {
+	//	LOG.debug("Filescanner Library  getImportDTO newImportDto.setBaseDirectory(importDTO.getBaseDirectory()) : " + importDTO.getBaseDirectory());
         ImportDTO newImportDto = new ImportDTO();
         newImportDto.setBaseDirectory(importDTO.getBaseDirectory());
         newImportDto.setClient(importDTO.getClient());

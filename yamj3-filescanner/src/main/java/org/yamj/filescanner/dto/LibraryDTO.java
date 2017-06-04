@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Class to represent the library XML file on disk
  *
@@ -36,6 +37,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class LibraryDTO implements Serializable {
 
     private static final long serialVersionUID = 6029416002787399037L;
+	private static final Logger LOG = LoggerFactory.getLogger(LibraryDTO.class);
     
     private List<LibraryEntryDTO> libraries = new ArrayList<>();
 
@@ -45,6 +47,7 @@ public class LibraryDTO implements Serializable {
      * @return
      */
     public List<LibraryEntryDTO> getLibraries() {
+	//	LOG.debug ("LibraryDTO getLibraries libraries : " + libraries);
         return libraries;
     }
 
@@ -54,6 +57,7 @@ public class LibraryDTO implements Serializable {
      * @param libraries
      */
     public void setLibraries(List<LibraryEntryDTO> libraries) {
+	//	LOG.debug ("LibraryDTO setLibraries libraries : " + libraries);
         this.libraries = libraries;
     }
 
@@ -63,6 +67,7 @@ public class LibraryDTO implements Serializable {
      * @param libraryFile
      */
     public void addLibrary(LibraryEntryDTO libraryFile) {
+	//	LOG.debug ("LibraryDTO addLibrary libraryFile : " + libraryFile);
         this.libraries.add(libraryFile);
     }
 

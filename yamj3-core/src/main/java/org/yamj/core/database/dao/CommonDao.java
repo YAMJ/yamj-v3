@@ -33,13 +33,15 @@ import static org.yamj.core.database.Literals.*;
 import static org.yamj.plugin.api.model.type.ArtworkType.BANNER;
 import static org.yamj.plugin.api.model.type.ArtworkType.FANART;
 import static org.yamj.plugin.api.model.type.ArtworkType.POSTER;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
+import org.hibernate.type.DateType;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
@@ -54,11 +56,12 @@ import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.core.api.model.CountTimestamp;
 
 @Transactional
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
-    
+    private static final Logger LOG = LoggerFactory.getLogger(CommonDao.class);
     @SuppressWarnings("unchecked")
 	public List<QueueDTO> getQueueIdOnly(final String queryName, final int maxResults) {        
         return currentSession().getNamedQuery(queryName)
@@ -189,7 +192,58 @@ public class CommonDao extends HibernateDao {
 
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
+	// add Cacheable LIBRARY
+	@Cacheable(value=DB_LIBRARY, key="#id", unless="#result==null")
+    public Library getLibrary(Long id) {
+        return getById(Library.class, id);
+    }
 
+    @Cacheable(value=DB_LIBRARY, key="#base_directory.toLowerCase()", unless="#result==null")
+    public Library getLibrary(String name) {
+        return getByNaturalIdCaseInsensitive(Library.class, LITERAL_NAME, name);
+    }
+
+    @CachePut(value=DB_LIBRARY, key="#base_directory.toLowerCase()")
+    public Library saveLibrary(String name) {
+        Library library = new Library();
+        library.setName(name);
+        this.saveEntity(library);
+        return library;
+    }
+
+    public List<Library> getLibraries(ApiWrapperList<Library> wrapper) {
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
+		
+        SqlScalars sqlScalars = new SqlScalars();
+         sqlScalars.addToSql("SELECT DISTINCT lib.id as id, lib.client as client, lib.player_path as playerPath, lib.base_directory as baseDirectory, lib.last_scanned as lastScanned FROM library lib ");
+        boolean addWhere = true;
+        if (options.getType() != null) {
+            if (MOVIE == options.getType()) {
+          //      sqlScalars.addToSql("JOIN videodata_libraries vl ON lib.id=vl.library_id ");
+            } else {
+           //     sqlScalars.addToSql("JOIN series_libraries sl ON lib.id=sl.library_id ");
+            }
+        }
+        if (options.getUsed() != null && options.getUsed()) {
+       //     sqlScalars.addToSql("WHERE (exists (select 1 from videodata_libraries vl where vl.library_id=lib.id) ");
+        //    sqlScalars.addToSql(" or exists (select 1 from series_libraries ss where sl.library_id=lib.id)) ");
+            addWhere = false;
+        }
+
+        sqlScalars.addToSql(options.getSearchString(addWhere));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
+		sqlScalars.addScalar("client", StringType.INSTANCE);
+        sqlScalars.addScalar("baseDirectory", StringType.INSTANCE);
+		sqlScalars.addScalar("playerPath", StringType.INSTANCE);
+		sqlScalars.addScalar("lastScanned", DateType.INSTANCE);
+       // sqlScalars.addScalar(LITERAL_NAME, StringType.INSTANCE);
+	   // LOG.debug ("CommonDao getLibraries Wrapper sqlScalars : " + sqlScalars);
+        return executeQueryWithTransform(Library.class, sqlScalars, wrapper);
+    }
+	// end library
+	
     @Cacheable(value=DB_COUNTRY, key="#id", unless="#result==null")
     public Country getCountry(Long id) {
         return getById(Country.class, id);

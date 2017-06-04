@@ -154,6 +154,15 @@ public class DeletionService {
                 LOG.warn("Failed to delete orphan studios", ex);
             }
         }
+		
+		// delete orphan library if allowed
+    //    if (this.configService.getBooleanProperty("yamj3.delete.orphan.library", true)) {
+     //       try {
+      //          this.commonStorageService.deleteOrphanLibraries();
+       //     } catch (Exception ex) {
+        //        LOG.warn("Failed to delete orphan libraries", ex);
+         //   }
+        //}
 
         // delete orphan countries if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.country", true)) {

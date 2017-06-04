@@ -38,6 +38,7 @@ public enum DataItem {
     TOP_RANK(true),
     GENRE(false),
     STUDIO(false),
+	LIBRARY(false),
     CERTIFICATION(false),
     RATING(false),
     BIOGRAPHY(true),

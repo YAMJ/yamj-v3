@@ -36,6 +36,7 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Library;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.*;
 
@@ -312,6 +313,34 @@ public class CommonController {
         return wrapper.setResults(jsonApiStorageService.getStudios(wrapper));
     }
     //</editor-fold>
+	
+	// add Library Methods
+	//<editor-fold defaultstate="collapsed" desc="Library Methods">
+    @RequestMapping(value = "/library/{name}", method = RequestMethod.GET)
+    public ApiWrapperSingle<Library> getLibrary(@PathVariable("name") String name) {
+        ApiWrapperSingle<Library> wrapper = new ApiWrapperSingle<>();
+
+        Library library;
+        if (StringUtils.isNumeric(name)) {
+            LOG.debug("Getting library with ID {}", name);
+            library = jsonApiStorageService.getLibrary(Long.parseLong(name));
+        } else {
+            LOG.debug("Getting library '{}'", name);
+            library = jsonApiStorageService.getLibrary(name);
+        }
+        
+        return wrapper.setResult(library);
+    }
+
+    @RequestMapping(value = "/libraries/list", method = RequestMethod.GET)
+    public ApiWrapperList<Library> getLibraries(@ModelAttribute("options") OptionsSingleType options) {
+        LOG.debug("Getting library list - Options: {}", options);
+
+        ApiWrapperList<Library> wrapper = new ApiWrapperList<>(options);
+        return wrapper.setResults(jsonApiStorageService.getLibraries(wrapper));
+    }
+    //</editor-fold>
+	// end library
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
     @RequestMapping(value = "/country", method = RequestMethod.GET)

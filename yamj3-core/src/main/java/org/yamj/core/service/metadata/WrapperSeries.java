@@ -143,6 +143,15 @@ public class WrapperSeries implements ISeries {
             series.setStudioNames(studios, scannerName);
         }
     }
+	
+	// add setLibraries
+	@Override
+    public void setLibraries(Collection<String> libraries) {
+        if (OverrideTools.checkOverwriteLibraries(series, scannerName)) {
+            series.setLibraryNames(libraries, scannerName);
+        }
+    }
+	// end library
 
     @Override
     public void setGenres(Collection<String> genres) {

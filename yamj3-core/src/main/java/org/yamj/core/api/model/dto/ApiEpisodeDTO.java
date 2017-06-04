@@ -29,6 +29,7 @@ import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Library;
 import org.yamj.plugin.api.model.type.JobType;
 
 /**
@@ -52,6 +53,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String videoimage;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
+	private List<Library> libraries = Collections.emptyList();
     private List<ApiCountryDTO> countries = Collections.emptyList();
     private List<ApiCertificationDTO> certifications = Collections.emptyList();
     private List<ApiRatingDTO> ratings = Collections.emptyList();
@@ -121,6 +123,12 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     public void setStudios(List<Studio> studios) {
         this.studios = studios;
     }
+	
+	// add setLibraries
+	public void setLibraries(List<Library> libraries) {
+        this.libraries = libraries;
+    }
+	//end library
 
     public void setCountries(List<ApiCountryDTO> countries) {
         this.countries = countries;
@@ -201,6 +209,12 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return studios;
     }
     
+	// add getLibraries
+	    public List<Library> getLibraries() {
+        return libraries;
+    }
+	// end library
+	
     public List<ApiCountryDTO> getCountries() {
         return countries;
     }

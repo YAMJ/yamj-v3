@@ -20,37 +20,35 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.plugin.api.model;
+package org.yamj.core.api.model.dto;
 
-import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public interface ICombined extends IdMap {
+@JsonInclude(Include.NON_DEFAULT)
+public class ApiLibraryDTO extends AbstractApiIdentifiableDTO {
+
+    private String name;
+
+    public ApiLibraryDTO()  {
+        // empty constructor
+    }
+
+    public ApiLibraryDTO(String name)  { 
+        this.name = name;
+    }
+
+    public ApiLibraryDTO(Long id, String name) {
+        super(id);
+        this.name = name;
+    }
     
-    String getTitle();
+    public String getName() {
+        return name;
+    }
 
-    void setTitle(String title);
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    String getOriginalTitle();
-
-    void setOriginalTitle(String originalTitle);
-
-    void setPlot(String plot);
-
-    void setOutline(String outline);
-
-    void setRating(int rating);
-
-    void setStudios(Collection<String> studios);
-	
-	void setLibraries(Collection<String> libraries);
-
-    void setGenres(Collection<String> genres);
-
-    void setCountries(Collection<String> countries);
-
-    void addCertification(String country, String certificate);
-    
-    void addAward(String event, String category, int year);
-
-    void addAward(String event, String category, int year, boolean won, boolean nominated);
 }

@@ -58,6 +58,7 @@ public final class InfoDTO implements IdMap {
     private String tagline;
     private String quote;
     private String company;
+	private String library;
     private String onlineScanner;
 
     public InfoDTO(Map<String,String> ids, boolean tvShow) {
@@ -278,6 +279,18 @@ public final class InfoDTO implements IdMap {
         }
     }
 
+	// add library
+	public String getLibrary() {
+        return library;
+    }
+
+    public void setLibrary(String library) {
+        if (StringUtils.isNotBlank(library)) {
+            this.library = library.trim();
+            this.changed = true;
+        }
+    }
+	// end library
     public Set<String> getGenres() {
         return genres;
     }

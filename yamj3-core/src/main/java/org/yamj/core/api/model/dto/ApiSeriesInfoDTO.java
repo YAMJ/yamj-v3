@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Collections;
 import java.util.List;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Library;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiSeriesInfoDTO extends AbstractMetaDataDTO {
@@ -34,6 +35,7 @@ public class ApiSeriesInfoDTO extends AbstractMetaDataDTO {
     private Long seriesId;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
+	private List<Library> libraries = Collections.emptyList();
     private List<ApiCountryDTO> countries = Collections.emptyList();
     private List<ApiCertificationDTO> certifications = Collections.emptyList();
     private List<ApiAwardDTO> awards = Collections.emptyList();
@@ -71,6 +73,20 @@ public class ApiSeriesInfoDTO extends AbstractMetaDataDTO {
     public int getStudioCount() {
         return studios.size();
     }
+	
+	//add getLibraries
+	public List<Library> getLibraries() {
+        return libraries;
+    }
+
+    public void setLibraries(List<Library> libraries) {
+        this.libraries = libraries;
+    }
+
+    public int getLibraryCount() {
+        return libraries.size();
+    }
+	// end library
 
     public List<ApiCountryDTO> getCountries() {
         return countries;

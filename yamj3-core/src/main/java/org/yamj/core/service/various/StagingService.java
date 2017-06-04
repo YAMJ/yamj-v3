@@ -82,27 +82,41 @@ public class StagingService {
 
     @Transactional
     public Library storeLibrary(ImportDTO libraryDTO) {
-        Library library = stagingDao.getLibrary(libraryDTO.getClient(), libraryDTO.getPlayerPath());
+		// get the library from the storage db , return null if not exists		
+        Library library = stagingDao.getLibrary(libraryDTO.getClient(), libraryDTO.getBaseDirectory());
+		// in don't know why but the path is transformed beetween the filescanner and the stagingService  so check for / or \ to fetch the right library
+		Library library2 = stagingDao.getLibrary(libraryDTO.getClient(), StringUtils.replace(libraryDTO.getBaseDirectory(), "\\", "/"));
+
         if (library == null) {
-            library = new Library();
-            library.setClient(libraryDTO.getClient());
-            library.setPlayerPath(libraryDTO.getPlayerPath());
-            library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-            library.setLastScanned(new Date());
-            stagingDao.saveEntity(library);
-        } else {
-            library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-            library.setLastScanned(new Date());
-            stagingDao.updateEntity(library);
+			if (library2 == null) {
+				library = new Library();
+				library.setClient(libraryDTO.getClient());
+				library.setPlayerPath(libraryDTO.getPlayerPath());
+				library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+				library.setLastScanned(new Date());
+				stagingDao.saveEntity(library);
+				return library;
+			} else {
+			//	LOG.debug("StagingService storeLibrary  library2 : " + library2);
+				library2.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+				library2.setLastScanned(new Date());
+				stagingDao.updateEntity(library2);
+				return library2;
+			}
         }
-        return library;
+		else {
+			//	LOG.debug("StagingService storeLibrary  library : " + library);
+				library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+				library.setLastScanned(new Date());
+				stagingDao.updateEntity(library);
+				return library;
+			}
     }
 
     @Transactional
     public void storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
         // normalize the directory path
         String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
-
         StageDirectory stageDirectory = stagingDao.getStageDirectory(normalized, library);
         if (stageDirectory == null) {
             // used to set the directory name

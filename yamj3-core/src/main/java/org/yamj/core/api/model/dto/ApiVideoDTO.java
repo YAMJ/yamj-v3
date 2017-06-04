@@ -30,6 +30,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Library;
 import org.yamj.plugin.api.model.type.JobType;
 
 /**
@@ -54,6 +55,7 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     private String videoSource;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
+	private List<Library> libraries = Collections.emptyList();
     private List<ApiCountryDTO> countries = Collections.emptyList();
     private List<ApiCertificationDTO> certifications = Collections.emptyList();
     private List<ApiRatingDTO> ratings = Collections.emptyList();
@@ -108,11 +110,21 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     public int getStudioCount() {
         return studios.size();
     }
+	
+	// add library
+	 public List<Library> getLibraries() {
+        return libraries;
+    }
 
+    public int getLibraryCount() {
+        return libraries.size();
+    }
+	// end library
+	
     public List<ApiCountryDTO> getCountries() {
         return countries;
     }
-
+	
     public int getCountriesCount() {
         return countries.size();
     }
@@ -255,7 +267,13 @@ public class ApiVideoDTO extends AbstractMetaDataDTO {
     public void setStudios(List<Studio> studios) {
         this.studios = studios;
     }
-
+	
+	// add setLibraries
+	 public void setLibraries(List<Library> libraries) {
+        this.libraries = libraries;
+    }
+	// end library
+	
     public void setCertifications(List<ApiCertificationDTO> certifications) {
         this.certifications = certifications;
     }

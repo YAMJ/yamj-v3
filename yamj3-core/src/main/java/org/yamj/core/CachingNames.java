@@ -26,6 +26,7 @@ public final class CachingNames {
 
     public static final String DB_GENRE = "db_genre";
     public static final String DB_STUDIO = "db_studio";
+	public static final String DB_LIBRARY = "db_library";
     public static final String DB_COUNTRY = "db_country";
     public static final String DB_CERTIFICATION = "db_certification";
     public static final String DB_PERSON = "db_person";
@@ -37,6 +38,7 @@ public final class CachingNames {
 
     public static final String API_GENRES = "api_genres";
     public static final String API_STUDIOS = "api_studios";
+	public static final String API_LIBRARIES = "api_libraries";
     public static final String API_COUNTRIES = "api_countries";
     public static final String API_CERTIFICATIONS = "api_certifications";
     public static final String API_EXTERNAL_IDS = "api_external_ids"; 

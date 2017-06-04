@@ -62,6 +62,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 // caches for database objects
                 .cache(cacheConfigDatabase(DB_GENRE, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(DB_STUDIO, 50, TTL_ONE_DAY))
+				.cache(cacheConfigDatabase(DB_LIBRARY, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(DB_COUNTRY, 50, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(DB_CERTIFICATION, 100, TTL_ONE_DAY))
                 .cache(cacheConfigDatabase(DB_PERSON, 2000, TTL_ONE_DAY))
@@ -74,6 +75,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 // caches for API objects
                 .cache(cacheConfig(API_GENRES, 5000, TTL_ONE_WEEK))
                 .cache(cacheConfig(API_STUDIOS, 5000, TTL_ONE_WEEK))
+				.cache(cacheConfig(API_LIBRARIES, 5000, TTL_ONE_WEEK))
                 .cache(cacheConfig(API_COUNTRIES, 5000, TTL_ONE_WEEK))
                 .cache(cacheConfig(API_CERTIFICATIONS, 5000, TTL_ONE_WEEK))
                 .cache(cacheConfig(API_EXTERNAL_IDS, 5000, TTL_ONE_WEEK))

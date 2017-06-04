@@ -299,7 +299,11 @@ public final class InfoReader {
             // parse company (may be studio)
             value = DOMHelper.getValueFromElement(eCommon, "studio", "company");
             dto.setCompany(value);
-
+			
+			// parse library
+            value = DOMHelper.getValueFromElement(eCommon, "library");
+            dto.setLibrary(value);
+			
             // parse genres
             parseGenres(eCommon.getElementsByTagName("genre"), dto);
 

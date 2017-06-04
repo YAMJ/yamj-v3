@@ -148,6 +148,15 @@ public class WrapperMovie implements IMovie {
             videoData.setStudioNames(studios, scannerName);
         }
     }
+	
+	// add setLibraries
+	@Override
+    public void setLibraries(Collection<String> libraries) {
+        if (OverrideTools.checkOverwriteLibraries(videoData, scannerName)) {
+            videoData.setLibraryNames(libraries, scannerName);
+        }
+    }
+	// end library
 
     @Override
     public void setGenres(Collection<String> genres) {

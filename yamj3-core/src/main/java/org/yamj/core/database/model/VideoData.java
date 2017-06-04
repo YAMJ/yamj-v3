@@ -287,6 +287,16 @@ public class VideoData extends AbstractMetadata {
             inverseJoinColumns = @JoinColumn(name = "studio_id"),
             inverseForeignKey = @ForeignKey(name = "FK_DATASTUDIOS_STUDIO"))
     private Set<Studio> studios = new HashSet<>(0);
+	
+	// add videodata_libraries
+	//@ManyToMany
+   // @JoinTable(name = "videodata_libraries",
+   //         joinColumns = @JoinColumn(name = "data_id"),
+    //        foreignKey = @ForeignKey(name = "FK_DATALIBRARIES_VIDEODATA"),
+     //       inverseJoinColumns = @JoinColumn(name = "library_id"),
+      //      inverseForeignKey = @ForeignKey(name = "FK_DATALIBRARIES_LIBRARY"))
+    //private Set<Library> libraries = new HashSet<>(0);
+	// end videodata_libraries
 
     @ManyToMany
     @JoinTable(name = "videodata_countries",
@@ -335,6 +345,10 @@ public class VideoData extends AbstractMetadata {
 
     @Transient
     private Collection<String> studioNames;
+	
+	//add collection libraryNames
+	@Transient
+    private Collection<String> libraryNames;
 
     @Transient
     private Collection<String> countryCodes;
@@ -753,6 +767,15 @@ public class VideoData extends AbstractMetadata {
     public void setStudios(Set<Studio> studios) {
         this.studios = studios;
     }
+	// add library
+	//public Set<Library> getLibraries() {
+    //    return libraries;
+    //}
+
+    //public void setLibraries(Set<Library> libraries) {
+     //   this.libraries = libraries;
+    //}
+	// end library
 
     public Set<Country> getCountries() {
         return countries;
@@ -894,7 +917,20 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
-
+	// add collection getLibraryNames
+	 public Collection<String> getLibraryNames() {
+        return libraryNames;
+    }
+	public Collection<String> setLibrary(String LibraryNames) {
+        return libraryNames;
+	}
+    public void setLibraryNames(Collection<String> LibraryNames, String source) {
+        if (CollectionUtils.isNotEmpty(LibraryNames)) {
+            this.libraryNames = libraryNames;
+            setOverrideFlag(OverrideFlag.LIBRARIES, source);
+        }
+    }
+	// end library
     public Collection<String> getCountryCodes() {
         return countryCodes;
     }

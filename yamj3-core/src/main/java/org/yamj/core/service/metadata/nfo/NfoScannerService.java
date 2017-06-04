@@ -152,12 +152,16 @@ public class NfoScannerService {
             if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
                 videoData.setCountryCodes(infoDTO.getCountryCodes(), SCANNER_ID);
             }
-
-            if (StringUtils.isNotBlank(infoDTO.getCompany()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+			// add library
+       //     if (OverrideTools.checkOverwriteLibraries(videoData, SCANNER_ID)) {
+        //        videoData.setLibraryNames(infoDTO.getLibrary(), SCANNER_ID);
+         //   }
+				videoData.setLibrary(infoDTO.getLibrary());
+			// set studio
+			if (StringUtils.isNotBlank(infoDTO.getCompany()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
                 Set<String> studioNames = Collections.singleton(infoDTO.getCompany());
                 videoData.setStudioNames(studioNames, SCANNER_ID);
             }
-
             // add certifications
             videoData.setCertificationInfos(infoDTO.getCertificationInfos());
 
