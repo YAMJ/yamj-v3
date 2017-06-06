@@ -117,7 +117,6 @@ public class YamjInfo {
         // Core Port
         this.corePort = PropertyTools.getIntProperty("yamj3.core.port", 
         		NumberUtils.toInt(System.getProperty("yamj3.core.port"), 8888));
-        System.err.println(System.getProperty("yamj3.core.port"));
         
         // Database IP & Name
         findDatabaseInfo();
