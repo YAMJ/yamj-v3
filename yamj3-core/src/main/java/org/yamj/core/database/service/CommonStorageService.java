@@ -491,14 +491,6 @@ public class CommonStorageService {
     public int deleteOrphanStudios() {
         return this.stagingDao.executeUpdate(Studio.DELETE_ORPHANS);
     }
-
-	// add DB_LIBRARY
-//	@Transactional
- //   @CacheEvict(value=DB_LIBRARY, allEntries=true)
-  //  public int deleteOrphanLibraries() {
-   //     return this.stagingDao.executeUpdate(Library.DELETE_ORPHANS);
-   // }
-	// end library
 	
     @Transactional
     @CacheEvict(value=DB_COUNTRY, allEntries=true)
