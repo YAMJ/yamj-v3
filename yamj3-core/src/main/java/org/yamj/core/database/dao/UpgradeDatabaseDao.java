@@ -37,7 +37,17 @@ import org.yamj.core.hibernate.HibernateDao;
 public class UpgradeDatabaseDao extends HibernateDao {
 
     // MYSQL CHECKS
-    
+
+    @SuppressWarnings("unchecked")
+	protected boolean mysqlExistsTable(String table) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.TABLES ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
+    }
+
     @SuppressWarnings("unchecked")
 	protected boolean mysqlExistsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
