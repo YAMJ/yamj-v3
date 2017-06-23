@@ -32,15 +32,7 @@ import org.hibernate.annotations.NaturalId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
-
 @NamedNativeQueries({    
-//    @NamedNativeQuery(name = Library.DELETE_ORPHANS,
-  //      query = "DELETE FROM library WHERE not exists (select 1 from videodata_libraries vl where vl.library_id=id) "+
-   //             "AND not exists (select 1 from series_libraries sl where sl.library_id=id)"
-    //),
     @NamedNativeQuery(name = "metadata.library.series", resultClass = Library.class,
         query = "SELECT l.id, l.base_directory as baseDirectory FROM library l  ORDER BY base_directory"
     ),
@@ -58,16 +50,8 @@ import org.slf4j.LoggerFactory;
 )
 public class Library extends AbstractIdentifiable implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Library.class);
- //   private static final long serialVersionUID = -5113519542293276527L;
-  //  public static final String DELETE_ORPHANS = "library.deleteOrphans";
-    
-    
-//    @Column(name = "base_directory", nullable = false, length = 200)
-//   private String name;
-
-	// add library extends
 	private static final long serialVersionUID = -3086992329257871600L;
+
 	@NaturalId(mutable = true)
     @Column(name = "client", nullable = false, length = 100)
     private String client;
@@ -75,77 +59,59 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Column(name = "player_path", nullable = false, length = 1000)
     private String playerPath;
 	
-	
     @Column(name = "base_directory", nullable = false, length = 1000)
     private String baseDirectory;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)
     private Date lastScanned;
-	// end library
-	
-	
-	
-	
-    // GETTER and SETTER to be compatible with the studio duplication
-    
-   public String getName() {
-	// LOG.debug("Library.java getName() baseDirectory : " + baseDirectory);
-       return baseDirectory;
-	}
 
-    public void setName(String baseDirectory) {
-	/// LOG.debug("Library.java setName() baseDirectory : " + baseDirectory);
-      this.baseDirectory = baseDirectory;
+    // GETTER and SETTER
+
+    public String getName() {
+    	return baseDirectory;
     }
-	// GETTER and SETTER
+
+    public void setName(String name) {
+    	this.baseDirectory = name;
+    }
+
     public String getClient() {
-	// LOG.debug("Library.java getClient() client : " + client);
         return client;
     }
 
     public void setClient(String client) {
-	// LOG.debug("Library.java setClient() client : " + client);
         this.client = client;
     }
 
     public String getPlayerPath() {
-	// LOG.debug("Library.java getPlayerPath() playerPath : " + playerPath);
         return playerPath;
     }
 
     public void setPlayerPath(String playerPath) {
-	// LOG.debug("Library.java setPlayerPath() playerPath : " + playerPath);
         this.playerPath = playerPath;
     }
 
     public String getBaseDirectory() {
-	// LOG.debug("Library.java getBaseDirectory() baseDirectory : " + baseDirectory);
         return baseDirectory;
     }
 
     public void setBaseDirectory(String baseDirectory) {
-	// LOG.debug("Library.java setBaseDirectory() baseDirectory : " + baseDirectory);
         this.baseDirectory = baseDirectory;
     }
 
     public Date getLastScanned() {
-	// LOG.debug("Library.java getLastScanned() lastScanned : " + lastScanned);
         return lastScanned;
     }
 
     public void setLastScanned(Date lastScanned) {
-	// LOG.debug("Library.java setLastScanned() lastScanned : " + lastScanned);
         this.lastScanned = lastScanned;
     }
-	//end library
 	
     // EQUALITY CHECKS
     
-  
 	@Override
     public int hashCode() {
-	//	LOG.debug ("Library HashCodeBuilder");
         return new HashCodeBuilder()
                 .append(getClient())
                 .append(getPlayerPath())
@@ -156,30 +122,22 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
-		// 	LOG.debug ("Library egals this == obj return true");
             return true;
-        }
-        if (obj == null) {
-		//	LOG.debug ("Library egals obj == null return false");
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof Library)) {
             return false;
         }
-        if (!(obj instanceof Library)) {
-		//	LOG.debug ("Library !instanceof library return false");
-            return false;
-        }
-	   Library other = (Library) obj;
+        Library other = (Library) obj;
         // first check the id
-		// 	LOG.debug ("Library other getId() : " + getId() + " other.getId() : " + other.getId());
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
-       
-		// 	LOG.debug ("Library  return new EqualsBuilder ()");
-			return new EqualsBuilder()
-                    .append(getClient(), other.getClient())
-                    .append(getPlayerPath(), other.getPlayerPath())
-					.append(getBaseDirectory(), other.getBaseDirectory())
-                    .isEquals();
+		return new EqualsBuilder()
+                .append(getClient(), other.getClient())
+                .append(getPlayerPath(), other.getPlayerPath())
+				.append(getBaseDirectory(), other.getBaseDirectory())
+                .isEquals();
     }
 
     @Override
