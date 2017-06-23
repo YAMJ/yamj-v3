@@ -29,8 +29,6 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = "metadata.library.series", resultClass = Library.class,
