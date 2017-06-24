@@ -159,7 +159,25 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
     
     // PATCHES
-    
+	 @SuppressWarnings("unchecked")
+      public void patchDatabaseUpdateLibraries() {
+        currentSession()
+        .createSQLQuery("insert into series_libraries (series_id, library_id) select ser.id, sd.library_id "
+		+ "from stage_directory sd join stage_file sf on sd.id = sf.directory_id join mediafile_videodata mv on mv.mediafile_id = sf.mediafile_id "
+		+ "join videodata vd on mv.videodata_id = vd.id join season sea on vd.season_id = sea.id "
+		+ "join series ser on sea.series_id = ser.id group by ser.id "
+		+ "ON DUPLICATE KEY UPDATE series_id = series_id")
+        .executeUpdate();
+		
+		 currentSession()
+        .createSQLQuery("insert into videodata_libraries (data_id, library_id)  select distinct mv.videodata_id, sd.library_id  "
+		+ "from stage_directory sd join stage_file sf on sd.id = sf.directory_id "
+		+ "join mediafile_videodata mv on mv.mediafile_id = sf.mediafile_id "
+		+ "ON DUPLICATE KEY UPDATE data_id = data_id")
+		.executeUpdate();
+		
+	  }
+	
     public void deleteOrphanConfigs() {
         currentSession()
         .createSQLQuery("DELETE FROM configuration WHERE config_key like '%.throwError.tempUnavailable'")

@@ -56,6 +56,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     private String aspectRatio;
     private String runtime;
     private String videoSource;
+	private String library;
     private Long fileId;
     private String fileName;
     private String fileDate;
@@ -193,6 +194,14 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setVideoSource(String videoSource) {
         this.videoSource = videoSource;
+    }
+	
+	public String getLibrary() {
+        return library;
+    }
+
+    public void setLibrary(String library) {
+        this.library = library;
     }
 
     public String getFileName() {

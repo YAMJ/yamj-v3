@@ -146,9 +146,7 @@ public class JsonApiStorageService {
                         break;
 					// case LIBRARY
 					case LIBRARY:
-					//	LOG.debug("JsonApiStorageService Index Method");
                         if (MetaDataType.EPISODE != video.getVideoType()) {
-						//	LOG.debug("JsonApiStorageService video.setLibraries  MetaDataType.EPISODE != video.getVideoType");
                             video.setLibraries(apiDao.getLibrariesForMetadata(video.getVideoType(), video.getId()));
                         }
                         break;
@@ -341,17 +339,14 @@ public class JsonApiStorageService {
 	//add Library Methods
 	//<editor-fold defaultstate="collapsed" desc="Library Methods">
     public Library getLibrary(Long id) {
-//		LOG.debug("JsonApiStorageService getLibrary id");
         return commonDao.getLibrary(id);
     }
 
     public Library getLibrary(String name) {
-//		LOG.debug("JsonApiStorageService getLibrary name");
         return commonDao.getLibrary(name);
     }
 
     public List<Library> getLibraries(ApiWrapperList<Library> wrapper) {
-//		LOG.debug("JsonApiStorageService getLibraries Wrapper");
         return commonDao.getLibraries(wrapper);
     }
     //</editor-fold>
@@ -881,7 +876,6 @@ public class JsonApiStorageService {
                         break;
 					// add case LIBRARY
 					case LIBRARY:
-					//	LOG.debug("JsonApiStorageService series.setLibraries  SERIES");
                         series.setLibraries(apiDao.getLibrariesForMetadata(MetaDataType.SERIES, series.getId()));
                         break;
 					// end library

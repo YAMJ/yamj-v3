@@ -39,6 +39,7 @@ public enum DataItem {
     GENRE(false),
     STUDIO(false),
 	LIBRARY(false),
+	LIBRARY_ITEM(false),
     CERTIFICATION(false),
     RATING(false),
     BIOGRAPHY(true),

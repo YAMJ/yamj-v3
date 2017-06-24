@@ -97,6 +97,7 @@ public abstract class OptionsAbstract implements IOptions {
     @Override
     public Integer getMax() {
         int value = max;
+		
         // Check to see if one of the "pers" is set
         if (max < 0 && (perpage > 0 || perline > 0)) {
             if (line > 0) {

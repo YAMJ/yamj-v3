@@ -179,7 +179,6 @@ public class LibraryCollection implements Serializable {
 
     public void addLibraryEntry(LibraryEntryDTO libraryEntryDto) {
         Library library = new Library();
-	//	LOG.debug("addLibraryEntry setBaseDirectory(libraryEntryDto.getPath() : " + libraryEntryDto.getPath());
         // Set up the ImportDTO
         ImportDTO importDto = new ImportDTO();
         importDto.setBaseDirectory(libraryEntryDto.getPath());

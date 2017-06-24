@@ -48,8 +48,8 @@ import org.hibernate.annotations.NaturalId;
 )
 public class Library extends AbstractIdentifiable implements Serializable {
 
-	private static final long serialVersionUID = -3086992329257871600L;
-
+ 	private static final long serialVersionUID = -3086992329257871600L;
+	
 	@NaturalId(mutable = true)
     @Column(name = "client", nullable = false, length = 100)
     private String client;
@@ -57,21 +57,22 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Column(name = "player_path", nullable = false, length = 1000)
     private String playerPath;
 	
+	
     @Column(name = "base_directory", nullable = false, length = 1000)
     private String baseDirectory;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)
     private Date lastScanned;
+	
+    // GETTER and SETTER 
+    
+   public String getName() {
+       return baseDirectory;
+	}
 
-    // GETTER and SETTER
-
-    public String getName() {
-    	return baseDirectory;
-    }
-
-    public void setName(String name) {
-    	this.baseDirectory = name;
+    public void setName(String baseDirectory) {
+      this.baseDirectory = baseDirectory;
     }
 
     public String getClient() {
@@ -108,6 +109,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
 	
     // EQUALITY CHECKS
     
+  
 	@Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -121,21 +123,24 @@ public class Library extends AbstractIdentifiable implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (obj == null) {
-            return false;
-        } else if (!(obj instanceof Library)) {
+        }
+        if (obj == null) {
             return false;
         }
-        Library other = (Library) obj;
+        if (!(obj instanceof Library)) {
+            return false;
+        }
+	   Library other = (Library) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
-		return new EqualsBuilder()
-                .append(getClient(), other.getClient())
-                .append(getPlayerPath(), other.getPlayerPath())
-				.append(getBaseDirectory(), other.getBaseDirectory())
-                .isEquals();
+       
+			return new EqualsBuilder()
+                    .append(getClient(), other.getClient())
+                    .append(getPlayerPath(), other.getPlayerPath())
+					.append(getBaseDirectory(), other.getBaseDirectory())
+                    .isEquals();
     }
 
     @Override

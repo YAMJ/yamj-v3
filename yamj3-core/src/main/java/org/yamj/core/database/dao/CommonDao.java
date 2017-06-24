@@ -238,8 +238,6 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("baseDirectory", StringType.INSTANCE);
 		sqlScalars.addScalar("playerPath", StringType.INSTANCE);
 		sqlScalars.addScalar("lastScanned", DateType.INSTANCE);
-       // sqlScalars.addScalar(LITERAL_NAME, StringType.INSTANCE);
-	   // LOG.debug ("CommonDao getLibraries Wrapper sqlScalars : " + sqlScalars);
         return executeQueryWithTransform(Library.class, sqlScalars, wrapper);
     }
 	// end library

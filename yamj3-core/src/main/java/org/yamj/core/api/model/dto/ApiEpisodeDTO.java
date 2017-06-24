@@ -51,6 +51,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
+	private String library_base;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
 	private List<Library> libraries = Collections.emptyList();
@@ -127,6 +128,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
 	// add setLibraries
 	public void setLibraries(List<Library> libraries) {
         this.libraries = libraries;
+    }
+	
+	public String getLibrary_base() {
+        return library_base;
     }
 	//end library
 

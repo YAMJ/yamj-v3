@@ -60,9 +60,19 @@ public class UpgradeDatabaseService {
             // no valid database type for patching
             databaseType = null;
         }
-
+		
         LOG.trace("Run patches for database type {}", databaseType);
-
+			
+	
+       LOG.debug("update database series_libraries, videodata_libraries");
+		// Issues: 311  - populate libraries populate
+        // Date:   24.06.2017
+        try {
+            upgradeDatabaseDao.patchDatabaseUpdateLibraries();
+        } catch (Exception ex) {
+		   LOG.warn("Failed to upgrade series_libraries for database type "+databaseType, ex);
+        }
+	
         // fix roles (same for all database types)
         try {
             upgradeDatabaseDao.fixRoles();

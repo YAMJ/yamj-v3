@@ -193,7 +193,6 @@ public class Library implements Serializable {
      * @return
      */
     public ImportDTO getImportDTO(StageDirectoryDTO stageDir) {
-	//	LOG.debug("Filescanner Library  getImportDTO newImportDto.setBaseDirectory(importDTO.getBaseDirectory()) : " + importDTO.getBaseDirectory());
         ImportDTO newImportDto = new ImportDTO();
         newImportDto.setBaseDirectory(importDTO.getBaseDirectory());
         newImportDto.setClient(importDTO.getClient());

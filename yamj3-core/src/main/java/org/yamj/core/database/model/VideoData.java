@@ -289,13 +289,13 @@ public class VideoData extends AbstractMetadata {
     private Set<Studio> studios = new HashSet<>(0);
 	
 	// add videodata_libraries
-	//@ManyToMany
-   // @JoinTable(name = "videodata_libraries",
-   //         joinColumns = @JoinColumn(name = "data_id"),
-    //        foreignKey = @ForeignKey(name = "FK_DATALIBRARIES_VIDEODATA"),
-     //       inverseJoinColumns = @JoinColumn(name = "library_id"),
-      //      inverseForeignKey = @ForeignKey(name = "FK_DATALIBRARIES_LIBRARY"))
-    //private Set<Library> libraries = new HashSet<>(0);
+	@ManyToMany
+    @JoinTable(name = "videodata_libraries",
+            joinColumns = @JoinColumn(name = "data_id"),
+            foreignKey = @ForeignKey(name = "FK_DATALIBRARIES_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "library_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_DATALIBRARIES_LIBRARY"))
+    private Set<Library> libraries = new HashSet<>(0);
 	// end videodata_libraries
 
     @ManyToMany

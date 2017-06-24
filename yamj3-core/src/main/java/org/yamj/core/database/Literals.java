@@ -51,6 +51,8 @@ public final class Literals {
     public static final String LITERAL_LAST_NAME = "lastName"; 
     public static final String LITERAL_LASTSCAN = "lastscan";
     public static final String LITERAL_LIBRARY = "library";
+	public static final String LITERAL_LIBRARY_ITEM = "library_item";
+	public static final String LITERAL_LIBRARY_BASE = "library_base";
     public static final String LITERAL_LOCATED_ID = "locatedId";
     public static final String LITERAL_METADATA_TYPE = "metaDataType";
     public static final String LITERAL_NAME = "name";

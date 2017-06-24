@@ -75,6 +75,10 @@ public class IndexParams {
     public Boolean getWatched() {
         return options.getWatched();
     }
+	
+	public Boolean getLibrary_item() {
+		return options.hasDataItem(DataItem.LIBRARY_ITEM);
+    }
 
     public String getSearchString(boolean addWhere) {
         return options.getSearchString(addWhere);

@@ -47,7 +47,6 @@ public class LibraryDTO implements Serializable {
      * @return
      */
     public List<LibraryEntryDTO> getLibraries() {
-	//	LOG.debug ("LibraryDTO getLibraries libraries : " + libraries);
         return libraries;
     }
 
@@ -57,7 +56,6 @@ public class LibraryDTO implements Serializable {
      * @param libraries
      */
     public void setLibraries(List<LibraryEntryDTO> libraries) {
-	//	LOG.debug ("LibraryDTO setLibraries libraries : " + libraries);
         this.libraries = libraries;
     }
 
@@ -67,7 +65,6 @@ public class LibraryDTO implements Serializable {
      * @param libraryFile
      */
     public void addLibrary(LibraryEntryDTO libraryFile) {
-	//	LOG.debug ("LibraryDTO addLibrary libraryFile : " + libraryFile);
         this.libraries.add(libraryFile);
     }
 

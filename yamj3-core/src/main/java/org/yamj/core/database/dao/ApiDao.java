@@ -78,6 +78,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(LITERAL_SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_EPISODE, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_WATCHED, BooleanType.INSTANCE);
+		sqlScalars.addScalar(LITERAL_LIBRARY_BASE, StringType.INSTANCE);
 
         if (params.checkNewest()) {
             sqlScalars.addScalar("newest", TimestampType.INSTANCE);
@@ -181,6 +182,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title, vd.title_original AS originalTitle, vd.title_sort AS sortTitle");
         sbSQL.append(", vd.publication_year AS videoYear, vd.release_date as releaseDate");
         sbSQL.append(", null AS seriesId, vd.season_id AS seasonId, null AS season, vd.episode AS episode ");
+		if (!params.getLibrary_item()) { sbSQL.append(", null AS library_base ");}
         sbSQL.append(", vd.watched AS watched, vd.create_timestamp as createTimestamp ");
         
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "vd"));
@@ -201,8 +203,11 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND mf.extra=:extra) AS newest");
             }
         }
-
-        sbSQL.append(" FROM videodata vd WHERE vd.episode");
+		if (params.getLibrary_item()) {
+			sbSQL.append(" ,l.base_directory as library_base from videodata_libraries vl join library l on l.id = vl.library_id join videodata vd on vd.id = vl.data_id WHERE vd.episode");
+        }
+		else {sbSQL.append(" FROM videodata vd WHERE vd.episode");}
+        
         sbSQL.append(type == MOVIE ? "<0" : ">-1");
 
         if (params.getId() > 0L) {
@@ -225,7 +230,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND vd.watched=");
             sbSQL.append(params.getWatched().booleanValue() ? "1" : "0");
         }
-
+		
         // check genre inclusion/exclusion
         includeOrExcludeGenre(type, params, sbSQL);
 
@@ -299,6 +304,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title, ser.title_original AS originalTitle, ser.title_sort AS sortTitle");
         sbSQL.append(", ser.start_year AS videoYear, null as releaseDate");
         sbSQL.append(", ser.id AS seriesId, null AS seasonId, null AS season, -1 AS episode");
+		if (!params.getLibrary_item()) { sbSQL.append(", null AS library_base ");}
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
         sbSQL.append(", ser.create_timestamp as createTimestamp ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
@@ -320,8 +326,11 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND mf.extra=:extra) as newest ");
             }
         }
-
-        sbSQL.append(" FROM series ser WHERE 1=1");
+		if (params.getLibrary_item()) {
+			sbSQL.append(" ,l.base_directory as library_base from series_libraries sl join library l on l.id = sl.library_id join series ser on ser.id = sl.series_id WHERE 1=1");
+        }
+		else {sbSQL.append(" FROM series ser WHERE 1=1");}
+        
 
         if (params.getId() > 0L) {
             sbSQL.append(" AND ser.id=").append(params.getId());
@@ -427,6 +436,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.title, sea.title_original AS originalTitle, sea.title_sort AS sortTitle");
         sbSQL.append(", sea.publication_year as videoYear, null as releaseDate");
         sbSQL.append(", sea.series_id AS seriesId, sea.id AS seasonId, sea.season AS season, -1 AS episode");
+		if (!params.getLibrary_item()) { sbSQL.append(", null AS library_base ");}
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched");
         sbSQL.append(", sea.create_timestamp as createTimestamp ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
@@ -447,8 +457,11 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND mf.extra=:extra) AS newest");
             }
         }
-
-        sbSQL.append(" FROM season sea WHERE 1=1");
+		if (params.getLibrary_item()) {
+			sbSQL.append(" ,l.base_directory as library_base from series_libraries sl join library l on l.id = sl.library_id join season sea on sea.series_id = sl.series_id WHERE 1=1");
+        }
+		else {sbSQL.append(" FROM season sea WHERE 1=1");}
+        
         if (params.getId().longValue() > 0L) {
             sbSQL.append(" AND sea.id=").append(params.getId());
         }
@@ -618,71 +631,43 @@ public class ApiDao extends HibernateDao {
     }
     // add includeOrExcludeLibrary
 	private static void includeOrExcludeLibrary(MetaDataType type, IndexParams params, StringBuilder sql) {
-	//	LOG.debug ("includeOrExcludeLibrary  type = " + type + " checkLibrary : " + params.checkLibrary());
         if (params.checkLibrary()) {
 
             final String library = params.getLibraryName();
-           // addExistsOrNot(params.includeLibrary(), sql);
-			LOG.debug ("includeOrExcludeLibrary with checkLibrary: library_id = " + library + " type = " + type );
+            addExistsOrNot(params.includeLibrary(), sql);
             if (StringUtils.isNumeric(library)) {
                 switch(type) {
                     case SERIES: 
-					//		sql.append(" and ser.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory where library_id = ");
-							sql.append(" and ser.id IN (select sea.series_id from season sea where sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
-							sql.append(library).append(")))))");
+							sql.append("SELECT 1 FROM series_libraries sl WHERE sl.series_id=ser.id AND sl.library_id=");
 						break;
-                //        sql.append("SELECT 1 FROM series_library sl WHERE sl.series_id=ser.id AND sl.library_id=");
-                //        break;
                     case SEASON: 
-                //  	sql.append(" and sea.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory where library_id = ");
-						sql.append(" and sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
-						sql.append(library).append("))))");
+						sql.append("SELECT 1 FROM series_libraries sl WHERE sea.series_id=sl.series_id AND sl.library_id=");
 					break;
-				//		sql.append("SELECT 1 FROM series_library sl WHERE sea.series_id=sl.series_id AND sl.library_id=");
-                //        break;
                     case EPISODE:
-                 	sql.append(" and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
-                        sql.append(library).append(")))");
+						sql.append("SELECT 1 FROM series_libraries sl, season sea WHERE vd.season_id=sea.id ");
+                        sql.append("AND sl.series_id=sea.series_id AND sl.library_id=");
 						break;
-				//		sql.append("SELECT 1 FROM series_library sl, season sea WHERE vd.season_id=sea.id ");
-                 //       sql.append("AND sl.series_id=sea.series_id AND sl.library_id=");
-                  //      break;
                     default: // movie
-                       // sql.append("SELECT 1 FROM videodata_library vl WHERE vl.id=vl.data_id AND vl.library_id=");
-						sql.append(" and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id = ");
-                        sql.append(library).append(")))");
+                        sql.append("SELECT 1 FROM videodata_libraries vl WHERE vd.id=vl.data_id AND vl.library_id=");
 						break;
                 }
-              //  sql.append(library).append(")))");
+                sql.append(library).append(")");
             } else {
-			LOG.debug ("includeOrExcludeLibrary is not numeric: library_id = " + library + " type = " + type );
             switch(type) {
                 case SERIES:
-				//	sql.append(" and ser.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
-                    sql.append(" and ser.id IN (select sea.series_id from season sea where sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
-					sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))))");
+					sql.append("SELECT 1 FROM series_libraries sl, library l WHERE ser.id=sl.series_id AND sl.library_id=l.id");
 					break;
-                //    sql.append("SELECT 1 FROM series_library sl, library l WHERE ser.id=sl.series_id AND sl.library_id=l.id");
-                //   break;
                 case SEASON:
-				//   sql.append(" and sea.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
-                   sql.append(" and sea.id IN (SELECT vd.season_id FROM videodata vd WHERE vd.episode>0 and vd.id IN (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND sf.directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = "); 
-				   sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))))");
+					sql.append("SELECT 1 FROM series_libraries sl, library l WHERE sea.series_id=sl.series_id AND sl.library_id=l.id");
 				   break;
-                 //   sql.append("SELECT 1 FROM series_library sl, library l WHERE sea.series_id=sl.series_id AND sl.library_id=l.id");
-                 //   break;
                 case EPISODE:
-				   sql.append(" and vd.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
-                   sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
+					sql.append("SELECT 1 FROM series_libraries sl, library l, season sea WHERE vd.season_id=sea.id AND sl.series_id=sea.series_id AND sl.library_id=l.id");
 				   break;
-                //    sql.append("SELECT 1 FROM series_library sl, library l, season sea WHERE vd.season_id=sea.id AND sl.series_id=sea.series_id AND sl.library_id=l.id");
-                //    break;
                 default: // movie
-                    sql.append(" and vd.id in (select distinct videodata_id from mediafile_videodata where mediafile_id IN (SELECT distinct mediafile_id FROM stage_file sf WHERE sf.file_type='VIDEO' AND sf.status not in ('DUPLICATE','DELETED') AND directory_id IN (select id from stage_directory sd where sd.library_id in (select id from library l where l.base_directory = ");
-                    sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
-						break;
+					sql.append("SELECT 1 FROM videodata_libraries vl, library l WHERE vd.id=vl.data_id AND vl.library_id=l.id");
+					break;
 				}
-		//			sql.append(" '").append(StringUtils.strip(library,"\"\'")).append("'))))");
+					sql.append(" AND lower(l.base_directory)='").append(library).append("')");
 			}
         }
     }
@@ -706,7 +691,6 @@ public class ApiDao extends HibernateDao {
                     sql.append("SELECT 1 FROM videodata_countries vc, country c WHERE vd.id=vc.data_id AND vc.country_id=c.id");
                     break;
             }
-            
             sql.append(" AND lower(c.country_code)='").append(params.getCountryCode()).append("')");
         }
     }
@@ -1453,40 +1437,52 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
         sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, vid.watched as watched, ");
+		sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir, ");
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("vid.plot, ");
             sqlScalars.addScalar(LITERAL_PLOT, StringType.INSTANCE);
         }
-        if (options.hasDataItem(DataItem.OUTLINE)) {
+		if (options.hasDataItem(DataItem.OUTLINE)) {
             sqlScalars.addToSql("vid.outline, ");
             sqlScalars.addScalar(LITERAL_OUTLINE, StringType.INSTANCE);
         }
-        sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir ");
-        sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a ");
-        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
-        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
-        sqlScalars.addToSql("WHERE sea.series_id=ser.id AND vid.season_id=sea.id AND a.videodata_id=vid.id ");
-
-        if (options.getSeriesid() > 0L) {
-            sqlScalars.addToSql("AND ser.id=:seriesid");
-            sqlScalars.addParameter("seriesid", options.getSeriesid());
-            if (options.getSeason() > 0L) {
-                sqlScalars.addToSql("AND sea.season=:season");
-                sqlScalars.addParameter(LITERAL_SEASON, options.getSeason());
-            }
+		if (options.hasDataItem(DataItem.LIBRARY_ITEM)) {
+			sqlScalars.addToSql("(select l.base_directory from library l,");
+			sqlScalars.addToSql("videodata vid, series ser, season sea, mediafile_videodata mv join stage_file sf on mv.mediafile_id = sf.mediafile_id left");
+			sqlScalars.addToSql("join stage_directory sd on sd.id = sf.directory_id");
+			sqlScalars.addToSql("where mv.videodata_id = vid.id and l.id = sd.library_id AND ser.id=:seriesid AND sea.id=:seasonid and sea.series_id=ser.id AND vid.season_id=sea.id");
+			sqlScalars.addToSql("group by l.base_directory) as library_base,");
+ 
+			sqlScalars.addScalar(LITERAL_LIBRARY_BASE, StringType.INSTANCE);
         }
+        
+			sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir ");
+			sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a ");
+			sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+			sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
+			sqlScalars.addToSql("WHERE sea.series_id=ser.id AND vid.season_id=sea.id AND a.videodata_id=vid.id ");
 
-        if (options.getSeasonid() > 0L) {
-            sqlScalars.addToSql("AND sea.id=:seasonid");
-            sqlScalars.addParameter("seasonid", options.getSeasonid());
-        }
+		if (options.getSeriesid() > 0L) {
+			sqlScalars.addToSql("AND ser.id=:seriesid");
+			sqlScalars.addParameter("seriesid", options.getSeriesid());
+			if (options.getSeason() > 0L) {
+				sqlScalars.addToSql("AND sea.season=:season");
+				sqlScalars.addParameter(LITERAL_SEASON, options.getSeason());
+			}
+		}
 
-        if (options.getWatched() != null) {
-            sqlScalars.addToSql("AND vid.watched=:watched");
-            sqlScalars.addParameter("watched", options.getWatched().booleanValue());
-        }
+		if (options.getSeasonid() > 0L) {
+			sqlScalars.addToSql("AND sea.id=:seasonid");
+			sqlScalars.addParameter("seasonid", options.getSeasonid());
+		}
 
-        sqlScalars.addToSql("ORDER BY seriesId, season, episode");
+		if (options.getWatched() != null) {
+			sqlScalars.addToSql("AND vid.watched=:watched");
+			sqlScalars.addParameter("watched", options.getWatched().booleanValue());
+		}
+
+		sqlScalars.addToSql("ORDER BY seriesId, season, episode");
+		
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
 
         sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
@@ -1500,6 +1496,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(LITERAL_CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar("firstAired", DateType.INSTANCE);
         sqlScalars.addScalar(LITERAL_WATCHED, BooleanType.INSTANCE);
+
 
         return executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
     }
@@ -1533,6 +1530,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(LITERAL_SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_EPISODE, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_WATCHED, BooleanType.INSTANCE);
+
         
         // add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
@@ -2069,7 +2067,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public List<CountGeneric> getJobCount(List<String> requiredJobs) {
-        LOG.info("getJobCount: Required Jobs: {}", (requiredJobs == null) ? "all" : requiredJobs);
+        LOG.debug("getJobCount: Required Jobs: {}", (requiredJobs == null) ? "all" : requiredJobs);
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS counter");
