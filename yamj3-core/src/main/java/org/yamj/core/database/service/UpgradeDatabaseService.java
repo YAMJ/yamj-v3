@@ -73,6 +73,16 @@ public class UpgradeDatabaseService {
 		   LOG.warn("Failed to upgrade series_libraries for database type "+databaseType, ex);
         }
 	
+		// set HSQL to compatibility with SQL command by exemple syntax ON DUPLICATE KEY 
+		if (databaseType == DatabaseType.HSQL)
+		{
+			try {
+				upgradeDatabaseDao.patchDatabaseCompatibilityHSQL();
+			} catch (Exception ex) {
+			   LOG.warn("Failed to set compatibility for database type "+databaseType, ex);
+			}
+		}
+		
         // fix roles (same for all database types)
         try {
             upgradeDatabaseDao.fixRoles();
