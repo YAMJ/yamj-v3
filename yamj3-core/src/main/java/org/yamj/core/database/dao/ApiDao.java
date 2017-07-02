@@ -1435,9 +1435,10 @@ public class ApiDao extends HibernateDao {
 
     public List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper, OptionsEpisode options) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
-        sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, vid.watched as watched, ");
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode,");
+        sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, vid.watched as watched, al.id AS locatedId, ");
 		sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir, ");
+		
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("vid.plot, ");
             sqlScalars.addScalar(LITERAL_PLOT, StringType.INSTANCE);
@@ -1455,7 +1456,7 @@ public class ApiDao extends HibernateDao {
  
 			sqlScalars.addScalar(LITERAL_LIBRARY_BASE, StringType.INSTANCE);
         }
-        
+		
 			sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir ");
 			sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a ");
 			sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
@@ -1484,7 +1485,8 @@ public class ApiDao extends HibernateDao {
 		sqlScalars.addToSql("ORDER BY seriesId, season, episode");
 		
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
-
+		
+		
         sqlScalars.addScalar(LITERAL_ID, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_SEASON_ID, LongType.INSTANCE);
@@ -1496,6 +1498,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(LITERAL_CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar("firstAired", DateType.INSTANCE);
         sqlScalars.addScalar(LITERAL_WATCHED, BooleanType.INSTANCE);
+		sqlScalars.addScalar(LITERAL_LOCATED_ID, LongType.INSTANCE);
+
 
 
         return executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);

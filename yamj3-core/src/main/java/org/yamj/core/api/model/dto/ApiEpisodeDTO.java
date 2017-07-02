@@ -42,6 +42,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private Long seasonId = -1L;
     private Long season = -1L;
     private Long episode = -1L;
+	private Long locatedId;
     private String title;
     private String originalTitle;
     private String outline;
@@ -63,6 +64,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
+	public Long getLocatedId() {
+        return locatedId;
+    }
+	
     public void setSeriesId(Long seriesId) {
         this.seriesId = seriesId;
     }

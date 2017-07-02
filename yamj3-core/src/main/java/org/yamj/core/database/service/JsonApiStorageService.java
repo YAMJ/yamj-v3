@@ -1298,8 +1298,11 @@ public class JsonApiStorageService {
     @Transactional
     @CacheEvict(value=API_EXTERNAL_IDS, key="{#type, #id}")
     public ApiStatus updateExternalId(MetaDataType type, Long id, String sourceDb, String sourceDbId) {
-        // first check if source is known
-        if (!onlineScannerService.isKnownScanner(type, sourceDb)) {
+        // first check if source is known or sourceDb == tvdb and type == PERSON
+		if (sourceDb.equals("tvdb") &&  MetaDataType.PERSON.equals(type)) {
+			LOG.debug("JsonApiService updateExternalId if type : " + type.name().toLowerCase() + " sourceDb : " + sourceDb + " perform update as asked");
+		}
+        else if (!onlineScannerService.isKnownScanner(type, sourceDb)) {
             StringBuilder sb = new StringBuilder();
             sb.append("The sourceDb ");
             sb.append(sourceDb);
