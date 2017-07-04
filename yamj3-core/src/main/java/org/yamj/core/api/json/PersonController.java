@@ -60,6 +60,7 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ApiStatus updatePerson(@PathVariable("id") Long id, @RequestBody UpdatePerson update) {
+		LOG.info("Updating person with ID {}", id);
         return jsonApiStorageService.updatePerson(id, update);
     }
 

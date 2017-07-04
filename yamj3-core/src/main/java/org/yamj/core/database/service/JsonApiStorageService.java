@@ -255,7 +255,7 @@ public class JsonApiStorageService {
         if (person == null) {
             return ApiStatus.notFound("ID " + id + " does not determine a valid person entry");
         }
-        
+        LOG.debug ("JsonApiStorageService updatePerson id : " + id);
         if (OverrideTools.checkOverwriteName(person, API_SOURCE)) {
             person.setName(update.getName(), API_SOURCE);
         }
@@ -743,7 +743,8 @@ public class JsonApiStorageService {
         if (videoData == null) {
             return ApiStatus.notFound("ID " + id + " does not determine a valid video");
         }
-
+		 LOG.debug ("JsonApiStorageService updateVideodata id : "  + id);
+		 
         if (OverrideTools.checkOverwriteTitle(videoData, API_SOURCE)) {
             videoData.setTitle(update.getTitle(), API_SOURCE);
         }
@@ -775,8 +776,8 @@ public class JsonApiStorageService {
         if (OverrideTools.checkOverwriteReleaseDate(videoData, API_SOURCE)) {
             videoData.setRelease(update.getReleaseDate(), API_SOURCE);
         }
-        
-        videoData.setTopRank(update.getTopRank());
+  		
+       videoData.setTopRank(update.getTopRank());
 
         metadataDao.updateEntity(videoData);
         return ApiStatus.ok("Updated video with ID "+id);
