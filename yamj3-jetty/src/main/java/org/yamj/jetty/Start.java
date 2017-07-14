@@ -55,12 +55,13 @@ public final class Start {
     private static final String WAR_DIR = "lib/";
     private static final String WAR_FILE_RELEASE = "yamj3-core-3.0.war";
     private static final String WAR_FILE_SNAPSHOT = "yamj3-core-3.0-SNAPSHOT.war";
-    private static final String RESOURCES_DIR = "./resources/";
+    
     private static final String SKINS_DIR = "skins/";
     private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
     private static final String SERVER_ERROR = "Server error";
 
     private static String yamjHome = ".";
+	private static String RESOURCES_DIR = yamjHome + "/resources/";	
     private static int yamjPort = 8888;
     private static int yamjShutdownTimeout = 5000;
     private static boolean yamjStopAtShutdown = true;
@@ -100,13 +101,18 @@ public final class Start {
     private static ExitType startUp(CmdLineParser parser) { //NOSONAR
         if (StringUtils.isNotBlank(parser.getParsedOptionValue("h"))) {
             yamjHome = parser.getParsedOptionValue("h");
+			
         }
+		// set the resources_dir according with the home_dir if required
+		String resources_dir = yamjHome +  "/resources/"; 
+		RESOURCES_DIR = resources_dir;
         yamjPort = convertToInt(parser.getParsedOptionValue("p"), yamjPort);
         yamjShutdownTimeout = convertToInt(parser.getParsedOptionValue("t"), yamjShutdownTimeout);
         yamjStopAtShutdown = convertToBoolean(parser.getParsedOptionValue("s"), yamjStopAtShutdown);
 
         // first release WAR, then snapshot WAR
         String warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE_RELEASE);
+		
         File warFile = new File(warFilename);
         if (!warFile.exists()) {
             warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE_SNAPSHOT);
@@ -122,6 +128,7 @@ public final class Start {
             }
             
             LOG.info("YAMJ Home: '{}'", yamjHome);
+			LOG.info("Yamj resources_dir: '{}'", RESOURCES_DIR);
             LOG.info("YAMJ Port: {}", yamjPort);
             LOG.info("YAMJ Shudown Timeout: {}ms", yamjShutdownTimeout);
             LOG.info("YAMJ {} stop at Shutdown", yamjStopAtShutdown ? "will" : "will not");
