@@ -50,7 +50,6 @@ public class Library extends AbstractIdentifiable implements Serializable {
 
  	private static final long serialVersionUID = -3086992329257871600L;
 	
-	@NaturalId(mutable = true)
     @Column(name = "client", nullable = false, length = 100)
     private String client;
 
