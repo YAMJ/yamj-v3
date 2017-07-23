@@ -60,8 +60,11 @@ public enum ExitType {
     /**
      * Unable to send files to the core
      */
-    SEND_FAILURE(6);
-
+    SEND_FAILURE(6),
+	/**
+     * LOOP send files to the core
+     */
+    LOOP(7);
     private final int returnValue;
 
     private ExitType(int returnValue) {
