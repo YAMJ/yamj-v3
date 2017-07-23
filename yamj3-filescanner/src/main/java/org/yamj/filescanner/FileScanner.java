@@ -70,11 +70,13 @@ public final class FileScanner {
         ExitType status;
         try {
             parser.parse(args);
-
+			LOG.debug("Filescanner ExitType status parser :" + parser);
             if (parser.userWantsHelp()) {
+				LOG.debug("Filescanner ExitType status userWantsHelp :" + parser);
                 help(parser);
                 status = SUCCESS;
             } else {
+				LOG.debug("Filescanner ExitType status userWantsHelp in else step:" + parser);
 				help(parser);
                 status = execute(parser);
             }
@@ -84,6 +86,7 @@ public final class FileScanner {
             help(parser);
             status = CMDLINE_ERROR;
         }
+		LOG.debug("Filescanner ExitType System.exit(status.getReturn())");
         System.exit(status.getReturn()); //NOSONAR
     }
 
@@ -104,7 +107,7 @@ public final class FileScanner {
         CmdLineParser parser = new CmdLineParser();
 	
         parser.addOption(new CmdLineOption("d", "directory", "The directory to process", false, true));
-        parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
+        parser.addOption(new CmdLineOption("w", "true or false", "Keep watching the directories for changes", false, true));
         parser.addOption(new CmdLineOption("l", "library", "The library file to read", false, true));
 		// print always options syntax in case of no options or wrong options 
 		// LOG.info(parser.getDescriptions());

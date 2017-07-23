@@ -48,6 +48,7 @@ public class LibraryCollection implements Serializable {
     private XmlTools xmlTools;
 
     public LibraryCollection() {
+	//	LOG.debug("LibraryCollection LibraryCollection()");
         libraries = new ArrayList<>();
     }
 
@@ -57,6 +58,7 @@ public class LibraryCollection implements Serializable {
      * @param library
      */
     public void add(Library library) {
+	//	LOG.debug("LibraryCollection add(Library library)");
         libraries.add(library);
     }
 
@@ -66,6 +68,7 @@ public class LibraryCollection implements Serializable {
      * @param library
      */
     public void remove(Library library) {
+	//	LOG.debug("LibraryCollection remove(Library library)");
         libraries.remove(library);
     }
 
@@ -75,6 +78,7 @@ public class LibraryCollection implements Serializable {
      * @param path
      */
     public void remove(String path) {
+	//	LOG.debug("LibraryCollection remove(String path)");
         List<Library> toRemove = new ArrayList<>();
         for (Library library : libraries) {
             if (library.getImportDTO().getBaseDirectory().equalsIgnoreCase(path)) {
@@ -90,6 +94,7 @@ public class LibraryCollection implements Serializable {
      * @return
      */
     public List<Library> getLibraries() {
+	//	LOG.debug("LibraryCollection List<Library> getLibraries()");
         return libraries;
     }
 
@@ -97,6 +102,7 @@ public class LibraryCollection implements Serializable {
      * Clear the list of libraries
      */
     public void clear() {
+	//	LOG.debug("LibraryCollection clear()");
         libraries.clear();
     }
 
@@ -106,6 +112,7 @@ public class LibraryCollection implements Serializable {
      * @return
      */
     public int size() {
+	//	LOG.debug("LibraryCollection size()");
         return libraries.size();
     }
 
@@ -151,6 +158,7 @@ public class LibraryCollection implements Serializable {
     }
 
     public void saveLibraryFile(String libraryFilename) {
+	//	LOG.debug("LibraryCollection saveLibraryFile(String libraryFilename)");
         LibraryDTO lib = new LibraryDTO();
         for (Library libraryEntry : libraries) {
             LibraryEntryDTO le = new LibraryEntryDTO();
@@ -168,6 +176,7 @@ public class LibraryCollection implements Serializable {
     }
 
     public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
+	//	LOG.debug("LibraryCollection addLibraryDirectory(String baseDirectory, boolean defaultWatchState)");
         LibraryEntryDTO le = new LibraryEntryDTO();
         le.setPath(baseDirectory);
         le.setWatch(defaultWatchState);
@@ -178,6 +187,7 @@ public class LibraryCollection implements Serializable {
     }
 
     public void addLibraryEntry(LibraryEntryDTO libraryEntryDto) {
+	//	LOG.debug("LibraryCollection addLibraryEntry(LibraryEntryDTO libraryEntryDto)");
         Library library = new Library();
         // Set up the ImportDTO
         ImportDTO importDto = new ImportDTO();
@@ -193,18 +203,22 @@ public class LibraryCollection implements Serializable {
     }
 
     public String getDefaultPlayerPath() {
+	//	LOG.debug("LibraryCollection getDefaultPlayerPath()");
         return defaultPlayerPath;
     }
 
     public void setDefaultPlayerPath(String defaultPlayerPath) {
+	//	LOG.debug("LibraryCollection setDefaultPlayerPath(String defaultPlayerPath)");
         this.defaultPlayerPath = defaultPlayerPath;
     }
 
     public String getDefaultClient() {
+	//	LOG.debug("LibraryCollection getDefaultClient()");
         return defaultClient;
     }
 
     public void setDefaultClient(String defaultClient) {
+	//	LOG.debug("LibraryCollection setDefaultClient(String defaultClient)");
         this.defaultClient = defaultClient;
     }
 
@@ -214,6 +228,7 @@ public class LibraryCollection implements Serializable {
      * @return
      */
     public boolean isEmpty() {
+	//	LOG.debug("LibraryCollection isEmpty()");
         return libraries.isEmpty();
     }
 }

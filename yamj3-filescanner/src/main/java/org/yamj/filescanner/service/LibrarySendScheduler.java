@@ -21,7 +21,7 @@
  *
  */
 package org.yamj.filescanner.service;
-
+import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -53,6 +53,7 @@ public class LibrarySendScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibrarySendScheduler.class);
     private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
+	private static long WAIT_TIME = PropertyTools.getLongProperty("filescanner.wait.time", 600000);
     private final AtomicInteger runningCount = new AtomicInteger(0);
     private final AtomicInteger retryCount = new AtomicInteger(0);
 
@@ -75,16 +76,20 @@ public class LibrarySendScheduler {
      */
     @PreDestroy
     public void cleanUp() {
-        LOG.info("LibrarySendScheduler is exiting.");
+        LOG.info("LibrarySendScheduler is exiting process cleanUp ().");
         yamjExecutor.shutdown();
     }
 
+	
+	
     @Async
-    @Scheduled(initialDelay = 10000, fixedDelay = 15000)
-    public void sendLibraries() { //NOSONAR
+	// first run after 10 seconds, next run each 10 minutes by default or the value defined in yamj3.filescanner.properties in milliseconds
+    @Scheduled(initialDelay = 10000, fixedDelayString = "${filescanner.wait.time:600000}")    
+    public void sendLibraries() throws IOException, InterruptedException{ //NOSONAR
         if (retryCount.get() > RETRY_MAX) {
             LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", Integer.valueOf(RETRY_MAX));
             for (Library library : libraryCollection.getLibraries()) {
+			//	LOG.debug ("LibrarySendScheduler retryCount {} > RETRY_MAX {} library.setSendingComplete(true)", retryCount.get(),RETRY_MAX);
                 library.setSendingComplete(true);
             }
             return;
@@ -200,7 +205,7 @@ public class LibrarySendScheduler {
             sentOk = true;
         } catch (TaskRejectedException ex) {
             LOG.warn("Send queue full. '{}' will be sent later.", stageDto.getPath());
-            LOG.trace("Exception: ", ex);
+            LOG.trace("LibrarySendScheduler sendToCore Exception: ", ex);
             library.addDirectoryStatus(stageDto.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
         }
         

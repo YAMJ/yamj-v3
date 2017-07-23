@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+
 /**
  * @author Stuart
  */
@@ -304,10 +305,12 @@ public class Library implements Serializable {
     }
 
     public boolean isSendingComplete() {
+	//	LOG.debug("Library isSendingComplete : " + sendingComplete.get());
         return sendingComplete.get();
     }
 
     public void setSendingComplete(boolean sendingComplete) {
+	//	LOG.debug("Library setSendingComplete");
         this.sendingComplete.set(sendingComplete);
     }
 

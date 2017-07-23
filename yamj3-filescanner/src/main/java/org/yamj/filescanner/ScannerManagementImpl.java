@@ -21,6 +21,7 @@
  *
  */
 package org.yamj.filescanner;
+import org.yamj.filescanner.service.SendToCore;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +60,25 @@ import org.yamj.filescanner.service.SystemInfoCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
 
+
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.TaskRejectedException;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.yamj.filescanner.ApplicationContextProvider;
+import org.yamj.filescanner.model.Library;
+import org.yamj.filescanner.model.LibraryCollection;
+import org.yamj.filescanner.model.TimeType;
+
 /**
  * Performs an initial scan of the library location and then updates when
  * changes occur.
@@ -73,6 +93,11 @@ public class ScannerManagementImpl implements ScannerManagement {
      * TODO: determine what files have changed between scans
      */
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
+    private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
+    private final AtomicInteger runningCount = new AtomicInteger(0);
+    private final AtomicInteger retryCount = new AtomicInteger(0);
+	private final AtomicInteger retryWait = new AtomicInteger(0);
+	private static String dirToWatch = "";
     // The default watched status
     private static final boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", false);
     @Autowired
@@ -181,7 +206,10 @@ public class ScannerManagementImpl implements ScannerManagement {
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
         String libraryFilename = parser.getParsedOptionValue("l");
-
+		
+		LOG.info("watchEnabled :{}", watchEnabled);
+		
+		
         if (StringUtils.isNotBlank(libraryFilename)) {
             List<String> libraryList = Arrays.asList(libraryFilename.split(DEFAULT_SPLIT));
             libraryCollection.processLibraryList(libraryList, watchEnabled);
@@ -214,6 +242,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         // Wait for the libraries to be sent
         boolean allDone;
+		retryWait.getAndSet(0);
         do {
             allDone = true;
             for (Library library : libraryCollection.getLibraries()) {
@@ -223,14 +252,29 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             if (!allDone) {
                 try {
+				// for some reason ?? the sendLibraries action doesn't send, don't wait too much time 
+				// try to send one Time
+					for (Library library : libraryCollection.getLibraries()) {
+						if ((retryWait.get() > RETRY_MAX) && library.isScanningComplete()) 
+						{
+							LOG.info("Maximum number of wait-time ({}) exceeded. Try to send .", Integer.valueOf(RETRY_MAX));
+							sendLibrariesOneTime();
+							// if done resst all value 
+							retryWait.getAndSet(0);
+							allDone = true;
+						}
+					}
                     LOG.info("Waiting for library sending to complete...");
                     TimeUnit.SECONDS.sleep(WAIT_10_SECONDS);
+					retryWait.incrementAndGet();
                 } catch (InterruptedException ex) { //NOSONAR
                     LOG.trace("Interrupted whilst waiting for threads to complete");
                 }
             }
         } while (!allDone);
-
+		// exit loop, reset de wait count to 0
+		retryWait.getAndSet(0);
+		
         if (LOG.isInfoEnabled()) {
             LOG.info(StringUtils.repeat("*", DIVIDER_LINE_LENGTH));
             LOG.info("Completed initial sending of all libraries ({} total)", libraryCollection.size());
@@ -241,11 +285,20 @@ public class ScannerManagementImpl implements ScannerManagement {
                 LOG.info("{}", library.getStatistics().generateStatistics(true));
             }
         }
-        
-        if (watchEnabled) {
+        // when watched is asked loop to the specified directory until the watcher detect something   
+		// set status = ExitType.LOOP not SUCCESS to loop,
+		// if SUCCESS is setted filescanner shutdown     
+		// when the watcher detect a change now the following sequence is performed 
+		// stop watching (reset keys and break watcher)
+		// rescan the library
+		// send the new scanning to the core (one time)
+		// restart the watcher
+		
+        do  {
             Watcher wd;
             try {
                 wd = new Watcher();
+			//	LOG.debug("ScannerManagementImpl watchEnabled wd");
             } catch (UnsatisfiedLinkError ule) { //NOSONAR
                 LOG.warn("Watching is not possible on this system; therefore watch service will not be used");
                 wd = null;
@@ -254,7 +307,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             if (wd != null) {
                 boolean directoriesToWatch = false;
                 for (Library library : libraryCollection.getLibraries()) {
-                    String dirToWatch = library.getImportDTO().getBaseDirectory();
+                    dirToWatch = library.getImportDTO().getBaseDirectory();
                     if (library.isWatch()) {
                         LOG.info("Watching directory '{}' for changes...", dirToWatch);
                         wd.addDirectory(dirToWatch);
@@ -265,19 +318,42 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
 
                 if (directoriesToWatch) {
+				//	LOG.debug("ScannerManagementImpl start wd.processEvents() with  '{}' ", dirToWatch);
+					status = ExitType.LOOP;
                     wd.processEvents();
+					 for (Library library : libraryCollection.getLibraries()) {
+								library.getStatistics().setTime(TimeType.START);
+								status = scan(library);
+								library.getStatistics().setTime(TimeType.END);
+								library.setScanningComplete(true);
+								LOG.info("Scanning completed.");
+								library.setSendingComplete(false);
+								status = ExitType.LOOP;
+								sendLibrariesOneTime ();
+							}
                     LOG.info("Watching directory '{}' completed", directoryProperty);
                 } else {
                     LOG.info("No directories marked for watching");
                 }
             }
-        } else {
-            LOG.info("Watching not enabled.");
-        }
+			if (status.equals(ExitType.LOOP)) 
+			{
+					LOG.info("do watch with status {}", status);
+					continue;
+			}
+			else {
+				LOG.info("Exiting watch with status {}", status);
+				break;
+			}
+        } while (watchEnabled);
+		if (!watchEnabled)
+			{
+				LOG.info("Watching not enabled.");
+			}
 
         LOG.info("Exiting with status {}", status);
-
-        return status;
+		return status;
+		
     }
 
     /**
@@ -489,4 +565,143 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static void queueForSending(Library library, StageDirectoryDTO stageDir) {
         library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
     }
+	
+	/**
+	* sequence added to start sending new scanned libraries once to the core
+	* @param there is no param 
+	* add a new task 
+	* start send library
+	* check status 
+	* send to the core
+	* @return 
+	*/
+    @Resource(name = "taskExecutor")
+    private ThreadPoolTaskExecutor yamjExecutor;
+
+	private void sendLibrariesOneTime() { //NOSONAR
+	
+    
+        if (retryCount.get() > RETRY_MAX) {
+            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", Integer.valueOf(RETRY_MAX));
+            for (Library library : libraryCollection.getLibraries()) {
+                library.setSendingComplete(true);
+            }
+            return;
+        }
+
+        LOG.info("There are {} libraries to process, there have been {} consecutive failed attempts to send.", libraryCollection.size(), retryCount.get());
+        LOG.info("There are {} items currently queued to be sent to core.", runningCount.get());
+
+        for (Library library : libraryCollection.getLibraries()) {
+            library.getStatistics().setTime(TimeType.SENDING_START);
+            LOG.info("  {} has {} directories and the file scanner has {} scanning.",
+                    library.getImportDTO().getBaseDirectory(),
+                    library.getDirectories().size(),
+                    library.isScanningComplete() ? "finished" : "not finished");
+
+            try {
+                for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
+                    LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
+
+                    if (checkStatus(library, entry.getValue(), entry.getKey())) {
+                        if (retryCount.get() > 0) {
+                            LOG.debug("Successfully sent file to server, resetting retry count to 0 from {}.", retryCount.getAndSet(0));
+                        } else {
+                            LOG.debug("Successfully sent file to server.");
+                            retryCount.set(0);
+                        }
+                    } else {
+                        // Make sure this is set to false
+                        library.setSendingComplete(false);
+                        LOG.warn("Failed to send a file, this was failed attempt #{}. Waiting until next run...", retryCount.incrementAndGet());
+                        return;
+                    }
+                }
+
+                // Don't stop sending until the scanning is completed and there are no running tasks
+                if (library.isScanningComplete() && runningCount.get() <= 0) {
+                    // When we reach this point we should have completed the library sending
+                    LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
+                    library.setSendingComplete(true);
+                    library.getStatistics().setTime(TimeType.SENDING_END);
+                } else {
+                    LOG.info("  {}: Scanning and/or sending ({} left) is not complete. Waiting for more files to send.", library.getImportDTO().getBaseDirectory(), runningCount.get());
+                }
+            } catch (InterruptedException ex) { //NOSONAR
+                LOG.info("Interrupted error: {}", ex.getMessage());
+            } catch (ExecutionException ex) {
+                LOG.warn("Execution error", ex);
+            }
+        }
+    }
+  private boolean checkStatus(Library library, Future<StatusType> statusType, String directory) throws InterruptedException, ExecutionException {
+        boolean sendStatus;
+
+        
+        if (statusType.isDone()) {
+            StatusType processingStatus = statusType.get();
+            
+            if (processingStatus == StatusType.NEW) {
+                LOG.info("    Sending '{}' to core for processing.", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.UPDATED) {
+                LOG.info("    Sending updated '{}' to core for processing.", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.ERROR) {
+                LOG.info("    Resending '{}' to core for processing (was in error status).", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.DONE) {
+                LOG.info("    Completed: '{}'", directory);
+                sendStatus = true;
+            } else {
+                LOG.warn("    Unknown processing status {} for {}", processingStatus, directory);
+                // Assume this is correct, so we don't get stuck
+                sendStatus = true;
+            }
+        } else {
+            LOG.warn("    Still being procesed {}", directory);
+            sendStatus = false;
+        }
+        return sendStatus;
+    }
+   /**
+     * Send the directory to the core.
+     *
+     * Will get the StageDirectoryDTO from the library for sending.
+     *
+     * @param library
+     * @param sendDir
+     */
+    private boolean sendToCore(Library library, String sendDir) {
+        StageDirectoryDTO stageDto = library.getDirectory(sendDir);
+        boolean sentOk = false;
+
+        if (stageDto == null) {
+            LOG.warn("StageDirectoryDTO for '{}' is null!", sendDir);
+            // We do not want to send this again.
+            library.addDirectoryStatus(sendDir, ConcurrentUtils.constantFuture(StatusType.INVALID));
+            return true;
+        }
+
+        LOG.info("Sending #{}: {}", runningCount.incrementAndGet(), sendDir);
+
+        ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
+        SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
+        stc.setImportDto(library.getImportDTO(stageDto));
+        stc.setCounter(runningCount);
+        FutureTask<StatusType> task = new FutureTask<>(stc);
+
+        try {
+            yamjExecutor.submit(task);
+            library.addDirectoryStatus(stageDto.getPath(), task);
+            sentOk = true;
+        } catch (TaskRejectedException ex) {
+            LOG.warn("Send queue full. '{}' will be sent later.", stageDto.getPath());
+            LOG.trace("Exception: ", ex);
+            library.addDirectoryStatus(stageDto.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
+        }
+        
+        return sentOk;
+    }
+  
 }

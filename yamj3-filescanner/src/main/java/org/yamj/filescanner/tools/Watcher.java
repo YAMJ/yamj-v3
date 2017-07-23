@@ -26,13 +26,19 @@ import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_CREATE;
 import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_DELETE;
 import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_MODIFY;
 import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.FILE_TREE;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import name.pachler.nio.file.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.concurrent.Callable;
+import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.stereotype.Service;
+import java.util.concurrent.ExecutionException;
 
 public class Watcher {
 
@@ -44,7 +50,7 @@ public class Watcher {
     private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
     // keep watching the directories
     private boolean watchEnabled = true;
-
+	
     /**
      * Creates a WatchService
      */
@@ -94,10 +100,9 @@ public class Watcher {
      * @param dir
      */
     public final void addDirectory(Path dir) {
-        register(dir);
-
-        // enable trace after initial registration
+		// enable trace for registration
         this.trace = true;
+        register(dir);
     }
 
     /**
@@ -107,6 +112,7 @@ public class Watcher {
      */
     private void register(Path dir) {
         WatchKey key = null;
+		
         try {
             key = dir.register(watcherService, STANDARD_EVENTS, FILE_TREE);
         } catch (UnsupportedOperationException ex) {
@@ -120,9 +126,9 @@ public class Watcher {
             if (trace) {
                 Path prev = keys.get(key);
                 if (prev == null) {
-                    LOG.info("Register: {}", dir);
+                    LOG.info("Register Watcher for: {}", dir);
                 } else if (!dir.equals(prev)) {
-                    LOG.info("Update: {} -> {}", prev, dir);
+                    LOG.info("Update Watcher for: {} -> {}", prev, dir);
                 }
             }
             keys.put(key, dir);
@@ -136,24 +142,31 @@ public class Watcher {
         while (watchEnabled) {
 
             // wait for key to be signaled
-            WatchKey key;
+			 WatchKey key;
+			// just info
+			startWatching();
             try {
-                key = watcherService.take();
+				key = watcherService.take();
+			//	LOG.debug("Watcher start take() key and sleep 20s: " + key);
+			// delay action for 20 seconds to let more time to change 
+				TimeUnit.MILLISECONDS.sleep(20000);
             } catch (InterruptedException ex) {
+				LOG.debug("ProcessEvents watchEnabled InterruptedException: {}", ex);
                 continue;
             } catch (ClosedWatchServiceException ex) {
                 LOG.info("Watch service closed, terminating.");
-                LOG.trace("Exception:", ex);
+                LOG.trace("Watcher ProcessEvents Exception:", ex);
                 watchEnabled = false;
                 break;
             }
 
             Path dir = keys.get(key);
+			LOG.debug("Watcher : " + dir);
             if (dir == null) {
                 LOG.warn("WatchKey not recognized!!");
                 continue;
             }
-
+			
             for (WatchEvent<?> event : key.pollEvents()) {
                 @SuppressWarnings("rawtypes")
                 WatchEvent.Kind kind = event.kind();
@@ -170,20 +183,24 @@ public class Watcher {
                 Path child = dir.resolve(name);
 
                 // print out event
-                LOG.info("{}: {}", event.kind().name(), child);
-
+                LOG.info("{}: {} ", event.kind().name(), child); // runningCount.incrementAndGet());
+				
             }
-
+			
             // reset key and remove from set if directory no longer accessible
-            boolean valid = key.reset();
+			boolean valid = key.reset();
+			LOG.debug("Watcher reset key.");
             if (!valid) {
-                keys.remove(key);
+               keys.remove(key);
 
                 // all directories are inaccessible
                 if (keys.isEmpty()) {
-                    break;
+					LOG.debug("Watcher keys.isEmpty()");
+                   break;
                 }
             }
+			// now stop watcher to exit loop and treat what is modified
+			 stopWatching();
         }
     }
 
