@@ -35,6 +35,14 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.remote.service.FileImportService;
 import org.yamj.common.type.StatusType;
+import org.yamj.filescanner.model.Library;
+import org.yamj.filescanner.model.LibraryCollection;
+import org.yamj.filescanner.model.TimeType;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import org.yamj.common.type.StatusType;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
@@ -43,10 +51,13 @@ public class SendToCore implements Callable<StatusType> {
     private static final Logger LOG = LoggerFactory.getLogger(SendToCore.class);
     private ImportDTO importDto;
     private AtomicInteger runningCount;
-
+	private int current_runningCount = 0;
     @Autowired
     private FileImportService fileImportService;
-
+	
+	@Autowired
+    private LibraryCollection libraryCollection;
+	
     public SendToCore() {
         // empty initialization
     }
@@ -66,11 +77,13 @@ public class SendToCore implements Callable<StatusType> {
     @Override
     public StatusType call() {
         StatusType status;
-        String displayPath = importDto.getStageDirectory().getPath();
+        String displayPath = importDto.getStageDirectory().getPath();	
+		
         try {
             LOG.debug("Sending: {}", displayPath);
             fileImportService.importScanned(importDto);
-            LOG.debug("{}: Successfully queued", displayPath);
+			current_runningCount = runningCount.decrementAndGet();
+        //    LOG.debug("{}: Successfully queued", displayPath);
             status = StatusType.DONE;
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}: Failed to connect to the core server: {}", displayPath, ex.getMessage());
@@ -81,9 +94,27 @@ public class SendToCore implements Callable<StatusType> {
             LOG.trace("Exception:", ex);
             status = StatusType.ERROR;
         }
-
+		
         // Whether or not the message was sent, quit
-        LOG.info("{}: Exiting with status {}, remaining threads: {}", displayPath, status, runningCount.decrementAndGet());
+        LOG.info("{}: Exiting with status {}, remaining threads: {}", displayPath, status, current_runningCount);
+		if (current_runningCount == 0)
+		{
+			for (Library library : libraryCollection.getLibraries()) 
+				{
+					for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) 
+						{
+						//	LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
+							String displayCurrentLib = entry.getKey();
+						//	LOG.debug ("sendToCore displayCurrentLib: {} , displayPath: {}", displayCurrentLib, displayPath);
+							if (displayCurrentLib.equals(displayPath)) 
+							{
+								LOG.info ("Sending Complete");
+								library.setSendingComplete(true);
+								library.getStatistics().setTime(TimeType.SENDING_END);
+							}
+						}
+				}		   
+		}
         return status;
     }
 }
