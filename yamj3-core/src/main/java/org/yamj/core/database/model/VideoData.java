@@ -346,7 +346,6 @@ public class VideoData extends AbstractMetadata {
     @Transient
     private Collection<String> studioNames;
 	
-	//add collection libraryNames
 	@Transient
     private Collection<String> libraryNames;
 
@@ -767,15 +766,6 @@ public class VideoData extends AbstractMetadata {
     public void setStudios(Set<Studio> studios) {
         this.studios = studios;
     }
-	// add library
-	//public Set<Library> getLibraries() {
-    //    return libraries;
-    //}
-
-    //public void setLibraries(Set<Library> libraries) {
-     //   this.libraries = libraries;
-    //}
-	// end library
 
     public Set<Country> getCountries() {
         return countries;
