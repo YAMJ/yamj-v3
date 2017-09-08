@@ -28,7 +28,6 @@ import java.util.Date;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.NaturalId;
 
 @NamedNativeQueries({    
     @NamedNativeQuery(name = "metadata.library.series", resultClass = Library.class,
@@ -107,7 +106,6 @@ public class Library extends AbstractIdentifiable implements Serializable {
     }
 	
     // EQUALITY CHECKS
-    
   
 	@Override
     public int hashCode() {

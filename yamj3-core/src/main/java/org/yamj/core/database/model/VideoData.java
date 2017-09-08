@@ -917,20 +917,22 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
-	// add collection getLibraryNames
-	 public Collection<String> getLibraryNames() {
-        return libraryNames;
+    
+    public Collection<String> getLibraryNames() {
+    	return libraryNames;
     }
+    
 	public Collection<String> setLibrary(String LibraryNames) {
         return libraryNames;
 	}
-    public void setLibraryNames(Collection<String> LibraryNames, String source) {
-        if (CollectionUtils.isNotEmpty(LibraryNames)) {
+	
+    public void setLibraryNames(Collection<String> libraryNames, String source) {
+        if (CollectionUtils.isNotEmpty(libraryNames)) {
             this.libraryNames = libraryNames;
             setOverrideFlag(OverrideFlag.LIBRARIES, source);
         }
     }
-	// end library
+    
     public Collection<String> getCountryCodes() {
         return countryCodes;
     }
