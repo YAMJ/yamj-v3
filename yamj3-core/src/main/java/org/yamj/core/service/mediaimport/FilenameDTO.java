@@ -27,8 +27,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.FileType;
 
 /**
  * Container of parsed data from movie file name. Contains only information which could be possibly extracted from file name.
@@ -40,7 +40,8 @@ public class FilenameDTO {
     private static DecimalFormat PADDED_FORMAT = new DecimalFormat("000"); // Issue 190
     private final String name;
     private final String parentName;
-    private final boolean directory;
+    private final boolean bluray;
+    private final boolean dvd;
     private String rest;
     private String title = null;
     private String cleanTitle = null;
@@ -65,13 +66,8 @@ public class FilenameDTO {
     public FilenameDTO(StageFile stageFile) {
         this.name = stageFile.getFileName();
         this.parentName = FilenameUtils.getName(stageFile.getStageDirectory().getDirectoryPath());
-        this.directory = false;
-    }
-
-    public FilenameDTO(StageDirectory stageDirectory) {
-        this.name = FilenameUtils.getName(stageDirectory.getDirectoryPath());
-        this.parentName = FilenameUtils.getName(stageDirectory.getParentDirectory().getDirectoryPath());
-        this.directory = true;
+        this.bluray = FileType.BLURAY.equals(stageFile.getFileType());
+        this.dvd = FileType.DVD.equals(stageFile.getFileType());
     }
 
     public String getName() {
@@ -82,11 +78,15 @@ public class FilenameDTO {
         return parentName;
     }
 
-    public boolean isDirectory() {
-        return directory;
-    }
+    public boolean isBluray() {
+		return bluray;
+	}
 
-    public String getRest() {
+	public boolean isDvd() {
+		return dvd;
+	}
+
+	public String getRest() {
         return rest;
     }
 

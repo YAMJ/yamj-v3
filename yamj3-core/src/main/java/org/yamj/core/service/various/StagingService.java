@@ -96,21 +96,19 @@ public class StagingService {
 				library.setLastScanned(new Date());
 				stagingDao.saveEntity(library);
 				return library;
-			} else {
-			//	LOG.debug("StagingService storeLibrary  library2 : " + library2);
-				library2.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-				library2.setLastScanned(new Date());
-				stagingDao.updateEntity(library2);
-				return library2;
 			}
+			
+			LOG.trace("StagingService storeLibrary  library2 : " + library2);
+			library2.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+			library2.setLastScanned(new Date());
+			stagingDao.updateEntity(library2);
+			return library2;
         }
-		else {
-			//	LOG.debug("StagingService storeLibrary  library : " + library);
-				library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
-				library.setLastScanned(new Date());
-				stagingDao.updateEntity(library);
-				return library;
-			}
+		LOG.trace("StagingService storeLibrary  library : " + library);
+        library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
+        library.setLastScanned(new Date());
+        stagingDao.updateEntity(library);
+        return library;
     }
 
     @Transactional
@@ -167,8 +165,13 @@ public class StagingService {
                 stageFile.setBaseName(baseName);
                 stageFile.setExtension(extension);
                 stageFile.setStageDirectory(stageDirectory);
-                stageFile.setFileType(filenameScanner.determineFileType(extension));
-                stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
+                stageFile.setFileType(fileType);
+                if (fileType == FileType.BLURAY || fileType == FileType.DVD) {
+                	// use directory name for BluRay and DVD
+                	stageFile.setFullPath(stageDirectoryDTO.getPath());
+                } else {
+                	stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
+                }
                 stageFile.setStatus(NEW);
 
                 // set changeable values in stage file
@@ -205,6 +208,12 @@ public class StagingService {
         stageFile.setFileSize(stageFileDTO.getFileSize());
 
         if (FileType.VIDEO.equals(stageFile.getFileType())) {
+            // media info scan content
+            stageFile.setContent(stageFileDTO.getContent());
+        } else if (FileType.BLURAY.equals(stageFile.getFileType())) {
+            // media info scan content
+            stageFile.setContent(stageFileDTO.getContent());
+        } else if (FileType.DVD.equals(stageFile.getFileType())) {
             // media info scan content
             stageFile.setContent(stageFileDTO.getContent());
         } else if (FileType.NFO.equals(stageFile.getFileType())) {

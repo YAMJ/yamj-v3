@@ -76,9 +76,10 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
-    public Long getNextStageFileId(FileType fileType) {
+    public Long getNextStageFileId(FileType... fileTypes) {
+    	List<FileType> listFileTypes = Arrays.asList(fileTypes);
         return (Long) currentSession().createCriteria(StageFile.class)
-                .add(Restrictions.eq(LITERAL_FILE_TYPE, fileType))    
+                .add(Restrictions.in(LITERAL_FILE_TYPE, listFileTypes))    
                 .add(Restrictions.or(
                         Restrictions.eq(LITERAL_STATUS, StatusType.NEW),
                         Restrictions.eq(LITERAL_STATUS, StatusType.UPDATED)))

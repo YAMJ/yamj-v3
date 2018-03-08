@@ -74,8 +74,6 @@ public class MediaImportService {
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
     private static final String SCANNER_ID = "filename";
     private static final String TVSHOW_NFO_NAME = "tvshow";
-    private static final String BDMV_FOLDER = "BDMV";
-    private static final String DVD_FOLDER = "VIDEO_TS";
     
     @Autowired
     private StagingDao stagingDao;
@@ -110,8 +108,8 @@ public class MediaImportService {
     private String photoFolderName;
     
     @Transactional(readOnly = true)
-    public Long getNextStageFileId(final FileType fileType) {
-        return this.stagingDao.getNextStageFileId(fileType);
+    public Long getNextStageFileId(final FileType... fileTypes) {
+        return this.stagingDao.getNextStageFileId(fileTypes);
     }
 
     @Transactional
@@ -175,7 +173,7 @@ public class MediaImportService {
             // clean the title
             final String cleanTitle = this.identifierService.cleanIdentifier(dto.getTitle());
             if (StringUtils.isBlank(cleanTitle)) {
-                LOG.error("No valid clean title for  '{}' from filename '{}'", dto.getTitle(), stageFile.getFileName());
+                LOG.error("No valid clean title for '{}' from filename '{}'", dto.getTitle(), stageFile.getFileName());
                 stageFile.setStatus(ERROR);
                 mediaDao.updateEntity(stageFile);
                 return;
@@ -453,16 +451,9 @@ public class MediaImportService {
         Map<StageFile, Integer> nfoFiles = new HashMap<>();
 
         // search name is the base name of the stage file
-        String searchName = stageFile.getBaseName();
-
-        // BDMV and VIDEO_TS folder handling
-        StageDirectory directory = stageFile.getStageDirectory();
-        if (isBlurayOrDvdFolder(directory)) {
-            // use parent directory for search
-            directory = directory.getParentDirectory();
-            // search for name of parent directory
-            searchName = directory.getDirectoryName();
-        }
+        final String searchName = stageFile.getBaseName();
+        // search in directory
+        final StageDirectory directory = stageFile.getStageDirectory();
 
         // case 1: find matching NFO in directory
         StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
@@ -559,19 +550,6 @@ public class MediaImportService {
             // recurse until parent is null
             this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), counter+1, recurse);
         }
-    }
-
-    private static boolean isBlurayOrDvdFolder(StageDirectory directory) {
-        if (directory == null) {
-            return false;
-        }
-        if (BDMV_FOLDER.equalsIgnoreCase(directory.getDirectoryName())) {
-            return true;
-        }
-        if (DVD_FOLDER.equalsIgnoreCase(directory.getDirectoryName())) {
-            return true;
-        }
-        return false;
     }
 
     private void attachSubtilesToMediaFile(MediaFile mediaFile, StageFile videoFile) {
@@ -709,11 +687,6 @@ public class MediaImportService {
 
         } else if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
 
-            if (isBlurayOrDvdFolder(stageFile.getStageDirectory())) {
-                // ignore NFO in BDMV or DVD folder; should be placed in parent directory
-                return videoFiles;
-            }
-
             // case 10: apply to all video data in stage directory
             videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
             attachVideoDataToNFO(videoFiles, videoDatas, 10);
@@ -722,23 +695,6 @@ public class MediaImportService {
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
             if (CollectionUtils.isEmpty(childDirectories)) {
                 return videoFiles;
-            }
-
-            // filter out BluRay and DVD folders from child directories
-            List<StageDirectory> blurayOrDvdFolders = new ArrayList<>();
-            for (StageDirectory directory : childDirectories) {
-                if (isBlurayOrDvdFolder(directory)) {
-                    blurayOrDvdFolders.add(directory);
-                }
-            }
-            childDirectories.removeAll(blurayOrDvdFolders);
-
-            // case 1: BluRay/DVD handling
-            if (CollectionUtils.isNotEmpty(blurayOrDvdFolders)) {
-                for (StageDirectory folder : blurayOrDvdFolders) {
-                    videoDatas = this.stagingDao.findVideoDatasForNFO(folder);
-                    attachVideoDataToNFO(videoFiles, videoDatas, 1);
-                }
             }
 
             if (CollectionUtils.isNotEmpty(childDirectories)) {

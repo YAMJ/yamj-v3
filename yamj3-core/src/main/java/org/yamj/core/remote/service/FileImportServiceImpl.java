@@ -43,10 +43,9 @@ public class FileImportServiceImpl implements FileImportService {
     
     @Override
     public void importScanned(ImportDTO importDTO) {
-        Library library;
         try {
-            library = stagingService.storeLibrary(importDTO);
-			// LOG.debug("Imported scanned library: {}", library);
+        	Library library = stagingService.storeLibrary(importDTO);
+			LOG.trace("Imported scanned library: {}", library);
             stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
             LOG.trace("Imported scanned directory: {}", importDTO.getStageDirectory().getPath());
             importScheduler.trigger();

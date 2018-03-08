@@ -294,6 +294,10 @@ public class FilenameScanner {
             return FileType.NFO;
         } else if ("watched".equals(extension)) {
             result = FileType.WATCHED;
+        } else if ("bluray".equals(extension)) {
+        	result = FileType.BLURAY;
+        } else if ("dvd".equals(extension)) {
+        	result = FileType.DVD;
         } else if (videoExtensions.contains(ext)) {
             result = FileType.VIDEO;
         } else if (subtitleExtensions.contains(ext)) {
@@ -317,9 +321,12 @@ public class FilenameScanner {
         }
 
         // EXTENSION AND CONTAINER
-        if (dto.isDirectory()) {
-            dto.setContainer("DVD");
-            dto.setVideoSource("DVD");
+        if (dto.isBluray()) {
+            dto.setContainer(FileType.BLURAY.name());
+            dto.setVideoSource("BluRay");
+        } else if (dto.isDvd()) {
+            dto.setContainer(FileType.DVD.name());
+            dto.setVideoSource(FileType.DVD.name());
         } else {
             // Extract and strip extension
             String ext = FilenameUtils.getExtension(dto.getRest());

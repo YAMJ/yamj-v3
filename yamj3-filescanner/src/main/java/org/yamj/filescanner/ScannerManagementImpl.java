@@ -21,15 +21,24 @@
  *
  */
 package org.yamj.filescanner;
-import org.yamj.filescanner.service.SendToCore;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import javax.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,8 +47,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.cmdline.CmdLineParser;
@@ -54,30 +66,14 @@ import org.yamj.common.type.DirectoryType;
 import org.yamj.common.type.ExitType;
 import org.yamj.common.type.StatusType;
 import org.yamj.common.util.KeywordMap;
-import org.yamj.filescanner.comparator.FileTypeComparator;
-import org.yamj.filescanner.model.*;
+import org.yamj.filescanner.model.Library;
+import org.yamj.filescanner.model.LibraryCollection;
+import org.yamj.filescanner.model.StatType;
+import org.yamj.filescanner.model.TimeType;
+import org.yamj.filescanner.service.SendToCore;
 import org.yamj.filescanner.service.SystemInfoCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
-
-
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.task.TaskRejectedException;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.yamj.filescanner.ApplicationContextProvider;
-import org.yamj.filescanner.model.Library;
-import org.yamj.filescanner.model.LibraryCollection;
-import org.yamj.filescanner.model.TimeType;
 
 /**
  * Performs an initial scan of the library location and then updates when
@@ -259,7 +255,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 						{
 							LOG.info("Maximum number of wait-time ({}) exceeded. Try to send .", Integer.valueOf(RETRY_MAX));
 							sendLibrariesOneTime();
-							// if done resst all value 
+							// if done reset all value 
 							retryWait.getAndSet(0);
 							allDone = true;
 						}
@@ -298,7 +294,6 @@ public class ScannerManagementImpl implements ScannerManagement {
             Watcher wd;
             try {
                 wd = new Watcher();
-			//	LOG.debug("ScannerManagementImpl watchEnabled wd");
             } catch (UnsatisfiedLinkError ule) { //NOSONAR
                 LOG.warn("Watching is not possible on this system; therefore watch service will not be used");
                 wd = null;
@@ -318,7 +313,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
 
                 if (directoriesToWatch) {
-				//	LOG.debug("ScannerManagementImpl start wd.processEvents() with  '{}' ", dirToWatch);
+                	LOG.trace("ScannerManagementImpl start wd.processEvents() with  '{}' ", dirToWatch);
 					status = ExitType.LOOP;
                     wd.processEvents();
 					 for (Library library : libraryCollection.getLibraries()) {
@@ -336,20 +331,19 @@ public class ScannerManagementImpl implements ScannerManagement {
                     LOG.info("No directories marked for watching");
                 }
             }
-			if (status.equals(ExitType.LOOP)) 
-			{
-					LOG.info("do watch with status {}", status);
-					continue;
+
+            if (status.equals(ExitType.LOOP))  {
+				LOG.info("do watch with status {}", status);
+				continue;
 			}
-			else {
-				LOG.info("Exiting watch with status {}", status);
-				break;
-			}
+            
+            LOG.info("Exiting watch with status {}", status);
+			break;
         } while (watchEnabled);
-		if (!watchEnabled)
-			{
-				LOG.info("Watching not enabled.");
-			}
+        
+		if (!watchEnabled) {
+			LOG.info("Watching not enabled.");
+		}
 
         LOG.info("Exiting with status {}", status);
 		return status;
@@ -388,126 +382,139 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param directory
      */
     private StageDirectoryDTO scanDir(Library library, File directory) {
-        DirectoryType dirType = DirectoryEnding.check(directory);
-        StageDirectoryDTO stageDir;
-
-        LOG.info("Scanning directory '{}', detected type - {}", library.getRelativeDir(directory), dirType);
-
-        if (dirType == DirectoryType.BLURAY || dirType == DirectoryType.DVD) {
-            // Don't scan BLURAY or DVD structures
-            LOG.info("Skipping directory '{}' as its a {} type", directory.getAbsolutePath(), dirType);
-            library.getStatistics().increment(dirType == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
-            stageDir = null;
-        } else if (DIR_EXCLUSIONS.containsKey(directory.getName().toLowerCase())) {
+        LOG.info("Scanning directory '{}'", library.getRelativeDir(directory));
+        
+        if (DIR_EXCLUSIONS.containsKey(directory.getName().toLowerCase())) {
             LOG.info("Skipping directory '{}' as its in the exclusion list.", directory.getAbsolutePath());
-            stageDir = null;
-        } else {
-            try {
-                if (FileUtils.directoryContains(directory, new File(directory, FILE_MJBIGNORE))) {
-                    LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", FILE_MJBIGNORE, directory.getName());
+            return null;
+        }
+        
+        try {
+            if (FileUtils.directoryContains(directory, new File(directory, FILE_MJBIGNORE))) {
+                LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", FILE_MJBIGNORE, directory.getName());
+                return null;
+            }
+        } catch (IOException ex) {
+            LOG.trace("Failed to seach for '{}' in the directory {}", FILE_MJBIGNORE, directory.getName());
+            LOG.trace("IO error", ex);
+        }
+
+
+        File[] listedFiles = directory.listFiles();
+        if (listedFiles == null || listedFiles.length == 0) {
+            return null;
+        }
+        
+        // divide into directors and files
+        final List<File> directories = new ArrayList<File>();
+        final List<File> files = new ArrayList<File>();
+        for (File file : listedFiles) {
+        	if (file.isFile()) {
+        		files.add(file);
+        	} else if (file.isDirectory()) {
+        		directories.add(file);
+        	}
+        }
+        
+        if (directories.isEmpty() && files.isEmpty()) {
+        	// neither directories nor files
+        	return null;
+        }
+
+        // create new stage directory
+        StageDirectoryDTO stageDir = new StageDirectoryDTO();
+        stageDir.setPath(directory.getAbsolutePath());
+        stageDir.setDate(directory.lastModified());
+
+        library.getStatistics().increment(StatType.DIRECTORY);
+
+        /*
+         * We need to scan the directory and look for any of the exclusion filenames.
+         *
+         * We then build a list of those excluded extensions, so that when we scan the filename list we can exclude the unwanted files.
+         */
+        List<String> exclusions = new ArrayList<>();
+        for (File file : files) {
+            final String lcFilename = file.getName().toLowerCase();
+            if (DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
+                    // Because the value is null or empty we exclude the whole directory, so quit now.
+                    LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
+                    // All files to be excluded, so quit
                     return null;
                 }
-            } catch (IOException ex) {
-                LOG.trace("Failed to seach for '{}' in the directory {}", FILE_MJBIGNORE, directory.getName());
-                LOG.trace("IO error", ex);
-            }
 
-            stageDir = new StageDirectoryDTO();
-            stageDir.setPath(directory.getAbsolutePath());
-            stageDir.setDate(directory.lastModified());
-
-            library.getStatistics().increment(StatType.DIRECTORY);
-
-            File[] files = directory.listFiles();
-            if (files == null) {
-                return stageDir;
-            }
-            
-            final List<File> currentFileList = Arrays.asList(files);
-            final FileTypeComparator comp = new FileTypeComparator(false);
-            Collections.sort(currentFileList, comp);
-
-            /*
-             * We need to scan the directory and look for any of the exclusion filenames.
-             *
-             * We then build a list of those excluded extensions, so that when we scan the filename list we can exclude the unwanted files.
-             */
-            List<String> exclusions = new ArrayList<>();
-            for (File file : currentFileList) {
-                if (!file.isFile()) {
-                    // First directory we find, we can stop (because we sorted the files first)
-                    break;
-                }
-                
-                final String lcFilename = file.getName().toLowerCase();
-                if (DIR_EXCLUSIONS.containsKey(lcFilename)) {
-                    if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
-                        // Because the value is null or empty we exclude the whole directory, so quit now.
-                        LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
-                        // All files to be excluded, so quit
-                        return null;
-                    }
-
-                    // We found a match, so add it to our local copy
-                    LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
-                    exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
-                    // Skip to the next file, theres no need of further processing
-                }
-            }
-
-            // Create a precompiled Matcher for use later (Doesn't matter what the values are)
-            Matcher matcher = Pattern.compile(FILE_MJBIGNORE).matcher(FILE_MJBIGNORE);
-
-            // Scan the directory properly
-            for (File file : currentFileList) {
-                if (!file.isFile()) {
-                    // First directory we find, we can stop (because we sorted the files first)
-                    break;
-                }
-
-                boolean excluded = false;
-                String lcFilename = file.getName().toLowerCase();
-                if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
-                    LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
-                    continue;
-                }
-
-                // Process the DIR_IGNORE_FILES
-                for (Pattern pattern : DIR_IGNORE_FILES) {
-                    matcher.reset(lcFilename).usePattern(pattern);
-                    if (matcher.matches()) {
-                        // Found the file pattern, so skip the file
-                        LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
-                        excluded = true;
-                        break;
-                    }
-                }
-
-                if (!excluded) {
-                    stageDir.addStageFile(scanFile(file));
-                    library.getStatistics().increment(StatType.FILE);
-                }
-            }
-
-            library.addDirectory(stageDir);
-            queueForSending(library, stageDir);
-
-            // Resort the files with directories first
-            comp.setDirectoriesFirst(true);
-            Collections.sort(currentFileList, comp);
-
-            // Now scan the directories
-            for (File scanDir : currentFileList) {
-                if (!scanDir.isDirectory()) {
-                    // First file we find, we can stop (because we are sorted directories first)
-                    break;
-                }
-                
-                if (scanDir(library, scanDir) == null) {
-                    LOG.info("Not adding directory '{}', no files found or all excluded", scanDir.getAbsolutePath());
-                }
+                // We found a match, so add it to our local copy
+                LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
+                exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
+                // Skip to the next file, theres no need of further processing
             }
         }
+
+        // Create a precompiled Matcher for use later (Doesn't matter what the values are)
+        Matcher matcher = Pattern.compile(FILE_MJBIGNORE).matcher(FILE_MJBIGNORE);
+
+
+        // Scan the directory properly
+        for (File file : files) {
+            boolean excluded = false;
+            String lcFilename = file.getName().toLowerCase();
+            if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
+                continue;
+            }
+
+            // Process the DIR_IGNORE_FILES
+            for (Pattern pattern : DIR_IGNORE_FILES) {
+                matcher.reset(lcFilename).usePattern(pattern);
+                if (matcher.matches()) {
+                    // Found the file pattern, so skip the file
+                    LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
+                    excluded = true;
+                    break;
+                }
+            }
+
+            if (!excluded) {
+                stageDir.addStageFile(scanFile(file));
+                library.getStatistics().increment(StatType.FILE);
+            }
+        }
+
+        // check if a sub directory is BluRay or DVD folder
+        DirectoryType containsType = DirectoryType.STANDARD;
+        Iterator<File> iter =  directories.iterator();
+        while (iter.hasNext()) {
+        	File scanDir = iter.next();
+            DirectoryType dirType = DirectoryEnding.check(scanDir);
+            if (dirType != DirectoryType.STANDARD) {
+                LOG.info("Directory '{}' contains {}", directory.getAbsolutePath(), dirType);
+                containsType = dirType;
+                // remove directory
+                iter.remove();
+            }
+        }
+        
+        if (containsType != DirectoryType.STANDARD) {
+            // create dummy stage file to determine BluRay or DVD
+            StageFileDTO stageFile = new StageFileDTO();
+            stageFile.setFileName(directory.getName() + "." + containsType.name().toLowerCase());
+            stageFile.setFileDate(directory.lastModified());
+            stageFile.setFileSize(0);
+            stageDir.addStageFile(stageFile);
+        }
+        
+        // queue directory
+        library.addDirectory(stageDir);
+        queueForSending(library, stageDir);
+
+        // Now scan all other directories
+        for (File scanDir : directories) {
+            if (scanDir(library, scanDir) == null) {
+                LOG.info("Not adding directory '{}', no files found or all excluded", scanDir.getAbsolutePath());
+            }
+        }
+        
         return stageDir;
     }
 

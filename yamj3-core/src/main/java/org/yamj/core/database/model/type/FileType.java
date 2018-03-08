@@ -25,6 +25,8 @@ package org.yamj.core.database.model.type;
 public enum FileType {
 
     VIDEO,
+    BLURAY,
+    DVD,
     IMAGE,
     SUBTITLE,
     NFO,
