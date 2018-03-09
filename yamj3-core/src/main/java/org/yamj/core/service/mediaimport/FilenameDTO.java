@@ -42,6 +42,7 @@ public class FilenameDTO {
     private final String parentName;
     private final boolean bluray;
     private final boolean dvd;
+    private final boolean hdDvd;
     private String rest;
     private String title = null;
     private String cleanTitle = null;
@@ -67,6 +68,7 @@ public class FilenameDTO {
         this.name = stageFile.getFileName();
         this.parentName = FilenameUtils.getName(stageFile.getStageDirectory().getDirectoryPath());
         this.bluray = FileType.BLURAY.equals(stageFile.getFileType());
+        this.hdDvd = FileType.HDDVD.equals(stageFile.getFileType());
         this.dvd = FileType.DVD.equals(stageFile.getFileType());
     }
 
@@ -84,6 +86,10 @@ public class FilenameDTO {
 
 	public boolean isDvd() {
 		return dvd;
+	}
+
+	public boolean isHdDvd() {
+		return hdDvd;
 	}
 
 	public String getRest() {

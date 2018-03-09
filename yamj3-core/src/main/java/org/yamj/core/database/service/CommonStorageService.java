@@ -24,7 +24,6 @@ package org.yamj.core.database.service;
 
 import static org.yamj.common.type.StatusType.*;
 import static org.yamj.core.CachingNames.*;
-import static org.yamj.core.database.model.type.FileType.VIDEO;
 import static org.yamj.core.tools.YamjTools.getWatchedDTO;
 
 import java.util.*;
@@ -92,6 +91,9 @@ public class CommonStorageService {
         Set<String> filesToDelete;
         switch (stageFile.getFileType()) {
             case VIDEO:
+            case BLURAY:
+            case HDDVD:
+            case DVD:
                 filesToDelete = this.deleteVideoStageFile(stageFile);
                 break;
             case IMAGE:
@@ -428,7 +430,7 @@ public class CommonStorageService {
 
     @Transactional
     public boolean toogleWatchedStatus(final StageFile videoFile, final boolean watched, final boolean apiCall) {
-        if (videoFile == null || !VIDEO.equals(videoFile.getFileType()) || videoFile.isDuplicate()) {
+        if (videoFile == null || !videoFile.isAcceptedAsVideo() || videoFile.isDuplicate()) {
             return false;
         }
 

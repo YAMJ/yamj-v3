@@ -496,7 +496,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         }
         
         if (containsType != DirectoryType.STANDARD) {
-            // create dummy stage file to determine BluRay or DVD
+            // create dummy stage file to determine BluRay,HD-DVD or DVD
             StageFileDTO stageFile = new StageFileDTO();
             stageFile.setFileName(directory.getName() + "." + containsType.name().toLowerCase());
             stageFile.setFileDate(directory.lastModified());

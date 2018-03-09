@@ -42,6 +42,7 @@ public final class DirectoryEnding {
         DIR_ENDINGS.put("BDMV", DirectoryType.BLURAY);
         DIR_ENDINGS.put("AUDIO_TS", DirectoryType.DVD);
         DIR_ENDINGS.put("VIDEO_TS", DirectoryType.DVD);
+        DIR_ENDINGS.put("HVDVD_TS", DirectoryType.HDDVD);
     }
 
     private DirectoryEnding() {

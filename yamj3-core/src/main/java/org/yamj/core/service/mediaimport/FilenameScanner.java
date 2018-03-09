@@ -296,6 +296,8 @@ public class FilenameScanner {
             result = FileType.WATCHED;
         } else if ("bluray".equals(extension)) {
         	result = FileType.BLURAY;
+        } else if ("hddvd".equals(extension)) {
+        	result = FileType.HDDVD;
         } else if ("dvd".equals(extension)) {
         	result = FileType.DVD;
         } else if (videoExtensions.contains(ext)) {
@@ -324,6 +326,9 @@ public class FilenameScanner {
         if (dto.isBluray()) {
             dto.setContainer(FileType.BLURAY.name());
             dto.setVideoSource("BluRay");
+        } else if (dto.isHdDvd()) {
+            dto.setContainer("HD-DVD");
+            dto.setVideoSource("HD-DVD");
         } else if (dto.isDvd()) {
             dto.setContainer(FileType.DVD.name());
             dto.setVideoSource(FileType.DVD.name());

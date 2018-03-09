@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.database.model.type.FileType.*;
+
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -53,15 +55,15 @@ import org.yamj.core.database.model.type.FileType;
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SERIES,
         query = "SELECT distinct sf FROM Series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE ser.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
+                "WHERE ser.id=:id AND sf.fileType in ('VIDEO','BLURAY','HDDVD','DVD') AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_SEASON,
         query = "SELECT distinct sf FROM Season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE sea.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
+                "WHERE sea.id=:id AND sf.fileType in ('VIDEO','BLURAY','HDDVD','DVD') AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
     ),
     @NamedQuery(name = StageFile.QUERY_VIDEOFILES_FOR_VIDEODATA,
         query = "SELECT distinct sf FROM VideoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf "+
-                "WHERE vd.id=:id AND sf.fileType='VIDEO' AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
+                "WHERE vd.id=:id AND sf.fileType in ('VIDEO','BLURAY','HDDVD','DVD') AND mf.extra=:extra AND sf.status != 'DELETED' AND sf.status != 'DUPLICATE'"
     ),
     @NamedQuery(name = StageFile.QUERY_ARTWORK_FILES,
         query = "SELECT distinct sf FROM StageFile sf WHERE sf.stageDirectory in (:directories) and sf.fileType='IMAGE' "+
@@ -273,6 +275,10 @@ public class StageFile extends AbstractStateful {
         return Integer.toString(Math.abs(getFullPath().hashCode()) + increase);
     }
 
+    public boolean isAcceptedAsVideo() {
+    	return (VIDEO.equals(getFileType()) || BLURAY.equals(getFileType()) || HDDVD.equals(getFileType()) || DVD.equals(getFileType()));  
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

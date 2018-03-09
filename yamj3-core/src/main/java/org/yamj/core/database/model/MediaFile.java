@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.database.model.type.FileType.*;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -389,7 +391,7 @@ public class MediaFile extends AbstractStateful {
     // TRANSIENT METHODS
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
-            if (FileType.VIDEO.equals(stageFile.getFileType()) && !stageFile.isDuplicate()) {
+        	if (stageFile.isAcceptedAsVideo() && !stageFile.isDuplicate()) {
                 return stageFile;
             }
         }

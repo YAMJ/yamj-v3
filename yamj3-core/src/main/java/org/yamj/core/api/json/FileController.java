@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.json;
 
+import static org.yamj.core.database.model.type.FileType.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +93,7 @@ public class FileController {
         	return statusNotFound(id);
         }
         
-        if (FileType.VIDEO.equals(fileType)) {
+        if (VIDEO.equals(fileType) || BLURAY.equals(fileType) || HDDVD.equals(fileType) || DVD.equals(fileType)) {
         	// trigger media file scanning
         	this.mediaFileScanScheduler.trigger();
         }

@@ -212,7 +212,9 @@ public class StagingDao extends HibernateDao {
         // for movies
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT a FROM Artwork a JOIN a.videoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf ");
-        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType='VIDEO' AND sf.status!='DELETED' ");
+        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
+        sb.append("AND sf.status!='DELETED' ");
         sb.append("AND mf.extra=:extra AND vd.episode < 0 AND sf.stageDirectory=:stageDirectory ");
         if (baseName != null) {
             sb.append("AND lower(sf.baseName)=:baseName ");
@@ -222,8 +224,9 @@ public class StagingDao extends HibernateDao {
         // for season
         sb.setLength(0);
         sb.append("SELECT a FROM Artwork a JOIN a.season sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf ");
-        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType='VIDEO' AND sf.status!='DELETED' ");
-        sb.append("AND mf.extra=:extra AND sf.stageDirectory=:stageDirectory ");
+        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
+        sb.append("AND sf.status!='DELETED' AND mf.extra=:extra AND sf.stageDirectory=:stageDirectory ");
         if (baseName != null) {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
@@ -243,8 +246,9 @@ public class StagingDao extends HibernateDao {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT a FROM Artwork a ");
         sb.append("JOIN a.series ser JOIN ser.seasons sea JOIN sea.videoDatas vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf ");
-        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType='VIDEO' AND sf.status!='DELETED' ");
-        sb.append("AND mf.extra=:extra AND vd.episode >= 0 ");
+        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
+        sb.append("AND sf.status!='DELETED' AND mf.extra=:extra AND vd.episode >= 0 ");
         if (videosOnlyInSubDirs) {
             sb.append("AND sf.stageDirectory.parentDirectory=:stageDirectory ");
         } else {
@@ -272,8 +276,9 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("JOIN sf.stageDirectory sd ");
         }
-        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType='VIDEO' AND sf.status!='DELETED' ");
-        sb.append("AND mf.extra=:extra AND vd.episode < 0 AND lower(sf.baseName)=:baseName ");
+        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
+        sb.append("AND sf.status!='DELETED' AND mf.extra=:extra AND vd.episode < 0 AND lower(sf.baseName)=:baseName ");
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
@@ -285,8 +290,9 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("JOIN sf.stageDirectory sd ");
         }
-        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType='VIDEO' AND sf.status!='DELETED' ");
-        sb.append("AND mf.extra=:extra AND lower(sf.baseName)=:baseName ");
+        sb.append("WHERE a.artworkType=:artworkType AND sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
+        sb.append("AND sf.status!='DELETED' AND mf.extra=:extra AND lower(sf.baseName)=:baseName ");
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
@@ -307,16 +313,17 @@ public class StagingDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-	public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, StageDirectory stageDirectory) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT distinct sf FROM StageFile sf WHERE sf.fileType=:fileType AND lower(sf.baseName)=:baseName ");
+	public List<StageFile> findStageFiles(String baseName, String searchExtension, StageDirectory stageDirectory, FileType... fileTypes) {
+    	StringBuilder sb = new StringBuilder();
+        sb.append("SELECT distinct sf FROM StageFile sf WHERE sf.fileType");
+        appendFileTypesSelection(sb, fileTypes);
+        sb.append("AND lower(sf.baseName)=:baseName ");
         if (searchExtension != null) {
             sb.append("AND lower(sf.extension)=:extension ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory AND sf.status not in ('DUPLICATE','DELETED') ");
 
         Query query = currentSession().createQuery(sb.toString());
-        query.setParameter(LITERAL_FILE_TYPE, fileType);
         query.setString(LITERAL_BASENAME, baseName.toLowerCase());
         if (searchExtension != null) {
             query.setString(LITERAL_EXTENSION, searchExtension.toLowerCase());
@@ -328,13 +335,15 @@ public class StagingDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-	public List<StageFile> findStageFiles(FileType fileType, String baseName, String searchExtension, Library library) {
+	public List<StageFile> findStageFiles(String baseName, String searchExtension, Library library, FileType... fileTypes) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf FROM StageFile sf ");
         if (library != null) {
             sb.append("JOIN sf.stageDirectory sd ");
         }
-        sb.append("WHERE sf.fileType=:fileType AND lower(sf.baseName)=:baseName ");
+        sb.append("WHERE sf.fileType");
+        appendFileTypesSelection(sb, fileTypes);
+        sb.append("AND lower(sf.baseName)=:baseName ");
         if (searchExtension != null) {
             sb.append("AND lower(sf.extension)=:extension ");
         }
@@ -344,7 +353,6 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status not in ('DUPLICATE','DELETED') ");
 
         Query query = currentSession().createQuery(sb.toString());
-        query.setParameter(LITERAL_FILE_TYPE, fileType);
         query.setString(LITERAL_BASENAME, baseName.toLowerCase());
         if (searchExtension != null) {
             query.setString(LITERAL_EXTENSION, searchExtension.toLowerCase());
@@ -372,7 +380,8 @@ public class StagingDao extends HibernateDao {
         params.put("searchNames", searchNames);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT distinct sf FROM StageFile sf JOIN sf.stageDirectory sd WHERE sf.fileType=:fileType ");
+        sb.append("SELECT distinct sf FROM StageFile sf JOIN sf.stageDirectory sd WHERE sf.fileType");
+        sb.append(SQL_SELECTABLE_VIDEOS);
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
@@ -434,5 +443,13 @@ public class StagingDao extends HibernateDao {
                 .setCacheable(true)
                 .setCacheMode(NORMAL)
                 .list();
+    }
+    
+    private static void appendFileTypesSelection(StringBuilder sb, FileType... fileTypes) {
+    	sb.append(" in ('" );
+    	for (FileType fileType : fileTypes) {
+    		sb.append(fileType.name()).append("'");
+    	}
+    	sb.append(") ");
     }
 }

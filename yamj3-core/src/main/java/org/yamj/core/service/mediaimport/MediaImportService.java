@@ -559,7 +559,7 @@ public class MediaImportService {
         }
 
         // case 1: find matching files in same directory
-        List<StageFile> stageFiles = this.stagingDao.findStageFiles(FileType.SUBTITLE, videoFile.getBaseName(), null, videoFile.getStageDirectory());
+        List<StageFile> stageFiles = this.stagingDao.findStageFiles(videoFile.getBaseName(), null, videoFile.getStageDirectory(), FileType.SUBTITLE);
         // case 2: find matching files in subtitle folder
         Set<String> searchNames = Collections.singleton(videoFile.getBaseName().toLowerCase());
         List<StageFile> other = this.stagingDao.findStageFilesInSpecialFolder(FileType.SUBTITLE, subtitleFolderName, library, searchNames);

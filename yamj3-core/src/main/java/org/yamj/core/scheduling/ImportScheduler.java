@@ -80,7 +80,7 @@ public class ImportScheduler {
             id = null;
             try {
                 // find next stage file to process
-                id = mediaImportService.getNextStageFileId(VIDEO, BLURAY, DVD);
+                id = mediaImportService.getNextStageFileId(VIDEO, BLURAY, HDDVD, DVD);
                 if (id != null) {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);

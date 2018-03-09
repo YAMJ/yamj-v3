@@ -26,6 +26,7 @@ public enum DirectoryType {
 
     DVD,
     BLURAY,
+    HDDVD,
     STANDARD;
 
     public static DirectoryType fromString(String type) {

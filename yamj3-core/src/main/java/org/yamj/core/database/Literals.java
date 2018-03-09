@@ -87,6 +87,7 @@ public final class Literals {
     public static final String SQL_LEFT_JOIN_ARTWORK_GENERATED = " LEFT JOIN artwork_generated ag ON al.id=ag.located_id ";
     public static final String SQL_LEFT_JOIN_ARTWORK_LOCATED = " LEFT JOIN artwork_located al ON a.id=al.artwork_id and al.status not in ('INVALID','NOTFOUND','ERROR','IGNORE','DELETED') ";
     public static final String SQL_IGNORE_STATUS_SET = " NOT IN ('DELETED','INVALID','DUPLICATE') ";
+    public static final String SQL_SELECTABLE_VIDEOS = " IN ('VIDEO','BLURAY','HDDVD','DVD') ";
 
     private Literals() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

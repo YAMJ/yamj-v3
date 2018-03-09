@@ -28,7 +28,7 @@ import static org.yamj.common.type.StatusType.NEW;
 import static org.yamj.common.type.StatusType.UPDATED;
 import static org.yamj.core.database.Literals.LITERAL_ID;
 import static org.yamj.core.database.Literals.LITERAL_STATUS;
-import static org.yamj.core.database.model.type.FileType.VIDEO;
+import static org.yamj.core.database.model.type.FileType.*;
 import static org.yamj.core.tools.YamjTools.split;
 
 import java.io.File;
@@ -153,7 +153,7 @@ public class StagingService {
             String extension = FilenameUtils.getExtension(stageFileDTO.getFileName());
             FileType fileType = filenameScanner.determineFileType(extension);
 
-            if (StringUtils.isBlank(baseName) || fileType == FileType.UNKNOWN) {
+            if (StringUtils.isBlank(baseName) || fileType == UNKNOWN) {
                 // no valid baseName or extension
                 continue;
             }
@@ -166,7 +166,7 @@ public class StagingService {
                 stageFile.setExtension(extension);
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(fileType);
-                if (fileType == FileType.BLURAY || fileType == FileType.DVD) {
+                if (fileType == BLURAY || fileType == HDDVD || fileType == DVD) {
                 	// use directory name for BluRay and DVD
                 	stageFile.setFullPath(stageDirectoryDTO.getPath());
                 } else {
@@ -213,6 +213,9 @@ public class StagingService {
         } else if (FileType.BLURAY.equals(stageFile.getFileType())) {
             // media info scan content
             stageFile.setContent(stageFileDTO.getContent());
+        } else if (FileType.HDDVD.equals(stageFile.getFileType())) {
+            // media info scan content
+            stageFile.setContent(stageFileDTO.getContent());
         } else if (FileType.DVD.equals(stageFile.getFileType())) {
             // media info scan content
             stageFile.setContent(stageFileDTO.getContent());
@@ -257,7 +260,7 @@ public class StagingService {
         	return null;
     	}
 
-		if (stageFile.getFileType().equals(VIDEO) && stageFile.getMediaFile() != null) {
+		if (stageFile.getMediaFile() != null && stageFile.isAcceptedAsVideo()) {
 			// update media file instead stage file
 			stageFile.getMediaFile().setStatus(UPDATED);
 			this.stagingDao.updateEntity(stageFile.getMediaFile());
@@ -290,7 +293,9 @@ public class StagingService {
     public List<StageFile> findWatchedVideoFiles(StageFile watchedFile) {
         String videoBaseName = FilenameUtils.getBaseName(watchedFile.getBaseName());
         String videoExtension = FilenameUtils.getExtension(watchedFile.getBaseName());
-        if (filenameScanner.determineFileType(videoExtension) != FileType.VIDEO) {
+        
+        FileType determined = filenameScanner.determineFileType(videoExtension);
+        if (!(determined.equals(VIDEO) || determined.equals(BLURAY) || determined.equals(HDDVD) || determined.equals(DVD))) {  
             // extension is no video, so use the full base name
             videoBaseName = watchedFile.getBaseName();
             videoExtension = null;
@@ -305,10 +310,10 @@ public class StagingService {
             }
 
             // search in all directories of the library
-            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, library);
+            videoFiles = this.stagingDao.findStageFiles(videoBaseName, videoExtension, library, VIDEO, BLURAY, HDDVD, DVD);
         } else {
             // search in just this directory
-            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory());
+            videoFiles = this.stagingDao.findStageFiles(videoBaseName, videoExtension, watchedFile.getStageDirectory(), VIDEO, BLURAY, HDDVD, DVD);
         }
 
         return videoFiles;
@@ -330,10 +335,10 @@ public class StagingService {
             }
 
             // search in all directories of the library
-            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, null, library);
+            videoFiles = this.stagingDao.findStageFiles(videoBaseName, null, library, VIDEO, BLURAY, HDDVD, DVD);
         } else {
             // search in just this directory
-            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, null, subtitleFile.getStageDirectory());
+            videoFiles = this.stagingDao.findStageFiles(videoBaseName, null, subtitleFile.getStageDirectory(), VIDEO, BLURAY, HDDVD, DVD);
         }
 
         return videoFiles;

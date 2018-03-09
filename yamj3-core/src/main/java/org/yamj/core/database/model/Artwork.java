@@ -50,7 +50,7 @@ import org.yamj.plugin.api.model.type.ArtworkType;
     ),
     @NamedQuery(name = Artwork.QUERY_FIND_MATCHING_VIDEOIMAGES_BY_NAME_AND_DIRECTORY,
         query = "SELECT art FROM Artwork art JOIN art.videoData vd JOIN vd.mediaFiles mf JOIN mf.stageFiles sf WHERE art.artworkType='VIDEOIMAGE' "+
-                "AND sf.fileType='VIDEO' AND sf.status!='DELETED' AND sf.stageDirectory=:stageDirectory AND mf.extra=:extra "+
+                "AND sf.fileType in ('VIDEO','BLURAY','HDDVD','DVD') AND sf.status!='DELETED' AND sf.stageDirectory=:stageDirectory AND mf.extra=:extra "+
                 "AND vd.episode >=0 AND lower(sf.baseName)=:baseName ORDER by vd.episode"
     ),
     @NamedQuery(name = Artwork.UPDATE_RESCAN_ALL,

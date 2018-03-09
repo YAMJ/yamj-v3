@@ -26,6 +26,7 @@ import static org.yamj.core.tools.YamjTools.formatFileSize;
 import static org.yamj.core.tools.YamjTools.formatRuntime;
 import static org.yamj.plugin.api.metadata.MetadataTools.formatDateLong;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
@@ -65,7 +66,9 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private List<ApiAudioCodecDTO> audioCodecs = new ArrayList<>();
     private List<ApiSubtitleDTO> subtitles = new ArrayList<>();
-
+    @JsonIgnore
+    private String fileType;
+    
     public Boolean getExtra() {
         return extra;
     }
@@ -269,4 +272,12 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     public void setSubtitles(List<ApiSubtitleDTO> subtitles) {
         this.subtitles = subtitles;
     }
+
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
 }

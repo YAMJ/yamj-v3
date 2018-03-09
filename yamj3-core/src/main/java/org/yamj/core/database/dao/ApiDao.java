@@ -30,6 +30,7 @@ import static org.yamj.plugin.api.model.type.ArtworkType.*;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -198,7 +199,9 @@ public class ApiDao extends HibernateDao {
 
                 sbSQL.append(", (SELECT MAX(sf.file_date) FROM stage_file sf ");
                 sbSQL.append("JOIN mediafile mf ON mf.id=sf.mediafile_id JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-                sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type='VIDEO' AND sf.status");
+                sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status");
                 sbSQL.append(SQL_IGNORE_STATUS_SET);
                 sbSQL.append("AND mf.extra=:extra) AS newest");
             }
@@ -285,8 +288,9 @@ public class ApiDao extends HibernateDao {
                 addExistsOrNot(params.includeNewest(), sbSQL);
                 sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
                 sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-                sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' ");
-                sbSQL.append("AND mf.extra=:extra AND sf.file_date >= :newestDate)");
+                sbSQL.append("WHERE mv.videodata_id=vd.id AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status!='DUPLICATE' AND mf.extra=:extra AND sf.file_date >= :newestDate)");
             }
         }
 
@@ -321,7 +325,9 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(", (SELECT MAX(sf.file_date) FROM stage_file sf ");
                 sbSQL.append("JOIN mediafile mf ON mf.id=sf.mediafile_id JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
                 sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id JOIN season sea ON sea.id=vd.season_id ");
-                sbSQL.append("WHERE sea.series_id=ser.id AND sf.file_type='VIDEO' AND sf.status");
+                sbSQL.append("WHERE sea.series_id=ser.id AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status");
                 sbSQL.append(SQL_IGNORE_STATUS_SET);
                 sbSQL.append("AND mf.extra=:extra) as newest ");
             }
@@ -410,7 +416,9 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("SELECT 1 FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
                 sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id JOIN videodata vd ON mv.videodata_id=vd.id ");
                 sbSQL.append("JOIN season sea ON sea.id=vd.season_id WHERE sea.series_id=ser.id ");
-                sbSQL.append("AND sf.file_type='VIDEO' AND sf.status");
+                sbSQL.append("AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status");
                 sbSQL.append(SQL_IGNORE_STATUS_SET);
                 sbSQL.append("AND mf.extra=:extra ");
                 sbSQL.append("AND sf.file_date >= :newestDate)");
@@ -452,7 +460,9 @@ public class ApiDao extends HibernateDao {
 
                 sbSQL.append(", (SELECT MAX(sf.file_date) FROM stage_file sf JOIN mediafile mf ON mf.id=sf.mediafile_id ");
                 sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id JOIN videodata vd ON mv.videodata_id=vd.id ");
-                sbSQL.append("WHERE vd.season_id=sea.id AND sf.file_type='VIDEO' AND sf.status");
+                sbSQL.append("WHERE vd.season_id=sea.id AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status");
                 sbSQL.append(SQL_IGNORE_STATUS_SET);
                 sbSQL.append("AND mf.extra=:extra) AS newest");
             }
@@ -542,7 +552,9 @@ public class ApiDao extends HibernateDao {
                 addExistsOrNot(params.includeNewest(), sbSQL);
                 sbSQL.append("JOIN mediafile mf ON mf.id=sf.mediafile_id JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
                 sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id WHERE vd.season_id=sea.id ");
-                sbSQL.append("AND sf.file_type='VIDEO' AND sf.status!='DUPLICATE' AND mf.extra=:extra AND sf.file_date >= :newestDate)");
+                sbSQL.append("AND sf.file_type");
+                sbSQL.append(SQL_SELECTABLE_VIDEOS);
+                sbSQL.append("AND sf.status!='DUPLICATE' AND mf.extra=:extra AND sf.file_date >= :newestDate)");
             }
         }
 
@@ -1612,7 +1624,7 @@ public class ApiDao extends HibernateDao {
         sql.append("mf.container as container, mf.codec as codec, mf.codec_format as codecFormat, mf.codec_profile as codecProfile, ");
         sql.append("mf.bitrate as bitrate, mf.overall_bitrate as overallBitrate, mf.fps as fps, ");
         sql.append("mf.width as width, mf.height as height, mf.aspect_ratio as aspectRatio, mf.runtime as runtime, mf.video_source as videoSource, ");
-        sql.append("sf.id as fileId, sf.full_path as fileName, sf.file_date as fileDate, sf.file_size as fileSize, ");
+        sql.append("sf.id as fileId, sf.full_path as fileName, sf.file_date as fileDate, sf.file_size as fileSize, sf.file_type as fileType, ");
 
         if (type == MOVIE) {
             sql.append("null as season, null as episode ");
@@ -1633,7 +1645,9 @@ public class ApiDao extends HibernateDao {
         }
 
         sql.append("and mv.mediafile_id=mf.id and sf.mediafile_id=mf.id ");
-        sql.append("and sf.file_type='VIDEO' and sf.status");
+        sql.append("and sf.file_type");
+        sql.append(SQL_SELECTABLE_VIDEOS);
+        sql.append("and sf.status");
         sql.append(SQL_IGNORE_STATUS_SET);
 
         if (type == SERIES || type == SEASON) {
@@ -1662,13 +1676,24 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("fileName", StringType.INSTANCE);
         sqlScalars.addScalar("fileDate", TimestampType.INSTANCE);
         sqlScalars.addScalar("fileSize", LongType.INSTANCE);
+        sqlScalars.addScalar("fileType", StringType.INSTANCE);
         sqlScalars.addScalar(LITERAL_SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(LITERAL_EPISODE, LongType.INSTANCE);
         sqlScalars.addParameter(LITERAL_ID, id);
 
         List<ApiFileDTO> results = executeQueryWithTransform(ApiFileDTO.class, sqlScalars);
         for (ApiFileDTO file : results) {
-            file.setAudioCodecs(currentSession().getNamedQuery(AudioCodec.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
+        	if ("BLURAY".equals(file.getFileType())) {
+        		// fix BluRay file name
+        		file.setFileName(FilenameUtils.concat(file.getFileName(), "BDMV"));
+        	} else if ("HDDVD".equals(file.getFileType())) {
+        		// fix HD-DVD file name
+        		file.setFileName(FilenameUtils.concat(file.getFileName(), "HVDVD_TS"));
+        	} else if ("DVD".equals(file.getFileType())) {
+        		// fix DVD file name
+        		file.setFileName(FilenameUtils.concat(file.getFileName(), "VIDEO_TS"));
+        	}
+    		file.setAudioCodecs(currentSession().getNamedQuery(AudioCodec.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
             file.setSubtitles(currentSession().getNamedQuery(Subtitle.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
         }
         return results;

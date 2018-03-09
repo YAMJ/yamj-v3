@@ -27,6 +27,7 @@ public enum FileType {
     VIDEO,
     BLURAY,
     DVD,
+    HDDVD,
     IMAGE,
     SUBTITLE,
     NFO,
