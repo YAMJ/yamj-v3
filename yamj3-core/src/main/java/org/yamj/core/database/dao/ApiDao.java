@@ -1685,13 +1685,13 @@ public class ApiDao extends HibernateDao {
         for (ApiFileDTO file : results) {
         	if ("BLURAY".equals(file.getFileType())) {
         		// fix BluRay file name
-        		file.setFileName(FilenameUtils.concat(file.getFileName(), "BDMV"));
+        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "BDMV"), true));
         	} else if ("HDDVD".equals(file.getFileType())) {
         		// fix HD-DVD file name
-        		file.setFileName(FilenameUtils.concat(file.getFileName(), "HVDVD_TS"));
+        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "HVDVD_TS"), true));
         	} else if ("DVD".equals(file.getFileType())) {
         		// fix DVD file name
-        		file.setFileName(FilenameUtils.concat(file.getFileName(), "VIDEO_TS"));
+        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "VIDEO_TS"), true));
         	}
     		file.setAudioCodecs(currentSession().getNamedQuery(AudioCodec.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
             file.setSubtitles(currentSession().getNamedQuery(Subtitle.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
