@@ -77,9 +77,8 @@ public class StagingDao extends HibernateDao {
     }
 
     public Long getNextStageFileId(FileType... fileTypes) {
-    	List<FileType> listFileTypes = Arrays.asList(fileTypes);
         return (Long) currentSession().createCriteria(StageFile.class)
-                .add(Restrictions.in(LITERAL_FILE_TYPE, listFileTypes))    
+                .add(Restrictions.in(LITERAL_FILE_TYPE, Arrays.asList(fileTypes)))    
                 .add(Restrictions.or(
                         Restrictions.eq(LITERAL_STATUS, StatusType.NEW),
                         Restrictions.eq(LITERAL_STATUS, StatusType.UPDATED)))
@@ -372,12 +371,11 @@ public class StagingDao extends HibernateDao {
         }
 
         Map<String, Object> params = new HashMap<>();
-        params.put(LITERAL_FILE_TYPE, fileType);
+        params.put("folderName", folderName.toLowerCase());
+        params.put("searchNames", searchNames);
         if (library != null) {
             params.put(LITERAL_LIBRARY, library);
         }
-        params.put("folderName", folderName.toLowerCase());
-        params.put("searchNames", searchNames);
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf FROM StageFile sf JOIN sf.stageDirectory sd WHERE sf.fileType");
