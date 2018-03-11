@@ -30,7 +30,6 @@ import static org.yamj.plugin.api.model.type.ArtworkType.*;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -1683,16 +1682,6 @@ public class ApiDao extends HibernateDao {
 
         List<ApiFileDTO> results = executeQueryWithTransform(ApiFileDTO.class, sqlScalars);
         for (ApiFileDTO file : results) {
-        	if ("BLURAY".equals(file.getFileType())) {
-        		// fix BluRay file name
-        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "BDMV"), true));
-        	} else if ("HDDVD".equals(file.getFileType())) {
-        		// fix HD-DVD file name
-        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "HVDVD_TS"), true));
-        	} else if ("DVD".equals(file.getFileType())) {
-        		// fix DVD file name
-        		file.setFileName(FilenameUtils.normalize(FilenameUtils.concat(file.getFileName(), "VIDEO_TS"), true));
-        	}
     		file.setAudioCodecs(currentSession().getNamedQuery(AudioCodec.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
             file.setSubtitles(currentSession().getNamedQuery(Subtitle.QUERY_METADATA).setParameter(LITERAL_ID, file.getId()).list());
         }

@@ -67,7 +67,8 @@ import org.yamj.core.service.mediaimport.FilenameScanner;
 public class StagingService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StagingService.class);
-
+    private static final char WINDOWS_SEPARATOR = '\\';
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -166,12 +167,17 @@ public class StagingService {
                 stageFile.setExtension(extension);
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(fileType);
-                if (fileType == BLURAY || fileType == HDDVD || fileType == DVD) {
-                	// use directory name for BluRay and DVD
-                	stageFile.setFullPath(stageDirectoryDTO.getPath());
+                
+                if (fileType == BLURAY) {
+                	stageFile.setFullPath(buildFullPath(stageDirectoryDTO.getPath(), "BDMV"));
+                } else if (fileType == HDDVD) {
+                	stageFile.setFullPath(buildFullPath(stageDirectoryDTO.getPath(), "HVDVD_TS"));
+                } else if (fileType == DVD) {
+                	stageFile.setFullPath(buildFullPath(stageDirectoryDTO.getPath(), "VIDEO_TS"));
                 } else {
-                	stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
+                	stageFile.setFullPath(buildFullPath(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
                 }
+                
                 stageFile.setStatus(NEW);
 
                 // set changeable values in stage file
@@ -413,5 +419,19 @@ public class StagingService {
             int updated = this.stagingDao.executeUpdate(StageFile.UPDATE_STATUS_BULK, params);
             LOG.trace("Marked {} stage files as deleted", updated);
         }
+    }
+    
+    private static String buildFullPath(String basePath, String fileNameToAdd) {
+    	if (StringUtils.isBlank(basePath)) {
+    		return fileNameToAdd;
+    	}
+    	
+    	final String fileName = FilenameUtils.concat(basePath, fileNameToAdd);
+    	if (basePath.indexOf(WINDOWS_SEPARATOR) == -1) {
+    		// basePath is from a UNIX system
+    		return FilenameUtils.separatorsToUnix(fileName);
+    	}
+		// basePath is from a Windows system 
+    	return FilenameUtils.separatorsToWindows(fileName);
     }
 }
