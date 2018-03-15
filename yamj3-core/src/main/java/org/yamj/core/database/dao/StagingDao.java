@@ -444,9 +444,12 @@ public class StagingDao extends HibernateDao {
     }
     
     private static void appendFileTypesSelection(StringBuilder sb, FileType... fileTypes) {
-    	sb.append(" in ('" );
+    	sb.append(" in (" );
+    	boolean first = true;
     	for (FileType fileType : fileTypes) {
+    		sb.append(first ? "'" : ",'");
     		sb.append(fileType.name()).append("'");
+    		first = false;    		
     	}
     	sb.append(") ");
     }
