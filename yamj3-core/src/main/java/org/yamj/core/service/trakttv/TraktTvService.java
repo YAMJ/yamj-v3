@@ -434,7 +434,7 @@ public class TraktTvService {
         // find collected movies on Trakt.TV
         List<TrackedMovie> trackedMovies;
         try {
-            trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.MINIMAL);
+            trackedMovies = traktTvApi.syncService().getCollectionMovies(Extended.NONE);
         } catch (Exception e) {
             LOG.error("Failed to get collected movies", e);
             return;
@@ -522,7 +522,7 @@ public class TraktTvService {
         // find collected shows on Trakt.TV
         List<TrackedShow> trackedShows;
         try {
-            trackedShows = traktTvApi.syncService().getCollectionShows(Extended.MINIMAL);
+            trackedShows = traktTvApi.syncService().getCollectionShows(Extended.NONE);
         } catch (Exception e) {
             LOG.error("Failed to get collected shows", e);
             return;
@@ -621,7 +621,7 @@ public class TraktTvService {
         // get watched movies from Trakt.TV
         List<TrackedMovie> watchedMovies;
         try {
-            watchedMovies = traktTvApi.syncService().getWatchedMovies(Extended.MINIMAL);
+            watchedMovies = traktTvApi.syncService().getWatchedMovies(Extended.NONE);
         } catch (Exception e) {
             LOG.error("Failed to get watched movies", e);
             return false;
@@ -709,7 +709,7 @@ public class TraktTvService {
         // get watched shows from Trakt.TV
         List<TrackedShow> watchedShows;
         try {
-            watchedShows = traktTvApi.syncService().getWatchedShows(Extended.MINIMAL);
+            watchedShows = traktTvApi.syncService().getWatchedShows(Extended.NONE);
         } catch (Exception e) {
             LOG.error("Failed to get watched shows", e);
             return false;
