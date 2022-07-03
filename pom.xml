@@ -74,7 +74,7 @@
         <spring.version>5.2.22.RELEASE</spring.version>
         <org.slf4j.version>1.7.25</org.slf4j.version>
         <ehcache.version>2.6.11</ehcache.version>
-        <jackson.version>2.10.0</jackson.version> <!-- Not working with later than 2.6.5 versions, until spring is fixed -->
+        <jackson.version>2.12.6.1</jackson.version> <!-- Not working with later than 2.6.5 versions, until spring is fixed -->
         <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
 
